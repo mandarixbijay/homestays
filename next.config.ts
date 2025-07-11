@@ -13,7 +13,7 @@ const nextConfig = {
       { protocol: "https", hostname: "homestays-s3.s3.eu-north-1.amazonaws.com", pathname: "/**" },
     ],
   },
-  webpack: (config: any) => {
+  webpack: (config: import('webpack').Configuration) => {
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
