@@ -6,11 +6,6 @@ import { hotels } from "@/data/hotels";
 import HomestayDetailClient from "@/components/homestay/page";
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Homestay Details",
-  description: "View details about this homestay",
-};
-
 export interface Hero3Card {
   image: string;
   images: string[];
@@ -40,7 +35,6 @@ export interface Hero3Card {
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 const dataAdapters = {
@@ -52,7 +46,7 @@ const dataAdapters = {
     price: item.totalPrice,
     rating: parseFloat(item.rating),
     slug: item.slug,
-    rooms: item.rooms || [], // Include rooms
+    rooms: item.rooms || [],
   }),
   hero: (item: any): Hero3Card => ({
     image: item.image || "/images/fallback-image.png",
@@ -62,7 +56,7 @@ const dataAdapters = {
     price: item.price,
     rating: item.rating,
     slug: item.slug,
-    rooms: item.rooms || [], // Assume hero3Data includes rooms or provide default
+    rooms: item.rooms || [],
   }),
   destination: (item: any): Hero3Card => ({
     image: item.images[0] || "/images/fallback-image.png",
@@ -72,7 +66,7 @@ const dataAdapters = {
     price: item.totalPrice,
     rating: parseFloat(item.rating),
     slug: item.name.toLowerCase().replace(/\s+/g, "-"),
-    rooms: item.rooms || [], // Assume hotels includes rooms or provide default
+    rooms: item.rooms || [],
   }),
 };
 
@@ -82,14 +76,64 @@ const dataSources = [
   { data: hotels, adapter: dataAdapters.destination },
 ];
 
-export default async function HomestayDetail({
-  params,
-  searchParams,
-}: PageProps) {
-  const { slug } = await params;
-  const resolvedSearchParams = await searchParams;
-  const imageUrl = resolvedSearchParams?.imageUrl as string | undefined;
+// Generate static paths for all homestays
+export async function generateStaticParams() {
+  const slugs: { slug: string }[] = [];
 
+  dataSources.forEach((source) => {
+    source.data.forEach((item: any) => {
+      const slug =
+        source.adapter === dataAdapters.destination
+          ? item.name.toLowerCase().replace(/\s+/g, "-")
+          : item.slug;
+      slugs.push({ slug });
+    });
+  });
+
+  return slugs;
+}
+
+// Dynamic metadata for each homestay
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  let homestay: Hero3Card | null = null;
+
+  for (const source of dataSources) {
+    const found = source.data.find((item: any) => {
+      if (source.adapter === dataAdapters.destination) {
+        return item.name.toLowerCase().replace(/\s+/g, "-") === slug;
+      }
+      return item.slug === slug;
+    });
+    if (found) {
+      homestay = source.adapter(found);
+      break;
+    }
+  }
+
+  if (!homestay) {
+    return {
+      title: "Homestay Not Found | Nepal Homestays",
+      description: "The requested homestay could not be found.",
+    };
+  }
+
+  return {
+    title: `${homestay.city} Homestay | Nepal Homestays`,
+    description: `Book your stay in ${homestay.city}, ${homestay.region} with Nepal Homestays.`,
+    keywords: `${homestay.city}, ${homestay.region}, homestay, Nepal, travel`,
+    openGraph: {
+      title: `${homestay.city} Homestay`,
+      description: `Book your stay in ${homestay.city}, ${homestay.region}.`,
+      images: [{ url: homestay.image, width: 1200, height: 630, alt: `${homestay.city} Homestay` }],
+      url: `https://nepalhomestays.com/homestays/${homestay.slug}`,
+      type: "website",
+    },
+  };
+}
+
+export default async function HomestayDetail({ params }: PageProps) {
+  const { slug } = await params;
   let homestay: Hero3Card | null = null;
 
   for (const source of dataSources) {
@@ -109,7 +153,5 @@ export default async function HomestayDetail({
     return <div>Homestay not found</div>;
   }
 
-  return (
-    <HomestayDetailClient homestay={homestay} imageUrl={imageUrl} slug={slug} />
-  );
+  return <HomestayDetailClient homestay={homestay} imageUrl={undefined} slug={homestay.slug} />;
 }

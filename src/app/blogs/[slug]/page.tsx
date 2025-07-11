@@ -201,7 +201,7 @@ export async function generateStaticParams() {
 
 // Dynamic metadata for each blog post
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params; // Await params
+  const { slug } = await params;
   const blogPost = blogPosts.find((post) => post.slug === slug);
 
   if (!blogPost) {
@@ -230,7 +230,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params; // Await params
+  const { slug } = await params;
   const blogPost = blogPosts.find((post) => post.slug === slug);
 
   if (!blogPost) {
