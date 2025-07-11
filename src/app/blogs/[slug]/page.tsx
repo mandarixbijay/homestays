@@ -194,15 +194,15 @@ const blogPosts = [
   },
 ];
 
-export default function BlogDetailPage() {
-  const router = useRouter();
-  const params = useParams();
-  const slug = params.slug as string;
+export async function generateStaticParams() {
+  return blogPosts.map((post) => ({
+    slug: post.slug,
+  }));
+}
 
-  // Find the blog post by slug
-  const blogPost = blogPosts.find((post) => post.slug === slug);
+export default function BlogDetailPage({ params }: { params: { slug: string } }) {
+  const blogPost = blogPosts.find((post) => post.slug === params.slug);
 
-  // Handle case where blog post is not found
   if (!blogPost) {
     return (
       <div className="bg-background min-h-screen font-manrope">
@@ -216,21 +216,18 @@ export default function BlogDetailPage() {
           <p className="text-text-secondary text-base mb-6">
             Sorry, we couldn’t find the blog post you’re looking for.
           </p>
-          
         </main>
         <Footer />
       </div>
     );
   }
 
-  // Calculate reading time (assuming 200 words per minute)
   const wordCount =
     blogPost.intro.split(" ").length +
     blogPost.sections.reduce((acc, section) => acc + section.text.split(" ").length, 0) +
     blogPost.tips.reduce((acc, tip) => acc + tip.desc.split(" ").length, 0);
   const readingTime = Math.ceil(wordCount / 200);
 
-  // Truncate intro for meta description (160 characters max)
   const metaDescription =
     blogPost.intro.length > 160 ? blogPost.intro.substring(0, 157) + "..." : blogPost.intro;
 
@@ -248,10 +245,6 @@ export default function BlogDetailPage() {
         <meta property="og:type" content="article" />
       </Head>
       <Navbar />
-
-    
-
-      {/* Hero Section */}
       <section className="relative w-full h-56 sm:h-72 md:h-96 lg:h-[32rem] overflow-hidden mb-12">
         <Image
           src={blogPost.image}
@@ -273,8 +266,6 @@ export default function BlogDetailPage() {
           </div>
         </div>
       </section>
-
-      {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <article className="animate-fade-in bg-card rounded-lg shadow-sm p-6 sm:p-8">
           <div className="flex justify-between items-center text-text-secondary text-sm mb-6">
@@ -286,7 +277,6 @@ export default function BlogDetailPage() {
           <p className="text-base sm:text-lg text-text-primary mb-10 leading-relaxed">
             {blogPost.intro}
           </p>
-
           {blogPost.sections.map((section, idx) => (
             <section key={idx} className="mb-12 animate-fade-in">
               <p className="text-base sm:text-lg text-text-primary leading-relaxed">
@@ -297,8 +287,6 @@ export default function BlogDetailPage() {
               )}
             </section>
           ))}
-
-          {/* Tips Section */}
           <section className="mb-12">
             <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-6">
               Tips for Planning Your {blogPost.category}
@@ -311,8 +299,6 @@ export default function BlogDetailPage() {
               ))}
             </ul>
           </section>
-
-          {/* Social Sharing */}
           <section className="mb-12">
             <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-4">Share This Post</h2>
             <div className="flex gap-4">
@@ -344,7 +330,6 @@ export default function BlogDetailPage() {
           </section>
         </article>
       </main>
-
       <Footer />
     </div>
   );
