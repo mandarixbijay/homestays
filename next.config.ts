@@ -2,7 +2,7 @@ import path from 'path';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // Add this for static site generation
+  output: 'standalone', // For serverless/SSR deployment on Vercel
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
