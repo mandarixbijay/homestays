@@ -1,5 +1,4 @@
-// next.config.ts
-import path from 'path';
+
 
 /** @type {import('next').NextConfig} */
 const nextConfig: import('next').NextConfig = {
@@ -14,14 +13,7 @@ const nextConfig: import('next').NextConfig = {
       { protocol: "https", hostname: "homestays-s3.s3.eu-north-1.amazonaws.com", pathname: "/**" },
     ],
   },
-  webpack: (config: import('webpack').Configuration) => {
-    config.resolve = config.resolve || {};
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      '@': path.resolve(__dirname, 'src'),
-    };
-    return config;
-  },
+  
 };
 
 export default nextConfig;
