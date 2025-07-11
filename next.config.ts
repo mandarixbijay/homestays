@@ -2,7 +2,6 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig: import('next').NextConfig = {
-  output: 'standalone', // For serverless/SSR deployment on Vercel
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
