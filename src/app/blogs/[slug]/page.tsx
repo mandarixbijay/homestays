@@ -1,11 +1,9 @@
-"use client";
+// src/app/blogs/[slug]/page.tsx
 import Footer from "@/components/footer/footer";
 import Navbar from "@/components/navbar/navbar";
 import Image from "next/image";
-import { useRouter, useParams } from "next/navigation";
-import Head from "next/head";
-import React from "react";
-import { Twitter, Facebook } from "lucide-react";
+import { Metadata } from "next";
+import SocialShare from "@/components/blog/SocialShare";
 
 const blogPosts = [
   {
@@ -194,22 +192,50 @@ const blogPosts = [
   },
 ];
 
+// Generate static paths for all blog posts
 export async function generateStaticParams() {
   return blogPosts.map((post) => ({
     slug: post.slug,
   }));
 }
 
-export default function BlogDetailPage({ params }: { params: { slug: string } }) {
-  const blogPost = blogPosts.find((post) => post.slug === params.slug);
+// Dynamic metadata for each blog post
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params; // Await params
+  const blogPost = blogPosts.find((post) => post.slug === slug);
+
+  if (!blogPost) {
+    return {
+      title: "Post Not Found | Nepal Homestays",
+      description: "The requested blog post could not be found.",
+    };
+  }
+
+  const metaDescription =
+    blogPost.intro.length > 160 ? blogPost.intro.substring(0, 157) + "..." : blogPost.intro;
+
+  return {
+    title: `${blogPost.title} | Nepal Homestays`,
+    description: metaDescription,
+    keywords: `${blogPost.title}, Nepal, ${blogPost.category.toLowerCase()}, homestays, travel`,
+    robots: "index, follow",
+    openGraph: {
+      title: blogPost.title,
+      description: metaDescription,
+      images: [{ url: blogPost.image, width: 1200, height: 630, alt: blogPost.title }],
+      url: `https://nepalhomestays.com/blogs/${blogPost.slug}`,
+      type: "article",
+    },
+  };
+}
+
+export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params; // Await params
+  const blogPost = blogPosts.find((post) => post.slug === slug);
 
   if (!blogPost) {
     return (
       <div className="bg-background min-h-screen font-manrope">
-        <Head>
-          <title>Post Not Found | Nepal Homestays</title>
-          <meta name="description" content="The requested blog post could not be found." />
-        </Head>
         <Navbar />
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <h1 className="text-3xl font-bold text-text-primary mb-4">Blog Post Not Found</h1>
@@ -228,22 +254,8 @@ export default function BlogDetailPage({ params }: { params: { slug: string } })
     blogPost.tips.reduce((acc, tip) => acc + tip.desc.split(" ").length, 0);
   const readingTime = Math.ceil(wordCount / 200);
 
-  const metaDescription =
-    blogPost.intro.length > 160 ? blogPost.intro.substring(0, 157) + "..." : blogPost.intro;
-
   return (
     <div className="bg-background min-h-screen font-manrope">
-      <Head>
-        <title>{blogPost.title} | Nepal Homestays</title>
-        <meta name="description" content={metaDescription} />
-        <meta name="keywords" content={`${blogPost.title}, Nepal, ${blogPost.category.toLowerCase()}, homestays, travel`} />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:title" content={blogPost.title} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:image" content={blogPost.image} />
-        <meta property="og:url" content={`https://nepalhomestays.com/blogs/${blogPost.slug}`} />
-        <meta property="og:type" content="article" />
-      </Head>
       <Navbar />
       <section className="relative w-full h-56 sm:h-72 md:h-96 lg:h-[32rem] overflow-hidden mb-12">
         <Image
@@ -301,32 +313,7 @@ export default function BlogDetailPage({ params }: { params: { slug: string } })
           </section>
           <section className="mb-12">
             <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-4">Share This Post</h2>
-            <div className="flex gap-4">
-              <button
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover focus:ring-2 focus:ring-primary focus:outline-none transition-colors"
-                aria-label="Share on Twitter"
-                onClick={() =>
-                  window.open(
-                    `https://twitter.com/intent/tweet?url=https://nepalhomestays.com/blogs/${blogPost.slug}&text=${encodeURIComponent(blogPost.title)}`,
-                    "_blank"
-                  )
-                }
-              >
-                <Twitter className="w-5 h-5" /> Twitter
-              </button>
-              <button
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover focus:ring-2 focus:ring-primary focus:outline-none transition-colors"
-                aria-label="Share on Facebook"
-                onClick={() =>
-                  window.open(
-                    `https://www.facebook.com/sharer/sharer.php?u=https://nepalhomestays.com/blogs/${blogPost.slug}`,
-                    "_blank"
-                  )
-                }
-              >
-                <Facebook className="w-5 h-5" /> Facebook
-              </button>
-            </div>
+            <SocialShare slug={blogPost.slug} title={blogPost.title} />
           </section>
         </article>
       </main>
