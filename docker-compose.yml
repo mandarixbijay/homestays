@@ -1,0 +1,18 @@
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    restart: always
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - API_BASE_URL=${API_BASE_URL}   
+    networks:
+      - homestay-network
+networks:
+  homestay-network:
+    external: true    

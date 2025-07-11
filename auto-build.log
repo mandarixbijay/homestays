@@ -1,0 +1,2225 @@
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:26:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:28:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:30:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:32:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:34:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:36:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+   512c1d5..d011de8  dev        -> origin/dev
+[Tue Jun  3 05:38:03 AM UTC 2025] New commits found: 1. Pulling and rebuilding...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+Updating 512c1d5..d011de8
+Fast-forward
+ README.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+time="2025-06-03T05:38:04Z" level=warning msg="/home/homestay/homestay/homestays_frontend/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container homestays_frontend-web-1  Stopping
+ Container homestays_frontend-web-1  Stopped
+ Container homestays_frontend-web-1  Removing
+ Container homestays_frontend-web-1  Removed
+ Network homestays_frontend_default  Removing
+ Network homestays_frontend_default  Removed
+time="2025-06-03T05:38:05Z" level=warning msg="/home/homestay/homestay/homestays_frontend/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+#0 building with "default" instance using docker driver
+
+#1 [web internal] load build definition from Dockerfile
+#1 transferring dockerfile: 574B done
+#1 DONE 0.0s
+
+#2 [web internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 1.5s
+
+#3 [web internal] load .dockerignore
+#3 transferring context: 80B done
+#3 DONE 0.0s
+
+#4 [web builder 1/6] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8
+#4 DONE 0.0s
+
+#5 [web internal] load build context
+#5 transferring context: 23.28kB 0.0s done
+#5 DONE 0.0s
+
+#6 [web builder 3/6] COPY package.json package-lock.json ./
+#6 CACHED
+
+#7 [web builder 2/6] WORKDIR /app
+#7 CACHED
+
+#8 [web builder 4/6] RUN npm install --legacy-peer-deps
+#8 CACHED
+
+#9 [web builder 5/6] COPY . .
+#9 DONE 0.1s
+
+#10 [web builder 6/6] RUN npm run build
+#10 0.861 
+#10 0.861 > home-stay@0.1.0 build
+#10 0.861 > next build
+#10 0.861 
+#10 1.686 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#10 1.686 This information is used to shape Next.js' roadmap and prioritize features.
+#10 1.686 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#10 1.686 https://nextjs.org/telemetry
+#10 1.686 
+#10 1.827    ▲ Next.js 15.1.8
+#10 1.827 
+#10 1.847    Creating an optimized production build ...
+#10 21.85  ✓ Compiled successfully
+#10 21.85    Linting and checking validity of types ...
+#10 27.42    Collecting page data ...
+#10 30.42    Generating static pages (0/11) ...
+#10 31.32    Generating static pages (2/11) 
+#10 31.32    Generating static pages (5/11) 
+#10 31.32    Generating static pages (8/11) 
+#10 31.32  ✓ Generating static pages (11/11)
+#10 31.67    Finalizing page optimization ...
+#10 31.67    Collecting build traces ...
+#10 39.54 
+#10 39.55 Route (app)                              Size     First Load JS
+#10 39.55 ┌ ○ /                                    31.8 kB         178 kB
+#10 39.55 ├ ○ /_not-found                          979 B           106 kB
+#10 39.55 ├ ○ /blog                                1.35 kB         142 kB
+#10 39.55 ├ ○ /forgot-password                     1.78 kB         178 kB
+#10 39.55 ├ ○ /list-your-property                  3.76 kB         118 kB
+#10 39.55 ├ ○ /reset-password                      3.49 kB         160 kB
+#10 39.55 ├ ○ /signin                              2.86 kB         179 kB
+#10 39.55 └ ○ /signup                              2.81 kB         179 kB
+#10 39.55 + First Load JS shared by all            105 kB
+#10 39.55   ├ chunks/4bd1b696-2bd1e2535f87b1d1.js  52.9 kB
+#10 39.55   ├ chunks/517-75e7ca64588befa9.js       50.5 kB
+#10 39.55   └ other shared chunks (total)          1.91 kB
+#10 39.55 
+#10 39.55 
+#10 39.55 ○  (Static)  prerendered as static content
+#10 39.55 
+#10 DONE 39.7s
+
+#11 [web runner 3/8] COPY --from=builder /app/package.json ./
+#11 CACHED
+
+#12 [web runner 4/8] COPY --from=builder /app/package-lock.json ./
+#12 CACHED
+
+#13 [web runner 5/8] COPY --from=builder /app/node_modules ./node_modules
+#13 CACHED
+
+#14 [web runner 6/8] COPY --from=builder /app/.next ./.next
+#14 DONE 0.0s
+
+#15 [web runner 7/8] COPY --from=builder /app/public ./public
+#15 DONE 0.0s
+
+#16 [web runner 8/8] COPY --from=builder /app/next.config.ts ./next.config.ts
+#16 DONE 0.0s
+
+#17 [web] exporting to image
+#17 exporting layers
+#17 exporting layers 1.1s done
+#17 writing image sha256:035f687549744a4616cce3ea15bf54b5a567788df7f7a918c434282720465296 done
+#17 naming to docker.io/library/homestays_frontend-web done
+#17 DONE 1.1s
+
+#18 [web] resolving provenance for metadata file
+#18 DONE 0.1s
+ web  Built
+ Network homestays_frontend_default  Creating
+ Network homestays_frontend_default  Created
+ Container homestays_frontend-web-1  Creating
+ Container homestays_frontend-web-1  Created
+ Container homestays_frontend-web-1  Starting
+ Container homestays_frontend-web-1  Started
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:40:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:42:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:44:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:46:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:48:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:50:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:52:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:54:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:56:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 05:58:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:00:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:02:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:04:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:06:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:08:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:10:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:12:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:14:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:16:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:18:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:20:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:22:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:24:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:26:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:28:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:30:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:32:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:34:03 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:36:02 AM UTC 2025] No new commits.
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Tue Jun  3 06:38:03 AM UTC 2025] No new commits.
+=== Script run at Tue Jun  3 06:40:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+/home/homestay/homestay/auto-build.sh: line 26: cd: /home/homestay/homestay/homestays_nepal_back: No such file or directory
+=== Script run at Tue Jun  3 06:42:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 06:44:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 06:46:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 06:48:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 06:50:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 06:52:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 06:54:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 06:56:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 06:58:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:00:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:02:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+   d011de8..57bb3a5  dev        -> origin/dev
+[Frontend] 1 new commits found. Pulling and building...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+fatal: Cannot rebase onto multiple branches.
+time="2025-06-03T07:02:04Z" level=warning msg="/home/homestay/homestay/homestays_frontend/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+#0 building with "default" instance using docker driver
+
+#1 [web internal] load build definition from Dockerfile
+#1 transferring dockerfile: 574B done
+#1 DONE 0.0s
+
+#2 [web internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 1.8s
+
+#3 [web internal] load .dockerignore
+#3 transferring context: 80B done
+#3 DONE 0.0s
+
+#4 [web builder 1/6] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8
+#4 DONE 0.0s
+
+#5 [web internal] load build context
+#5 transferring context: 6.00MB 0.1s done
+#5 DONE 0.1s
+
+#6 [web builder 2/6] WORKDIR /app
+#6 CACHED
+
+#7 [web builder 3/6] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [web builder 4/6] RUN npm install --legacy-peer-deps
+#8 CACHED
+
+#9 [web builder 5/6] COPY . .
+#9 DONE 0.2s
+
+#10 [web builder 6/6] RUN npm run build
+#10 0.394 
+#10 0.394 > home-stay@0.1.0 build
+#10 0.394 > next build
+#10 0.394 
+#10 1.229 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#10 1.229 This information is used to shape Next.js' roadmap and prioritize features.
+#10 1.229 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#10 1.229 https://nextjs.org/telemetry
+#10 1.229 
+#10 1.376    ▲ Next.js 15.1.8
+#10 1.376 
+#10 1.397    Creating an optimized production build ...
+#10 22.49  ✓ Compiled successfully
+#10 22.50    Linting and checking validity of types ...
+#10 28.80    Collecting page data ...
+#10 30.53    Generating static pages (0/11) ...
+#10 32.06    Generating static pages (2/11) 
+#10 32.06    Generating static pages (5/11) 
+#10 32.06    Generating static pages (8/11) 
+#10 32.06  ✓ Generating static pages (11/11)
+#10 33.17    Finalizing page optimization ...
+#10 33.17    Collecting build traces ...
+#10 40.98 
+#10 40.99 Route (app)                              Size     First Load JS
+#10 40.99 ┌ ○ /                                    31.8 kB         178 kB
+#10 40.99 ├ ○ /_not-found                          979 B           106 kB
+#10 40.99 ├ ○ /blog                                1.35 kB         142 kB
+#10 40.99 ├ ○ /forgot-password                     1.78 kB         178 kB
+#10 40.99 ├ ○ /list-your-property                  3.76 kB         118 kB
+#10 40.99 ├ ○ /reset-password                      3.49 kB         160 kB
+#10 40.99 ├ ○ /signin                              2.86 kB         179 kB
+#10 40.99 └ ○ /signup                              2.81 kB         179 kB
+#10 40.99 + First Load JS shared by all            105 kB
+#10 40.99   ├ chunks/4bd1b696-2bd1e2535f87b1d1.js  52.9 kB
+#10 40.99   ├ chunks/517-75e7ca64588befa9.js       50.5 kB
+#10 40.99   └ other shared chunks (total)          1.91 kB
+#10 40.99 
+#10 40.99 
+#10 40.99 ○  (Static)  prerendered as static content
+#10 40.99 
+#10 DONE 41.2s
+
+#11 [web runner 3/8] COPY --from=builder /app/package.json ./
+#11 CACHED
+
+#12 [web runner 4/8] COPY --from=builder /app/package-lock.json ./
+#12 CACHED
+
+#13 [web runner 5/8] COPY --from=builder /app/node_modules ./node_modules
+#13 CACHED
+
+#14 [web runner 6/8] COPY --from=builder /app/.next ./.next
+#14 DONE 0.1s
+
+#15 [web runner 7/8] COPY --from=builder /app/public ./public
+#15 DONE 0.0s
+
+#16 [web runner 8/8] COPY --from=builder /app/next.config.ts ./next.config.ts
+#16 DONE 0.0s
+
+#17 [web] exporting to image
+#17 exporting layers
+#17 exporting layers 1.0s done
+#17 writing image sha256:1f8d42868643e1a5b0c9944227e4567b6f5189547b8159c1b69a54b7da2d7fc9 done
+#17 naming to docker.io/library/homestays_frontend-web done
+#17 DONE 1.0s
+
+#18 [web] resolving provenance for metadata file
+#18 DONE 0.0s
+ web  Built
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:04:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] 1 new commits found. Pulling and building...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+Updating d011de8..57bb3a5
+Fast-forward
+ README.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+time="2025-06-03T07:04:04Z" level=warning msg="/home/homestay/homestay/homestays_frontend/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+#0 building with "default" instance using docker driver
+
+#1 [web internal] load build definition from Dockerfile
+#1 transferring dockerfile: 574B done
+#1 DONE 0.0s
+
+#2 [web internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.8s
+
+#3 [web internal] load .dockerignore
+#3 transferring context: 80B done
+#3 DONE 0.0s
+
+#4 [web builder 1/6] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8
+#4 DONE 0.0s
+
+#5 [web internal] load build context
+#5 transferring context: 40.36kB done
+#5 DONE 0.0s
+
+#6 [web builder 2/6] WORKDIR /app
+#6 CACHED
+
+#7 [web builder 3/6] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [web builder 4/6] RUN npm install --legacy-peer-deps
+#8 CACHED
+
+#9 [web builder 5/6] COPY . .
+#9 DONE 0.1s
+
+#10 [web builder 6/6] RUN npm run build
+#10 0.413 
+#10 0.413 > home-stay@0.1.0 build
+#10 0.413 > next build
+#10 0.413 
+#10 1.180 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#10 1.180 This information is used to shape Next.js' roadmap and prioritize features.
+#10 1.180 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#10 1.180 https://nextjs.org/telemetry
+#10 1.181 
+#10 1.326    ▲ Next.js 15.1.8
+#10 1.326 
+#10 1.345    Creating an optimized production build ...
+#10 22.36  ✓ Compiled successfully
+#10 22.37    Linting and checking validity of types ...
+#10 28.68    Collecting page data ...
+#10 31.76    Generating static pages (0/11) ...
+#10 32.63    Generating static pages (2/11) 
+#10 32.63    Generating static pages (5/11) 
+#10 32.63    Generating static pages (8/11) 
+#10 32.67  ✓ Generating static pages (11/11)
+#10 33.25    Finalizing page optimization ...
+#10 33.25    Collecting build traces ...
+#10 40.78 
+#10 40.78 Route (app)                              Size     First Load JS
+#10 40.78 ┌ ○ /                                    31.8 kB         178 kB
+#10 40.78 ├ ○ /_not-found                          979 B           106 kB
+#10 40.78 ├ ○ /blog                                1.35 kB         142 kB
+#10 40.78 ├ ○ /forgot-password                     1.78 kB         178 kB
+#10 40.78 ├ ○ /list-your-property                  3.76 kB         118 kB
+#10 40.78 ├ ○ /reset-password                      3.49 kB         160 kB
+#10 40.78 ├ ○ /signin                              2.86 kB         179 kB
+#10 40.78 └ ○ /signup                              2.81 kB         179 kB
+#10 40.78 + First Load JS shared by all            105 kB
+#10 40.78   ├ chunks/4bd1b696-2bd1e2535f87b1d1.js  52.9 kB
+#10 40.78   ├ chunks/517-75e7ca64588befa9.js       50.5 kB
+#10 40.78   └ other shared chunks (total)          1.91 kB
+#10 40.78 
+#10 40.78 
+#10 40.78 ○  (Static)  prerendered as static content
+#10 40.78 
+#10 DONE 40.9s
+
+#11 [web runner 3/8] COPY --from=builder /app/package.json ./
+#11 CACHED
+
+#12 [web runner 4/8] COPY --from=builder /app/package-lock.json ./
+#12 CACHED
+
+#13 [web runner 5/8] COPY --from=builder /app/node_modules ./node_modules
+#13 CACHED
+
+#14 [web runner 6/8] COPY --from=builder /app/.next ./.next
+#14 DONE 0.1s
+
+#15 [web runner 7/8] COPY --from=builder /app/public ./public
+#15 DONE 0.0s
+
+#16 [web runner 8/8] COPY --from=builder /app/next.config.ts ./next.config.ts
+#16 DONE 0.0s
+
+#17 [web] exporting to image
+#17 exporting layers
+#17 exporting layers 1.1s done
+#17 writing image sha256:9f159c2c680645c18545cc54222b3dd7039688ec9d85c31dafe17c93855a68a6 done
+#17 naming to docker.io/library/homestays_frontend-web done
+#17 DONE 1.1s
+
+#18 [web] resolving provenance for metadata file
+#18 DONE 0.0s
+ web  Built
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:06:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:08:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+   57bb3a5..c8895aa  dev        -> origin/dev
+[Frontend] 2 new commits found. Pulling and building...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+Updating 57bb3a5..c8895aa
+Fast-forward
+ next.config.ts                                     |  10 +-
+ src/app/globals.css                                |  11 ++
+ src/app/page.tsx                                   |   6 +-
+ src/components/dialog/otp-dialog.tsx               |  19 +---
+ src/components/guest-picker.tsx                    |   6 +-
+ src/components/landing-page/cards/CategoryCard.tsx |  32 ++++++
+ src/components/landing-page/cards/DealCard.tsx     |  84 ++++++++++++++
+ src/components/landing-page/hero1.tsx              | 122 +++++++++++++++++++++
+ src/components/landing-page/hero2.tsx              |  55 ++++++++++
+ src/models/index.ts                                |  35 ++++++
+ 10 files changed, 355 insertions(+), 25 deletions(-)
+ create mode 100644 src/components/landing-page/cards/CategoryCard.tsx
+ create mode 100644 src/components/landing-page/cards/DealCard.tsx
+ create mode 100644 src/components/landing-page/hero1.tsx
+ create mode 100644 src/components/landing-page/hero2.tsx
+ create mode 100644 src/models/index.ts
+time="2025-06-03T07:08:04Z" level=warning msg="/home/homestay/homestay/homestays_frontend/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+#0 building with "default" instance using docker driver
+
+#1 [web internal] load build definition from Dockerfile
+#1 transferring dockerfile: 574B done
+#1 DONE 0.0s
+
+#2 [web internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 1.5s
+
+#3 [web internal] load .dockerignore
+#3 transferring context: 80B done
+#3 DONE 0.0s
+
+#4 [web builder 1/6] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8
+#4 DONE 0.0s
+
+#5 [web internal] load build context
+#5 transferring context: 80.83kB 0.0s done
+#5 DONE 0.0s
+
+#6 [web builder 2/6] WORKDIR /app
+#6 CACHED
+
+#7 [web builder 3/6] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [web builder 4/6] RUN npm install --legacy-peer-deps
+#8 CACHED
+
+#9 [web builder 5/6] COPY . .
+#9 DONE 0.1s
+
+#10 [web builder 6/6] RUN npm run build
+#10 0.372 
+#10 0.372 > home-stay@0.1.0 build
+#10 0.372 > next build
+#10 0.372 
+#10 1.161 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#10 1.161 This information is used to shape Next.js' roadmap and prioritize features.
+#10 1.161 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#10 1.161 https://nextjs.org/telemetry
+#10 1.161 
+#10 1.310    ▲ Next.js 15.1.8
+#10 1.310 
+#10 1.326    Creating an optimized production build ...
+#10 21.92  ✓ Compiled successfully
+#10 21.93    Linting and checking validity of types ...
+#10 28.31    Collecting page data ...
+#10 30.01    Generating static pages (0/11) ...
+#10 31.47    Generating static pages (2/11) 
+#10 31.47    Generating static pages (5/11) 
+#10 31.47    Generating static pages (8/11) 
+#10 31.47  ✓ Generating static pages (11/11)
+#10 32.59    Finalizing page optimization ...
+#10 32.59    Collecting build traces ...
+#10 40.60 
+#10 40.60 Route (app)                              Size     First Load JS
+#10 40.60 ┌ ○ /                                    33.4 kB         180 kB
+#10 40.60 ├ ○ /_not-found                          979 B           106 kB
+#10 40.60 ├ ○ /blog                                1.35 kB         142 kB
+#10 40.60 ├ ○ /forgot-password                     1.78 kB         178 kB
+#10 40.60 ├ ○ /list-your-property                  3.77 kB         118 kB
+#10 40.60 ├ ○ /reset-password                      3.5 kB          160 kB
+#10 40.60 ├ ○ /signin                              2.86 kB         179 kB
+#10 40.60 └ ○ /signup                              2.81 kB         179 kB
+#10 40.60 + First Load JS shared by all            105 kB
+#10 40.60   ├ chunks/4bd1b696-2bd1e2535f87b1d1.js  52.9 kB
+#10 40.60   ├ chunks/517-75e7ca64588befa9.js       50.5 kB
+#10 40.60   └ other shared chunks (total)          1.91 kB
+#10 40.60 
+#10 40.60 
+#10 40.60 ○  (Static)  prerendered as static content
+#10 40.60 
+#10 DONE 40.8s
+
+#11 [web runner 3/8] COPY --from=builder /app/package.json ./
+#11 CACHED
+
+#12 [web runner 4/8] COPY --from=builder /app/package-lock.json ./
+#12 CACHED
+
+#13 [web runner 5/8] COPY --from=builder /app/node_modules ./node_modules
+#13 CACHED
+
+#14 [web runner 6/8] COPY --from=builder /app/.next ./.next
+#14 DONE 0.0s
+
+#15 [web runner 7/8] COPY --from=builder /app/public ./public
+#15 DONE 0.0s
+
+#16 [web runner 8/8] COPY --from=builder /app/next.config.ts ./next.config.ts
+#16 DONE 0.0s
+
+#17 [web] exporting to image
+#17 exporting layers
+#17 exporting layers 1.2s done
+#17 writing image sha256:d81b5d8ad57f833639529889cfefceaeb87d931d54e2c20c1e9c1a5e2ead80ec done
+#17 naming to docker.io/library/homestays_frontend-web done
+#17 DONE 1.2s
+
+#18 [web] resolving provenance for metadata file
+#18 DONE 0.0s
+ web  Built
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:10:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:12:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:14:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:16:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:18:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:20:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:22:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+   c8895aa..1f0b7e4  dev        -> origin/dev
+[Frontend] 1 new commits found. Pulling and building...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+Updating c8895aa..1f0b7e4
+Fast-forward
+ README.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+time="2025-06-03T07:22:04Z" level=warning msg="/home/homestay/homestay/homestays_frontend/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+#0 building with "default" instance using docker driver
+
+#1 [web internal] load build definition from Dockerfile
+#1 transferring dockerfile: 574B done
+#1 DONE 0.0s
+
+#2 [web internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 1.8s
+
+#3 [web internal] load .dockerignore
+#3 transferring context: 80B done
+#3 DONE 0.0s
+
+#4 [web builder 1/6] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8
+#4 DONE 0.0s
+
+#5 [web internal] load build context
+#5 transferring context: 6.03MB 0.1s done
+#5 DONE 0.1s
+
+#6 [web builder 2/6] WORKDIR /app
+#6 CACHED
+
+#7 [web builder 3/6] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [web builder 4/6] RUN npm install --legacy-peer-deps
+#8 CACHED
+
+#9 [web builder 5/6] COPY . .
+#9 DONE 0.1s
+
+#10 [web builder 6/6] RUN npm run build
+#10 0.373 
+#10 0.373 > home-stay@0.1.0 build
+#10 0.373 > next build
+#10 0.373 
+#10 1.251 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#10 1.252 This information is used to shape Next.js' roadmap and prioritize features.
+#10 1.252 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#10 1.252 https://nextjs.org/telemetry
+#10 1.252 
+#10 1.399    ▲ Next.js 15.1.8
+#10 1.399 
+#10 1.434    Creating an optimized production build ...
+#10 22.57  ✓ Compiled successfully
+#10 22.58    Linting and checking validity of types ...
+#10 28.83    Collecting page data ...
+#10 30.58    Generating static pages (0/11) ...
+#10 31.97    Generating static pages (2/11) 
+#10 31.97    Generating static pages (5/11) 
+#10 31.97    Generating static pages (8/11) 
+#10 31.97  ✓ Generating static pages (11/11)
+#10 33.08    Finalizing page optimization ...
+#10 33.08    Collecting build traces ...
+#10 40.74 
+#10 40.74 Route (app)                              Size     First Load JS
+#10 40.74 ┌ ○ /                                    33.4 kB         180 kB
+#10 40.74 ├ ○ /_not-found                          979 B           106 kB
+#10 40.74 ├ ○ /blog                                1.35 kB         142 kB
+#10 40.74 ├ ○ /forgot-password                     1.78 kB         178 kB
+#10 40.74 ├ ○ /list-your-property                  3.77 kB         118 kB
+#10 40.74 ├ ○ /reset-password                      3.5 kB          160 kB
+#10 40.74 ├ ○ /signin                              2.86 kB         179 kB
+#10 40.74 └ ○ /signup                              2.81 kB         179 kB
+#10 40.74 + First Load JS shared by all            105 kB
+#10 40.74   ├ chunks/4bd1b696-2bd1e2535f87b1d1.js  52.9 kB
+#10 40.74   ├ chunks/517-75e7ca64588befa9.js       50.5 kB
+#10 40.74   └ other shared chunks (total)          1.91 kB
+#10 40.74 
+#10 40.74 
+#10 40.74 ○  (Static)  prerendered as static content
+#10 40.74 
+#10 DONE 40.9s
+
+#11 [web runner 3/8] COPY --from=builder /app/package.json ./
+#11 CACHED
+
+#12 [web runner 4/8] COPY --from=builder /app/package-lock.json ./
+#12 CACHED
+
+#13 [web runner 5/8] COPY --from=builder /app/node_modules ./node_modules
+#13 CACHED
+
+#14 [web runner 6/8] COPY --from=builder /app/.next ./.next
+#14 DONE 0.0s
+
+#15 [web runner 7/8] COPY --from=builder /app/public ./public
+#15 DONE 0.0s
+
+#16 [web runner 8/8] COPY --from=builder /app/next.config.ts ./next.config.ts
+#16 DONE 0.0s
+
+#17 [web] exporting to image
+#17 exporting layers
+#17 exporting layers 1.0s done
+#17 writing image sha256:14f9c4217d37e20ee85a712f4ff4c4fc568b6d617a55c4f319e6ada41de114cd done
+#17 naming to docker.io/library/homestays_frontend-web done
+#17 DONE 1.0s
+
+#18 [web] resolving provenance for metadata file
+#18 DONE 0.0s
+ web  Built
+ Container homestays_frontend-web-1  Recreate
+ Container homestays_frontend-web-1  Recreated
+ Container homestays_frontend-web-1  Starting
+ Container homestays_frontend-web-1  Started
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:24:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:26:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:28:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:30:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:32:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:34:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:36:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:38:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:40:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:42:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:44:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:46:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:48:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:50:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:52:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:54:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:56:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 07:58:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:00:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:02:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:04:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:06:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:08:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:10:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:12:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:14:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:16:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:18:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:20:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:22:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:24:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:26:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:28:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:30:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:32:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:34:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:36:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:38:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:40:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:42:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:44:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:46:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:48:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:50:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:52:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:54:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:56:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 08:58:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:00:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:02:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:04:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:06:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:08:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:10:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:12:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:14:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:16:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:18:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:20:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:22:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:24:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:26:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:28:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:30:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:32:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:34:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:36:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:38:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:40:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:42:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:44:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:46:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:48:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:50:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:52:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:54:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:56:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 09:58:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:00:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:02:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:04:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:06:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:08:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:10:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:12:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:14:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:16:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:18:02 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:20:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:22:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:24:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:26:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:28:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:30:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:32:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:34:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:36:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:38:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:40:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:42:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:44:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:46:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:48:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:50:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:52:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:54:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:56:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 10:58:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 11:00:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 11:02:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+   1f0b7e4..ce31bb0  dev        -> origin/dev
+[Frontend] 3 new commits found. Pulling and building...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+Updating 1f0b7e4..ce31bb0
+Fast-forward
+ package-lock.json                                  |  301 +++++-
+ package.json                                       |    8 +
+ src/app/globals.css                                |   88 ++
+ src/app/list-your-property/page.tsx                |  604 +++++++++--
+ src/app/types/onboarding.ts                        |    5 +-
+ src/components/dialog/otp-dialog.tsx               |  216 +++-
+ src/components/onboarding/Step.tsx                 |  100 +-
+ src/components/onboarding/Step1.tsx                |  204 +++-
+ .../onboarding/steps/Step1BasicInformation.tsx     |  228 ++++
+ .../onboarding/steps/Step2PropertyDetails.tsx      |  317 ++++++
+ .../onboarding/steps/Step3Facilities.tsx           |  140 +++
+ .../onboarding/steps/Step4RoomInformation.tsx      | 1113 ++++++++++++++++++++
+ .../Step4RoomInformation/Step4RoomInformation.tsx  |  291 +++++
+ .../Step4RoomInformation/components/ExtrasStep.tsx |   70 ++
+ .../components/GeneralInfoStep.tsx                 |   98 ++
+ .../Step4RoomInformation/components/ImageModal.tsx |  351 ++++++
+ .../Step4RoomInformation/components/ImageStep.tsx  |  104 ++
+ .../components/OccupancyStep.tsx                   |  149 +++
+ .../components/PricingStep.tsx                     |  124 +++
+ .../components/RoomSwitcher.tsx                    |   41 +
+ .../Step4RoomInformation/components/TotalRooms.tsx |   59 ++
+ .../components/WizardProgress.tsx                  |   27 +
+ .../onboarding/steps/Step4RoomInformation/types.ts |   23 +
+ .../onboarding/steps/Step4RoomInformation/utils.ts |   70 ++
+ .../onboarding/steps/Step5RoomFacilities.tsx       |   36 +
+ src/components/onboarding/steps/Step6MealPlan.tsx  |   29 +
+ src/components/onboarding/steps/Step7Rules.tsx     |   21 +
+ src/components/ui/accordion.tsx                    |   58 +
+ src/components/ui/checkbox.tsx                     |   30 +
+ src/components/ui/progress.tsx                     |   28 +-
+ src/components/ui/resendbutton.tsx                 |   20 +-
+ src/components/ui/textarea.tsx                     |   22 +
+ src/components/ui/toast.tsx                        |  129 +++
+ src/components/ui/toaster.tsx                      |   35 +
+ src/components/ui/tooltip.tsx                      |   30 +
+ src/hooks/use-media-query.ts                       |   19 -
+ src/hooks/use-toast.ts                             |  194 ++++
+ tailwind.config.ts                                 |  128 ++-
+ 38 files changed, 5242 insertions(+), 268 deletions(-)
+ create mode 100644 src/components/onboarding/steps/Step1BasicInformation.tsx
+ create mode 100644 src/components/onboarding/steps/Step2PropertyDetails.tsx
+ create mode 100644 src/components/onboarding/steps/Step3Facilities.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/Step4RoomInformation.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/components/ExtrasStep.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/components/GeneralInfoStep.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/components/ImageModal.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/components/ImageStep.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/components/OccupancyStep.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/components/PricingStep.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/components/RoomSwitcher.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/components/TotalRooms.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/components/WizardProgress.tsx
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/types.ts
+ create mode 100644 src/components/onboarding/steps/Step4RoomInformation/utils.ts
+ create mode 100644 src/components/onboarding/steps/Step5RoomFacilities.tsx
+ create mode 100644 src/components/onboarding/steps/Step6MealPlan.tsx
+ create mode 100644 src/components/onboarding/steps/Step7Rules.tsx
+ create mode 100644 src/components/ui/accordion.tsx
+ create mode 100644 src/components/ui/checkbox.tsx
+ create mode 100644 src/components/ui/textarea.tsx
+ create mode 100644 src/components/ui/toast.tsx
+ create mode 100644 src/components/ui/toaster.tsx
+ create mode 100644 src/components/ui/tooltip.tsx
+ delete mode 100644 src/hooks/use-media-query.ts
+ create mode 100644 src/hooks/use-toast.ts
+time="2025-06-03T11:02:05Z" level=warning msg="/home/homestay/homestay/homestays_frontend/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+#0 building with "default" instance using docker driver
+
+#1 [web internal] load build definition from Dockerfile
+#1 transferring dockerfile: 574B done
+#1 DONE 0.0s
+
+#2 [web internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 1.8s
+
+#3 [web internal] load .dockerignore
+#3 transferring context: 80B done
+#3 DONE 0.0s
+
+#4 [web builder 1/6] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8
+#4 DONE 0.0s
+
+#5 [web internal] load build context
+#5 transferring context: 736.54kB 0.0s done
+#5 DONE 0.0s
+
+#6 [web builder 2/6] WORKDIR /app
+#6 CACHED
+
+#7 [web builder 3/6] COPY package.json package-lock.json ./
+#7 DONE 0.0s
+
+#8 [web builder 4/6] RUN npm install --legacy-peer-deps
+#8 43.91 
+#8 43.91 added 471 packages, and audited 472 packages in 44s
+#8 43.91 
+#8 43.91 156 packages are looking for funding
+#8 43.91   run `npm fund` for details
+#8 43.95 
+#8 43.95 1 critical severity vulnerability
+#8 43.95 
+#8 43.95 To address all issues, run:
+#8 43.95   npm audit fix --force
+#8 43.95 
+#8 43.95 Run `npm audit` for details.
+#8 43.95 npm notice
+#8 43.95 npm notice New major version of npm available! 10.8.2 -> 11.4.1
+#8 43.95 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.4.1
+#8 43.95 npm notice To update run: npm install -g npm@11.4.1
+#8 43.95 npm notice
+#8 DONE 44.7s
+
+#9 [web builder 5/6] COPY . .
+#9 DONE 0.1s
+
+#10 [web builder 6/6] RUN npm run build
+#10 0.371 
+#10 0.371 > home-stay@0.1.0 build
+#10 0.371 > next build
+#10 0.371 
+#10 1.157 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#10 1.157 This information is used to shape Next.js' roadmap and prioritize features.
+#10 1.157 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#10 1.157 https://nextjs.org/telemetry
+#10 1.157 
+#10 1.302    ▲ Next.js 15.1.8
+#10 1.302 
+#10 1.325    Creating an optimized production build ...
+#10 11.28 Failed to compile.
+#10 11.28 
+#10 11.28 ./src/components/dialog/otp-dialog.tsx
+#10 11.28 Error:   [31mx[0m Merge conflict marker encountered.
+#10 11.28     ,-[[36;1;4m/app/src/components/dialog/otp-dialog.tsx[0m:39:1]
+#10 11.28  [2m36[0m |   blockedMessage?: string;
+#10 11.28  [2m37[0m |   isBlocked?: boolean;
+#10 11.28  [2m38[0m | }
+#10 11.28  [2m39[0m | =======
+#10 11.28     : [35;1m^^^^^^^[0m
+#10 11.28  [2m40[0m | import { OtpDialogProps } from "@/models";
+#10 11.28  [2m41[0m | 
+#10 11.28  [2m42[0m | export function OtpDialog({
+#10 11.28     `----
+#10 11.28 
+#10 11.28 Caused by:
+#10 11.28     Syntax Error
+#10 11.28 
+#10 11.28 Import trace for requested module:
+#10 11.28 ./src/components/dialog/otp-dialog.tsx
+#10 11.28 ./src/app/forgot-password/page.tsx
+#10 11.28 
+#10 11.29 
+#10 11.29 > Build failed because of webpack errors
+#10 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+------
+ > [web builder 6/6] RUN npm run build:
+11.28 
+11.28 Caused by:
+11.28     Syntax Error
+11.28 
+11.28 Import trace for requested module:
+11.28 ./src/components/dialog/otp-dialog.tsx
+11.28 ./src/app/forgot-password/page.tsx
+11.28 
+11.29 
+11.29 > Build failed because of webpack errors
+------
+failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 11:04:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+   ce31bb0..4fda244  dev        -> origin/dev
+[Frontend] 1 new commits found. Pulling and building...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+Updating ce31bb0..4fda244
+Fast-forward
+ src/app/globals.css                  | 2 +-
+ src/components/dialog/otp-dialog.tsx | 2 --
+ 2 files changed, 1 insertion(+), 3 deletions(-)
+time="2025-06-03T11:04:05Z" level=warning msg="/home/homestay/homestay/homestays_frontend/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+#0 building with "default" instance using docker driver
+
+#1 [web internal] load build definition from Dockerfile
+#1 transferring dockerfile: 574B done
+#1 DONE 0.0s
+
+#2 [web internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.9s
+
+#3 [web internal] load .dockerignore
+#3 transferring context: 80B done
+#3 DONE 0.0s
+
+#4 [web builder 1/6] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8
+#4 DONE 0.0s
+
+#5 [web internal] load build context
+#5 transferring context: 154.05kB 0.0s done
+#5 DONE 0.0s
+
+#6 [web builder 3/6] COPY package.json package-lock.json ./
+#6 CACHED
+
+#7 [web builder 2/6] WORKDIR /app
+#7 CACHED
+
+#8 [web builder 4/6] RUN npm install --legacy-peer-deps
+#8 CACHED
+
+#9 [web builder 5/6] COPY . .
+#9 DONE 0.1s
+
+#10 [web builder 6/6] RUN npm run build
+#10 0.465 
+#10 0.465 > home-stay@0.1.0 build
+#10 0.465 > next build
+#10 0.465 
+#10 1.361 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#10 1.362 This information is used to shape Next.js' roadmap and prioritize features.
+#10 1.362 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#10 1.362 https://nextjs.org/telemetry
+#10 1.362 
+#10 1.504    ▲ Next.js 15.1.8
+#10 1.504 
+#10 1.538    Creating an optimized production build ...
+#10 24.88  ✓ Compiled successfully
+#10 24.89    Linting and checking validity of types ...
+#10 30.12 
+#10 30.12 Failed to compile.
+#10 30.12 
+#10 30.12 ./src/app/list-your-property/page.tsx
+#10 30.12 67:11  Error: An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.
+#10 30.12 - If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.
+#10 30.12 - If you want a type meaning "any object", you probably want `object` instead.
+#10 30.12 - If you want a type meaning "any value", you probably want `unknown` instead.  @typescript-eslint/no-empty-object-type
+#10 30.12 68:11  Error: An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.
+#10 30.12 - If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.
+#10 30.12 - If you want a type meaning "any object", you probably want `object` instead.
+#10 30.12 - If you want a type meaning "any value", you probably want `unknown` instead.  @typescript-eslint/no-empty-object-type
+#10 30.12 69:11  Error: An empty interface declaration allows any non-nullish value, including literals like `0` and `""`.
+#10 30.12 - If that's what you want, disable this lint rule with an inline comment or configure the 'allowInterfaces' rule option.
+#10 30.12 - If you want a type meaning "any object", you probably want `object` instead.
+#10 30.12 - If you want a type meaning "any value", you probably want `unknown` instead.  @typescript-eslint/no-empty-object-type
+#10 30.12 131:9  Warning: The 'defaultRoom' object makes the dependencies of useCallback Hook (at line 402) change on every render. To fix this, wrap the initialization of 'defaultRoom' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+#10 30.12 184:91  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+#10 30.12 195:15  Error: 'maxOccErr' is never reassigned. Use 'const' instead.  prefer-const
+#10 30.12 199:15  Error: 'minOccErr' is never reassigned. Use 'const' instead.  prefer-const
+#10 30.12 208:88  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+#10 30.12 259:6  Warning: React Hook useEffect has a missing dependency: 'defaultRoom'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+#10 30.12 405:9  Error: 'isRoomComplete' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+#10 30.12 496:9  Error: 'validRooms' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+#10 30.12 
+#10 30.12 ./src/components/onboarding/steps/Step2PropertyDetails.tsx
+#10 30.12 38:9  Warning: The 'images' logical expression could make the dependencies of useMemo Hook (at line 158) change on every render. To fix this, wrap the initialization of 'images' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+#10 30.12 70:6  Warning: React Hook useEffect has missing dependencies: 'imageTags' and 'images'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+#10 30.12 77:6  Warning: React Hook useEffect has a missing dependency: 'tagInput.length'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+#10 30.12 
+#10 30.12 ./src/components/onboarding/steps/Step3Facilities.tsx
+#10 30.12 16:11  Error: 'register' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+#10 30.12 
+#10 30.12 ./src/components/onboarding/steps/Step4RoomInformation/Step4RoomInformation.tsx
+#10 30.12 6:29  Error: 'RoomInfo' is defined but never used.  @typescript-eslint/no-unused-vars
+#10 30.12 40:9  Warning: The 'steps' array makes the dependencies of useCallback Hook (at line 175) change on every render. To fix this, wrap the initialization of 'steps' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+#10 30.12 40:9  Warning: The 'steps' array makes the dependencies of useCallback Hook (at line 188) change on every render. To fix this, wrap the initialization of 'steps' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+#10 30.12 92:6  Warning: React Hook useEffect has a missing dependency: 'rooms'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+#10 30.12 
+#10 30.12 ./src/components/onboarding/steps/Step4RoomInformation/components/ImageModal.tsx
+#10 30.12 18:12  Error: 'ImageComponent' is defined but never used.  @typescript-eslint/no-unused-vars
+#10 30.12 120:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+#10 30.12 153:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+#10 30.12 241:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+#10 30.12 278:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+#10 30.12 
+#10 30.12 ./src/components/onboarding/steps/Step4RoomInformation/components/TotalRooms.tsx
+#10 30.12 2:26  Error: 'UseFormRegister' is defined but never used.  @typescript-eslint/no-unused-vars
+#10 30.12 2:43  Error: 'UseFormSetValue' is defined but never used.  @typescript-eslint/no-unused-vars
+#10 30.12 
+#10 30.12 ./src/components/onboarding/steps/Step4RoomInformation.tsx
+#10 30.12 87:9  Warning: The 'rooms' logical expression could make the dependencies of useCallback Hook (at line 195) change on every render. To fix this, wrap the initialization of 'rooms' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+#10 30.12 87:9  Warning: The 'rooms' logical expression could make the dependencies of useCallback Hook (at line 237) change on every render. To fix this, wrap the initialization of 'rooms' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+#10 30.12 87:9  Warning: The 'rooms' logical expression could make the dependencies of useCallback Hook (at line 272) change on every render. To fix this, wrap the initialization of 'rooms' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+#10 30.12 157:6  Warning: React Hook useEffect has missing dependencies: 'defaultRoom' and 'rooms'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+#10 30.12 215:5  Warning: React Hook useCallback has a missing dependency: 'selectedImages'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+#10 30.12 331:6  Warning: React Hook useCallback has a missing dependency: 'steps.length'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+#10 30.12 
+#10 30.12 ./src/hooks/use-toast.ts
+#10 30.12 21:7  Error: 'actionTypes' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars
+#10 30.12 
+#10 30.12 info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+#10 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+------
+ > [web builder 6/6] RUN npm run build:
+30.12 87:9  Warning: The 'rooms' logical expression could make the dependencies of useCallback Hook (at line 237) change on every render. To fix this, wrap the initialization of 'rooms' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+30.12 87:9  Warning: The 'rooms' logical expression could make the dependencies of useCallback Hook (at line 272) change on every render. To fix this, wrap the initialization of 'rooms' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+30.12 157:6  Warning: React Hook useEffect has missing dependencies: 'defaultRoom' and 'rooms'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+30.12 215:5  Warning: React Hook useCallback has a missing dependency: 'selectedImages'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+30.12 331:6  Warning: React Hook useCallback has a missing dependency: 'steps.length'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+30.12 
+30.12 ./src/hooks/use-toast.ts
+30.12 21:7  Error: 'actionTypes' is assigned a value but only used as a type.  @typescript-eslint/no-unused-vars
+30.12 
+30.12 info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+------
+failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 11:06:02 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.
+=== Script run at Tue Jun  3 11:08:01 AM UTC 2025 ===
+[Frontend] Checking for updates in /home/homestay/homestay/homestays_frontend...
+From https://github.com/mandarix-core/homestays_frontend
+ * branch            dev        -> FETCH_HEAD
+[Frontend] No new commits.
+[Backend] Checking for updates in /home/homestay/homestay/homestays_nepal_backend...
+From https://github.com/mandarixbijay/homestays_nepal_backend
+ * branch            dev        -> FETCH_HEAD
+[Backend] No new commits.

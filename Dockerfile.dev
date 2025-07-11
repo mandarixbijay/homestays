@@ -1,0 +1,24 @@
+# Base image
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies
+COPY package.json package-lock.json ./
+RUN npm install --legacy-peer-deps
+
+# Copy source code
+COPY . .
+
+# Expose development port
+EXPOSE 3000
+
+# Set environment variables (can be overridden in docker-compose)
+ENV NODE_ENV=development
+ENV NEXTAUTH_SECRET=7caa68c0b037ff7f2c72c97d367bde6214b0cac5f49e919b99d887f0a3b47a56
+ENV NEXTAUTH_URL=http://app:3001
+ENV API_BASE_URL=http://app:3001
+
+# Default command
+CMD ["npm", "run", "dev"]
