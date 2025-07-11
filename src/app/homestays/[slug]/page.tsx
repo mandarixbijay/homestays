@@ -3,7 +3,7 @@ import React from "react";
 import { hero3Data } from "@/data/homestays";
 import { dealCardsData } from "@/data/deals";
 import { hotels } from "@/data/hotels";
-import HomestayDetailClient from "@/components/homestay/page";
+import HomestayDetailWrapper from "@/components/homestay/HomestayDetailWrapper";
 import { Metadata } from "next";
 
 export interface Hero3Card {
@@ -76,7 +76,6 @@ const dataSources = [
   { data: hotels, adapter: dataAdapters.destination },
 ];
 
-// Generate static paths for all homestays
 export async function generateStaticParams() {
   const slugs: { slug: string }[] = [];
 
@@ -93,7 +92,6 @@ export async function generateStaticParams() {
   return slugs;
 }
 
-// Dynamic metadata for each homestay
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   let homestay: Hero3Card | null = null;
@@ -115,6 +113,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return {
       title: "Homestay Not Found | Nepal Homestays",
       description: "The requested homestay could not be found.",
+      metadataBase: new URL("https://nepalhomestays.com"),
     };
   }
 
@@ -122,6 +121,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${homestay.city} Homestay | Nepal Homestays`,
     description: `Book your stay in ${homestay.city}, ${homestay.region} with Nepal Homestays.`,
     keywords: `${homestay.city}, ${homestay.region}, homestay, Nepal, travel`,
+    metadataBase: new URL("https://nepalhomestays.com"),
     openGraph: {
       title: `${homestay.city} Homestay`,
       description: `Book your stay in ${homestay.city}, ${homestay.region}.`,
@@ -149,9 +149,5 @@ export default async function HomestayDetail({ params }: PageProps) {
     }
   }
 
-  if (!homestay) {
-    return <div>Homestay not found</div>;
-  }
-
-  return <HomestayDetailClient homestay={homestay} imageUrl={undefined} slug={homestay.slug} />;
+  return <HomestayDetailWrapper homestay={homestay} slug={slug} />;
 }

@@ -4,7 +4,6 @@ import path from 'path';
 /** @type {import('next').NextConfig} */
 const nextConfig: import('next').NextConfig = {
   output: 'standalone', // For serverless/SSR deployment on Vercel
-  metadataBase: new URL('https://nepalhomestays.com'), // Add for correct Open Graph URLs
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

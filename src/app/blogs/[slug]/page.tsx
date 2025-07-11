@@ -192,14 +192,12 @@ const blogPosts = [
   },
 ];
 
-// Generate static paths for all blog posts
 export async function generateStaticParams() {
   return blogPosts.map((post) => ({
     slug: post.slug,
   }));
 }
 
-// Dynamic metadata for each blog post
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const blogPost = blogPosts.find((post) => post.slug === slug);
@@ -208,6 +206,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return {
       title: "Post Not Found | Nepal Homestays",
       description: "The requested blog post could not be found.",
+      metadataBase: new URL("https://nepalhomestays.com"),
     };
   }
 
@@ -218,6 +217,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${blogPost.title} | Nepal Homestays`,
     description: metaDescription,
     keywords: `${blogPost.title}, Nepal, ${blogPost.category.toLowerCase()}, homestays, travel`,
+    metadataBase: new URL("https://nepalhomestays.com"),
     robots: "index, follow",
     openGraph: {
       title: blogPost.title,
