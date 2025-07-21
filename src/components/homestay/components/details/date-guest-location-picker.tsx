@@ -1,4 +1,3 @@
-// src/components/homestay/components/details/date-guest-location-picker.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -19,8 +18,8 @@ const locations = [
   { value: "lumbini", label: "Lumbini, Nepal" },
   { value: "chitwan", label: "Chitwan, Nepal" },
   { value: "dharan", label: "Dharan, Nepal" },
-  { value: "thori", label: "Thori, Nepal" }, // Added to match dealCardsData
-  { value: "bardiya", label: "Bardiya, Nepal" }, // Added to match dealCardsData
+  { value: "thori", label: "Thori, Nepal" },
+  { value: "bardiya", label: "Bardiya, Nepal" },
 ];
 
 interface Room {
@@ -49,17 +48,14 @@ export function DateGuestLocationPicker({
   initialDate,
   initialRooms,
 }: DateGuestLocationPickerProps) {
-  const [date, setDate] = useState<DateRange | undefined>(initialDate || {
-    from: new Date(2025, 6, 10),
-    to: addDays(new Date(2025, 6, 10), 2),
-  });
+  const [date, setDate] = useState<DateRange | undefined>(initialDate);
   const [rooms, setRooms] = useState<Room[]>(initialRooms || [{ adults: 2, children: 0 }]);
   const [isGuestPopoverOpen, setIsGuestPopoverOpen] = useState(false);
   const [location, setLocation] = useState<string | null>(initialLocation || null);
 
   useEffect(() => {
     setLocation(initialLocation || null);
-    setDate(initialDate || { from: new Date(2025, 6, 10), to: addDays(new Date(2025, 6, 10), 2) });
+    setDate(initialDate || undefined);
     setRooms(initialRooms || [{ adults: 2, children: 0 }]);
   }, [initialLocation, initialDate, initialRooms]);
 
@@ -97,7 +93,7 @@ export function DateGuestLocationPicker({
   const totalRooms = rooms.length;
 
   return (
-    <div className={cn("w-full flex flex-col sm:flex-row gap-2 sm:gap-3", className)}>
+    <div className={cn("w-full flex flex-col sm:flex-row gap-1.5 sm:gap-2", className)}>
       {/* Location Picker */}
       <motion.div
         className="flex-1 min-w-0"
@@ -105,16 +101,16 @@ export function DateGuestLocationPicker({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <label className="block text-xs font-semibold text-text-secondary mb-1 px-1">
+        <label className="block text-xs font-semibold text-muted-foreground mb-1 px-1">
           <MapPin className="inline h-3 w-3 mr-1 text-accent" />
           Location
         </label>
         <Select onValueChange={handleLocationChange} defaultValue={initialLocation}>
           <SelectTrigger
-            className="w-full h-12 bg-background border border-border rounded-xl hover:border-primary focus:border-accent focus:ring-2 focus:ring-accent/50 text-sm font-medium shadow-sm"
+            className="w-full h-10 sm:h-11 bg-background border border-border rounded-xl hover:border-primary focus:border-accent focus:ring-2 focus:ring-accent/50 text-sm font-medium shadow-sm"
             aria-label="Select a location"
           >
-            <SelectValue placeholder="Where to?" className="text-text-secondary" />
+            <SelectValue placeholder="Where to?" className="text-muted-foreground" />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-border shadow-lg">
             {locations.map((location) => (
@@ -125,7 +121,7 @@ export function DateGuestLocationPicker({
               >
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-accent" />
-                  <span className="text-sm font-medium text-text-primary">{location.label}</span>
+                  <span className="text-sm font-medium text-foreground">{location.label}</span>
                 </div>
               </SelectItem>
             ))}
@@ -140,17 +136,17 @@ export function DateGuestLocationPicker({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <label className="block text-xs font-semibold text-text-secondary mb-1 px-1">
+        <label className="block text-xs font-semibold text-muted-foreground mb-1 px-1">
           <CalendarIcon className="inline h-3 w-3 mr-1 text-accent" />
-          Dates
+          Check-in - Check-out
         </label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               className={cn(
-                "w-full h-12 justify-start text-left bg-background border border-border rounded-xl hover:border-primary focus:border-accent focus:ring-2 focus:ring-accent/50 text-sm font-medium shadow-sm",
-                !date && "text-text-secondary"
+                "w-full h-10 sm:h-11 justify-start text-left bg-background border border-border rounded-xl hover:border-primary focus:border-accent focus:ring-2 focus:ring-accent/50 text-sm font-medium shadow-sm",
+                !date && "text-muted-foreground"
               )}
               aria-label="Select travel dates"
             >
@@ -158,16 +154,16 @@ export function DateGuestLocationPicker({
               <div className="flex-1 truncate">
                 {date?.from ? (
                   date.to ? (
-                    <span className="text-sm font-semibold text-text-primary">
-                      {format(date.from, "MMM dd")} - {format(date.to, "MMM dd, yyyy")}
+                    <span className="text-sm font-semibold text-foreground">
+                      {format(date.from, "MMM dd, yyyy")} - {format(date.to, "MMM dd, yyyy")}
                     </span>
                   ) : (
-                    <span className="text-sm font-semibold text-text-primary">
+                    <span className="text-sm font-semibold text-foreground">
                       {format(date.from, "MMM dd, yyyy")}
                     </span>
                   )
                 ) : (
-                  <span className="text-sm text-text-secondary">Add dates</span>
+                  <span className="text-sm text-muted-foreground">Select dates</span>
                 )}
               </div>
             </Button>
@@ -179,8 +175,9 @@ export function DateGuestLocationPicker({
               defaultMonth={date?.from}
               selected={date}
               onSelect={setDate}
-              numberOfMonths={1}
+              numberOfMonths={2}
               className="rounded-xl"
+              disabled={{ before: new Date() }}
             />
           </PopoverContent>
         </Popover>
@@ -193,7 +190,7 @@ export function DateGuestLocationPicker({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        <label className="block text-xs font-semibold text-text-secondary mb-1 px-1">
+        <label className="block text-xs font-semibold text-muted-foreground mb-1 px-1">
           <Users className="inline h-3 w-3 mr-1 text-accent" />
           Guests
         </label>
@@ -201,40 +198,40 @@ export function DateGuestLocationPicker({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full h-12 justify-start text-left bg-background border border-border rounded-xl hover:border-primary focus:border-accent focus:ring-2 focus:ring-accent/50 text-sm font-medium shadow-sm"
+              className="w-full h-10 sm:h-11 justify-start text-left bg-background border border-border rounded-xl hover:border-primary focus:border-accent focus:ring-2 focus:ring-accent/50 text-sm font-medium shadow-sm"
               aria-label="Select number of guests and rooms"
             >
               <Users className="mr-2 h-4 w-4 text-accent flex-shrink-0" />
               <div className="flex-1 truncate">
-                <span className="text-sm font-semibold text-text-primary">
+                <span className="text-sm font-semibold text-foreground">
                   {totalAdults + totalChildren} guest{totalAdults + totalChildren !== 1 ? "s" : ""}, {totalRooms} room{totalRooms !== 1 ? "s" : ""}
                 </span>
               </div>
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-full sm:w-96 p-0 rounded-xl border-border shadow-xl"
+            className="w-full sm:w-80 p-0 rounded-xl border-border shadow-xl"
             align="start"
             sideOffset={8}
           >
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 sm:p-6"
+              className="p-3 sm:p-4"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-text-primary">Guests & Rooms</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-semibold text-foreground">Guests & Rooms</h3>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsGuestPopoverOpen(false)}
-                  className="h-8 w-8 p-0 hover:bg-primary/10 rounded-full"
+                  className="h-7 w-7 p-0 hover:bg-primary/10 rounded-full"
                   aria-label="Close guest picker"
                 >
-                  <X className="h-4 w-4 text-text-secondary" />
+                  <X className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </div>
-              <div className="space-y-4 max-h-80 overflow-y-auto">
+              <div className="space-y-3 max-h-72 overflow-y-auto">
                 <AnimatePresence>
                   {rooms.map((room, index) => (
                     <motion.div
@@ -242,16 +239,16 @@ export function DateGuestLocationPicker({
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="bg-primary/5 rounded-lg p-4 space-y-4"
+                      className="bg-primary/5 rounded-lg p-3 space-y-3"
                     >
                       <div className="flex justify-between items-center">
-                        <h4 className="text-sm font-semibold text-text-primary">Room {index + 1}</h4>
+                        <h4 className="text-sm font-semibold text-foreground">Room {index + 1}</h4>
                         {rooms.length > 1 && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleRemoveRoom(index)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+                            className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 text-xs"
                             aria-label={`Remove room ${index + 1}`}
                           >
                             Remove
@@ -260,57 +257,57 @@ export function DateGuestLocationPicker({
                       </div>
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm font-medium text-text-primary">Adults</p>
-                          <p className="text-xs text-text-secondary">Ages 18+</p>
+                          <p className="text-sm font-medium text-foreground">Adults</p>
+                          <p className="text-xs text-muted-foreground">Ages 18+</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleAdultsChange(index, -1)}
                             disabled={room.adults <= 1}
-                            className="h-8 w-8 p-0 rounded-full border-border hover:bg-primary/10 disabled:opacity-50"
+                            className="h-7 w-7 p-0 rounded-full border-border hover:bg-primary/10 disabled:opacity-50"
                             aria-label={`Decrease adults for room ${index + 1}`}
                           >
-                            <Minus className="h-3 w-3 text-text-primary" />
+                            <Minus className="h-3 w-3 text-foreground" />
                           </Button>
-                          <span className="w-6 text-center text-sm font-semibold text-text-primary">{room.adults}</span>
+                          <span className="w-5 text-center text-sm font-semibold text-foreground">{room.adults}</span>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleAdultsChange(index, 1)}
-                            className="h-8 w-8 p-0 rounded-full border-border hover:bg-primary/10"
+                            className="h-7 w-7 p-0 rounded-full border-border hover:bg-primary/10"
                             aria-label={`Increase adults for room ${index + 1}`}
                           >
-                            <Plus className="h-3 w-3 text-text-primary" />
+                            <Plus className="h-3 w-3 text-foreground" />
                           </Button>
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm font-medium text-text-primary">Children</p>
-                          <p className="text-xs text-text-secondary">Ages 0–17</p>
+                          <p className="text-sm font-medium text-foreground">Children</p>
+                          <p className="text-xs text-muted-foreground">Ages 0–17</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleChildrenChange(index, -1)}
                             disabled={room.children <= 0}
-                            className="h-8 w-8 p-0 rounded-full border-border hover:bg-primary/10 disabled:opacity-50"
+                            className="h-7 w-7 p-0 rounded-full border-border hover:bg-primary/10 disabled:opacity-50"
                             aria-label={`Decrease children for room ${index + 1}`}
                           >
-                            <Minus className="h-3 w-3 text-text-primary" />
+                            <Minus className="h-3 w-3 text-foreground" />
                           </Button>
-                          <span className="w-6 text-center text-sm font-semibold text-text-primary">{room.children}</span>
+                          <span className="w-5 text-center text-sm font-semibold text-foreground">{room.children}</span>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleChildrenChange(index, 1)}
-                            className="h-8 w-8 p-0 rounded-full border-border hover:bg-primary/10"
+                            className="h-7 w-7 p-0 rounded-full border-border hover:bg-primary/10"
                             aria-label={`Increase children for room ${index + 1}`}
                           >
-                            <Plus className="h-3 w-3 text-text-primary" />
+                            <Plus className="h-3 w-3 text-foreground" />
                           </Button>
                         </div>
                       </div>
@@ -320,14 +317,15 @@ export function DateGuestLocationPicker({
               </div>
               {rooms.length < 8 && (
                 <motion.div
-                  className="mt-4 pt-4 border-t border-border"
+                  className="mt-3 pt-3 border-t border-border"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
                 >
                   <Button
                     variant="outline"
                     onClick={handleAddRoom}
-                    className="w-full h-10 border-dashed border-border hover:bg-primary/10 text-text-secondary hover:text-primary text-sm rounded-lg"
+                    className="w-full h-9 border-dashed border-border hover:bg-primary/10 text-muted-foreground hover:text-primary text-sm rounded-lg"
                     aria-label="Add another room"
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -336,13 +334,14 @@ export function DateGuestLocationPicker({
                 </motion.div>
               )}
               <motion.div
-                className="mt-4 pt-4 border-t border-border"
+                className="mt-3 pt-3 border-t border-border"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
               >
                 <Button
                   onClick={handleDoneClick}
-                  className="w-full h-10 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg shadow-sm hover:shadow-md transition-all"
+                  className="w-full h-9 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg shadow-sm hover:shadow-md transition-all"
                   aria-label="Confirm guest selection"
                 >
                   Done
@@ -362,7 +361,7 @@ export function DateGuestLocationPicker({
       >
         <Button
           variant="default"
-          className="w-full h-12 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all mt-5"
+          className="w-full h-10 sm:h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all mt-4 sm:mt-5"
           onClick={handleSearch}
           aria-label="Search homestays"
         >

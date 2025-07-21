@@ -1,63 +1,32 @@
-// src/components/landing-page/hero.tsx
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
+import React, { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
-import { motion, Variants, useScroll, useTransform } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { format, addDays } from "date-fns";
+import Image from "next/image";
+import SignInCard from "../homestay/components/sign-in-card";
 import { DateGuestLocationPicker } from "@/components/homestay/components/details/date-guest-location-picker";
 import { DateRange } from "react-day-picker";
 
-// Data for hero images and text
-const data = [
-  { id: 1, image: "/images/hero/hero1.avif", alt: "Traditional Nepalese homestay with mountain views" },
-  { id: 2, image: "/images/hero/hero2.avif", alt: "Scenic homestay in Himalayan foothills" },
-  { id: 3, image: "/images/hero/hero3.avif", alt: "Cultural homestay experience with local family" },
-  { id: 4, image: "/images/hero/hero4.avif", alt: "Traditional architecture homestay" },
-  { id: 5, image: "/images/hero/hero5.avif", alt: "Premium homestay with modern amenities" },
-  { id: 6, image: "/images/hero/hero6.avif", alt: "Mountain view homestay with terraced fields" },
-];
-
-const textOptions = [
-  {
-    title: "Discover Nepal",
-    subtitle: "Homestays",
-    description: "Immerse in local culture with family stays",
-    highlight: "Up to 30% off first booking",
-  },
-  {
-    title: "Nature's",
-    subtitle: "Paradise",
-    description: "Breathtaking mountain views await",
-    highlight: "500+ verified homestays",
-  },
-  {
-    title: "Unforgettable",
-    subtitle: "Memories",
-    description: "Experience true Nepalese hospitality",
-    highlight: "Rated 4.9/5 by travelers",
-  },
-  {
-    title: "Live Local",
-    subtitle: "in Nepal",
-    description: "Stay with families, explore traditions",
-    highlight: "Exclusive deals available",
-  },
-  {
-    title: "Adventure",
-    subtitle: "Awaits",
-    description: "Discover unique homestay experiences",
-    highlight: "Flexible cancellations",
-  },
-  {
-    title: "Serenity &",
-    subtitle: "Culture",
-    description: "Relax in cozy Nepalese homestays",
-    highlight: "Top-rated hosts",
-  },
-];
+// Custom SVG for Arrow Icon
+const ArrowRightSVG = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M5 12H19M19 12L12 5M19 12L12 19"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 interface Room {
   adults: number;
@@ -65,58 +34,19 @@ interface Room {
 }
 
 export default function Hero() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [imageLoadErrorMap, setImageLoadErrorMap] = useState<Record<number, boolean>>({});
-  const { scrollY } = useScroll();
-  const parallaxY = useTransform(scrollY, [0, 500], [0, 100]);
-  const opacity = useTransform(scrollY, [0, 200], [1, 0.8]);
   const router = useRouter();
 
-  // Dynamic date (today: July 10, 2025)
-  const currentDate = new Date(2025, 6, 10);
-  const dateString = format(currentDate, "MMM d, yyyy");
-
-  // Auto-rotate images every 5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % data.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Animation variants
-  const imageVariants: Variants = {
-    active: { opacity: 1, scale: 1.02, transition: { duration: 1, ease: "easeInOut" } },
-    inactive: { opacity: 0, scale: 1, transition: { duration: 1, ease: "easeInOut" } },
-  };
-
-  const textVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-  };
-
-  const handleDotClick = useCallback((index: number) => {
-    setCurrentSlide(index);
-  }, []);
+  // Dynamic date (today: July 21, 2025)
+  const currentDate = new Date();
+  const defaultDateRange: DateRange = { from: currentDate, to: addDays(currentDate, 2) };
 
   const handleSearch = useCallback(
     (searchData: { location: string | null; date: DateRange | undefined; rooms: Room[] }) => {
       const queryParams = new URLSearchParams();
-      if (searchData.location) {
-        queryParams.append("location", searchData.location);
-      }
-      if (searchData.date?.from) {
-        queryParams.append("checkIn", format(searchData.date.from, "yyyy-MM-dd"));
-      }
-      if (searchData.date?.to) {
-        queryParams.append("checkOut", format(searchData.date.to, "yyyy-MM-dd"));
-      }
-      queryParams.append(
-        "guests",
-        searchData.rooms
-          .map((room) => `${room.adults}A${room.children}C`)
-          .join(",")
-      );
+      if (searchData.location) queryParams.append("location", searchData.location);
+      if (searchData.date?.from) queryParams.append("checkIn", format(searchData.date.from, "yyyy-MM-dd"));
+      if (searchData.date?.to) queryParams.append("checkOut", format(searchData.date.to, "yyyy-MM-dd"));
+      queryParams.append("guests", searchData.rooms.map((room) => `${room.adults}A${room.children}C`).join(","));
       queryParams.append("rooms", searchData.rooms.length.toString());
 
       router.push(`/search?${queryParams.toString()}`);
@@ -124,81 +54,129 @@ export default function Hero() {
     [router]
   );
 
+  // Data for the three new cards
+  const newCards = [
+    {
+      id: 2,
+      image: "/images/hero/hero2.avif",
+      alt: "Scenic mountain homestay",
+      textLines: [
+        "Immerse in local culture",
+        "Share meals with families",
+        "Authentic village experience",
+      ],
+    },
+    {
+      id: 6,
+      image: "/images/hero/hero6.avif",
+      alt: "Cozy rural homestay",
+      textLines: [
+        "Stay in historic homes",
+        "Admire unique designs",
+        "Blend of tradition & comfort",
+      ],
+    },
+    {
+      id: 5,
+      image: "/images/hero/hero5.avif",
+      alt: "Premium homestay with modern amenities",
+      textLines: [
+        "Luxury meets homestay",
+        "Modern amenities included",
+        "Relax in premium comfort",
+      ],
+    },
+  ];
+
   return (
-    <div className="relative w-full h-screen min-h-[500px] sm:min-h-[600px] md:min-h-[700px] overflow-hidden">
-      <section id="home" className="w-full h-full relative">
-        {/* Background Image */}
-        <motion.div className="absolute inset-0 z-0" style={{ y: parallaxY, opacity }}>
-          {data.map((item, index) => (
-            <motion.div
-              key={item.id}
-              className="absolute inset-0"
-              variants={imageVariants}
-              animate={currentSlide === index ? "active" : "inactive"}
-              initial="inactive"
+    <div className="relative w-full h-[60vh] min-h-[400px] sm:min-h-[500px] md:min-h-[600px] bg-background">
+      <section id="home" className="w-full h-full relative pt-40 sm:pt-40 md:pt-44">
+        <div className="relative z-30 px-4 sm:px-6 md:px-8">
+          <div className="container mx-auto max-w-full sm:max-w-6xl md:max-w-7xl">
+            {/* Search Bar in Card */}
+            <div
+              className="bg-white rounded-xl border border-gray-300 p-3 sm:p-4 md:p-5"
             >
-              <Image
-                src={imageLoadErrorMap[item.id] ? "/images/fallback-image.png" : item.image}
-                alt={item.alt}
-                fill
-                sizes="100vw"
-                className="object-cover"
-                priority={index === 0}
-                placeholder="blur"
-                blurDataURL="/images/placeholder-homestay.jpg"
-                onError={() => setImageLoadErrorMap((prev) => ({ ...prev, [item.id]: true }))}
-                quality={85}
+              <DateGuestLocationPicker
+                onSearch={handleSearch}
+                initialDate={defaultDateRange}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-            </motion.div>
-          ))}
-        </motion.div>
+            </div>
 
-        {/* Text Content */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-8 z-10">
-          <motion.div
-            key={currentSlide}
-            variants={textVariants}
-            initial="hidden"
-            animate="animate"
-            className="max-w-4xl mx-auto space-y-4 sm:space-y-6"
-          >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg leading-tight">
-              <span className="block">{textOptions[currentSlide].title}</span>
-              <span className="block text-accent">{textOptions[currentSlide].subtitle}</span>
-            </h1>
-            <p className="text-sm sm:text-base md:text-lg text-white/90 drop-shadow-md max-w-xl">
-              {textOptions[currentSlide].description}
-            </p>
-            <p className="text-xs sm:text-sm md:text-base text-white bg-accent/20 rounded-full px-4 py-2 inline-block shadow-md">
-              {textOptions[currentSlide].highlight}
-            </p>
-          </motion.div>
-        </div>
+            {/* New Card with Image, Text, and Buttons */}
+            <div
+              className="bg-white rounded-xl mt-6 sm:mt-8 flex overflow-hidden max-w-full sm:max-w-6xl md:max-w-7xl mx-auto min-h-[150px] sm:min-h-[180px] md:min-h-[200px]"
+            >
+              <div className="w-[30%] relative">
+                <Image
+                  src="/images/hero/hero1.avif"
+                  alt="Traditional Nepalese homestay with mountain views"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+              <div className="w-[70%] bg-gray-100 p-4 sm:p-5 flex items-center">
+                <div className="flex-1">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
+                    Discover Authentic Homestays
+                  </h2>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-2">
+                    Experience the warmth of Nepalese hospitality.
+                  </p>
+                </div>
+                <div className="flex justify-end items-center space-x-3">
+                  <button className="text-gray-800 px-4 py-2 rounded-full text-sm sm:text-base font-medium bg-yellow-100 hover:bg-yellow-200 transition-colors">
+                    Learn More
+                  </button>
+                  <button className="text-gray-600 text-sm sm:text-base font-medium">
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
 
-        {/* Navigation Dots */}
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-          {data.map((_, index) => (
-            <button
-              key={index}
-              className={cn(
-                "h-3 w-3 rounded-full transition-all duration-300",
-                currentSlide === index
-                  ? "bg-accent scale-125 w-6"
-                  : "bg-white/50 hover:bg-white/80"
-              )}
-              onClick={() => handleDotClick(index)}
-              aria-label={`Go to slide ${index + 1}`}
-              aria-current={currentSlide === index ? "true" : "false"}
-            />
-          ))}
-        </div>
+            {/* Sign In Card */}
+            <SignInCard />
 
-        {/* Search Bar */}
-        <div className="absolute bottom-4 left-0 right-0 z-20 px-4 sm:px-6">
-          <div className="container mx-auto max-w-5xl">
-            <div className="bg-card/95 backdrop-blur-lg rounded-xl shadow-lg border border-border p-4 sm:p-6 ">
-              <DateGuestLocationPicker onSearch={handleSearch} />
+            {/* Three New Cards on Same Line */}
+            <div className="flex flex-row sm:flex-row gap-4 mt-6 sm:mt-8 overflow-x-auto snap-x snap-mandatory">
+              {newCards.map((card) => (
+                <div
+                  key={card.id}
+                  className="flex-1 bg-[#FFF7E6] rounded-lg h-[140px] flex overflow-hidden snap-start min-w-[300px] sm:min-w-0"
+                >
+                  {/* Text and Link Section */}
+                  <div className="w-[50%] p-3 sm:p-4 flex flex-col justify-center">
+                    <div className="space-y-0.5">
+                      {card.textLines.map((line, index) => (
+                        <p
+                          key={index}
+                          className="text-xs sm:text-sm text-gray-900 font-bold line-clamp-1"
+                        >
+                          {line}
+                        </p>
+                      ))}
+                    </div>
+                    <div className="mt-2">
+                      <button className="flex items-center gap-1 text-gray-800 text-[10px] sm:text-xs font-medium">
+                        Explore Now
+                        <ArrowRightSVG className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                      </button>
+                    </div>
+                  </div>
+                  {/* Image Section */}
+                  <div className="w-[50%] relative">
+                    <Image
+                      src={card.image}
+                      alt={card.alt}
+                      fill
+                      className="object-cover"
+                      priority={card.id === 2}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

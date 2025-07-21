@@ -37,32 +37,32 @@
   }
 
   .dark {
-    --background: 0 0% 100%; /* White for dark mode */
-    --foreground: 0 0% 20%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --background: 0 0% 10%; /* Dark gray for dark mode background */
+    --foreground: 0 0% 80%; /* Light gray text */
+    --card: 0 0% 15%; /* Darker card background */
+    --card-foreground: 0 0% 80%; /* Light card text */
+    --popover: 0 0% 15%; /* Dark popover */
+    --popover-foreground: 0 0% 80%; /* Light popover text */
     --primary: 180 42% 20%; /* #1A403D */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 20%;
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 40%;
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+    --secondary: 0 0% 20%; /* Dark gray secondary */
+    --secondary-foreground: 0 0% 80%; /* Light text on secondary */
+    --muted: 0 0% 25%; /* Dark muted */
+    --muted-foreground: 0 0% 60%; /* Lighter muted text */
     --accent: 43 80% 50%; /* Slightly lighter #D4A017 */
-    --accent-foreground: 0 0% 15%;
-    --destructive: 0 80% 50%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 85%;
-    --input: 0 0% 85%;
-    --ring: 180 42% 20%;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 20%;
+    --accent-foreground: 0 0% 80%; /* Light text on accent */
+    --destructive: 0 80% 50%; /* Red */
+    --destructive-foreground: 0 0% 100%; /* White text on destructive */
+    --border: 0 0% 25%; /* Dark gray border */
+    --input: 0 0% 25%; /* Dark gray input */
+    --ring: 180 42% 20%; /* #1A403D for ring */
+    --sidebar-background: 0 0% 15%;
+    --sidebar-foreground: 0 0% 80%;
     --sidebar-primary: 180 42% 20%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 95%;
-    --sidebar-accent-foreground: 0 0% 20%;
-    --sidebar-border: 0 0% 90%;
+    --sidebar-accent: 0 0% 20%;
+    --sidebar-accent-foreground: 0 0% 80%;
+    --sidebar-border: 0 0% 25%;
     --sidebar-ring: 180 42% 20%;
   }
 
@@ -112,6 +112,13 @@
   .error-message {
     @apply text-xs text-destructive bg-destructive/5 px-2 py-1 rounded flex items-center gap-1;
   }
+  .navbar {
+    @apply bg-white dark:bg-gray-900 fixed top-0 left-0 right-0 z-[100] h-16 shadow-md;
+  }
+  .hero-overlay::before {
+    content: '';
+    @apply absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/30 to-transparent;
+  }
 }
 
 @layer utilities {
@@ -129,4 +136,42 @@
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@layer components {
+  .navbar {
+    @apply bg-white dark:bg-gray-900 fixed top-0 left-0 right-0 z-[100] h-16 shadow-md;
+  }
+  .hero-overlay::before {
+    content: '';
+    @apply absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/40 to-transparent;
+  }
+}
+
+
+.bg-hero3::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(to top, rgba(254, 240, 138, 0.8), transparent),
+    url(/images/hero/bg_yellow.avif);
+  background-size: cover;
+  background-position: center;
+  z-index: -10;
+}
+
+@media (max-width: 639px) {
+  .blog-card {
+    position: relative !important;
+    width: calc(100% - 2rem) !important;
+    margin: 1rem auto 0;
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

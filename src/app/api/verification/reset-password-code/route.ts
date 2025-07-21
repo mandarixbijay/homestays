@@ -4,8 +4,10 @@ import { z } from "zod";
 const API_BASE_URL = process.env.API_BASE_URL || "http://13.61.8.56";
 
 // Define request body schema
-const resendVerificationSchema = z
+const resetPasswordSchema = z
   .object({
+    newPassword: z.string().min(8, "Password must be at least 8 characters"),
+    code: z.string().length(6, "Code must be 6 digits").regex(/^\d+$/, "Code must be numeric"),
     email: z.string().email("Invalid email address").optional(),
     mobileNumber: z
       .string()
@@ -25,15 +27,19 @@ export async function POST(req: NextRequest) {
   try {
     // Parse and validate request body
     const body = await req.json();
-    console.log("[resend-verification] Request body:", body);
-    const { email, mobileNumber } = resendVerificationSchema.parse(body);
+    console.log("[reset-password-code] Request body:", body);
+    const { newPassword, code, email, mobileNumber } = resetPasswordSchema.parse(body);
 
-    // Prepare payload with only the relevant field
-    const payload = email ? { email } : { mobileNumber };
-    console.log("[resend-verification] Backend payload:", payload);
+    // Prepare payload
+    const payload = {
+      newPassword,
+      code,
+      ...(email ? { email } : { mobileNumber }),
+    };
+    console.log("[reset-password-code] Backend payload:", payload);
 
     // Send request to backend
-    const response = await fetch(`${API_BASE_URL}/verification/resend-verification`, {
+    const response = await fetch(`${API_BASE_URL}/verification/reset-password-code`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -42,30 +48,28 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(payload),
     });
 
+    console.log("[reset-password-code] Backend response status:", response.status);
     const text = await response.text();
     let result;
     try {
       result = JSON.parse(text);
+      console.log("[reset-password-code] Backend response body:", result);
     } catch (e) {
-      console.error("[resend-verification] Failed to parse backend response:", text);
+      console.error("[reset-password-code] Failed to parse backend response:", text);
       return NextResponse.json(
         { status: "error", message: "Invalid response from server" },
         { status: 500 }
       );
     }
-    console.log("[resend-verification] Backend response:", {
-      status: response.status,
-      body: result,
-    });
 
     // Pass through the backend's status code and response body
     return NextResponse.json(result, { status: response.status });
   } catch (error) {
-    console.error("[resend-verification] Error resending OTP:", error);
+    console.error("[reset-password-code] Error processing request:", error);
 
     // Handle validation errors
     if (error instanceof z.ZodError) {
-      console.log("[resend-verification] Validation error:", error.errors);
+      console.log("[reset-password-code] Validation error:", error.errors);
       return NextResponse.json(
         { status: "error", message: error.errors[0].message || "Invalid input" },
         { status: 400 }
@@ -74,7 +78,10 @@ export async function POST(req: NextRequest) {
 
     // Handle other errors
     return NextResponse.json(
-      { status: "error", message: error instanceof Error ? error.message : "Failed to resend OTP" },
+      {
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to reset password",
+      },
       { status: 500 }
     );
   }

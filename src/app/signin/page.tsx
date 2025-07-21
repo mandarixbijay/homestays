@@ -27,14 +27,24 @@ import { useSession, signIn } from "next-auth/react";
 import Navbar from "@/components/navbar/navbar";
 
 const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  identifier: z
+    .string()
+    .min(1, "Email or mobile number is required")
+    .refine(
+      (value) =>
+        z.string().email().safeParse(value).success ||
+        /^\+?[1-9]\d{1,14}$/.test(value),
+      {
+        message: "Please enter a valid email or mobile number",
+      }
+    ),
   password: signinPasswordSchema,
 });
 
 const LoginPage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
-      email: "",
+      identifier: "",
       password: "",
     },
     resolver: zodResolver(formSchema),
@@ -48,59 +58,78 @@ const LoginPage = () => {
   const [otpError, setOtpError] = useState("");
   const [isResendingOtp, setIsResendingOtp] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [isCheckingSession, setIsCheckingSession] = useState(false);
   const { handleFailedAttempt, isBlocked, getBlockedMessage } = useErrorBlock();
   const router = useRouter();
   const { data: session, status } = useSession();
 
+  const isEmail = (identifier: string) => z.string().email().safeParse(identifier).success;
+
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.isEmailVerified) {
-      toast.success("Successfully logged in!");
-      const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
-      sessionStorage.removeItem("redirectAfterLogin");
-      router.push(redirectPath);
+    if (status === "loading") {
+      console.log("[LoginPage] Session loading");
+      setIsCheckingSession(true);
+      return;
+    }
+    setIsCheckingSession(false);
+    if (status === "authenticated") {
+      if (session?.user?.isEmailVerified || session?.user?.isMobileVerified) {
+        console.log("[LoginPage] User authenticated and verified, redirecting");
+        toast.success("Successfully logged in!");
+        const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
+        sessionStorage.removeItem("redirectAfterLogin");
+        router.push(redirectPath);
+      } else {
+        console.log("[LoginPage] User authenticated but unverified, opening OTP dialog");
+        setIsOtpDialogOpen(true);
+        handleResendOtp();
+      }
     }
   }, [status, session, router]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    if (isBlocked("email") || isBlocked("password")) {
-      toast.error(getBlockedMessage("email") || getBlockedMessage("password") || "Too many attempts.");
+    console.log("[onSubmit] Form submitted with values:", data);
+    if (isBlocked("identifier") || isBlocked("password")) {
+      console.log("[onSubmit] Blocked:", getBlockedMessage("identifier") || getBlockedMessage("password"));
+      toast.error(getBlockedMessage("identifier") || getBlockedMessage("password") || "Too many attempts.");
       return;
     }
 
     try {
+      setIsCheckingSession(true);
+      const payload = {
+        action: "login",
+        [isEmail(data.identifier) ? "email" : "mobileNumber"]: data.identifier,
+        password: data.password,
+      };
+      console.log("[onSubmit] Calling signIn with:", payload);
       const response = await signIn("credentials", {
         redirect: false,
-        email: data.email,
-        password: data.password,
-        action: "login", // Match auth.ts
+        ...payload,
       });
+      console.log("[onSubmit] signIn response:", response);
 
       if (response?.error) {
-        if (response.error.toLowerCase().includes("verify")) {
-          setIsOtpDialogOpen(true);
-          await handleResendOtp();
-        } else {
-          handleFailedAttempt("email");
-          handleFailedAttempt("password");
-          toast.error(response.error);
-        }
+        console.error("[onSubmit] signIn error:", response.error);
+        handleFailedAttempt("identifier");
+        handleFailedAttempt("password");
+        toast.error(response.error);
         return;
       }
 
-      // If login succeeds but user is unverified, show OTP dialog
-      if (status === "authenticated" && !session?.user?.isEmailVerified) {
-        setIsOtpDialogOpen(true);
-        await handleResendOtp();
-      }
+      console.log("[onSubmit] Login successful, awaiting session update");
     } catch (error) {
-      console.error("Login error:", error);
-      handleFailedAttempt("email");
+      console.error("[onSubmit] Login error:", error);
+      handleFailedAttempt("identifier");
       handleFailedAttempt("password");
       toast.error("Failed to login. Please try again.");
+    } finally {
+      setIsCheckingSession(false);
     }
   };
 
   const handleOtpOpenChange = (open: boolean) => {
+    console.log("[handleOtpOpenChange] OTP dialog open state:", open);
     setIsOtpDialogOpen(open);
     if (!open) {
       setOtpValue("");
@@ -109,66 +138,100 @@ const LoginPage = () => {
   };
 
   const handleOtpChange = (value: string) => {
+    console.log("[handleOtpChange] OTP changed to:", value);
     setOtpValue(value);
     if (otpError) setOtpError("");
   };
 
   const handleSubmitOtp = async () => {
+    console.log("[handleSubmitOtp] Starting OTP submission:", { otp: otpValue, isBlocked: isBlocked("otp") });
+    setOtpError("");
     if (isBlocked("otp")) {
+      console.log("[handleSubmitOtp] OTP blocked:", getBlockedMessage("otp"));
       toast.error(getBlockedMessage("otp") || "Too many attempts.");
-      return;
+      setOtpValue("");
+      return { status: "error", message: getBlockedMessage("otp") || "Too many attempts." };
     }
 
     if (otpValue.length !== 6) {
+      console.log("[handleSubmitOtp] Invalid OTP length:", otpValue.length);
       setOtpError("OTP must be 6 digits.");
       toast.error("OTP must be 6 digits.");
-      return;
+      setOtpValue("");
+      return { status: "error", message: "OTP must be 6 digits." };
     }
 
     try {
+      const identifier = form.getValues("identifier");
+      const payload = {
+        [isEmail(identifier) ? "email" : "mobileNumber"]: identifier,
+        code: otpValue,
+      };
+      console.log("[handleSubmitOtp] OTP verification payload:", payload);
       const response = await fetch("/api/verification/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.getValues("email"), code: otpValue }),
+        body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        setOtpError(result.message || "Invalid OTP.");
+      console.log("[handleSubmitOtp] HTTP status:", response.status);
+      const text = await response.text();
+      let result;
+      try {
+        result = JSON.parse(text);
+        console.log("[handleSubmitOtp] OTP verification response:", result);
+      } catch (e) {
+        console.error("[handleSubmitOtp] Failed to parse response:", text);
+        setOtpError("Invalid response from server. Please try again.");
+        toast.error("Invalid response from server.");
+        setOtpValue("");
         handleFailedAttempt("otp");
-        toast.error(result.message || "Invalid OTP.");
-        return;
+        return { status: "error", message: "Invalid response from server." };
       }
 
+      if (result.status !== "success") {
+        console.log("[handleSubmitOtp] Verification failed:", result.message);
+        setOtpError(result.message || "Invalid OTP. Please try again.");
+        toast.error(result.message || "Invalid OTP.");
+        setOtpValue("");
+        handleFailedAttempt("otp");
+        return { status: "error", message: result.message || "Invalid OTP." };
+      }
+
+      console.log("[handleSubmitOtp] Verification successful:", result.message);
       // Re-authenticate after OTP verification
       const loginResponse = await signIn("credentials", {
         redirect: false,
-        email: form.getValues("email"),
+        [isEmail(identifier) ? "email" : "mobileNumber"]: identifier,
         password: form.getValues("password"),
         action: "login",
       });
 
       if (loginResponse?.error) {
+        console.error("[handleSubmitOtp] Re-authentication failed:", loginResponse.error);
         toast.error("Failed to authenticate after verification.");
-        return;
+        setOtpValue("");
+        return { status: "error", message: "Failed to authenticate after verification." };
       }
 
-      toast.success("Account verified successfully!");
+      console.log("[handleSubmitOtp] Re-authentication successful");
+      toast.success(result.message || "Account verified successfully!");
       setIsOtpDialogOpen(false);
-      const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
-      sessionStorage.removeItem("redirectAfterLogin");
-      router.push(redirectPath);
+      return { status: "success", message: result.message || "Account verified successfully." };
     } catch (error) {
-      console.error("OTP verification error:", error);
+      console.error("[handleSubmitOtp] OTP verification error:", error);
       setOtpError("Failed to verify OTP.");
-      handleFailedAttempt("otp");
       toast.error("Failed to verify OTP.");
+      setOtpValue("");
+      handleFailedAttempt("otp");
+      return { status: "error", message: "Failed to verify OTP." };
     }
   };
 
   const handleResendOtp = async () => {
+    console.log("[handleResendOtp] Starting resend OTP for:", form.getValues("identifier"));
     if (isBlocked("otp") || isResendingOtp || countdown > 0) {
+      console.log("[handleResendOtp] Blocked or resending:", getBlockedMessage("otp"));
       toast.error(getBlockedMessage("otp") || "Please wait before resending OTP.");
       return;
     }
@@ -177,21 +240,41 @@ const LoginPage = () => {
     setCountdown(60);
 
     try {
+      const identifier = form.getValues("identifier");
+      const payload = {
+        [isEmail(identifier) ? "email" : "mobileNumber"]: identifier,
+      };
+      console.log("[handleResendOtp] Resend OTP payload:", payload);
       const response = await fetch("/api/verification/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.getValues("email") }),
+        body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
+      console.log("[handleResendOtp] HTTP status:", response.status);
+      const text = await response.text();
+      let result;
+      try {
+        result = JSON.parse(text);
+        console.log("[handleResendOtp] Resend OTP response:", result);
+      } catch (e) {
+        console.error("[handleResendOtp] Failed to parse response:", text);
+        throw new Error("Invalid response from server");
+      }
 
-      if (!response.ok) {
+      if (result.status !== "success") {
+        console.log("[handleResendOtp] Resend failed:", result.message);
         throw new Error(result.message || "Failed to resend OTP");
       }
 
-      toast.success("New OTP sent to your email.");
+      console.log("[handleResendOtp] Resend successful");
+      toast.success(
+        isEmail(identifier)
+          ? "New OTP sent to your email."
+          : "New OTP sent to your mobile number."
+      );
     } catch (error) {
-      console.error("Resend OTP error:", error);
+      console.error("[handleResendOtp] Resend OTP error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to resend OTP.");
       handleFailedAttempt("otp");
     } finally {
@@ -230,16 +313,16 @@ const LoginPage = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="email"
+              name="identifier"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Email</FormLabel>
+                  <FormLabel className="text-sm font-medium">Email or Mobile Number</FormLabel>
                   <FormControl>
                     <Input
-                      type="email"
-                      placeholder="Enter your email"
+                      type="text"
+                      placeholder="Enter your email or mobile number (e.g., +1234567890)"
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                      disabled={isBlocked("email")}
+                      disabled={isBlocked("identifier") || isCheckingSession}
                       {...field}
                     />
                   </FormControl>
@@ -259,7 +342,7 @@ const LoginPage = () => {
                         type={showPassword ? "text" : "password"}
                         placeholder="********"
                         className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent pr-10"
-                        disabled={isBlocked("password")}
+                        disabled={isBlocked("password") || isCheckingSession}
                         {...field}
                       />
                       <button
@@ -278,9 +361,9 @@ const LoginPage = () => {
             <Button
               type="submit"
               className="w-full py-2 px-4 font-medium rounded-lg transition-colors duration-200"
-              disabled={form.formState.isSubmitting || isBlocked("email") || isBlocked("password")}
+              disabled={form.formState.isSubmitting || isBlocked("identifier") || isBlocked("password") || isCheckingSession}
             >
-              {form.formState.isSubmitting ? "Signing In..." : "Sign In"}
+              {isCheckingSession ? "Processing..." : form.formState.isSubmitting ? "Signing In..." : "Sign In"}
             </Button>
           </form>
         </Form>
@@ -294,10 +377,15 @@ const LoginPage = () => {
           </Link>
           <div className="text-center">
             <p className="text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="font-medium  text-primary hover:text-primary-hover transition-colors duration-200">
-                Create account
-              </Link>
+              <span>
+                Don&apos;t have an account?{" "}
+                <Link
+                  href="/signup"
+                  className="font-medium text-primary hover:text-primary-hover transition-colors duration-200"
+                >
+                  Create account
+                </Link>
+              </span>
             </p>
           </div>
         </div>
@@ -312,7 +400,11 @@ const LoginPage = () => {
         isResending={isResendingOtp}
         onResend={handleResendOtp}
         title="Verify Your Account"
-        description="Enter the 6-digit code sent to your email address to verify your account."
+        description={
+          isEmail(form.getValues("identifier"))
+            ? "Enter the 6-digit code sent to your email address to verify your account."
+            : "Enter the 6-digit code sent to your mobile number to verify your account."
+        }
       />
     </div>
   );

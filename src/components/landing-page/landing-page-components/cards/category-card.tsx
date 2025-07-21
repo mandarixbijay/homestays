@@ -1,49 +1,38 @@
-// src/components/landing-page-components/cards/category-card.tsx
 "use client";
 
 import Image from "next/image";
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
+
+const FALLBACK_IMAGE = "/images/fallback-image.png";
 
 interface CategoryCardProps {
   imageSrc: string;
   categoryName: string;
+  onClick?: () => void;
 }
 
-const FALLBACK_IMAGE = "/images/fallback-image.png";
-
-const CategoryCard: React.FC<CategoryCardProps> = ({ imageSrc, categoryName }) => {
-  const router = useRouter();
-
+const CategoryCard: React.FC<CategoryCardProps> = ({ imageSrc, categoryName, onClick }) => {
   return (
-    <Card
-      className="card w-full h-[360px] sm:h-[400px] overflow-hidden cursor-pointer group animate-fade-in border-none rounded-xl"
-      onClick={() => router.push(`/search?destination=${categoryName.toLowerCase()}`)}
-      role="button"
-      aria-label={`Explore ${categoryName} homestays`}
-    >
+    <Card className="w-full h-[300px] sm:h-[360px] md:h-[400px] rounded-xl border border-gray-200" onClick={onClick}>
       <div className="relative w-full h-full">
         <Image
           src={imageSrc}
           alt={`${categoryName} destination`}
+          className="object-cover rounded-xl"
           fill
-          className="object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
-          sizes="(max-width: 640px) 90vw, 360px"
-          placeholder="blur"
-          blurDataURL="/images/fallback-image.png"
+          sizes="(max-width: 640px) 100vw, 300px"
+          quality={80}
           onError={(e) => {
             console.error(`Failed to load image: ${imageSrc}`);
             e.currentTarget.src = FALLBACK_IMAGE;
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl group-hover:from-black/60 transition-all duration-300" />
-        <div className="absolute bottom-4 left-0 right-0 px-4">
-          <h3 className="text-sm sm:text-base font-bold text-white text-center drop-shadow-md">
-            {categoryName}
-          </h3>
+        <div className="absolute bottom-4 left-4">
+          <div className="bg-black/50 rounded px-3 py-1">
+            <h3 className="text-base font-bold text-white text-left">{categoryName}</h3>
+          </div>
         </div>
-        <div className="absolute inset-0 border-2 border-transparent rounded-xl group-hover:border-primary/30 transition-all duration-300" />
       </div>
     </Card>
   );

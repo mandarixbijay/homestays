@@ -30,11 +30,22 @@ import { useRouter } from "next/navigation";
 import { useErrorBlock } from "@/hooks/block-hook/useErrorBlock";
 import { signIn } from "next-auth/react";
 import Navbar from "@/components/navbar/navbar";
+import { motion } from "framer-motion";
 
 const formSchema = z
   .object({
     fullName: z.string().min(1, "Full name is required"),
-    email: z.string().email("Invalid email"),
+    identifier: z
+      .string()
+      .min(1, "Email or mobile number is required")
+      .refine(
+        (value) =>
+          z.string().email().safeParse(value).success ||
+          /^\+?[1-9]\d{1,14}$/.test(value),
+        {
+          message: "Please enter a valid email or mobile number",
+        }
+      ),
     password: passwordSchema,
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
@@ -48,7 +59,7 @@ const SignupPage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       fullName: "",
-      email: "",
+      identifier: "",
       password: "",
       confirmPassword: "",
     },
@@ -66,18 +77,18 @@ const SignupPage = () => {
   const [countdown, setCountdown] = useState(0);
   const { handleFailedAttempt, isBlocked, getBlockedMessage } = useErrorBlock();
 
-  // Log form errors for debugging
+  const isEmail = (identifier: string) => z.string().email().safeParse(identifier).success;
+
   useEffect(() => {
     console.log("[Form Errors]", form.formState.errors);
   }, [form.formState.errors]);
 
-  // Reset isSubmitting to prevent stuck state
   useEffect(() => {
     if (form.formState.isSubmitting) {
       const timer = setTimeout(() => form.reset(form.getValues()), 5000);
       return () => clearTimeout(timer);
     }
-  }, [form.formState.isSubmitting]);
+  }, [form.formState.isSubmitting, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log("[onSubmit] Form submitted with values:", values);
@@ -89,18 +100,16 @@ const SignupPage = () => {
     }
 
     try {
-      console.log("[onSubmit] Calling signIn with:", {
+      const payload = {
         action: "register",
         name: values.fullName,
-        email: values.email,
+        [isEmail(values.identifier) ? "email" : "mobileNumber"]: values.identifier,
         password: values.password,
-      });
+      };
+      console.log("[onSubmit] Calling signIn with:", payload);
       const response = await signIn("credentials", {
         redirect: false,
-        action: "register",
-        name: values.fullName,
-        email: values.email,
-        password: values.password,
+        ...payload,
       });
       console.log("[onSubmit] signIn response:", response);
 
@@ -112,7 +121,11 @@ const SignupPage = () => {
       }
 
       console.log("[onSubmit] Registration successful, opening OTP dialog");
-      toast.success("OTP sent to your email. Please check your inbox.");
+      toast.success(
+        isEmail(values.identifier)
+          ? "OTP sent to your email. Please check your inbox."
+          : "OTP sent to your mobile number. Please check your messages."
+      );
       setShowOtpDialog(true);
     } catch (error) {
       console.error("[onSubmit] signIn failed:", error);
@@ -128,54 +141,83 @@ const SignupPage = () => {
   };
 
   const handleOtpChange = (value: string) => {
+    console.log("[handleOtpChange] OTP changed to:", value);
     setOtp(value);
     if (otpError) setOtpError("");
   };
 
   const handleOtpSubmit = async () => {
-    console.log("[handleOtpSubmit] Submitting OTP:", otp);
+    console.log("[handleOtpSubmit] Starting OTP submission:", { otp, isBlocked: isBlocked("otp") });
+    setOtpError("");
     if (isBlocked("otp")) {
       console.log("[handleOtpSubmit] OTP blocked:", getBlockedMessage("otp"));
       toast.error(getBlockedMessage("otp") || "Too many attempts. Please try again later.");
-      return;
+      setOtp("");
+      return { status: "error", message: getBlockedMessage("otp") || "Too many attempts." };
     }
 
     if (otp.length !== 6) {
+      console.log("[handleOtpSubmit] Invalid OTP length:", otp.length);
       setOtpError("OTP must be 6 digits.");
       toast.error("OTP must be 6 digits.");
-      return;
+      setOtp("");
+      return { status: "error", message: "OTP must be 6 digits." };
     }
 
     try {
+      const identifier = form.getValues("identifier");
+      const payload = {
+        [isEmail(identifier) ? "email" : "mobileNumber"]: identifier,
+        code: otp,
+      };
+      console.log("[handleOtpSubmit] OTP verification payload:", payload);
       const response = await fetch("/api/verification/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.getValues("email"), code: otp }),
+        body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
-      console.log("[handleOtpSubmit] OTP verification response:", result);
-
-      if (!response.ok) {
-        setOtpError(result.message || "Invalid OTP. Please try again.");
+      console.log("[handleOtpSubmit] HTTP status:", response.status);
+      const text = await response.text();
+      let result;
+      try {
+        result = JSON.parse(text);
+        console.log("[handleOtpSubmit] OTP verification response:", result);
+      } catch (e) {
+        console.error("[handleOtpSubmit] Failed to parse response:", text);
+        setOtpError("Invalid response from server. Please try again.");
+        toast.error("Invalid response from server.");
+        setOtp("");
         handleFailedAttempt("otp");
-        toast.error(result.message || "Invalid OTP.");
-        return;
+        return { status: "error", message: "Invalid response from server." };
       }
 
-      toast.success("Email verified successfully. Please sign in.");
+      if (result.status !== "success") {
+        console.log("[handleOtpSubmit] Verification failed:", result.message);
+        setOtpError(result.message || "Invalid OTP. Please try again.");
+        toast.error(result.message || "Invalid OTP.");
+        setOtp("");
+        handleFailedAttempt("otp");
+        return { status: "error", message: result.message || "Invalid OTP." };
+      }
+
+      console.log("[handleOtpSubmit] Verification successful:", result.message);
+      toast.success(result.message || "Verification successful. Please sign in.");
       setShowOtpDialog(false);
       router.push("/signin");
+      return { status: "success", message: result.message || "Verification successful." };
     } catch (error) {
       console.error("[handleOtpSubmit] OTP verification error:", error);
       setOtpError("Failed to verify OTP. Please try again.");
-      handleFailedAttempt("otp");
       toast.error("Failed to verify OTP.");
+      setOtp("");
+      handleFailedAttempt("otp");
+      return { status: "error", message: "Failed to verify OTP." };
     }
   };
 
   const handleResendOtp = async () => {
-    console.log("[handleResendOtp] Resending OTP for email:", form.getValues("email"));
+    console.log("[handleResendOtp] Starting resend OTP for:", form.getValues("identifier"));
     if (isBlocked("otp") || isResending || countdown > 0) {
       console.log("[handleResendOtp] Blocked or resending:", getBlockedMessage("otp"));
       toast.error(getBlockedMessage("otp") || "Please wait before resending OTP.");
@@ -186,20 +228,39 @@ const SignupPage = () => {
     setCountdown(60);
 
     try {
+      const identifier = form.getValues("identifier");
+      const payload = {
+        [isEmail(identifier) ? "email" : "mobileNumber"]: identifier,
+      };
+      console.log("[handleResendOtp] Resend OTP payload:", payload);
       const response = await fetch("/api/verification/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.getValues("email") }),
+        body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
-      console.log("[handleResendOtp] Resend OTP response:", result);
+      console.log("[handleResendOtp] HTTP status:", response.status);
+      const text = await response.text();
+      let result;
+      try {
+        result = JSON.parse(text);
+        console.log("[handleResendOtp] Resend OTP response:", result);
+      } catch (e) {
+        console.error("[handleResendOtp] Failed to parse response:", text);
+        throw new Error("Invalid response from server");
+      }
 
-      if (!response.ok) {
+      if (result.status !== "success") {
+        console.log("[handleResendOtp] Resend failed:", result.message);
         throw new Error(result.message || "Failed to resend OTP");
       }
 
-      toast.success("New OTP sent to your email.");
+      console.log("[handleResendOtp] Resend successful");
+      toast.success(
+        isEmail(identifier)
+          ? "New OTP sent to your email."
+          : "New OTP sent to your mobile number."
+      );
     } catch (error) {
       console.error("[handleResendOtp] Resend OTP error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to resend OTP.");
@@ -220,20 +281,33 @@ const SignupPage = () => {
   }, [countdown]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br pt-10 overflow-auto mt-20">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br pt-10 overflow-auto">
       <Navbar hideUserCircle />
-      <div className="w-full max-w-md p-4 sm:p-8 space-y-8 rounded-xl shadow-lg mx-2 bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md p-4 sm:p-6 md:p-8 space-y-6 rounded-xl shadow-lg mx-2 bg-background"
+      >
         <div className="flex justify-center mb-4">
-          <Image
-            src={theme === "dark" ? "/images/logo/darkmode_logo.png" : "/images/logo/logo.png"}
-            alt="Homestay Nepal Logo"
-            width={80}
-            height={80}
-          />
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <Image
+              src={theme === "dark" ? "/images/logo/darkmode_logo.png" : "/images/logo/logo.png"}
+              alt="Nepal Homestays Nepal Logo"
+              width={80}
+              height={80}
+              className="rounded-full"
+            />
+          </motion.div>
         </div>
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Create Account</h1>
-          <p>Join Homestay and start your journey</p>
+          <p className="text-sm text-muted-foreground">
+            Join Nepal Homestays and start your journey
+          </p>
         </div>
 
         <Form {...form}>
@@ -248,32 +322,32 @@ const SignupPage = () => {
                     <Input
                       type="text"
                       placeholder="Enter your full name"
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
+                      className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent"
                       disabled={form.formState.isSubmitting || isBlocked("register")}
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage className="text-red-500 text-sm" />
+                  <FormMessage className="text-red-500 text-xs" />
                 </FormItem>
               )}
             />
 
             <FormField
               control={form.control}
-              name="email"
+              name="identifier"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Email</FormLabel>
+                  <FormLabel className="text-sm font-medium">Email or Mobile Number</FormLabel>
                   <FormControl>
                     <Input
-                      type="email"
-                      placeholder="Enter your email"
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
+                      type="text"
+                      placeholder="Enter your email or mobile number (e.g., +1234567890)"
+                      className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent"
                       disabled={form.formState.isSubmitting || isBlocked("register")}
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage className="text-red-500 text-sm" />
+                  <FormMessage className="text-red-500 text-xs" />
                 </FormItem>
               )}
             />
@@ -289,7 +363,7 @@ const SignupPage = () => {
                       <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="******"
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent pr-10"
+                        className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent pr-10"
                         disabled={form.formState.isSubmitting || isBlocked("register")}
                         {...field}
                         onChange={(e) => {
@@ -301,6 +375,7 @@ const SignupPage = () => {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -315,7 +390,7 @@ const SignupPage = () => {
                     </div>
                     <p className="text-xs mt-1 text-gray-500">{getStrengthText(passwordStrength)}</p>
                   </div>
-                  <FormMessage className="text-red-500 text-sm" />
+                  <FormMessage className="text-red-500 text-xs" />
                 </FormItem>
               )}
             />
@@ -331,7 +406,7 @@ const SignupPage = () => {
                       <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="******"
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent pr-10"
+                        className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent pr-10"
                         disabled={form.formState.isSubmitting || isBlocked("register")}
                         {...field}
                       />
@@ -339,40 +414,53 @@ const SignupPage = () => {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                   </FormControl>
-                  <FormMessage className="text-red-500 text-sm" />
+                  <FormMessage className="text-red-500 text-xs" />
                 </FormItem>
               )}
             />
 
-            <Button
-              type="submit"
-              className="w-full py-2 px-4 font-medium rounded-lg transition-colors duration-200"
-              disabled={form.formState.isSubmitting || isBlocked("register")}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {form.formState.isSubmitting ? "Creating Account..." : "Create Account"}
-            </Button>
+              <Button
+                type="submit"
+                className="w-full py-2 px-4 font-medium rounded-lg transition-colors duration-200"
+                disabled={form.formState.isSubmitting || isBlocked("register")}
+              >
+                {form.formState.isSubmitting ? "Creating Account..." : "Create Account"}
+              </Button>
+            </motion.div>
           </form>
         </Form>
 
         <div className="text-center">
           <p className="text-sm">
             Already have an account?{" "}
-            <Link href="/signin" className="font-medium text-primary hover:text-primary-hover transition-colors duration-200">
+            <Link
+              href="/signin"
+              className="font-medium text-primary hover:text-primary-hover transition-colors duration-200"
+            >
               Sign in
             </Link>
           </p>
         </div>
-      </div>
+      </motion.div>
 
       <OtpDialog
-        title="Verify your email"
+        title="Verify your account"
         isBlocked={isBlocked("otp")}
-        description="Enter the 6-digit verification code sent to your email."
+        description={
+          isEmail(form.getValues("identifier"))
+            ? "Enter the 6-digit verification code sent to your email."
+            : "Enter the 6-digit verification code sent to your mobile number."
+        }
         open={showOtpDialog}
         onOpenChange={setShowOtpDialog}
         otp={otp}

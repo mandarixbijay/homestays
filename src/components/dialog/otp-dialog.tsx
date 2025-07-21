@@ -11,13 +11,12 @@ import {
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSeparator,
   InputOTPSlot,
+  InputOTPSeparator,
 } from "../ui/input-otp";
 import Resend from "../ui/resendbutton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
 import { useEffect, useRef, useState } from "react";
 
 interface OtpDialogProps {
@@ -26,7 +25,7 @@ interface OtpDialogProps {
   otp: string;
   onOtpChange: (value: string) => void;
   otpError: string;
-  onSubmitOtp: (otp: string) => void;
+  onSubmitOtp: () => Promise<{ status: string; message?: string } | null>;
   isResending: boolean;
   onResend: () => Promise<void>;
   title?: string;
@@ -77,15 +76,27 @@ export function OtpDialog({
 
   const handleInternalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmitOtp(otp);
-    if (location.pathname === "/forgot-password") {
+    console.log("[OtpDialog] handleInternalSubmit called, pathname:", location.pathname);
+    const isForgotPassword = location.pathname === "/forgot-password";
+    const endpoint = isForgotPassword ? "/api/auth/validate-code" : "/api/verification/verify-code";
+
+    const result = await onSubmitOtp();
+    console.log("[OtpDialog] onSubmitOtp result:", result);
+
+    if (result?.status === "success" && isForgotPassword) {
+      console.log("[OtpDialog] OTP verified for forgot-password, redirecting to /reset-password");
       router.push("/reset-password");
+    } else if (result?.status !== "success") {
+      console.log("[OtpDialog] OTP verification failed:", result?.message);
+    } else {
+      console.log("[OtpDialog] OTP verified for sign-in/signup, no redirect in OtpDialog");
     }
   };
 
   const handleResend = async () => {
+    console.log("[OtpDialog] handleResend called");
     await onResend();
-    setCountdown(60); // Reset countdown
+    setCountdown(60);
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -97,16 +108,25 @@ export function OtpDialog({
     }, 1000);
   };
 
+  // Restrict input to numbers only
+  const handleOtpInputChange = (value: string) => {
+    const numericValue = value.replace(/[^0-9]/g, "");
+    console.log("[handleOtpInputChange] Filtered OTP:", numericValue);
+    onOtpChange(numericValue);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[420px] max-w-[92vw] p-6 sm:p-8 rounded-2xl bg-background shadow-2xl border border-border">
+      <DialogContent
+        className="sm:max-w-[420px] max-w-[92vw] p-6 sm:p-8 rounded-2xl bg-background shadow-2xl border border-border"
+      >
         <DialogHeader className="text-center space-y-2">
           <DialogTitle className="text-2xl font-bold text-foreground tracking-tight">
-            {title || "Verify Your Email"}
+            {title || "Verify Your Account"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-sm leading-relaxed">
             {description ||
-              "Enter the 6-digit code sent to your email to continue."}
+              "Enter the 6-digit code sent to your email or mobile number to continue."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleInternalSubmit} className="mt-6 space-y-6">
@@ -128,8 +148,9 @@ export function OtpDialog({
             <InputOTP
               maxLength={6}
               value={otp}
-              onChange={onOtpChange}
+              onChange={handleOtpInputChange}
               className="flex justify-center"
+              type="tel"
             >
               <InputOTPGroup className="flex gap-1 sm:gap-2">
                 {Array.from({ length: 3 }).map((_, index) => (
@@ -138,6 +159,7 @@ export function OtpDialog({
                     index={index}
                     ref={index === 0 ? firstInputRef : null}
                     className="w-10 h-10 sm:w-12 sm:h-12 text-base sm:text-lg font-medium text-center border-2 border-input rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200 bg-background shadow-sm"
+                    aria-label={`OTP digit ${index + 1}`}
                   />
                 ))}
                 <InputOTPSeparator className="text-muted-foreground self-center mx-1 sm:mx-2" />
@@ -146,6 +168,7 @@ export function OtpDialog({
                     key={index + 3}
                     index={index + 3}
                     className="w-10 h-10 sm:w-12 sm:h-12 text-base sm:text-lg font-medium text-center border-2 border-input rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200 bg-background shadow-sm"
+                    aria-label={`OTP digit ${index + 4}`}
                   />
                 ))}
               </InputOTPGroup>

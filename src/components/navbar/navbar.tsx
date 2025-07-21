@@ -23,7 +23,7 @@ import {
   Sun,
   Moon,
   Menu,
-  X, // Added for close icon
+  X,
 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import UserProfileDropdown from "./navbar-component/UserProfileDropdown";
@@ -62,7 +62,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
   const showListProperty = !isLoggedIn || userRole === "host";
 
   return (
-    <nav className="bg-white/80 dark:bg-gray-900/80 fixed top-0 left-0 right-0 z-[100] h-16">
+    <nav className="bg-white dark:bg-gray-900 fixed top-0 left-0 right-0 z-[100] h-16 shadow-md"> {/* Solid white, added shadow-md */}
       <div className="flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <Link href="/" className="flex items-center">
           <div className="p-2">
@@ -70,8 +70,8 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
               src={"/images/logo/logo.png"}
               alt="Homestay Nepal Logo"
               className=""
-              width={80} // Reduced size
-              height={80} // Reduced size
+              width={80}
+              height={80}
               priority
             />
           </div>
@@ -168,7 +168,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                   size="icon"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <X className="h-6 w-6" /> {/* Changed to close icon */}
+                  <X className="h-6 w-6" />
                 </Button>
               </div>
             </DrawerHeader>
@@ -226,38 +226,6 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                         )}
                       </Button>
                     </div>
-                    {/* <div className="flex items-center justify-between mb-6">
-                      <span className="text-lg font-medium">Notifications</span>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="relative"
-                          >
-                            <Bell className="h-5 w-5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-80 z-[100]">
-                          <div className="p-2">
-                            <h4 className="font-medium mb-2">Notifications</h4>
-                            <div className="space-y-2">
-                              <DropdownMenuItem className="flex flex-col items-start p-2 rounded-md">
-                                <p className="font-medium">
-                                  New Booking Request
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  Notification 1
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  2 minutes ago
-                                </p>
-                              </DropdownMenuItem>
-                            </div>
-                          </div>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div> */}
                     <div className="w-full">
                       {isLoggedIn ? (
                         <UserProfileDropdown />

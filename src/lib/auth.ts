@@ -1,4 +1,3 @@
-// /src/lib/auth.ts
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -13,9 +12,11 @@ declare module "next-auth" {
     role?: string;
     permissions?: string[];
     isEmailVerified?: boolean;
+    isMobileVerified?: boolean;
     accessToken?: string | null;
     name?: string | null;
     email?: string | null;
+    mobileNumber?: string | null;
     image?: string | null;
   }
 
@@ -25,9 +26,11 @@ declare module "next-auth" {
       role?: string;
       permissions?: string[];
       isEmailVerified?: boolean;
+      isMobileVerified?: boolean;
       accessToken?: string | null;
       name?: string | null;
       email?: string | null;
+      mobileNumber?: string | null;
       image?: string | null;
     };
   }
@@ -39,9 +42,11 @@ declare module "next-auth/jwt" {
     role?: string;
     permissions?: string[];
     isEmailVerified?: boolean;
+    isMobileVerified?: boolean;
     accessToken?: string | null;
     name?: string | null;
     email?: string | null;
+    mobileNumber?: string | null;
     image?: string | null;
   }
 }
@@ -52,9 +57,10 @@ export const authOptions: NextAuthOptions = {
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
+        mobileNumber: { label: "Mobile Number", type: "text" },
         password: { label: "Password", type: "password" },
         name: { label: "Name", type: "text" },
-        action: { label: "Action", type: "text" }, // Add action to credentials
+        action: { label: "Action", type: "text" },
       },
       async authorize(credentials) {
         console.log("[NextAuth] Authorize called with credentials:", credentials);
@@ -62,23 +68,23 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Credentials are required");
         }
 
-        const { email, password, name, action } = credentials;
+        const { email, mobileNumber, password, name, action } = credentials;
 
         try {
           // Handle registration
           if (action === "register") {
-            if (!name || !email || !password) {
-              throw new Error("Name, email, and password are required");
+            if (!name || (!email && !mobileNumber) || !password) {
+              throw new Error("Name, either email or mobile number, and password are required");
             }
 
-            console.log("[NextAuth] Registering user:", { name, email });
+            console.log("[NextAuth] Registering user:", { name, email, mobileNumber });
             const response = await fetch(`${API_BASE_URL}/auth/register-guest`, {
               method: "POST",
               headers: {
                 Accept: "application/json",
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ name, email, password }),
+              body: JSON.stringify({ name, email, mobileNumber, password }),
             });
 
             const result = await response.json();
@@ -92,27 +98,32 @@ export const authOptions: NextAuthOptions = {
               id: result.data.id.toString(),
               name: result.data.name,
               email: result.data.email,
+              mobileNumber: result.data.mobileNumber,
               role: result.data.role,
               permissions: result.data.permissions,
               isEmailVerified: result.data.isEmailVerified,
+              isMobileVerified: result.data.isMobileVerified,
               accessToken: null,
               image: null,
             };
           }
 
           // Handle login
-          if (!email || !password) {
-            throw new Error("Email and password are required");
+          if (!email && !mobileNumber) {
+            throw new Error("Either email or mobile number is required");
+          }
+          if (!password) {
+            throw new Error("Password is required");
           }
 
-          console.log("[NextAuth] Logging in user:", { email });
+          console.log("[NextAuth] Logging in user:", { email, mobileNumber });
           const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: "POST",
             headers: {
               Accept: "application/json",
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ email, mobileNumber, password }),
           });
 
           const result = await response.json();
@@ -126,9 +137,11 @@ export const authOptions: NextAuthOptions = {
             id: result.data.user.id.toString(),
             name: result.data.user.name,
             email: result.data.user.email,
+            mobileNumber: result.data.user.mobileNumber,
             role: result.data.user.role,
             permissions: result.data.user.permissions,
             isEmailVerified: result.data.user.isEmailVerified,
+            isMobileVerified: result.data.user.isMobileVerified,
             accessToken: result.data.accessToken,
             image: null,
           };
@@ -146,9 +159,11 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
+        token.mobileNumber = user.mobileNumber;
         token.role = user.role;
         token.permissions = user.permissions;
         token.isEmailVerified = user.isEmailVerified;
+        token.isMobileVerified = user.isMobileVerified;
         token.accessToken = user.accessToken;
         token.image = user.image;
       }
@@ -161,9 +176,11 @@ export const authOptions: NextAuthOptions = {
           id: token.id ?? "",
           name: token.name ?? null,
           email: token.email ?? null,
+          mobileNumber: token.mobileNumber ?? null,
           role: token.role,
           permissions: token.permissions,
           isEmailVerified: token.isEmailVerified,
+          isMobileVerified: token.isMobileVerified,
           accessToken: token.accessToken,
           image: token.image,
         };

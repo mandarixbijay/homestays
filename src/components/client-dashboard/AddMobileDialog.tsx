@@ -25,14 +25,16 @@ export default function AddMobileDialog() {
     if (otpError) setOtpError("");
   };
 
-  const handleOtpSubmit = () => {
+  const handleOtpSubmit = async (): Promise<{ status: string; message?: string } | null> => {
     if (otp.length !== 6) {
       setOtpError("OTP must be 6 digits.");
-      return;
+      return { status: "error", message: "OTP must be 6 digits." };
     }
     setOtpError("");
     setOtpOpen(false);
     // Here you would verify the OTP and update the user's mobile number
+    // Simulate success response
+    return { status: "success" };
   };
 
   const handleResendOtp = async () => {
