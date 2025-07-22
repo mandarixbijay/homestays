@@ -141,7 +141,7 @@ const ContactSupport = () => {
         <Card className="w-full max-w-2xl p-6 sm:p-10 my-10 rounded-lg shadow-md overflow-visible">
           <h1 className="text-3xl font-bold mb-2 text-center">Contact Support</h1>
           <p className="text-muted-foreground mb-6 text-center">
-            We're here to help! Please fill out the form below or use the alternative contact methods provided.
+            We&apos;re here to help! Please fill out the form below or use the alternative contact methods provided.
           </p>
 
           <form className="space-y-4 mb-10" onSubmit={handleSubmit}>
