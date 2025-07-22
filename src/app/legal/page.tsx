@@ -1,6 +1,7 @@
 import Footer from "@/components/footer/footer";
 import Navbar from "@/components/navbar/navbar";
 import React from "react";
+import Link from "next/link"; // Added import for Link
 import { Calendar, FileText, Shield, Scale } from "lucide-react";
 
 const lastUpdated = "Jun 26, 2025";
@@ -74,7 +75,7 @@ const LegalPage = () => {
                                 <div className="prose prose-lg max-w-none">
                                     <div className="bg-primary-30/20 border-l-4 border-primary p-6 rounded-r-lg mb-8">
                                         <p className="text-primary font-medium mb-2">Your Privacy Matters</p>
-                                        <p className="text-primary-70 text-sm">We're committed to protecting your personal information and being transparent about how we use it.</p>
+                                        <p className="text-primary-70 text-sm">We&apos;re committed to protecting your personal information and being transparent about how we use it.</p>
                                     </div>
                                     
                                     <h3 className="text-xl font-semibold text-text-primary mb-4">Information We Collect</h3>
@@ -126,7 +127,7 @@ const LegalPage = () => {
 
                                     <h3 className="text-xl font-semibold text-text-primary mb-4">Booking & Payments</h3>
                                     <p className="text-text-secondary leading-relaxed mb-6">
-                                        When you book a stay, you agree to pay all applicable fees and taxes, and to follow the host's rules and cancellation policy. Payments are processed securely through our trusted partners. All bookings are subject to host approval and availability.
+                                        When you book a stay, you agree to pay all applicable fees and taxes, and to follow the host&apos;s rules and cancellation policy. Payments are processed securely through our trusted partners. All bookings are subject to host approval and availability.
                                     </p>
 
                                     <h3 className="text-xl font-semibold text-text-primary mb-4">Responsibilities & Limitations</h3>
@@ -151,12 +152,12 @@ const LegalPage = () => {
                         <p className="text-primary-30 mb-6 max-w-2xl mx-auto">
                             Now that you understand our policies, explore authentic homestay experiences across Nepal.
                         </p>
-                        <a 
+                        <Link 
                             href="/" 
                             className="inline-flex items-center px-6 py-3 bg-accent hover:bg-accent/90 text-white font-semibold rounded-lg transition-colors duration-200"
                         >
                             Explore Homestays
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>
