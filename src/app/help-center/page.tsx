@@ -136,7 +136,7 @@ const HelpCenterPage = () => {
                         Still need help? Contact us for personalized assistance.
                     </p>
                     <Button onClick={() => {
-                        route.push('/get-in-touch')
+                        route.push('/contact-support')
                     }} className="bg-primary hover:bg-primary-hover text-white font-semibold px-8 py-2 text-lg rounded-full">
                         Contact Us
                     </Button>
