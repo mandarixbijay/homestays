@@ -722,7 +722,7 @@ function ListYourProperty() {
         <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <Onboarding
             title="List Your Property"
-            description="Set up your property listing with Homestays Nepal. Complete these steps to showcase your property and start welcoming guests."
+            description="Set up your property listing with Nepal Homestays. Complete these steps to showcase your property and start welcoming guests."
             steps={steps}
             currentStep={currentStep}
             onStepComplete={async () => {
@@ -738,7 +738,7 @@ function ListYourProperty() {
             logo={
               <Image
                 src={theme === 'dark' ? '/images/logo/darkmode_logo.png' : '/images/logo/logo.png'}
-                alt="Homestays Nepal Logo"
+                alt="Nepal Homestays Logo"
                 width={80}
                 height={40}
                 className="object-contain"

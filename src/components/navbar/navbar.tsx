@@ -23,12 +23,12 @@ import {
   Sun,
   Moon,
   Menu,
-  X,
 } from "lucide-react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import UserProfileDropdown from "./navbar-component/UserProfileDropdown";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 interface NavbarProps {
   hideUserCircle?: boolean;
@@ -42,215 +42,237 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
 
   const isLoggedIn = status === "authenticated";
   const userRole = session?.user?.role;
-
-  // Debug logs
-  console.log("Session:", session, "Status:", status, "User Role:", userRole);
-  console.log("Theme:", theme);
-  console.log("Is Menu Open:", isMenuOpen);
+  const showListProperty = !isLoggedIn || userRole === "host";
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleListPropertyClick = (e: React.MouseEvent) => {
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  const toListProperty = (e: React.MouseEvent) => {
     e.preventDefault();
+    closeMenu();
     if (!isLoggedIn) {
       router.push("/list-your-property");
     }
   };
 
-  const showListProperty = !isLoggedIn || userRole === "host";
+  const toPage = (href: string) => {
+    closeMenu();
+    router.push(href);
+  };
+
+  const navigationItems = [
+    ...(showListProperty
+      ? [
+          {
+            label: "List your property",
+            href: "/list-your-property",
+            action: toListProperty,
+          },
+        ]
+      : []),
+    { label: "About", href: "/about-us" },
+    { label: "Blogs", href: "/blogs" },
+    { label: "Support", href: "/contact-support" },
+  ];
 
   return (
-    <nav className="bg-white dark:bg-gray-900 fixed top-0 left-0 right-0 z-[100] h-16 shadow-md"> {/* Solid white, added shadow-md */}
-      <div className="flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-        <Link href="/" className="flex items-center">
+    <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-[100] border-b border-gray-200/20 dark:border-gray-700/20">
+      <div className="flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-20">
+        {/* Logo */}
+        <Link href="/" className="flex items-center" onClick={closeMenu}>
           <div className="p-2">
             <Image
-              src={"/images/logo/logo.png"}
+              src="/images/logo/logo.png"
               alt="Homestay Nepal Logo"
-              className=""
-              width={80}
-              height={80}
+              width={120}
+              height={120}
               priority
+              className="w-auto h-14 sm:h-16"
             />
           </div>
         </Link>
 
-        <div className="flex items-center">
-          <NavigationMenu className="hidden md:block">
-            <NavigationMenuList className="gap-4">
-              {showListProperty && (
-                <NavigationMenuItem>
+        {/* Desktop Navigation - Right Aligned, Smaller Text */}
+        <div className="hidden lg:flex items-center gap-4">
+          <NavigationMenu>
+            <NavigationMenuList className="gap-3">
+              {navigationItems.map((item) => (
+                <NavigationMenuItem key={item.label}>
                   <NavigationMenuLink asChild>
-                    <Button variant="ghost" onClick={handleListPropertyClick}>
-                      List your property
+                    <Button
+                      variant="ghost"
+                      className="text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-primary/10 transition-colors text-sm px-4 py-2 font-medium"
+                      onClick={item.action || (() => toPage(item.href))}
+                    >
+                      {item.label}
                     </Button>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
-              )}
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Button variant="ghost">
-                    <Link href="/blogs">Blogs</Link>
-                  </Button>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Button variant="ghost">
-                    <Link href="/contact-support">Support</Link>
-                  </Button>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Button variant="ghost">
-                    <Link href="/about-us">About</Link>
-                  </Button>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
+              ))}
             </NavigationMenuList>
           </NavigationMenu>
 
+          {/* Desktop User Actions */}
           {!hideUserCircle && (
-            <div className="hidden md:flex items-center gap-4 ml-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="hover:bg-primary/10 transition-colors"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-6 w-6" />
+                ) : (
+                  <Moon className="h-6 w-6" />
+                )}
+              </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative hover:bg-primary/10 transition-colors"
+                  >
+                    <Bell className="h-6 w-6" />
+                    <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
                   </Button>
                 </DropdownMenuTrigger>
-                {/* <DropdownMenuContent align="end" className="w-80 z-[100]">
-                  <div className="p-2">
-                    <h4 className="font-medium mb-2">Notifications</h4>
-                    <div className="space-y-2">
-                      <DropdownMenuItem className="flex flex-col items-start p-2 rounded-md">
-                        <p className="font-medium">New Booking Request</p>
-                        <p className="text-sm text-gray-500">Notification 1</p>
-                        <p className="text-xs text-gray-400">2 minutes ago</p>
-                      </DropdownMenuItem>
+                <DropdownMenuContent align="end" className="w-80 bg-white dark:bg-gray-800">
+                  <div className="p-3">
+                    <h4 className="font-medium mb-2 text-sm text-gray-900 dark:text-gray-100">
+                      Notifications
+                    </h4>
+                    <div className="text-xs text-gray-500 dark:text-gray-300">
+                      No new notifications
                     </div>
                   </div>
-                </DropdownMenuContent> */}
+                </DropdownMenuContent>
               </DropdownMenu>
 
               {isLoggedIn ? (
                 <UserProfileDropdown />
               ) : (
-                <Button asChild variant="ghost" className="gap-2">
+                <Button asChild variant="default" size="sm" className="gap-2 text-xs font-medium">
                   <Link href="/signin" className="flex items-center">
-                    <LogIn className="h-4 w-4" />
+                    <LogIn className="h-5 w-5" />
                     <span>Sign In</span>
                   </Link>
                 </Button>
               )}
             </div>
           )}
+        </div>
 
+        {/* Mobile Menu */}
+        <div className="flex items-center gap-3 lg:hidden">
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
-            onClick={toggleMenu}
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="hover:bg-primary/10 transition-colors"
           >
-            <Menu className="h-6 w-6" />
+            {theme === "dark" ? (
+              <Sun className="h-6 w-6" />
+            ) : (
+              <Moon className="h-6 w-6" />
+            )}
           </Button>
-        </div>
 
-        <Drawer open={isMenuOpen} onOpenChange={setIsMenuOpen} direction="top">
-          <DrawerContent className="h-[100vh] w-full fixed top-0 left-0 bg-white dark:bg-gray-900">
-            <DrawerHeader className="border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <DrawerTitle className="text-xl font-bold">Menu</DrawerTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <X className="h-6 w-6" />
-                </Button>
+          <Drawer direction="bottom" open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <DrawerTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleMenu}
+                className="hover:bg-primary/10 transition-colors"
+              >
+                <Menu className="h-7 w-7" />
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="h-[80vh] w-full fixed bottom-0 left-0 bg-white/95 dark:bg-gray-900/95 z-[110] rounded-t-2xl shadow-lg flex flex-col">
+              <VisuallyHidden>
+                <DrawerTitle>Navigation Menu</DrawerTitle>
+              </VisuallyHidden>
+
+              {/* Logo - Centered at Top */}
+              <div className="flex justify-center py-4 border-b border-gray-200 dark:border-gray-700">
+                <Image
+                  src="/images/logo/logo.png"
+                  alt="Homestay Nepal Logo"
+                  width={120}
+                  height={120}
+                  className="w-auto h-12"
+                />
               </div>
-            </DrawerHeader>
-            <div className="p-6">
-              <NavigationMenu>
-                <NavigationMenuList className="flex flex-col items-start gap-6">
-                  {showListProperty && (
-                    <NavigationMenuItem className="w-full">
-                      <NavigationMenuLink
-                        className="w-full text-lg font-medium hover:text-primary"
-                        onClick={handleListPropertyClick}
+
+              {/* Navigation Items - Scrollable */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex flex-col gap-3">
+                  {navigationItems.map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={item.action || (() => toPage(item.href))}
+                      className="text-base font-medium text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 py-3 px-4 rounded-lg"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* User Actions - Fixed Bottom */}
+              {!hideUserCircle && (
+                <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-3">
+                  <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
+                    <div className="relative">
+                      <Bell className="h-5 w-5 text-primary" />
+                      <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full"></span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Notifications
+                    </span>
+                  </button>
+
+                  {isLoggedIn ? (
+                    <UserProfileDropdown isMobile />
+                  ) : (
+                    <Button
+                      asChild
+                      variant="default"
+                      size="lg"
+                      className="w-full h-11 text-sm font-medium gap-2 bg-primary hover:bg-primary/90 transition-all duration-200"
+                    >
+                      <Link
+                        href="/signin"
+                        className="flex items-center justify-center"
+                        onClick={closeMenu}
                       >
-                        List your property
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
+                        <LogIn className="h-4 w-4" />
+                        <span>Sign In</span>
+                      </Link>
+                    </Button>
                   )}
-                  <NavigationMenuItem className="w-full">
-                    <NavigationMenuLink
-                      className="w-full text-lg font-medium hover:text-primary"
-                      onClick={() => setIsMenuOpen(false)}
+
+                  <DrawerClose asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary transition-all duration-200"
                     >
-                      <Link href="/blogs">Blogs</Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem className="w-full">
-                    <NavigationMenuLink
-                      className="w-full text-lg font-medium hover:text-primary"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Link href="/contact-support">Support</Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem className="w-full">
-                    <NavigationMenuLink
-                      className="w-full text-lg font-medium hover:text-primary"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Link href="/about-us">About</Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                  <div className="w-full border-t border-gray-200 pt-6 mt-2">
-                    <div className="flex items-center justify-between mb-6">
-                      <span className="text-lg font-medium">Theme</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          setTheme(theme === "dark" ? "light" : "dark")
-                        }
-                      >
-                        {theme === "dark" ? (
-                          <Sun className="h-5 w-5" />
-                        ) : (
-                          <Moon className="h-5 w-5" />
-                        )}
-                      </Button>
-                    </div>
-                    <div className="w-full">
-                      {isLoggedIn ? (
-                        <UserProfileDropdown />
-                      ) : (
-                        <Button
-                          asChild
-                          variant="default"
-                          className="w-full gap-2"
-                        >
-                          <Link
-                            href="/signin"
-                            className="flex items-center justify-center"
-                          >
-                            <LogIn className="h-4 w-4" />
-                            <span>Sign In</span>
-                          </Link>
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </NavigationMenuList>
-              </NavigationMenu>
-            </div>
-          </DrawerContent>
-        </Drawer>
+                      Close
+                    </Button>
+                  </DrawerClose>
+                </div>
+              )}
+            </DrawerContent>
+          </Drawer>
+        </div>
       </div>
     </nav>
   );

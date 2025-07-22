@@ -281,13 +281,13 @@ const SignupPage = () => {
   }, [countdown]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br pt-10 overflow-auto">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-900 pt-20 overflow-auto">
       <Navbar hideUserCircle />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md p-4 sm:p-6 md:p-8 space-y-6 rounded-xl shadow-lg mx-2 bg-background"
+        className="w-full max-w-md p-4 sm:p-6 md:p-8 space-y-6 rounded-xl shadow-lg mx-2 bg-white dark:bg-gray-800"
       >
         <div className="flex justify-center mb-4">
           <motion.div
@@ -304,8 +304,10 @@ const SignupPage = () => {
           </motion.div>
         </div>
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Create Account</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Create Account
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             Join Nepal Homestays and start your journey
           </p>
         </div>
@@ -317,12 +319,14 @@ const SignupPage = () => {
               name="fullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Full Name</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Full Name
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="text"
                       placeholder="Enter your full name"
-                      className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent"
+                      className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700"
                       disabled={form.formState.isSubmitting || isBlocked("register")}
                       {...field}
                     />
@@ -337,12 +341,14 @@ const SignupPage = () => {
               name="identifier"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Email or Mobile Number</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Email or Mobile Number
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="text"
                       placeholder="Enter your email or mobile number (e.g., +1234567890)"
-                      className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent"
+                      className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700"
                       disabled={form.formState.isSubmitting || isBlocked("register")}
                       {...field}
                     />
@@ -357,13 +363,15 @@ const SignupPage = () => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Password</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Password
+                  </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="******"
-                        className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent pr-10"
+                        className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 pr-10"
                         disabled={form.formState.isSubmitting || isBlocked("register")}
                         {...field}
                         onChange={(e) => {
@@ -374,21 +382,31 @@ const SignupPage = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        disabled={form.formState.isSubmitting || isBlocked("register")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label={showPassword ? "Hide password" : "Show password"}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setShowPassword(!showPassword);
+                          }
+                        }}
                       >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                       </button>
                     </div>
                   </FormControl>
                   <div className="mt-2">
-                    <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-1 w-full bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-all duration-300 ${getStrengthColor(passwordStrength)}`}
                         style={{ width: `${(passwordStrength / 5) * 100}%` }}
                       />
                     </div>
-                    <p className="text-xs mt-1 text-gray-500">{getStrengthText(passwordStrength)}</p>
+                    <p className="text-xs mt-1 text-gray-500 dark:text-gray-300">
+                      {getStrengthText(passwordStrength)}
+                    </p>
                   </div>
                   <FormMessage className="text-red-500 text-xs" />
                 </FormItem>
@@ -400,23 +418,33 @@ const SignupPage = () => {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Confirm Password</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Confirm Password
+                  </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="******"
-                        className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent pr-10"
+                        className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 pr-10"
                         disabled={form.formState.isSubmitting || isBlocked("register")}
                         {...field}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        disabled={form.formState.isSubmitting || isBlocked("register")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label={showPassword ? "Hide password" : "Show password"}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setShowPassword(!showPassword);
+                          }
+                        }}
                       >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                       </button>
                     </div>
                   </FormControl>
@@ -431,7 +459,7 @@ const SignupPage = () => {
             >
               <Button
                 type="submit"
-                className="w-full py-2 px-4 font-medium rounded-lg transition-colors duration-200"
+                className="w-full py-2 px-4 font-medium rounded-lg transition-colors duration-200 text-white dark:text-white bg-primary hover:bg-primary/90"
                 disabled={form.formState.isSubmitting || isBlocked("register")}
               >
                 {form.formState.isSubmitting ? "Creating Account..." : "Create Account"}
@@ -441,7 +469,7 @@ const SignupPage = () => {
         </Form>
 
         <div className="text-center">
-          <p className="text-sm">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             Already have an account?{" "}
             <Link
               href="/signin"

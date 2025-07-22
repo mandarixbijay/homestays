@@ -7,14 +7,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, LayoutDashboard } from "lucide-react";
+import { UserCircle, LogOut, LayoutDashboard, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 
-const UserProfileDropdown = () => {
+interface UserProfileDropdownProps {
+  isMobile?: boolean;
+}
+
+const UserProfileDropdown = ({ isMobile = false }: UserProfileDropdownProps) => {
   const [isListPropertyUser, setIsListPropertyUser] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -28,35 +33,92 @@ const UserProfileDropdown = () => {
     signOut({ callbackUrl: "/" });
   };
 
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  if (isMobile) {
+    return (
+      <div className="w-full">
+        <Button
+          variant="ghost"
+          className="w-full flex items-center justify-between gap-2 text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 py-3 px-4 rounded-lg"
+          onClick={toggleExpand}
+        >
+          <div className="flex items-center gap-2">
+            <UserCircle className="h-5 w-5" />
+            <span>{session?.user?.name || "Profile"}</span>
+          </div>
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
+        {isExpanded && (
+          <div className="mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 space-y-2">
+            {isListPropertyUser ? (
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-3 rounded-md"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                <span>Dashboard</span>
+              </Link>
+            ) : (
+              <Link
+                href="/account"
+                className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-3 rounded-md"
+              >
+                <UserCircle className="h-4 w-4" />
+                <span>Account</span>
+              </Link>
+            )}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-3 rounded-md"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative flex items-center gap-2">
+        <Button
+          variant="ghost"
+          className="relative flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100"
+        >
           <UserCircle className="h-5 w-5" />
           <span>{session?.user?.name || "Profile"}</span>
         </Button>
       </DropdownMenuTrigger>
-
-      <DropdownMenuContent align="end" className="w-44 space-y-1">
+      <DropdownMenuContent align="end" className="w-44 bg-white dark:bg-gray-800 space-y-1">
         {isListPropertyUser ? (
           <DropdownMenuItem asChild>
-            <Link href="/dashboard" className="flex items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 text-xs font-medium text-gray-900 dark:text-gray-100"
+            >
               <LayoutDashboard className="h-4 w-4" />
               <span>Dashboard</span>
             </Link>
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem asChild>
-            <Link href="/account" className="flex items-center gap-2">
+            <Link
+              href="/account"
+              className="flex items-center gap-2 text-xs font-medium text-gray-900 dark:text-gray-100"
+            >
               <UserCircle className="h-4 w-4" />
               <span>Account</span>
             </Link>
           </DropdownMenuItem>
         )}
-
         <DropdownMenuItem
           onClick={handleLogout}
-          className="flex items-center gap-2 text-red-600 focus:text-red-700 cursor-pointer"
+          className="flex items-center gap-2 text-xs font-medium text-red-600 focus:text-red-700 cursor-pointer"
         >
           <LogOut className="h-4 w-4" />
           <span>Logout</span>
