@@ -210,19 +210,19 @@ function HomestayCheckoutContent() {
     }
   };
 
-  const handleESewaCheckout = async () => {
-    setIsLoading(true);
-    setErrorMessage("");
-    try {
-      console.log("Redirecting to eSewa with amount:", convertToNPR(totalPrice).toFixed(2), "NPR");
-      // Implement actual eSewa redirect here
-    } catch (error) {
-      console.error("Error initiating eSewa payment:", error);
-      setErrorMessage("Failed to initiate eSewa payment. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const handleESewaCheckout = async () => {
+  //   setIsLoading(true);
+  //   setErrorMessage("");
+  //   try {
+  //     console.log("Redirecting to eSewa with amount:", convertToNPR(totalPrice).toFixed(2), "NPR");
+  //     // Implement actual eSewa redirect here
+  //   } catch (error) {
+  //     console.error("Error initiating eSewa payment:", error);
+  //     setErrorMessage("Failed to initiate eSewa payment. Please try again.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,9 +255,11 @@ function HomestayCheckoutContent() {
       await handleStripeCheckout();
     } else if (selectedPaymentMethod === "khalti") {
       await handleKhaltiCheckout();
-    } else if (selectedPaymentMethod === "esewa") {
-      await handleESewaCheckout();
-    } else if (selectedPaymentMethod === "pay-at-property") {
+    // } else if (selectedPaymentMethod === "esewa") {
+    //   await handleESewaCheckout();
+    // 
+    }
+     else if (selectedPaymentMethod === "pay-at-property") {
       window.location.href = `/payment-success?roomTitle=${encodeURIComponent(roomTitle)}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}`;
     }
   };

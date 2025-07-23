@@ -67,12 +67,12 @@ export default function PaymentMethods({
       title: "Credit/Debit Card",
       subtitle: "Visa, Mastercard",
     },
-    {
-      id: "esewa",
-      icon: <Image src="/images/esewa.png" alt="eSewa" width={24} height={24} />,
-      title: "eSewa Mobile Wallet",
-      subtitle: "Secure Mobile Payment",
-    },
+    // {
+    //   id: "esewa",
+    //   icon: <Image src="/images/esewa.png" alt="eSewa" width={24} height={24} />,
+    //   title: "eSewa Mobile Wallet",
+    //   subtitle: "Secure Mobile Payment",
+    // },
     {
       id: "khalti",
       icon: <Image src="/images/khalti.png" alt="Khalti" width={24} height={24} />,
@@ -341,7 +341,7 @@ export default function PaymentMethods({
       )}
 
       {/* eSewa Payment Instructions */}
-      {selectedPaymentMethod === "esewa" && (
+      {/* {selectedPaymentMethod === "esewa" && (
         <div className="space-y-6">
           <p className="text-base text-gray-700">
             You will be redirected to eSewa to complete your payment securely. Total amount: NPR {totalPriceNPR.toFixed(2)}.
@@ -355,7 +355,7 @@ export default function PaymentMethods({
             Note: Use your eSewa password, not MPIN, for login.
           </p>
         </div>
-      )}
+      )} */}
 
       {/* Khalti Payment Instructions */}
       {selectedPaymentMethod === "khalti" && (
