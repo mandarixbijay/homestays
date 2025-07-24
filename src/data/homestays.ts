@@ -57,7 +57,7 @@ export const hero3Data: Hero3Card[] = [
     region: "Kathmandu, Nepal",
     price: "$34",
     breakfast: "Breakfast included",
-    rating: 4.9,
+    rating: 4.9, 
     slug: "kathmandu-homestay",
   },
   {

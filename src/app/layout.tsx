@@ -1,6 +1,8 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 import "./globals.css";
+import { HomestayProvider } from "@/context/HomestayContext";
 import ClientWrapper from "@/components/ClientWrapper";
 
 const sora = Sora({
@@ -22,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${sora.variable} antialiased`}>
-        <ClientWrapper>{children}</ClientWrapper>
+        <ClientWrapper>
+          <HomestayProvider>{children}</HomestayProvider>
+        </ClientWrapper>
       </body>
     </html>
   );

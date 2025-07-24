@@ -15,9 +15,8 @@ export default function Home() {
       <main className="transition-all duration-300">
         <Hero />
         <Hero1 />
-        <Hero3 />
+          <Hero3 />
         <Hero2 />
-
         <Hero4Wrapper />
       </main>
       <Footer />

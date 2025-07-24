@@ -1,153 +1,127 @@
 // src/app/homestays/[slug]/page.tsx
-import React from "react";
-import { hero3Data } from "@/data/homestays";
-import { dealCardsData } from "@/data/deals";
-import { hotels } from "@/data/hotels";
 import HomestayDetailWrapper from "@/components/homestay/HomestayDetailWrapper";
-import { Metadata } from "next";
+import { Hero3Card, ApiHomestay } from "@/types/homestay";
+import { notFound } from "next/navigation";
 
-export interface Hero3Card {
-  image: string;
-  images: string[];
-  city: string;
-  region: string;
-  price: string;
-  rating: number;
-  slug: string;
-  rooms: {
-    imageUrls: string[];
-    roomTitle: string;
-    rating: number;
-    reviews: number;
-    cityView?: boolean;
-    freeParking?: boolean;
-    freeWifi?: boolean;
-    sqFt: number;
-    sleeps: number;
-    bedType: string;
-    refundable: boolean;
-    nightlyPrice: number;
-    totalPrice: number;
-    extrasOptions: { label: string; price: number }[];
-    roomsLeft: number;
-  }[];
-}
-
-interface PageProps {
+export default async function HomestayDetail({
+  params,
+  searchParams,
+}: {
   params: Promise<{ slug: string }>;
-}
-
-const dataAdapters = {
-  deals: (item: any): Hero3Card => ({
-    image: item.imageSrc || "/images/fallback-image.png",
-    images: item.imageSrc ? [item.imageSrc] : ["/images/fallback-image.png"],
-    city: item.location,
-    region: item.location,
-    price: item.totalPrice,
-    rating: parseFloat(item.rating),
-    slug: item.slug,
-    rooms: item.rooms || [],
-  }),
-  hero: (item: any): Hero3Card => ({
-    image: item.image || "/images/fallback-image.png",
-    images: item.images || [item.image || "/images/fallback-image.png"],
-    city: item.city,
-    region: item.region,
-    price: item.price,
-    rating: item.rating,
-    slug: item.slug,
-    rooms: item.rooms || [],
-  }),
-  destination: (item: any): Hero3Card => ({
-    image: item.images[0] || "/images/fallback-image.png",
-    images: item.images || ["/images/fallback-image.png"],
-    city: item.location,
-    region: item.location,
-    price: item.totalPrice,
-    rating: parseFloat(item.rating),
-    slug: item.name.toLowerCase().replace(/\s+/g, "-"),
-    rooms: item.rooms || [],
-  }),
-};
-
-const dataSources = [
-  { data: dealCardsData, adapter: dataAdapters.deals },
-  { data: hero3Data, adapter: dataAdapters.hero },
-  { data: hotels, adapter: dataAdapters.destination },
-];
-
-export async function generateStaticParams() {
-  const slugs: { slug: string }[] = [];
-
-  dataSources.forEach((source) => {
-    source.data.forEach((item: any) => {
-      const slug =
-        source.adapter === dataAdapters.destination
-          ? item.name.toLowerCase().replace(/\s+/g, "-")
-          : item.slug;
-      slugs.push({ slug });
-    });
-  });
-
-  return slugs;
-}
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const { slug } = await params;
-  let homestay: Hero3Card | null = null;
+  const queryParams = await searchParams;
+  const checkInDate = queryParams.checkIn as string | undefined;
+  const checkOutDate = queryParams.checkOut as string | undefined;
+  const guests = queryParams.guests as string | undefined;
+  const rooms = queryParams.rooms as string | undefined;
 
-  for (const source of dataSources) {
-    const found = source.data.find((item: any) => {
-      if (source.adapter === dataAdapters.destination) {
-        return item.name.toLowerCase().replace(/\s+/g, "-") === slug;
-      }
-      return item.slug === slug;
-    });
-    if (found) {
-      homestay = source.adapter(found);
-      break;
-    }
+  if (!checkInDate || !checkOutDate || !guests || !rooms) {
+    console.error("Server: Missing or invalid query parameters:", { checkInDate, checkOutDate, guests, rooms });
+    notFound();
   }
 
-  if (!homestay) {
-    return {
-      title: "Homestay Not Found | Nepal Homestays",
-      description: "The requested homestay could not be found.",
-      metadataBase: new URL("https://nepalhomestays.com"),
+  const now = new Date();
+  const checkIn = new Date(checkInDate);
+  const isSameDay = checkIn.toDateString() === now.toDateString();
+  const currentHour = now.getHours();
+  if (isSameDay && currentHour >= 14) {
+    console.error("Server: Same-day check-in not allowed after 14:00");
+    notFound();
+  }
+
+  let homestay: Hero3Card | null = null;
+
+  try {
+    const body = {
+      checkInDate,
+      checkOutDate,
+      rooms: guests
+        .split(",")
+        .map((guest) => {
+          const [adults, children] = guest.split("A").map((part) => parseInt(part.replace("C", "")));
+          return { adults, children };
+        }),
+      page: 1,
+      limit: 10,
+      sort: "PRICE_ASC",
     };
-  }
 
-  return {
-    title: `${homestay.city} Homestay | Nepal Homestays`,
-    description: `Book your stay in ${homestay.city}, ${homestay.region} with Nepal Homestays.`,
-    keywords: `${homestay.city}, ${homestay.region}, homestay, Nepal, travel`,
-    metadataBase: new URL("https://nepalhomestays.com"),
-    openGraph: {
-      title: `${homestay.city} Homestay`,
-      description: `Book your stay in ${homestay.city}, ${homestay.region}.`,
-      images: [{ url: homestay.image, width: 1200, height: 630, alt: `${homestay.city} Homestay` }],
-      url: `https://nepalhomestays.com/homestays/${homestay.slug}`,
-      type: "website",
-    },
-  };
-}
+    console.log("Server: Fetching homestay with POST:", `/bookings/check-availability`, body);
 
-export default async function HomestayDetail({ params }: PageProps) {
-  const { slug } = await params;
-  let homestay: Hero3Card | null = null;
-
-  for (const source of dataSources) {
-    const found = source.data.find((item: any) => {
-      if (source.adapter === dataAdapters.destination) {
-        return item.name.toLowerCase().replace(/\s+/g, "-") === slug;
-      }
-      return item.slug === slug;
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/bookings/check-availability`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
     });
-    if (found) {
-      homestay = source.adapter(found);
-      break;
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Server: POST /bookings/check-availability failed:", response.status, errorText);
+      throw new Error(`Failed to fetch homestay: ${response.status} ${errorText}`);
     }
+
+    const data = await response.json();
+    const homestayData = data.homestays.find((h: ApiHomestay) => h.slug.toLowerCase() === slug.toLowerCase());
+    if (!homestayData) {
+      throw new Error("Homestay not found");
+    }
+    homestay = adaptApiHomestay(homestayData);
+
+    console.log("Server: Fetched homestay:", homestay);
+  } catch (error) {
+    console.error("Server: Error fetching homestay:", error);
+    notFound();
   }
 
   return <HomestayDetailWrapper homestay={homestay} slug={slug} />;
+}
+
+function adaptApiHomestay(data: ApiHomestay): Hero3Card {
+  return {
+    id: data.id,
+    image: data.imageSrc || "/images/fallback-image.png",
+    images: data.rooms.flatMap((room) => room.imageUrls) || [data.imageSrc || "/images/fallback-image.png"],
+    name: data.name || "Unknown Homestay",
+    address: data.address || "Unknown Address",
+    aboutDescription: data.aboutDescription || "No description available",
+    city: data.address?.split(",")[1]?.trim() || "Unknown City",
+    region: data.address ? data.address.split(",")[2]?.trim() : "Unknown Region",
+    price: `NPR ${data.totalPrice}`,
+    rating: data.rating,
+    slug: data.slug,
+    categoryColor: data.categoryColor || "bg-blue-500",
+    features: data.features || [],
+    vipAccess: data.vipAccess || false,
+    rooms: data.rooms.map((room) => {
+      if (!room.id) {
+        throw new Error(`Room ID missing for room: ${room.name}`);
+      }
+      return {
+        imageUrls: room.imageUrls,
+        roomTitle: room.name,
+        rating: room.rating,
+        reviews: room.reviews,
+        facilities: room.facilities || [],
+        bedType: room.bedType,
+        refundable: room.refundable,
+        nightlyPrice: room.nightlyPrice,
+        totalPrice: room.totalPrice,
+        originalPrice: room.originalPrice,
+        extrasOptions: room.extrasOptions,
+        roomsLeft: room.roomsLeft,
+        sqFt: room.maxOccupancy * 100 || 0,
+        sleeps: room.maxOccupancy || 1,
+        cityView: room.facilities?.includes("City View") || false,
+        freeParking: room.facilities?.includes("Free Parking") || false,
+        freeWifi: room.facilities?.includes("Free Wifi") || false,
+        roomId: room.id,
+      };
+    }),
+  };
 }

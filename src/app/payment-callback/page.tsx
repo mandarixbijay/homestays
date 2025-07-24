@@ -1,79 +1,140 @@
 // src/app/payment-callback/page.tsx
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { LoaderPinwheel } from "lucide-react";
-import axios from "axios";
+import Navbar from "@/components/navbar/navbar";
+import Footer from "@/components/footer/footer";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 function PaymentCallbackContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
 
   useEffect(() => {
     const verifyPayment = async () => {
-      const pidx = searchParams.get("pidx");
-      const purchaseOrderId = searchParams.get("purchase_order_id");
+      const pidx = searchParams.get("pidx"); // Khalti
+      const sessionId = searchParams.get("session_id"); // Stripe
+      const paymentStatus = searchParams.get("status"); // Khalti status
+      const bookingId = searchParams.get("bookingId");
+      const homestayName = searchParams.get("homestayName") || "Homestay";
+      const totalPrice = searchParams.get("totalPrice") || "0";
+      const checkIn = searchParams.get("checkIn") || "";
+      const checkOut = searchParams.get("checkOut") || "";
+      const guests = searchParams.get("guests") || "";
+      const rooms = searchParams.get("rooms") || "";
+      const selectedRooms = searchParams.get("selectedRooms") || "[]";
 
-      if (!pidx) {
+      console.log("Payment callback params:", {
+        pidx,
+        sessionId,
+        paymentStatus,
+        bookingId,
+        homestayName,
+        totalPrice,
+        checkIn,
+        checkOut,
+        guests,
+        rooms,
+        selectedRooms,
+      });
+
+      // Validate required parameters
+      if (!bookingId) {
         setStatus("error");
-        window.location.href = `/payment-cancel?error=Missing payment identifier`;
+        toast.error("Missing booking ID");
+        router.push(`/payment-cancel?error=Missing booking ID&bookingId=N/A`);
+        return;
+      }
+
+      if (!pidx && !sessionId) {
+        setStatus("error");
+        toast.error("Missing payment identifier");
+        router.push(`/payment-cancel?error=Missing payment identifier&bookingId=${bookingId}`);
         return;
       }
 
       try {
-        const response = await axios.post(
-          "/api/khalti/verify",
-          { pidx },
-          {
-            headers: {
-              Authorization: `Key ${
-                process.env.NEXT_PUBLIC_KHALTI_TEST_SECRET_KEY ||
-                "05bf95cc57244045b8df5fad06748dab"
-              }`,
-            },
+        let response;
+        if (pidx) {
+          if (paymentStatus !== "Completed") {
+            setStatus("error");
+            toast.error(`Payment status: ${paymentStatus}`);
+            router.push(`/payment-cancel?error=Payment status ${paymentStatus}&bookingId=${bookingId}`);
+            return;
           }
-        );
-
-        const data = response.data as { status?: string };
-        if (data.status === "Completed") {
-          setStatus("success");
-          window.location.href = `/payment-success?purchase_order_id=${encodeURIComponent(
-            purchaseOrderId || ""
-          )}`;
+          response = await fetch("/api/khalti/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pidx, bookingId }),
+          });
+        } else if (sessionId) {
+          response = await fetch("/api/stripe/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId, bookingId }),
+          });
         } else {
           setStatus("error");
-          window.location.href = `/payment-cancel?error=Payment not completed`;
+          toast.error("Invalid payment method");
+          router.push(`/payment-cancel?error=Invalid payment method&bookingId=${bookingId}`);
+          return;
         }
-      } catch (error) {
-        console.error("Error verifying Khalti payment:", error);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to verify payment");
+        }
+
+        const { status: paymentConfirmationStatus, booking } = await response.json();
+        if (paymentConfirmationStatus !== "CONFIRMED") {
+          throw new Error("Payment confirmation failed");
+        }
+
+        setStatus("success");
+        toast.success("Payment and booking confirmed successfully!");
+        router.push(
+          `/payment-success?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(selectedRooms)}&status=CONFIRMED&transactionId=${booking.transactionId}`
+        );
+      } catch (error: any) {
+        console.error("Error verifying payment:", error.message);
         setStatus("error");
-        window.location.href = `/payment-cancel?error=Payment verification failed`;
+        toast.error(error.message || "Payment verification failed");
+        router.push(`/payment-cancel?error=${encodeURIComponent(error.message)}&bookingId=${bookingId}`);
       }
     };
 
     verifyPayment();
-  }, [searchParams]);
+  }, [searchParams, router]);
 
-  if (status === "loading") {
-    return (
-      <div className="flex justify-center items-center h-screen bg-gray-50">
+  return (
+    <div className="min-h-screen bg-gray-50 pt-16 pb-12 font-manrope">
+      <Toaster position="top-right" richColors />
+      <Navbar />
+      <div className="flex justify-center items-center h-[calc(100vh-8rem)]">
         <LoaderPinwheel className="animate-spin h-12 w-12 text-primary" />
         <p className="ml-4 text-lg text-gray-700">Verifying payment...</p>
       </div>
-    );
-  }
-
-  return null;
+      <Footer />
+    </div>
+  );
 }
 
 export default function PaymentCallback() {
   return (
     <Suspense
       fallback={
-        <div className="flex justify-center items-center h-screen bg-gray-50">
-          <LoaderPinwheel className="animate-spin h-12 w-12 text-primary" />
-          <p className="ml-4 text-lg text-gray-700">Verifying payment...</p>
+        <div className="min-h-screen bg-gray-50 pt-16 pb-12 font-manrope">
+          <Toaster position="top-right" richColors />
+          <Navbar />
+          <div className="flex justify-center items-center h-[calc(100vh-8rem)]">
+            <LoaderPinwheel className="animate-spin h-12 w-12 text-primary" />
+            <p className="ml-4 text-lg text-gray-700">Verifying payment...</p>
+          </div>
+          <Footer />
         </div>
       }
     >

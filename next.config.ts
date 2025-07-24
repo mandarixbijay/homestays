@@ -12,6 +12,15 @@ const nextConfig: import('next').NextConfig = {
       { protocol: "https", hostname: "homestays-s3.s3.eu-north-1.amazonaws.com", pathname: "/**" },
     ],
   },
+
+  async rewrites() {
+    return [
+      {
+        source: "/bookings/check-availability",
+        destination: "http://13.61.8.56:3001/bookings/check-availability",
+      },
+    ];
+  },
   
 };
 
