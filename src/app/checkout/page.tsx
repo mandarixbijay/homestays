@@ -1,4 +1,3 @@
-// src/app/checkout/page.tsx
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
@@ -93,7 +92,7 @@ function HomestayCheckoutContent() {
     const fetchUserDetails = async () => {
       if (session?.user?.accessToken) {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/me`, {
+          const response = await fetch('/api/users/me', {
             method: "GET",
             headers: {
               accept: "application/json",
@@ -101,7 +100,9 @@ function HomestayCheckoutContent() {
             },
           });
 
-          if (!response.ok) throw new Error("Failed to fetch user details");
+          if (!response.ok) {
+            throw new Error(`Failed to fetch user details: ${response.status}`);
+          }
 
           const { data } = await response.json();
           const [firstName, ...lastNameParts] = data.name.split(" ");
@@ -113,7 +114,14 @@ function HomestayCheckoutContent() {
         } catch (error) {
           console.error("Error fetching user details:", error);
           toast.error("Failed to load user details. Please enter manually.");
+          setFirstName("");
+          setLastName("");
+          setEmail("");
+          setPhoneNumber("");
+          setCountryRegion("Nepal +977");
         }
+      } else {
+        console.log("No authenticated user, using guest form");
       }
     };
 
@@ -129,7 +137,9 @@ function HomestayCheckoutContent() {
           method: "GET",
           headers: { accept: "application/json" },
         });
-        if (!response.ok) throw new Error("Failed to fetch homestay details");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch homestay details: ${response.status}`);
+        }
         const data = await response.json();
         setHomestayDetails({
           name: data.name || homestayName,
@@ -248,12 +258,13 @@ function HomestayCheckoutContent() {
         body.guestPhone = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
       }
 
-      console.log("Sending booking request to:", `${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`);
+      const url = `/api${endpoint}`;
+      console.log("Sending booking request to:", url);
       console.log("Request body:", JSON.stringify(body, null, 2));
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
+      const response = await fetch(url, {
         method: "POST",
         headers,
         body: JSON.stringify(body),
