@@ -92,7 +92,7 @@ function HomestayCheckoutContent() {
     const fetchUserDetails = async () => {
       if (session?.user?.accessToken) {
         try {
-          const response = await fetch('/api/users/me', {
+          const response = await fetch("/api/users/me", {
             method: "GET",
             headers: {
               accept: "application/json",
@@ -218,7 +218,7 @@ function HomestayCheckoutContent() {
         headers["Authorization"] = `Bearer ${session.user.accessToken}`;
       }
 
-      const validPaymentMethods = ["STRIPE", "PAY_AT_PROPERTY"];
+      const validPaymentMethods = ["STRIPE", "PAY_AT_PROPERTY", "KHALTI"];
       let paymentMethod: string;
       switch (selectedPaymentMethod) {
         case "credit-debit":
@@ -226,6 +226,9 @@ function HomestayCheckoutContent() {
           break;
         case "pay-at-property":
           paymentMethod = "PAY_AT_PROPERTY";
+          break;
+        case "khalti":
+          paymentMethod = "KHALTI";
           break;
         default:
           throw new Error(`Invalid payment method: ${selectedPaymentMethod}`);
@@ -374,6 +377,92 @@ function HomestayCheckoutContent() {
     }
   };
 
+  const handleKhaltiCheckout = async (bookingId: string) => {
+    if (!bookingId) {
+      throw new Error("Missing bookingId");
+    }
+
+    setIsLoading(true);
+    try {
+      const amountInPaisa = convertToPaisa(totalPrice);
+      if (!Number.isInteger(amountInPaisa) || amountInPaisa < 1000) {
+        throw new Error("Amount must be an integer and at least 1000 paisa (10 NPR)");
+      }
+
+      const payload = {
+        return_url: `https://www.nepalhomestays.com/payment-callback?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(JSON.stringify(selectedRooms))}`,
+        website_url: "https://www.nepalhomestays.com",
+        amount: amountInPaisa,
+        purchase_order_id: bookingId,
+        purchase_order_name: `Booking for ${homestayName}`,
+        customer_info: session?.user
+          ? {
+              name: `${firstName} ${lastName}`.trim(),
+              email: email,
+              phone: phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`,
+            }
+          : {
+              name: `${firstName} ${lastName}`.trim(),
+              email: email,
+              phone: phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`,
+            },
+        amount_breakdown: [
+          {
+            label: "Base Price",
+            amount: amountInPaisa,
+          },
+        ],
+        product_details: selectedRooms.map((room: any, index: number) => ({
+          identity: room.roomId.toString(),
+          name: room.roomTitle,
+          total_price: convertToPaisa(room.totalPrice),
+          quantity: 1,
+          unit_price: convertToPaisa(room.nightlyPrice),
+        })),
+        metadata: {
+          homestayName,
+          checkIn,
+          checkOut,
+          guests,
+          rooms,
+          selectedRooms: JSON.stringify(selectedRooms),
+          bookingId,
+          totalPriceNPR: totalPrice.toString(),
+          payment_timestamp: new Date().toISOString(),
+        },
+      };
+
+      console.log("Khalti checkout payload:", JSON.stringify(payload, null, 2));
+
+      const response = await fetch("/api/khalti/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const responseData = await response.json();
+      console.log("Khalti API response:", JSON.stringify(responseData, null, 2));
+
+      if (!response.ok) {
+        throw new Error(responseData.error || "Failed to initiate Khalti payment");
+      }
+
+      const { pidx, payment_url } = responseData;
+      if (!pidx || !payment_url) {
+        throw new Error("Missing pidx or payment_url from Khalti response");
+      }
+
+      console.log("Redirecting to Khalti payment URL:", payment_url);
+      window.location.href = payment_url;
+    } catch (error: any) {
+      console.error("Error initiating Khalti checkout:", error.message);
+      toast.error(error.message || "Failed to initiate Khalti payment. Please try again.");
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -450,6 +539,15 @@ function HomestayCheckoutContent() {
           return;
         }
         await handleStripeCheckout(bookingId);
+      } else if (selectedPaymentMethod === "khalti") {
+        const expiresAtDate = new Date(expiresAt);
+        const now = new Date();
+        const timeLeft = (expiresAtDate.getTime() - now.getTime()) / 1000 / 60;
+        if (timeLeft <= 0) {
+          toast.error("Temporary booking has expired. Please try again.");
+          return;
+        }
+        await handleKhaltiCheckout(bookingId);
       } else {
         throw new Error(`Unsupported payment method: ${selectedPaymentMethod}`);
       }
@@ -687,7 +785,7 @@ function HomestayCheckoutContent() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary" />
+                  <Users className="h-4 w-4 text-primary/army" />
                   <span>
                     <strong>Guests:</strong> {totalGuests.adults} Adult{totalGuests.adults !== 1 ? "s" : ""}, {totalGuests.children} Child{totalGuests.children !== 1 ? "ren" : ""}
                   </span>
