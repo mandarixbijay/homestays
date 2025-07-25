@@ -97,6 +97,7 @@ export async function POST(request: NextRequest) {
       amount: khaltiData.total_amount,
       currency: "NPR",
       transaction_timestamp: khaltiData.transaction_ts || new Date().toISOString(),
+      khalti_transaction_id: khaltiData.transaction_id, // Store actual transaction_id for reference
       ...Object.keys(khaltiData).reduce((acc, key) => {
         if (key.startsWith("merchant_")) {
           acc[key.replace("merchant_", "")] = khaltiData[key];
@@ -106,11 +107,11 @@ export async function POST(request: NextRequest) {
     };
     console.log("Prepared metadata:", JSON.stringify(metadata, null, 2));
 
-    // Call confirm-payment endpoint
+    // Call confirm-payment endpoint with pidx as transactionId
     const confirmUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/bookings/confirm-payment`;
     const confirmPayload = {
       groupBookingId: bookingId,
-      transactionId: khaltiData.transaction_id || pidx,
+      transactionId: `pidx_${pidx}`, // Use pidx with prefix
       metadata,
     };
     console.log("Confirming payment at:", confirmUrl, "with payload:", JSON.stringify(confirmPayload, null, 2));
