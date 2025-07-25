@@ -19,29 +19,9 @@ function PaymentCallbackContent() {
       const sessionId = searchParams.get("session_id"); // Stripe
       const paymentStatus = searchParams.get("status"); // Khalti status
       const bookingId = searchParams.get("bookingId");
-      const homestayName = searchParams.get("homestayName") || "Homestay";
-      const totalPrice = searchParams.get("totalPrice") || "0";
-      const checkIn = searchParams.get("checkIn") || "";
-      const checkOut = searchParams.get("checkOut") || "";
-      const guests = searchParams.get("guests") || "0A0C";
-      const rooms = searchParams.get("rooms") || "0";
-      const selectedRooms = searchParams.get("selectedRooms") || "[]";
       const paymentMethod = searchParams.get("paymentMethod") || "Unknown";
 
-      console.log("Payment callback params:", {
-        pidx,
-        sessionId,
-        paymentStatus,
-        bookingId,
-        homestayName,
-        totalPrice,
-        checkIn,
-        checkOut,
-        guests,
-        rooms,
-        selectedRooms,
-        paymentMethod,
-      });
+      console.log("Payment callback params:", { pidx, sessionId, paymentStatus, bookingId, paymentMethod });
 
       if (!bookingId) {
         setStatus("error");
@@ -50,11 +30,28 @@ function PaymentCallbackContent() {
         return;
       }
 
+      // Retrieve stored data from sessionStorage
+      const storedData = sessionStorage.getItem(`booking_${bookingId}`);
+      const bookingData = storedData
+        ? JSON.parse(storedData)
+        : {
+            homestayName: "Homestay",
+            totalPrice: "0",
+            checkIn: "",
+            checkOut: "",
+            guests: "0A0C",
+            rooms: "0",
+            selectedRooms: [],
+            paymentMethod: paymentMethod,
+          };
+
+      const { homestayName, totalPrice, checkIn, checkOut, guests, rooms, selectedRooms } = bookingData;
+
       if (paymentMethod === "PAY_AT_PROPERTY") {
         setStatus("success");
         toast.success("Booking confirmed successfully!");
         router.push(
-          `/payment-success?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(selectedRooms)}&status=CONFIRMED&paymentMethod=${paymentMethod}&transactionId=N/A`
+          `/payment-success?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(JSON.stringify(selectedRooms))}&status=CONFIRMED&paymentMethod=${paymentMethod}&transactionId=N/A`
         );
         return;
       }
@@ -108,7 +105,10 @@ function PaymentCallbackContent() {
 
         setStatus("success");
         toast.success("Payment and booking confirmed successfully!");
-        router.push(redirect || `/payment-success?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(selectedRooms)}&status=CONFIRMED&paymentMethod=${paymentMethod}`);
+        router.push(
+          redirect ||
+            `/payment-success?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(JSON.stringify(selectedRooms))}&status=CONFIRMED&paymentMethod=${paymentMethod}`
+        );
       } catch (error: any) {
         console.error("Error verifying payment:", {
           message: error.message,

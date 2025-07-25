@@ -5,7 +5,8 @@ import { Calendar, LoaderPinwheel, Users, Bed, Star, Wifi, Car, Phone, Info, Hom
 import SignInCard from "@/components/homestay/components/sign-in-card";
 import React, { Suspense, useEffect, useState } from "react";
 import BookingForm from "@/components/homestay/components/checkout/BookingForm";
-
+import PaymentMethods from "@/components/homestay/components/checkout/PaymentMethods";
+import PoliciesAndSummary from "@/components/homestay/components/checkout/PoliciesAndSummary";
 import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
 import { format, differenceInDays } from "date-fns";
@@ -16,8 +17,6 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
-import PaymentMethods from "@/components/homestay/components/checkout/PaymentMethods";
-import PoliciesAndSummary from "@/components/homestay/components/checkout/PoliciesAndSummary";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
@@ -361,21 +360,34 @@ function HomestayCheckoutContent() {
       if (!Number.isInteger(amountInPaisa) || amountInPaisa < 1000)
         throw new Error("Amount must be ≥ 1000 paisa");
 
+      // Store non-essential data in sessionStorage
+      sessionStorage.setItem(
+        `booking_${bookingId}`,
+        JSON.stringify({
+          homestayName,
+          totalPrice,
+          checkIn,
+          checkOut,
+          guests: guests || "0A0C",
+          rooms: rooms.toString(),
+          selectedRooms: selectedRooms || [],
+          paymentMethod: "KHALTI",
+        })
+      );
+
       const baseUrl = "https://www.nepalhomestays.com";
       const queryParams = new URLSearchParams({
         bookingId,
-        homestayName: encodeURIComponent(homestayName),
-        totalPrice: totalPrice.toString(),
-        checkIn,
-        checkOut,
-        guests: guests || "0A0C",
-        rooms: rooms.toString(),
-        selectedRooms: JSON.stringify(selectedRooms || []),
         paymentMethod: "KHALTI",
       });
 
+      const return_url = `${baseUrl}/payment-callback?${queryParams.toString()}`;
+      if (return_url.length > 255) {
+        throw new Error(`Return URL too long: ${return_url.length} characters`);
+      }
+
       const payload = {
-        return_url: `${baseUrl}/payment-callback?${queryParams.toString()}`,
+        return_url,
         website_url: baseUrl,
         amount: amountInPaisa,
         purchase_order_id: bookingId,
@@ -402,7 +414,25 @@ function HomestayCheckoutContent() {
       window.location.href = payment_url;
     } catch (error: any) {
       console.error("Khalti checkout error:", error.message);
-      toast.error(error.message || "Failed to initiate Khalti payment");
+      toast.error(
+        error.message || "Failed to initiate Khalti payment. Please try 'Pay at Property' or contact support."
+      );
+      setSelectedPaymentMethod("pay-at-property"); // Fallback to PAY_AT_PROPERTY
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEsewaCheckout = async (bookingId: string) => {
+    if (!bookingId) throw new Error("Missing bookingId");
+
+    setIsLoading(true);
+    try {
+      throw new Error("eSewa payment method is not yet implemented");
+    } catch (error: any) {
+      console.error("eSewa checkout error:", error.message);
+      toast.error(error.message || "Failed to initiate eSewa payment");
       throw error;
     } finally {
       setIsLoading(false);
@@ -442,7 +472,6 @@ function HomestayCheckoutContent() {
       const bookingData = await handleCreateBooking();
 
       if (selectedPaymentMethod === "pay-at-property") {
-        // Skip confirm-payment, redirect to success
         console.log("Redirecting to payment-success for PAY_AT_PROPERTY, bookingId:", bookingData.bookingId);
         const queryParams = new URLSearchParams({
           bookingId: bookingData.bookingId,
@@ -476,6 +505,15 @@ function HomestayCheckoutContent() {
           return;
         }
         await handleKhaltiCheckout(bookingData.bookingId);
+      } else if (selectedPaymentMethod === "esewa") {
+        const expiresAtDate = new Date(bookingData.expiresAt);
+        const now = new Date();
+        const timeLeft = (expiresAtDate.getTime() - now.getTime()) / 1000 / 60;
+        if (timeLeft <= 0) {
+          toast.error("Temporary booking expired.");
+          return;
+        }
+        await handleEsewaCheckout(bookingData.bookingId);
       } else {
         throw new Error(`Unsupported payment method: ${selectedPaymentMethod}`);
       }
@@ -656,7 +694,7 @@ function HomestayCheckoutContent() {
             <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 w-full">
               <PaymentMethods
                 selectedPaymentMethod={selectedPaymentMethod}
-                setSelectedPaymentMethod={(value: string) => {
+                setSelectedPaymentMethod={(value) => {
                   console.log("PaymentMethods setSelectedPaymentMethod:", value);
                   setSelectedPaymentMethod(value);
                 }}
