@@ -19,7 +19,7 @@ function PaymentCallbackContent() {
       const sessionId = searchParams.get("session_id"); // Stripe
       const paymentStatus = searchParams.get("status"); // Khalti status
       const bookingId = searchParams.get("bookingId");
-      // Optional parameters for success redirect
+      // Optional parameters for fallback
       const homestayName = searchParams.get("homestayName") || "Homestay";
       const totalPrice = searchParams.get("totalPrice") || "0";
       const checkIn = searchParams.get("checkIn") || "";
@@ -27,6 +27,7 @@ function PaymentCallbackContent() {
       const guests = searchParams.get("guests") || "";
       const rooms = searchParams.get("rooms") || "";
       const selectedRooms = searchParams.get("selectedRooms") || "[]";
+      const paymentMethod = searchParams.get("paymentMethod") || "Unknown";
 
       console.log("Payment callback params:", {
         pidx,
@@ -40,6 +41,7 @@ function PaymentCallbackContent() {
         guests,
         rooms,
         selectedRooms,
+        paymentMethod,
       });
 
       // Validate required parameters
@@ -86,7 +88,7 @@ function PaymentCallbackContent() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          console.error("Khalti verify error:", {
+          console.error("Verify error:", {
             status: response.status,
             error: errorData.error,
             details: errorData.details,
@@ -94,17 +96,15 @@ function PaymentCallbackContent() {
           throw new Error(errorData.error || "Failed to verify payment");
         }
 
-        const { status: paymentConfirmationStatus, booking } = await response.json();
-        console.log("Khalti verify response:", { paymentConfirmationStatus, booking });
+        const { status: paymentConfirmationStatus, booking, redirect } = await response.json();
+        console.log("Verify response:", { paymentConfirmationStatus, booking, redirect });
         if (paymentConfirmationStatus !== "CONFIRMED") {
           throw new Error("Payment confirmation failed");
         }
 
         setStatus("success");
         toast.success("Payment and booking confirmed successfully!");
-        router.push(
-          `/payment-success?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(selectedRooms)}&status=CONFIRMED&transactionId=${booking.transactionId}`
-        );
+        router.push(redirect || `/payment-success?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(selectedRooms)}&status=CONFIRMED&paymentMethod=${paymentMethod}`);
       } catch (error: any) {
         console.error("Error verifying payment:", {
           message: error.message,
