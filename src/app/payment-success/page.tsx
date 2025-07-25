@@ -1,4 +1,3 @@
-// src/app/payment-success/page.tsx
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
@@ -30,7 +29,7 @@ function PaymentSuccessContent() {
     rooms: { roomId: number; roomName: string; adults: number; children: number; totalPrice: number }[];
   } | null>(null);
 
-  // Extract query parameters
+  // Extract and log query parameters
   const bookingId = searchParams.get("bookingId") || "N/A";
   const homestayName = searchParams.get("homestayName") || "Homestay";
   const totalPrice = parseFloat(searchParams.get("totalPrice") || "0");
@@ -41,6 +40,20 @@ function PaymentSuccessContent() {
   const selectedRooms = searchParams.get("selectedRooms") ? JSON.parse(searchParams.get("selectedRooms") || "[]") : [];
   const transactionId = searchParams.get("transactionId") || "N/A";
   const sessionId = searchParams.get("session_id");
+
+  console.log("Payment success params:", {
+    bookingId,
+    homestayName,
+    totalPrice,
+    checkIn,
+    checkOut,
+    guests,
+    rooms,
+    selectedRooms,
+    transactionId,
+    sessionId,
+    status,
+  });
 
   // Format dates and calculate nights
   let checkInDate = "Today";
@@ -53,6 +66,7 @@ function PaymentSuccessContent() {
     if (numNights > 0) {
       nightStay = `${numNights}-night stay`;
     }
+    console.log("Formatted dates:", { checkInDate, checkOutDate, nightStay });
   } catch (error) {
     console.error("Error formatting dates:", error);
   }
@@ -67,25 +81,34 @@ function PaymentSuccessContent() {
       },
       { adults: 0, children: 0 }
     ) || { adults: 0, children: 0 };
+  console.log("Total guests:", totalGuests);
 
-  // Verify Stripe payment
+  // Verify Stripe payment or fetch booking details
   useEffect(() => {
     if (status === "CONFIRMED" || !sessionId) {
       // For "Pay at Property" or already confirmed bookings, fetch booking details
       const fetchBookingDetails = async () => {
+        console.log("Fetching booking details for:", bookingId);
         try {
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/bookings/${bookingId}`, {
             method: "GET",
             headers: { "Content-Type": "application/json", accept: "application/json" },
           });
+          console.log("Booking details response status:", response.status);
           if (!response.ok) {
-            throw new Error("Failed to fetch booking details");
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to fetch booking details");
           }
           const data = await response.json();
           setBookingDetails(data);
           setStatus(data.status || "CONFIRMED");
+          console.log("Booking details fetched:", JSON.stringify(data, null, 2));
         } catch (error: any) {
-          console.error("Error fetching booking details:", error);
+          console.error("Error fetching booking details:", {
+            message: error.message,
+            status: error.response?.status,
+            details: error.response?.data,
+          });
           toast.error("Failed to load booking details. Displaying available information.");
         }
       };
@@ -95,32 +118,39 @@ function PaymentSuccessContent() {
 
     const verifyPayment = async () => {
       setIsVerifying(true);
+      console.log("Verifying Stripe payment:", { sessionId, bookingId });
       try {
         const response = await fetch("/api/stripe/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sessionId, bookingId }),
         });
-
+        console.log("Stripe verify response status:", response.status);
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || "Failed to verify payment");
         }
-
         const data = await response.json();
+        console.log("Stripe verify response:", JSON.stringify(data, null, 2));
         if (data.status === "CONFIRMED") {
           setStatus("CONFIRMED");
           setBookingDetails(data.booking);
           toast.success("Payment confirmed! Your booking is now confirmed.");
+          console.log("Stripe payment confirmed:", JSON.stringify(data, null, 2));
         } else {
           throw new Error("Payment not completed");
         }
       } catch (error: any) {
-        console.error("Error verifying payment:", error);
+        console.error("Error verifying payment:", {
+          message: error.message,
+          status: error.response?.status,
+          details: error.response?.data,
+        });
         toast.error("Payment verification failed. Please contact support.");
         router.push(`/payment-cancel?error=${encodeURIComponent(error.message)}&bookingId=${bookingId}`);
       } finally {
         setIsVerifying(false);
+        console.log("Stripe verification completed");
       }
     };
 
@@ -128,6 +158,7 @@ function PaymentSuccessContent() {
   }, [searchParams, router, bookingId, sessionId, status]);
 
   if (isVerifying) {
+    console.log("Rendering verifying state");
     return (
       <div className="min-h-screen bg-gray-50 pt-16 pb-12">
         <Navbar />
@@ -145,6 +176,7 @@ function PaymentSuccessContent() {
     );
   }
 
+  console.log("Rendering success page with details:", bookingDetails || "Using query params");
   return (
     <div className="min-h-screen bg-gray-50 pt-16 pb-12 font-manrope">
       <Toaster position="top-right" richColors />

@@ -1,4 +1,3 @@
-// src/app/api/khalti/initiate/route.ts
 import { NextResponse } from "next/server";
 import axios from "axios";
 
@@ -52,7 +51,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Validate amount_breakdown
+    // Validate amount_breakdown if provided
     if (amount_breakdown) {
       const totalBreakdown = amount_breakdown.reduce((sum: number, item: { amount: number }) => sum + item.amount, 0);
       if (totalBreakdown !== amount) {
@@ -85,7 +84,7 @@ export async function POST(request: Request) {
     }, null, 2));
 
     // Validate environment variables
-    const khaltiUrl = process.env.KHALTI_SANDBOX_URL || "https://dev.khalti.com/api/v2/epayment/initiate/";
+    const khaltiUrl = "https://dev.khalti.com/api/v2/epayment/initiate/";
     const khaltiSecretKey = process.env.KHALTI_SECRET_KEY;
     if (!khaltiSecretKey) {
       return NextResponse.json(
@@ -124,6 +123,12 @@ export async function POST(request: Request) {
         console.log("Khalti API response:", JSON.stringify(response.data, null, 2));
         return NextResponse.json(response.data);
       } catch (error: any) {
+        console.error("Khalti API error:", {
+          attempt: attempt + 1,
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message,
+        });
         if (error.response?.status === 500 && attempt < maxRetries - 1) {
           attempt++;
           console.log(`Retrying Khalti request (attempt ${attempt + 1})...`);
@@ -136,7 +141,7 @@ export async function POST(request: Request) {
             : error.response?.status === 401
             ? "Invalid Khalti authorization key. Please contact support."
             : error.response?.data?.error_key === "validation_error"
-            ? error.response?.data?.message || "Invalid payment details"
+            ? error.response?.data?.message || JSON.stringify(error.response?.data) || "Invalid payment details"
             : error.message || "Failed to initiate Khalti payment";
         return NextResponse.json(
           { error: errorMessage, details: error.response?.data || error.message },
@@ -148,8 +153,7 @@ export async function POST(request: Request) {
     console.error("Error initiating Khalti payment:", {
       message: error.message,
       status: error.response?.status,
-      headers: error.response?.headers,
-      rawResponse: error.response?.data?.toString() || error.message,
+      data: error.response?.data,
     });
     return NextResponse.json(
       { error: "Failed to initiate Khalti payment", details: error.message },

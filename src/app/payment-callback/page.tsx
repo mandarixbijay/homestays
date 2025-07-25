@@ -1,4 +1,3 @@
-// src/app/payment-callback/page.tsx
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
@@ -20,6 +19,7 @@ function PaymentCallbackContent() {
       const sessionId = searchParams.get("session_id"); // Stripe
       const paymentStatus = searchParams.get("status"); // Khalti status
       const bookingId = searchParams.get("bookingId");
+      // Optional parameters for success redirect
       const homestayName = searchParams.get("homestayName") || "Homestay";
       const totalPrice = searchParams.get("totalPrice") || "0";
       const checkIn = searchParams.get("checkIn") || "";
@@ -86,10 +86,16 @@ function PaymentCallbackContent() {
 
         if (!response.ok) {
           const errorData = await response.json();
+          console.error("Khalti verify error:", {
+            status: response.status,
+            error: errorData.error,
+            details: errorData.details,
+          });
           throw new Error(errorData.error || "Failed to verify payment");
         }
 
         const { status: paymentConfirmationStatus, booking } = await response.json();
+        console.log("Khalti verify response:", { paymentConfirmationStatus, booking });
         if (paymentConfirmationStatus !== "CONFIRMED") {
           throw new Error("Payment confirmation failed");
         }
@@ -100,7 +106,13 @@ function PaymentCallbackContent() {
           `/payment-success?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(selectedRooms)}&status=CONFIRMED&transactionId=${booking.transactionId}`
         );
       } catch (error: any) {
-        console.error("Error verifying payment:", error.message);
+        console.error("Error verifying payment:", {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+          pidx,
+          bookingId,
+        });
         setStatus("error");
         toast.error(error.message || "Payment verification failed");
         router.push(`/payment-cancel?error=${encodeURIComponent(error.message)}&bookingId=${bookingId}`);

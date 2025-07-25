@@ -1,4 +1,3 @@
-// src/app/payment-cancel/page.tsx
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
@@ -22,6 +21,18 @@ function PaymentCancelContent() {
   const guests = searchParams.get("guests") || "";
   const rooms = searchParams.get("rooms") || "";
   const selectedRooms = searchParams.get("selectedRooms") || "[]";
+
+  console.log("Payment cancel params:", {
+    error,
+    bookingId,
+    homestayName,
+    totalPrice,
+    checkIn,
+    checkOut,
+    guests,
+    rooms,
+    selectedRooms,
+  });
 
   const tryAgainUrl = `/checkout?homestayId=${searchParams.get("homestayId") || "0"}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(selectedRooms)}&paymentMethod=khalti`;
 
@@ -49,9 +60,11 @@ function PaymentCancelContent() {
             <p className="text-sm text-red-700">
               Error: {error}
               <br />
-              {error.includes("Khalti server") || error.includes("Invalid Khalti authorization key") || error.includes("Invalid request to Stripe")
-                ? "Please try another payment method (e.g., Khalti or pay-at-property) or try again later."
-                : "Please try again with a different payment method or contact support if the issue persists."}
+              {error.includes("Khalti server") || error.includes("Invalid Khalti authorization key")
+                ? "Please try another payment method (e.g., pay-at-property) or try again later."
+                : error.includes("Payment confirmation failed")
+                  ? "Payment was processed but booking confirmation failed. Please contact support with your Booking ID."
+                  : "Please try again with a different payment method or contact support if the issue persists."}
             </p>
           </div>
           <div className="space-y-4">
@@ -73,7 +86,7 @@ function PaymentCancelContent() {
           </div>
           <p className="text-xs text-gray-500 mt-6">
             Need help?{" "}
-            <a href="mailto:support@example.com" className="text-primary hover:underline">
+            <a href="mailto:support@nepalhomestays.com" className="text-primary hover:underline">
               Contact our support team
             </a>
             .
