@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     }, null, 2));
 
     // Validate environment variables
-    const khaltiUrl = "https://dev.khalti.com/api/v2/epayment/initiate/";
+    const khaltiUrl = "https://khalti.com/api/v2/epayment/initiate/";
     const khaltiSecretKey = process.env.KHALTI_SECRET_KEY;
     if (!khaltiSecretKey) {
       return NextResponse.json(

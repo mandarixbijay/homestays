@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     console.log("Input validated:", { pidx, bookingId });
 
     // Verify Khalti payment
-    const khaltiApiUrl = "https://dev.khalti.com/api/v2/epayment/lookup/";
+    const khaltiApiUrl = "https://khalti.com/api/v2/epayment/lookup/";
     const khaltiSecretKey = process.env.KHALTI_SECRET_KEY;
     if (!khaltiSecretKey) {
       console.log("Khalti secret key missing");
