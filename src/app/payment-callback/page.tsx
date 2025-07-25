@@ -19,13 +19,12 @@ function PaymentCallbackContent() {
       const sessionId = searchParams.get("session_id"); // Stripe
       const paymentStatus = searchParams.get("status"); // Khalti status
       const bookingId = searchParams.get("bookingId");
-      // Optional parameters for fallback
       const homestayName = searchParams.get("homestayName") || "Homestay";
       const totalPrice = searchParams.get("totalPrice") || "0";
       const checkIn = searchParams.get("checkIn") || "";
       const checkOut = searchParams.get("checkOut") || "";
-      const guests = searchParams.get("guests") || "";
-      const rooms = searchParams.get("rooms") || "";
+      const guests = searchParams.get("guests") || "0A0C";
+      const rooms = searchParams.get("rooms") || "0";
       const selectedRooms = searchParams.get("selectedRooms") || "[]";
       const paymentMethod = searchParams.get("paymentMethod") || "Unknown";
 
@@ -44,11 +43,19 @@ function PaymentCallbackContent() {
         paymentMethod,
       });
 
-      // Validate required parameters
       if (!bookingId) {
         setStatus("error");
         toast.error("Missing booking ID");
         router.push(`/payment-cancel?error=Missing booking ID&bookingId=N/A`);
+        return;
+      }
+
+      if (paymentMethod === "PAY_AT_PROPERTY") {
+        setStatus("success");
+        toast.success("Booking confirmed successfully!");
+        router.push(
+          `/payment-success?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(selectedRooms)}&status=CONFIRMED&paymentMethod=${paymentMethod}&transactionId=N/A`
+        );
         return;
       }
 
@@ -80,10 +87,7 @@ function PaymentCallbackContent() {
             body: JSON.stringify({ sessionId, bookingId }),
           });
         } else {
-          setStatus("error");
-          toast.error("Invalid payment method");
-          router.push(`/payment-cancel?error=Invalid payment method&bookingId=${bookingId}`);
-          return;
+          throw new Error("Invalid payment method");
         }
 
         if (!response.ok) {
@@ -96,8 +100,8 @@ function PaymentCallbackContent() {
           throw new Error(errorData.error || "Failed to verify payment");
         }
 
-        const { status: paymentConfirmationStatus, booking, redirect } = await response.json();
-        console.log("Verify response:", { paymentConfirmationStatus, booking, redirect });
+        const { status: paymentConfirmationStatus, redirect } = await response.json();
+        console.log("Verify response:", { paymentConfirmationStatus, redirect });
         if (paymentConfirmationStatus !== "CONFIRMED") {
           throw new Error("Payment confirmation failed");
         }
@@ -128,7 +132,7 @@ function PaymentCallbackContent() {
       <Navbar />
       <div className="flex justify-center items-center h-[calc(100vh-8rem)]">
         <LoaderPinwheel className="animate-spin h-12 w-12 text-primary" />
-        <p className="ml-4 text-lg text-gray-700">Verifying payment...</p>
+        <p className="ml-4 text-lg text-gray-700">Verifying...</p>
       </div>
       <Footer />
     </div>
@@ -144,7 +148,7 @@ export default function PaymentCallback() {
           <Navbar />
           <div className="flex justify-center items-center h-[calc(100vh-8rem)]">
             <LoaderPinwheel className="animate-spin h-12 w-12 text-primary" />
-            <p className="ml-4 text-lg text-gray-700">Verifying payment...</p>
+            <p className="ml-4 text-lg text-gray-700">Loading...</p>
           </div>
           <Footer />
         </div>

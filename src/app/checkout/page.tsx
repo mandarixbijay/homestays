@@ -5,8 +5,7 @@ import { Calendar, LoaderPinwheel, Users, Bed, Star, Wifi, Car, Phone, Info, Hom
 import SignInCard from "@/components/homestay/components/sign-in-card";
 import React, { Suspense, useEffect, useState } from "react";
 import BookingForm from "@/components/homestay/components/checkout/BookingForm";
-import PaymentMethods from "@/components/homestay/components/checkout/PaymentMethods";
-import PoliciesAndSummary from "@/components/homestay/components/checkout/PoliciesAndSummary";
+
 import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
 import { format, differenceInDays } from "date-fns";
@@ -17,6 +16,8 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import PaymentMethods from "@/components/homestay/components/checkout/PaymentMethods";
+import PoliciesAndSummary from "@/components/homestay/components/checkout/PoliciesAndSummary";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
@@ -31,7 +32,7 @@ function HomestayCheckoutContent() {
   const [countryRegion, setCountryRegion] = useState("Nepal +977");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
-    searchParams.get("paymentMethod")?.toLowerCase() || "credit-debit"
+    searchParams.get("paymentMethod")?.toLowerCase() || "pay-at-property"
   );
   const [isLoading, setIsLoading] = useState(false);
   const [homestayDetails, setHomestayDetails] = useState<{
@@ -64,6 +65,7 @@ function HomestayCheckoutContent() {
     email?: string;
     countryRegion?: string;
     phoneNumber?: string;
+    paymentMethod?: string;
   };
 
   const [errors, setErrors] = useState<Errors>({});
@@ -73,15 +75,15 @@ function HomestayCheckoutContent() {
   const totalPrice = parseFloat(searchParams.get("totalPrice") || "0");
   const checkIn = searchParams.get("checkIn") || format(new Date(), "yyyy-MM-dd");
   const checkOut = searchParams.get("checkOut") || format(new Date(Date.now() + 24 * 60 * 60 * 1000), "yyyy-MM-dd");
-  const guests = searchParams.get("guests") || "";
-  const rooms = searchParams.get("rooms") || "";
+  const guests = searchParams.get("guests") || "0A0C";
+  const rooms = searchParams.get("rooms") || "0";
   const selectedRooms = searchParams.get("selectedRooms")
     ? JSON.parse(searchParams.get("selectedRooms") || "[]").map((room: any) => {
-      if (!room.roomId) {
-        throw new Error(`Room ID missing for selected room: ${room.roomTitle}`);
-      }
-      return room;
-    })
+        if (!room.roomId) {
+          throw new Error(`Room ID missing for selected room: ${room.roomTitle}`);
+        }
+        return room;
+      })
     : [];
 
   useEffect(() => {
@@ -99,29 +101,18 @@ function HomestayCheckoutContent() {
               Authorization: `Bearer ${session.user.accessToken}`,
             },
           });
-
-          if (!response.ok) {
-            throw new Error(`Failed to fetch user details: ${response.status}`);
-          }
-
+          if (!response.ok) throw new Error(`Failed to fetch user: ${response.status}`);
           const { data } = await response.json();
-          const [firstName, ...lastNameParts] = data.name.split(" ");
+          const [firstName, ...lastNameParts] = (data?.user?.name || "").split(" ");
           setFirstName(firstName || "");
           setLastName(lastNameParts.join(" ") || "");
-          setEmail(data.email || "");
-          setPhoneNumber(data.phoneNumber || "");
-          setCountryRegion(data.countryRegion || "Nepal +977");
+          setEmail(data?.user?.email || "");
+          setPhoneNumber(data.phone || "");
+          setCountryRegion(data.country || "Nepal +977");
         } catch (error) {
-          console.error("Error fetching user details:", error);
-          toast.error("Failed to load user details. Please enter manually.");
-          setFirstName("");
-          setLastName("");
-          setEmail("");
-          setPhoneNumber("");
-          setCountryRegion("Nepal +977");
+          console.error("Error fetching user:", error);
+          toast.error("Failed to load user details.");
         }
-      } else {
-        console.log("No authenticated user, using guest form");
       }
     };
 
@@ -137,38 +128,36 @@ function HomestayCheckoutContent() {
           method: "GET",
           headers: { accept: "application/json" },
         });
-        if (!response.ok) {
-          throw new Error(`Failed to fetch homestay details: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Failed to fetch homestay: ${response.status}`);
         const data = await response.json();
         setHomestayDetails({
           name: data.name || homestayName,
           address: data.address || "Unknown Location",
           rating: data.rating || 4.5,
           facilities: data.facilities || ["WiFi", "Parking"],
-          images: data.images || [{ id: 1, url: "/images/homimages/placeholder-homestay.jpg", isMain: true }],
+          images: data.images || [{ id: 1, url: "/images/placeholder-homestay.jpg", isMain: true }],
           rooms: data.rooms || [],
           checkInTime: data.checkInTime || "02:00 PM",
           checkOutTime: data.checkOutTime || "11:00 AM",
-          description: data.description || "A cozy homestay offering a comfortable stay.",
-          contactNumber: data.contactNumber || "Not available",
+          description: data.description || "A cozy homestay.",
+          contactNumber: data.contactNumber || "N/A",
           features: data.features || ["Attached Bathroom"],
           reviews: data.reviews || 0,
         });
       } catch (error) {
-        console.error("Error fetching homestay details:", error);
-        toast.error("Failed to load homestay details. Showing default values.");
+        console.error("Error fetching homestay:", error);
+        toast.error("Failed to load homestay details.");
         setHomestayDetails({
           name: homestayName,
           address: "Unknown Location",
           rating: 4.5,
           facilities: ["WiFi", "Parking"],
-          images: [{ id: 1, url: "/images/homimages/placeholder-homestay.jpg", isMain: true }],
+          images: [{ id: 1, url: "/images/placeholder-homestay.jpg", isMain: true }],
           rooms: [],
           checkInTime: "02:00 PM",
           checkOutTime: "11:00 AM",
-          description: "A cozy homestay offering a comfortable stay.",
-          contactNumber: "Not available",
+          description: "A cozy homestay.",
+          contactNumber: "N/A",
           features: ["Attached Bathroom"],
           reviews: 0,
         });
@@ -218,7 +207,7 @@ function HomestayCheckoutContent() {
         headers["Authorization"] = `Bearer ${session.user.accessToken}`;
       }
 
-      const validPaymentMethods = ["STRIPE", "PAY_AT_PROPERTY", "KHALTI"];
+      const validPaymentMethods = ["STRIPE", "PAY_AT_PROPERTY", "KHALTI", "ESEWA", "CARD"];
       let paymentMethod: string;
       switch (selectedPaymentMethod) {
         case "credit-debit":
@@ -229,6 +218,9 @@ function HomestayCheckoutContent() {
           break;
         case "khalti":
           paymentMethod = "KHALTI";
+          break;
+        case "esewa":
+          paymentMethod = "ESEWA";
           break;
         default:
           throw new Error(`Invalid payment method: ${selectedPaymentMethod}`);
@@ -291,10 +283,10 @@ function HomestayCheckoutContent() {
           ? "Booking confirmed successfully!"
           : "Temporary booking created! Please complete payment within 10 minutes."
       );
-      return { bookingId: responseData.bookingId, expiresAt: responseData.expiresAt };
+      return responseData;
     } catch (error: any) {
       console.error("Error creating booking:", error.message);
-      toast.error(error.message || "Failed to create booking. Please try again.");
+      toast.error(error.message || "Failed to create booking.");
       throw error;
     } finally {
       setIsLoading(false);
@@ -302,28 +294,17 @@ function HomestayCheckoutContent() {
   };
 
   const handleStripeCheckout = async (bookingId: string) => {
-    if (!bookingId) {
-      throw new Error("Missing bookingId");
-    }
+    if (!bookingId) throw new Error("Missing bookingId");
 
     setIsLoading(true);
     try {
       const stripe = await stripePromise;
-      if (!stripe) throw new Error("Stripe failed to initialize. Check NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.");
-
-      console.log("Stripe Publishable Key:", process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+      if (!stripe) throw new Error("Stripe failed to initialize.");
 
       const amountInPaisa = convertToPaisa(totalPrice);
-      if (!Number.isInteger(amountInPaisa) || amountInPaisa < 1000) {
-        throw new Error("Amount must be an integer and at least 1000 paisa (10 NPR)");
-      }
-
-      // Convert NPR to USD (approximate rate: 1 USD = 137 NPR)
       const NPR_TO_USD_RATE = 137;
       const amountInUSDCents = Math.round((amountInPaisa / 100) / NPR_TO_USD_RATE * 100);
-      if (amountInUSDCents < 50) {
-        throw new Error("Amount in USD must be at least 50 cents");
-      }
+      if (amountInUSDCents < 50) throw new Error("Amount in USD must be at least 50 cents");
 
       const payload = {
         amount: amountInUSDCents,
@@ -353,24 +334,18 @@ function HomestayCheckoutContent() {
       const responseData = await response.json();
       console.log("Stripe API response:", JSON.stringify(responseData, null, 2));
 
-      if (!response.ok) {
-        throw new Error(responseData.error || "Failed to initiate Stripe payment");
-      }
+      if (!response.ok) throw new Error(responseData.error || "Failed to initiate Stripe payment");
 
       const { sessionId } = responseData;
-      if (!sessionId) {
-        throw new Error("Missing sessionId from Stripe response");
-      }
+      if (!sessionId) throw new Error("Missing sessionId from Stripe response");
 
       console.log("Stripe sessionId:", sessionId);
       const { error } = await stripe.redirectToCheckout({ sessionId });
 
-      if (error) {
-        throw new Error(error.message || "Failed to redirect to Stripe checkout");
-      }
+      if (error) throw new Error(error.message || "Failed to redirect to Stripe checkout");
     } catch (error: any) {
-      console.error("Error initiating Stripe checkout:", error.message);
-      toast.error(error.message || "Failed to initiate Stripe payment. Please try again.");
+      console.error("Error initiating Stripe:", error.message);
+      toast.error(error.message || "Failed to initiate Stripe payment.");
       throw error;
     } finally {
       setIsLoading(false);
@@ -386,9 +361,22 @@ function HomestayCheckoutContent() {
       if (!Number.isInteger(amountInPaisa) || amountInPaisa < 1000)
         throw new Error("Amount must be ≥ 1000 paisa");
 
+      const baseUrl = "https://www.nepalhomestays.com";
+      const queryParams = new URLSearchParams({
+        bookingId,
+        homestayName: encodeURIComponent(homestayName),
+        totalPrice: totalPrice.toString(),
+        checkIn,
+        checkOut,
+        guests: guests || "0A0C",
+        rooms: rooms.toString(),
+        selectedRooms: JSON.stringify(selectedRooms || []),
+        paymentMethod: "KHALTI",
+      });
+
       const payload = {
-        return_url: `https://www.nepalhomestays.com/payment-callback?bookingId=${bookingId}`,
-        website_url: "https://www.nepalhomestays.com",
+        return_url: `${baseUrl}/payment-callback?${queryParams.toString()}`,
+        website_url: baseUrl,
         amount: amountInPaisa,
         purchase_order_id: bookingId,
         purchase_order_name: `Booking for ${homestayName}`,
@@ -421,11 +409,9 @@ function HomestayCheckoutContent() {
     }
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log("Submitting form with selectedPaymentMethod:", selectedPaymentMethod);
+    console.log("Submitting form with paymentMethod:", selectedPaymentMethod);
 
     const newErrors: Errors = {};
     if (!session?.user) {
@@ -434,10 +420,10 @@ function HomestayCheckoutContent() {
       if (!email) newErrors.email = "Email address is required.";
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Invalid email address.";
       if (!countryRegion) newErrors.countryRegion = "Country/region is required.";
-      if (!phoneNumber || !/^\+\d{10,15}$/.test(phoneNumber)) {
+      if (!phoneNumber || !/^\+\d{10,15}$/.test(phoneNumber))
         newErrors.phoneNumber = "Phone number must include country code (e.g., +9771234567890).";
-      }
     }
+    if (!selectedPaymentMethod) newErrors.paymentMethod = "Payment method is required.";
 
     setErrors(newErrors);
 
@@ -448,76 +434,59 @@ function HomestayCheckoutContent() {
     }
 
     if (selectedRooms.length === 0) {
-      toast.error("No rooms selected. Please select at least one room.");
+      toast.error("No rooms selected.");
       return;
     }
 
     try {
-      const { bookingId, expiresAt } = await handleCreateBooking();
-
-      if (!bookingId) {
-        throw new Error("Booking ID not returned from booking creation");
-      }
+      const bookingData = await handleCreateBooking();
 
       if (selectedPaymentMethod === "pay-at-property") {
-        console.log("Confirming Pay at Property booking, bookingId:", bookingId);
-        const confirmResponse = await fetch("/api/bookings/confirm-payment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            groupBookingId: bookingId,
-            transactionId: `PAY_AT_PROPERTY_${bookingId}`,
-            metadata: {
-              homestayName,
-              checkIn,
-              checkOut,
-              guests,
-              rooms,
-              selectedRooms: JSON.stringify(selectedRooms),
-              totalPriceNPR: totalPrice.toString(),
-              payment_timestamp: new Date().toISOString(),
-            },
-          }),
+        // Skip confirm-payment, redirect to success
+        console.log("Redirecting to payment-success for PAY_AT_PROPERTY, bookingId:", bookingData.bookingId);
+        const queryParams = new URLSearchParams({
+          bookingId: bookingData.bookingId,
+          homestayName: encodeURIComponent(bookingData.homestayName),
+          totalPrice: bookingData.totalPrice.toString(),
+          checkIn: bookingData.checkInDate,
+          checkOut: bookingData.checkOutDate,
+          guests: guests || "0A0C",
+          rooms: bookingData.rooms?.length.toString() || "0",
+          selectedRooms: JSON.stringify(bookingData.rooms || []),
+          transactionId: bookingData.transactionId || "N/A",
+          status: bookingData.status,
+          paymentMethod: bookingData.paymentMethod,
         });
-
-        if (!confirmResponse.ok) {
-          const errorData = await confirmResponse.json();
-          throw new Error(errorData.error || "Failed to confirm Pay at Property booking");
-        }
-
-        toast.success("Booking confirmed! You will pay at the property.");
-        router.push(
-          `/payment-success?bookingId=${bookingId}&homestayName=${encodeURIComponent(homestayName)}&totalPrice=${totalPrice}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&selectedRooms=${encodeURIComponent(JSON.stringify(selectedRooms))}&status=CONFIRMED&transactionId=PAY_AT_PROPERTY_${bookingId}`
-        );
+        router.push(`/payment-success?${queryParams.toString()}`);
       } else if (selectedPaymentMethod === "credit-debit") {
-        const expiresAtDate = new Date(expiresAt);
+        const expiresAtDate = new Date(bookingData.expiresAt);
         const now = new Date();
         const timeLeft = (expiresAtDate.getTime() - now.getTime()) / 1000 / 60;
         if (timeLeft <= 0) {
-          toast.error("Temporary booking has expired. Please try again.");
+          toast.error("Temporary booking expired.");
           return;
         }
-        await handleStripeCheckout(bookingId);
+        await handleStripeCheckout(bookingData.bookingId);
       } else if (selectedPaymentMethod === "khalti") {
-        const expiresAtDate = new Date(expiresAt);
+        const expiresAtDate = new Date(bookingData.expiresAt);
         const now = new Date();
         const timeLeft = (expiresAtDate.getTime() - now.getTime()) / 1000 / 60;
         if (timeLeft <= 0) {
-          toast.error("Temporary booking has expired. Please try again.");
+          toast.error("Temporary booking expired.");
           return;
         }
-        await handleKhaltiCheckout(bookingId);
+        await handleKhaltiCheckout(bookingData.bookingId);
       } else {
         throw new Error(`Unsupported payment method: ${selectedPaymentMethod}`);
       }
     } catch (error: any) {
       console.error("Error in handleSubmit:", error.message);
-      toast.error(error.message || "Failed to process booking. Please try again.");
+      toast.error(error.message || "Failed to process booking.");
     }
   };
 
-  const getImageUrl = (url: string, fallback: string = "/images/homimages/placeholder-homestay.jpg") => {
-    if (!url || url === "/images/homimages/placeholder-homestay.jpg") return fallback;
+  const getImageUrl = (url: string, fallback: string = "/images/placeholder-homestay.jpg") => {
+    if (!url || url === "/images/placeholder-homestay.jpg") return fallback;
     return url;
   };
 
@@ -534,12 +503,8 @@ function HomestayCheckoutContent() {
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4 mb-6 flex items-start gap-3">
           <Shield className="text-primary h-5 w-5 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-green-600">
-              Fully refundable before 24 hours prior to check-in
-            </p>
-            <p className="text-xs text-gray-600 mt-1">
-              Change or cancel your stay for a full refund if plans change.
-            </p>
+            <p className="text-sm font-medium text-green-600">Fully refundable before 3 days prior to check-in</p>
+            <p className="text-xs text-gray-600 mt-1">Change or cancel your stay for a full refund if plans change.</p>
           </div>
         </div>
 
@@ -552,15 +517,11 @@ function HomestayCheckoutContent() {
             <div className="space-y-3 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
-                <span>
-                  <strong>Check-in:</strong> {checkInDate}
-                </span>
+                <span><strong>Check-in:</strong> {checkInDate}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
-                <span>
-                  <strong>Check-out:</strong> {checkOutDate}
-                </span>
+                <span><strong>Check-out:</strong> {checkOutDate}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
@@ -570,30 +531,20 @@ function HomestayCheckoutContent() {
               </div>
               <div className="flex items-center gap-2">
                 <Bed className="h-4 w-4 text-primary" />
-                <span>
-                  <strong>Rooms:</strong> {rooms}
-                </span>
+                <span><strong>Rooms:</strong> {rooms}</span>
               </div>
               {selectedRooms.map((room: any, index: number) => (
                 <div key={index} className="border-t border-gray-200 pt-3 mt-3">
-                  <p className="text-sm font-medium text-gray-800">
-                    Room {index + 1}: {room.roomTitle}
-                  </p>
+                  <p className="text-sm font-medium text-gray-800">Room {index + 1}: {room.roomTitle}</p>
                   <p className="text-xs text-gray-600">
                     {room.adults} Adult{room.adults !== 1 ? "s" : ""}, {room.children || 0} Child{(room.children || 0) !== 1 ? "ren" : ""}
                   </p>
-                  <p className="text-xs text-gray-600">
-                    Nightly Price: NPR {room.nightlyPrice.toFixed(2)}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    Total: NPR {room.totalPrice.toFixed(2)} for {nightStay}
-                  </p>
+                  <p className="text-xs text-gray-600">Nightly Price: NPR {room.nightlyPrice.toFixed(2)}</p>
+                  <p className="text-xs text-gray-600">Total: NPR {room.totalPrice.toFixed(2)} for {nightStay}</p>
                 </div>
               ))}
               <div className="mt-4 bg-primary/10 rounded-lg p-4 text-center border border-primary/20">
-                <p className="text-base font-semibold text-primary">
-                  Grand Total: NPR {totalPrice.toFixed(2)}
-                </p>
+                <p className="text-base font-semibold text-primary">Grand Total: NPR {totalPrice.toFixed(2)}</p>
                 <p className="text-xs text-primary">{nightStay}</p>
               </div>
             </div>
@@ -606,15 +557,12 @@ function HomestayCheckoutContent() {
                 {homestayDetails.name}
               </h2>
               <Image
-                src={getImageUrl(homestayDetails.images.find((img) => img.isMain)?.url || "/images/homimages/placeholder-homestay.jpg")}
+                src={getImageUrl(homestayDetails.images.find((img) => img.isMain)?.url || "/images/placeholder-homestay.jpg")}
                 alt={homestayDetails.name}
                 width={300}
                 height={200}
                 className="w-full h-40 object-cover rounded-lg mb-4"
-                onError={(e) => {
-                  console.error(`Failed to load image: ${e.currentTarget.src}`);
-                  e.currentTarget.src = "/images/homimages/placeholder-homestay.jpg";
-                }}
+                onError={(e) => (e.currentTarget.src = "/images/placeholder-homestay.jpg")}
               />
               <p className="text-sm text-gray-600 mb-2">{homestayDetails.address}</p>
               <div className="flex items-center mb-2">
@@ -623,10 +571,8 @@ function HomestayCheckoutContent() {
                   {homestayDetails.rating ? homestayDetails.rating.toFixed(1) : "No rating"} ({homestayDetails.reviews || 0} reviews)
                 </span>
               </div>
-              {homestayDetails.description && (
-                <p className="text-sm text-gray-600 mb-2">{homestayDetails.description}</p>
-              )}
-              {homestayDetails.contactNumber && homestayDetails.contactNumber !== "Not available" && (
+              {homestayDetails.description && <p className="text-sm text-gray-600 mb-2">{homestayDetails.description}</p>}
+              {homestayDetails.contactNumber !== "N/A" && (
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                   <Phone className="h-4 w-4 text-primary" />
                   <span>{homestayDetails.contactNumber}</span>
@@ -656,7 +602,7 @@ function HomestayCheckoutContent() {
               <div className="space-y-4">
                 {selectedRooms.map((room: any, index: number) => {
                   const roomDetails = homestayDetails.rooms.find((r) => r.id === room.roomId);
-                  const imageUrl = getImageUrl(roomDetails?.imageUrls[0] || "/images/homimages/placeholder-homestay.jpg");
+                  const imageUrl = getImageUrl(roomDetails?.imageUrls[0] || "/images/placeholder-homestay.jpg");
                   return (
                     <div key={index} className="flex items-center gap-4">
                       <Image
@@ -665,10 +611,7 @@ function HomestayCheckoutContent() {
                         width={80}
                         height={80}
                         className="rounded-lg object-cover"
-                        onError={(e) => {
-                          console.error(`Failed to load room image: ${e.currentTarget.src}`);
-                          e.currentTarget.src = "/images/homimages/placeholder-homestay.jpg";
-                        }}
+                        onError={(e) => (e.currentTarget.src = "/images/placeholder-homestay.jpg")}
                       />
                       <div>
                         <p className="text-sm font-medium text-gray-800">{room.roomTitle}</p>
@@ -713,7 +656,7 @@ function HomestayCheckoutContent() {
             <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 w-full">
               <PaymentMethods
                 selectedPaymentMethod={selectedPaymentMethod}
-                setSelectedPaymentMethod={(value) => {
+                setSelectedPaymentMethod={(value: string) => {
                   console.log("PaymentMethods setSelectedPaymentMethod:", value);
                   setSelectedPaymentMethod(value);
                 }}
@@ -733,48 +676,34 @@ function HomestayCheckoutContent() {
               <div className="space-y-3 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-primary" />
-                  <span>
-                    <strong>Check-in:</strong> {checkInDate}
-                  </span>
+                  <span><strong>Check-in:</strong> {checkInDate}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-primary" />
-                  <span>
-                    <strong>Check-out:</strong> {checkOutDate}
-                  </span>
+                  <span><strong>Check-out:</strong> {checkOutDate}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary/army" />
+                  <Users className="h-4 w-4 text-primary" />
                   <span>
                     <strong>Guests:</strong> {totalGuests.adults} Adult{totalGuests.adults !== 1 ? "s" : ""}, {totalGuests.children} Child{totalGuests.children !== 1 ? "ren" : ""}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Bed className="h-4 w-4 text-primary" />
-                  <span>
-                    <strong>Rooms:</strong> {rooms}
-                  </span>
+                  <span><strong>Rooms:</strong> {rooms}</span>
                 </div>
                 {selectedRooms.map((room: any, index: number) => (
                   <div key={index} className="border-t border-gray-200 pt-3 mt-3">
-                    <p className="text-sm font-medium text-gray-800">
-                      Room {index + 1}: {room.roomTitle}
-                    </p>
+                    <p className="text-sm font-medium text-gray-800">Room {index + 1}: {room.roomTitle}</p>
                     <p className="text-xs text-gray-600">
                       {room.adults} Adult{room.adults !== 1 ? "s" : ""}, {room.children || 0} Child{(room.children || 0) !== 1 ? "ren" : ""}
                     </p>
-                    <p className="text-xs text-gray-600">
-                      Nightly Price: NPR {room.nightlyPrice.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Total: NPR {room.totalPrice.toFixed(2)} for {nightStay}
-                    </p>
+                    <p className="text-xs text-gray-600">Nightly Price: NPR {room.nightlyPrice.toFixed(2)}</p>
+                    <p className="text-xs text-gray-600">Total: NPR {room.totalPrice.toFixed(2)} for {nightStay}</p>
                   </div>
                 ))}
                 <div className="mt-4 bg-primary/10 rounded-lg p-4 text-center border border-primary/20">
-                  <p className="text-base font-semibold text-primary">
-                    Grand Total: NPR {totalPrice.toFixed(2)}
-                  </p>
+                  <p className="text-base font-semibold text-primary">Grand Total: NPR {totalPrice.toFixed(2)}</p>
                   <p className="text-xs text-primary">{nightStay}</p>
                 </div>
               </div>
@@ -787,15 +716,12 @@ function HomestayCheckoutContent() {
                   {homestayDetails.name}
                 </h2>
                 <Image
-                  src={getImageUrl(homestayDetails.images.find((img) => img.isMain)?.url || "/images/homimages/placeholder-homestay.jpg")}
+                  src={getImageUrl(homestayDetails.images.find((img) => img.isMain)?.url || "/images/placeholder-homestay.jpg")}
                   alt={homestayDetails.name}
                   width={300}
                   height={200}
                   className="w-full h-40 object-cover rounded-lg mb-4"
-                  onError={(e) => {
-                    console.error(`Failed to load image: ${e.currentTarget.src}`);
-                    e.currentTarget.src = "/images/homimages/placeholder-homestay.jpg";
-                  }}
+                  onError={(e) => (e.currentTarget.src = "/images/placeholder-homestay.jpg")}
                 />
                 <p className="text-sm text-gray-600 mb-2">{homestayDetails.address}</p>
                 <div className="flex items-center mb-2">
@@ -804,10 +730,8 @@ function HomestayCheckoutContent() {
                     {homestayDetails.rating ? homestayDetails.rating.toFixed(1) : "No rating"} ({homestayDetails.reviews || 0} reviews)
                   </span>
                 </div>
-                {homestayDetails.description && (
-                  <p className="text-sm text-gray-600 mb-2">{homestayDetails.description}</p>
-                )}
-                {homestayDetails.contactNumber && homestayDetails.contactNumber !== "Not available" && (
+                {homestayDetails.description && <p className="text-sm text-gray-600 mb-2">{homestayDetails.description}</p>}
+                {homestayDetails.contactNumber !== "N/A" && (
                   <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                     <Phone className="h-4 w-4 text-primary" />
                     <span>{homestayDetails.contactNumber}</span>
@@ -837,7 +761,7 @@ function HomestayCheckoutContent() {
                 <div className="space-y-4">
                   {selectedRooms.map((room: any, index: number) => {
                     const roomDetails = homestayDetails.rooms.find((r) => r.id === room.roomId);
-                    const imageUrl = getImageUrl(roomDetails?.imageUrls[0] || "/images/homimages/placeholder-homestay.jpg");
+                    const imageUrl = getImageUrl(roomDetails?.imageUrls[0] || "/images/placeholder-homestay.jpg");
                     return (
                       <div key={index} className="flex items-center gap-4">
                         <Image
@@ -846,10 +770,7 @@ function HomestayCheckoutContent() {
                           width={80}
                           height={80}
                           className="rounded-lg object-cover"
-                          onError={(e) => {
-                            console.error(`Failed to load room image: ${e.currentTarget.src}`);
-                            e.currentTarget.src = "/images/homimages/placeholder-homestay.jpg";
-                          }}
+                          onError={(e) => (e.currentTarget.src = "/images/placeholder-homestay.jpg")}
                         />
                         <div>
                           <p className="text-sm font-medium text-gray-800">{room.roomTitle}</p>
@@ -869,11 +790,9 @@ function HomestayCheckoutContent() {
 
         <Dialog open={isLoading}>
           <DialogContent className="flex justify-center items-center bg-white border border-gray-100 rounded-lg shadow-sm p-6">
-            <VisuallyHidden>
-              <DialogTitle>Processing Payment</DialogTitle>
-            </VisuallyHidden>
+            <VisuallyHidden><DialogTitle>Processing</DialogTitle></VisuallyHidden>
             <LoaderPinwheel className="animate-spin h-6 w-6 text-primary" />
-            <p className="ml-3 text-sm text-gray-800">Processing payment...</p>
+            <p className="ml-3 text-sm text-gray-800">Processing...</p>
           </DialogContent>
         </Dialog>
       </div>
