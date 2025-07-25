@@ -40,6 +40,7 @@ function PaymentSuccessContent() {
   const selectedRooms = searchParams.get("selectedRooms") ? JSON.parse(searchParams.get("selectedRooms") || "[]") : [];
   const transactionId = searchParams.get("transactionId") || "N/A";
   const sessionId = searchParams.get("session_id");
+  const paymentMethod = searchParams.get("paymentMethod") || "Unknown";
 
   console.log("Payment success params:", {
     bookingId,
@@ -53,6 +54,7 @@ function PaymentSuccessContent() {
     transactionId,
     sessionId,
     status,
+    paymentMethod,
   });
 
   // Format dates and calculate nights
@@ -83,26 +85,34 @@ function PaymentSuccessContent() {
     ) || { adults: 0, children: 0 };
   console.log("Total guests:", totalGuests);
 
-  // Verify Stripe payment or fetch booking details
+  // Fetch booking details
   useEffect(() => {
     if (status === "CONFIRMED" || !sessionId) {
-      // For "Pay at Property" or already confirmed bookings, fetch booking details
       const fetchBookingDetails = async () => {
         console.log("Fetching booking details for:", bookingId);
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/bookings/${bookingId}`, {
+          const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://13.61.8.56:3001"; // Fallback URL
+          const url = `${baseUrl}/bookings/${bookingId}`;
+          console.log("Fetching from:", url);
+          const response = await fetch(url, {
             method: "GET",
             headers: { "Content-Type": "application/json", accept: "application/json" },
+            cache: "no-store", // Ensure fresh data
           });
           console.log("Booking details response status:", response.status);
           if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to fetch booking details");
+            console.error("Fetch error:", {
+              status: response.status,
+              error: errorData.error,
+              details: errorData,
+            });
+            throw new Error(errorData.error || `Failed to fetch booking details (status: ${response.status})`);
           }
           const data = await response.json();
+          console.log("Booking details fetched:", JSON.stringify(data, null, 2));
           setBookingDetails(data);
           setStatus(data.status || "CONFIRMED");
-          console.log("Booking details fetched:", JSON.stringify(data, null, 2));
         } catch (error: any) {
           console.error("Error fetching booking details:", {
             message: error.message,
@@ -112,10 +122,16 @@ function PaymentSuccessContent() {
           toast.error("Failed to load booking details. Displaying available information.");
         }
       };
-      fetchBookingDetails();
+      if (bookingId !== "N/A") {
+        fetchBookingDetails();
+      } else {
+        console.log("Skipping fetch: Invalid bookingId");
+        toast.error("Invalid booking ID. Displaying available information.");
+      }
       return;
     }
 
+    // Stripe verification (for Stripe payments)
     const verifyPayment = async () => {
       setIsVerifying(true);
       console.log("Verifying Stripe payment:", { sessionId, bookingId });
@@ -134,8 +150,8 @@ function PaymentSuccessContent() {
         console.log("Stripe verify response:", JSON.stringify(data, null, 2));
         if (data.status === "CONFIRMED") {
           setStatus("CONFIRMED");
-          setBookingDetails(data.booking);
-          toast.success("Payment confirmed! Your booking is now confirmed.");
+          setBookingDetails(data);
+          toast.success("Payment confirmed! Your booking is confirmed.");
           console.log("Stripe payment confirmed:", JSON.stringify(data, null, 2));
         } else {
           throw new Error("Payment not completed");
@@ -206,7 +222,7 @@ function PaymentSuccessContent() {
                 <span className="font-medium">Transaction ID:</span> {bookingDetails?.transactionId || transactionId}
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-medium">Payment Method:</span> {bookingDetails?.paymentMethod || (status === "CONFIRMED" && !sessionId ? "Pay at Property" : "Stripe")}
+                <span className="font-medium">Payment Method:</span> {bookingDetails?.paymentMethod || (paymentMethod !== "Unknown" ? paymentMethod : "Khalti")}
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
@@ -235,13 +251,13 @@ function PaymentSuccessContent() {
               {(bookingDetails?.rooms || selectedRooms).map((room: any, index: number) => (
                 <div key={index} className="border-t border-gray-200 pt-3 mt-3">
                   <p className="text-sm font-medium text-gray-800">
-                    Room {index + 1}: {room.roomName || room.roomTitle}
+                    Room {index + 1}: {room.roomName || room.roomTitle || "Unknown"}
                   </p>
                   <p className="text-xs text-gray-600">
-                    {room.adults} Adult{room.adults !== 1 ? "s" : ""}, {room.children || 0} Child{(room.children || 0) !== 1 ? "ren" : ""}
+                    {room.adults || 0} Adult{room.adults !== 1 ? "s" : ""}, {room.children || 0} Child{(room.children || 0) !== 1 ? "ren" : ""}
                   </p>
                   <p className="text-xs text-gray-600">
-                    Total: NPR {(room.totalPrice || room.nightlyPrice).toFixed(2)} for {nightStay}
+                    Total: NPR {(room.totalPrice || room.nightlyPrice || 0).toFixed(2)} for {nightStay}
                   </p>
                 </div>
               ))}
