@@ -378,64 +378,48 @@ function HomestayCheckoutContent() {
   };
 
   const handleKhaltiCheckout = async (bookingId: string) => {
-  if (!bookingId) throw new Error("Missing bookingId");
+    if (!bookingId) throw new Error("Missing bookingId");
 
-  setIsLoading(true);
-  try {
-    const amountInPaisa = convertToPaisa(totalPrice);
-    if (!Number.isInteger(amountInPaisa) || amountInPaisa < 1000)
-      throw new Error("Amount must be ≥ 1000 paisa");
+    setIsLoading(true);
+    try {
+      const amountInPaisa = convertToPaisa(totalPrice);
+      if (!Number.isInteger(amountInPaisa) || amountInPaisa < 1000)
+        throw new Error("Amount must be ≥ 1000 paisa");
 
-    const baseUrl = "https://www.nepalhomestays.com";
-    const queryParams = new URLSearchParams({
-      bookingId,
-      homestayName: encodeURIComponent(homestayName),
-      totalPrice: totalPrice.toString(),
-      checkIn,
-      checkOut,
-      guests: guests || "0A0C",
-      rooms: rooms.toString(),
-      selectedRooms: JSON.stringify(selectedRooms || []),
-      paymentMethod: "Khalti",
-    });
-    const payload = {
-      return_url: `${baseUrl}/payment-callback?${queryParams.toString()}`,
-      website_url: baseUrl,
-      amount: amountInPaisa,
-      purchase_order_id: bookingId,
-      purchase_order_name: `Booking for ${homestayName}`,
-    };
+      const payload = {
+        return_url: `https://www.nepalhomestays.com/payment-callback?bookingId=${bookingId}`,
+        website_url: "https://www.nepalhomestays.com",
+        amount: amountInPaisa,
+        purchase_order_id: bookingId,
+        purchase_order_name: `Booking for ${homestayName}`,
+      };
 
-    console.log("Khalti payload:", JSON.stringify(payload, null, 2));
+      console.log("Khalti payload:", JSON.stringify(payload, null, 2));
 
-    const response = await fetch("/api/khalti/initiate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+      const response = await fetch("/api/khalti/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    const responseData = await response.json();
-    console.log("Khalti response:", JSON.stringify(responseData, null, 2));
+      const responseData = await response.json();
+      console.log("Khalti response:", JSON.stringify(responseData, null, 2));
 
-    if (!response.ok) throw new Error(responseData.error || "Failed to initiate Khalti payment");
+      if (!response.ok) throw new Error(responseData.error || "Failed to initiate Khalti payment");
 
-    const { pidx, payment_url } = responseData;
-    if (!pidx || !payment_url) throw new Error("Missing pidx or payment_url");
+      const { pidx, payment_url } = responseData;
+      if (!pidx || !payment_url) throw new Error("Missing pidx or payment_url");
 
-    console.log("Redirecting to:", payment_url);
-    window.location.href = payment_url;
-  } catch (error: any) {
-    console.error("Khalti checkout error:", {
-      message: error.message,
-      stack: error.stack,
-    });
-    toast.error(error.message || "Failed to initiate Khalti payment");
-    throw error;
-  } finally {
-    setIsLoading(false);
-    console.log("Khalti checkout completed:", new Date().toISOString());
-  }
-};
+      console.log("Redirecting to:", payment_url);
+      window.location.href = payment_url;
+    } catch (error: any) {
+      console.error("Khalti checkout error:", error.message);
+      toast.error(error.message || "Failed to initiate Khalti payment");
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
   const handleSubmit = async (e: React.FormEvent) => {
