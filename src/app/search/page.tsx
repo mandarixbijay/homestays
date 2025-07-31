@@ -23,7 +23,6 @@ export default async function SearchPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // Await searchParams
   const params = await searchParams;
   const checkIn = params.checkIn as string | undefined;
   const checkOut = params.checkOut as string | undefined;
@@ -37,7 +36,7 @@ export default async function SearchPage({
     notFound();
   }
 
-  // Validate check-in date (must be future date or today before 14:00)
+  // Validate check-in date
   const now = new Date();
   const checkInDate = new Date(checkIn);
   const isSameDay = checkInDate.toDateString() === now.toDateString();
@@ -48,6 +47,7 @@ export default async function SearchPage({
   }
 
   const adaptApiHomestay = (apiHomestay: ApiHomestay): Hero3Card => ({
+    id: apiHomestay.id,
     image: apiHomestay.imageSrc || "/images/fallback-image.png",
     images: apiHomestay.rooms.flatMap((room) => room.imageUrls) || [apiHomestay.imageSrc || "/images/fallback-image.png"],
     name: apiHomestay.name || "Unknown Homestay",
@@ -71,6 +71,7 @@ export default async function SearchPage({
       refundable: room.refundable,
       nightlyPrice: room.nightlyPrice,
       totalPrice: room.totalPrice,
+      originalPrice: room.originalPrice,
       extrasOptions: room.extrasOptions,
       roomsLeft: room.roomsLeft,
       sqFt: room.maxOccupancy * 100 || 0,
@@ -78,6 +79,7 @@ export default async function SearchPage({
       cityView: (apiHomestay.features ?? []).includes("City View") || false,
       freeParking: (apiHomestay.features ?? []).includes("Free Parking") || false,
       freeWifi: (apiHomestay.features ?? []).includes("Free Wifi") || false,
+      roomId: room.id,
     })),
   });
 
@@ -95,12 +97,17 @@ export default async function SearchPage({
           return { adults, children };
         }),
       page: 1,
-      limit: 10,
+      limit: 1000, // High limit to ensure we get ALL results regardless of total count
       sort: "PRICE_ASC",
       ...(location && { location }),
     };
 
-    console.log("Server: Fetching homestays with POST:", `/bookings/check-availability`, body);
+    console.log("Server: Fetching homestays...", { 
+      checkIn, 
+      checkOut, 
+      guestCount: body.rooms.length, 
+      location: location || "All locations" 
+    });
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/bookings/check-availability`, {
       method: "POST",
@@ -119,8 +126,14 @@ export default async function SearchPage({
     }
 
     const data = await response.json();
+    
+    if (!data.homestays || !Array.isArray(data.homestays)) {
+      throw new Error("Invalid response format from API");
+    }
+
     homestays = data.homestays.map(adaptApiHomestay);
-    console.log("Server: Fetched homestays for search:", homestays);
+    console.log(`Server: Successfully loaded ${homestays.length} of ${data.totalCount || homestays.length} homestays`);
+    
   } catch (err) {
     error = "Failed to load homestays. Please try again or select a different date.";
     console.error("Server: Error fetching homestays:", err);

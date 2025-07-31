@@ -256,12 +256,6 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
   searchRooms,
 }) => {
   const [sortOption, setSortOption] = useState("price-low-to-high");
-  const [filters, setFilters] = useState({
-    popularFilters: {},
-    minPrice: 0,
-    maxPrice: 100000,
-    amenities: {},
-  });
   const router = useRouter();
 
   // Calculate number of nights
@@ -290,9 +284,24 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
       : undefined;
     const totalRoomsLeft = homestay.rooms.reduce((sum, room) => sum + (room.roomsLeft || 0), 0);
 
+    // Combine main homestay image with room images - ONLY FIX
+    const allImages = [];
+    if (homestay.image && homestay.image !== FALLBACK_IMAGE) {
+      allImages.push(homestay.image);
+    }
+    if (homestay.rooms && homestay.rooms.length > 0) {
+      homestay.rooms.forEach(room => {
+        if (room.imageUrls && room.imageUrls.length > 0) {
+          allImages.push(...room.imageUrls);
+        }
+      });
+    }
+    const uniqueImages = [...new Set(allImages)];
+    const combinedImages = uniqueImages.length > 0 ? uniqueImages : [FALLBACK_IMAGE];
+
     return {
       imageSrc: homestay.image || FALLBACK_IMAGE,
-      images: homestay.images || [FALLBACK_IMAGE],
+      images: combinedImages, // FIXED: Now includes both main image and room images
       location: `${homestay.city}, ${homestay.region}`,
       address: homestay.address || `${homestay.city}, ${homestay.region}`,
       hotelName: homestay.name || homestay.city,
@@ -316,25 +325,8 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
     };
   };
 
-  const filteredHotels = homestays.filter((homestay) => {
-    if (searchLocation && homestay.city.toLowerCase() !== searchLocation.toLowerCase()) {
-      return false;
-    }
-    const price = parseFloat(homestay.price.replace("NPR ", ""));
-    if (price < filters.minPrice || price > filters.maxPrice) {
-      return false;
-    }
-    const selectedAmenities = Object.keys(filters.amenities).filter(
-      (key) => filters.amenities[key as keyof typeof filters.amenities]
-    );
-    if (selectedAmenities.length > 0) {
-      const allFeatures = [...(homestay.features || []), ...(homestay.rooms[0]?.facilities || [])];
-      return selectedAmenities.every((amenity) => allFeatures.includes(amenity));
-    }
-    return true;
-  });
-
-  const sortedHotels = [...filteredHotels].sort((a, b) => {
+  // Sort homestays (filtering is now done in parent component)
+  const sortedHotels = [...homestays].sort((a, b) => {
     if (sortOption === "price-low-to-high") {
       return parseFloat(a.price.replace("NPR ", "")) - parseFloat(b.price.replace("NPR ", ""));
     } else if (sortOption === "price-high-to-low") {

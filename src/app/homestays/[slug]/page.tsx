@@ -44,7 +44,7 @@ export default async function HomestayDetail({
           return { adults, children };
         }),
       page: 1,
-      limit: 10,
+      limit: 1000, // Fixed to use consistent high limit
       sort: "PRICE_ASC",
     };
 
@@ -67,13 +67,19 @@ export default async function HomestayDetail({
     }
 
     const data = await response.json();
+    
+    console.log(`Server: API returned ${data.homestays?.length || 0} homestays, looking for slug: ${slug}`);
+    
     const homestayData = data.homestays.find((h: ApiHomestay) => h.slug.toLowerCase() === slug.toLowerCase());
     if (!homestayData) {
+      // Debug: Log available slugs to help troubleshoot
+      const availableSlugs = data.homestays.map((h: ApiHomestay) => h.slug).slice(0, 10);
+      console.error("Server: Homestay not found. Available slugs:", availableSlugs);
       throw new Error("Homestay not found");
     }
     homestay = adaptApiHomestay(homestayData);
 
-    console.log("Server: Fetched homestay:", homestay);
+    console.log("Server: Successfully fetched homestay:", homestay.name);
   } catch (error) {
     console.error("Server: Error fetching homestay:", error);
     notFound();

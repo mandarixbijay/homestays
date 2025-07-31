@@ -13,7 +13,6 @@ export async function generateMetadata({
   const checkInDate = searchParams.checkIn as string || "2025-07-23";
   const checkOutDate = searchParams.checkOut as string || "2025-07-25";
   const guests = searchParams.guests as string || "2A0C";
-  const rooms = searchParams.rooms as string || "1";
 
   try {
     const body = {
@@ -26,11 +25,12 @@ export async function generateMetadata({
           return { adults, children };
         }),
       page: 1,
-      limit: 10,
+      limit: 1000, // Fixed to use consistent high limit
       sort: "PRICE_ASC",
     };
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/homestays/${slug}`, {
+    // Use the same endpoint as your main components
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/bookings/check-availability`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,15 +49,19 @@ export async function generateMetadata({
       };
     }
 
-    const homestay: ApiHomestay = await response.json();
-    const city =
-      homestay.address && typeof homestay.address === "string"
-        ? homestay.address.split(",")[1]?.trim() || "Unknown City"
-        : "Unknown City";
-    const region =
-      homestay.address && typeof homestay.address === "string"
-        ? homestay.address.split(",")[2]?.trim() || "Unknown Region"
-        : "Unknown Region";
+    const data = await response.json();
+    const homestay = data.homestays.find((h: ApiHomestay) => h.slug.toLowerCase() === slug.toLowerCase());
+    
+    if (!homestay) {
+      return {
+        title: "Homestay Not Found | Nepal Homestays",
+        description: "The requested homestay could not be found.",
+        metadataBase: new URL("https://nepalhomestays.com"),
+      };
+    }
+
+    const city = homestay.address ? homestay.address.split(",")[1]?.trim() || "Unknown City" : "Unknown City";
+    const region = homestay.address ? homestay.address.split(",")[2]?.trim() || "Unknown Region" : "Unknown Region";
 
     return {
       title: `${homestay.name} | Nepal Homestays`,
@@ -95,7 +99,7 @@ export async function generateStaticParams() {
         checkOutDate: "2025-07-25",
         rooms: [{ adults: 2, children: 0 }],
         page: 1,
-        limit: 100,
+        limit: 1000, // Fixed to use consistent high limit
         sort: "PRICE_ASC",
       }),
     });

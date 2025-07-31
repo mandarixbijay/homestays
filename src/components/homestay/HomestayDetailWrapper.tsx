@@ -1,4 +1,4 @@
-// src/app/homestays/[slug]/wrapper.tsx
+// src/components/homestay/HomestayDetailWrapper.tsx
 "use client";
 
 import { Suspense, useEffect, useState, useMemo } from "react";
@@ -130,7 +130,7 @@ export default function HomestayDetailWrapper({ homestay, slug }: HomestayDetail
               return { adults, children };
             }),
           page: 1,
-          limit: 10,
+          limit: 1000, // Fixed to use consistent high limit
           sort: "PRICE_ASC",
         };
 
@@ -141,7 +141,6 @@ export default function HomestayDetailWrapper({ homestay, slug }: HomestayDetail
             accept: "application/json",
           },
           body: JSON.stringify(body),
-          cache: "no-store",
         });
 
         if (!response.ok) {
@@ -150,8 +149,12 @@ export default function HomestayDetailWrapper({ homestay, slug }: HomestayDetail
 
         const data = await response.json();
         console.log("API Response:", data); // Log API response for debugging
+        
         const homestayData = data.homestays.find((h: ApiHomestay) => h.slug.toLowerCase() === slug.toLowerCase());
         if (!homestayData) {
+          // Debug: Log available slugs to help troubleshoot
+          const availableSlugs = data.homestays.map((h: ApiHomestay) => h.slug).slice(0, 10);
+          console.error("Client: Homestay not found. Available slugs:", availableSlugs);
           throw new Error("Homestay not found in response");
         }
 
@@ -193,12 +196,21 @@ export default function HomestayDetailWrapper({ homestay, slug }: HomestayDetail
     return (
       <div className="container mx-auto px-4 py-12 text-center">
         <p className="text-lg text-warning font-manrope mb-4">{error}</p>
-        <Button
-          onClick={() => window.location.reload()}
-          className="bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-2 rounded-lg font-manrope"
-        >
-          Try Again
-        </Button>
+        <div className="flex gap-4 justify-center">
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-2 rounded-lg font-manrope"
+          >
+            Try Again
+          </Button>
+          <Button
+            onClick={() => window.history.back()}
+            variant="outline"
+            className="px-6 py-2 rounded-lg font-manrope"
+          >
+            Go Back
+          </Button>
+        </div>
       </div>
     );
   }
