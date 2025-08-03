@@ -6,6 +6,43 @@ const API_BASE_URL = typeof window !== 'undefined'
   ? '/api/backend' // Use proxy path for client-side requests
   : 'http://13.61.8.56:3001'; // Direct URL for server-side requests
 
+interface DashboardStats {
+  totalHomestays: number;
+  pendingHomestays: number;
+  approvedHomestays: number;
+  rejectedHomestays: number;
+  totalUsers: number;
+  activeUsers: number;
+  totalRooms: number;
+  averageRating: number;
+  totalBookings: number;
+  totalRevenue: number;
+  occupancyRate: number;
+  recentActivity: ActivityItem[];
+  growthStats: {
+    homestaysGrowth: number;
+    usersGrowth: number;
+    bookingsGrowth: number;
+    revenueGrowth: number;
+  };
+}
+
+interface ActivityItem {
+  id: number;
+  type: 'homestay_created' | 'homestay_approved' | 'homestay_rejected' | 'user_registered' | 'booking_created' | 'payment_received';
+  description: string;
+  timestamp: string;
+  userId?: number;
+  homestayId?: number;
+  bookingId?: number;
+  metadata?: {
+    userName?: string;
+    homestayName?: string;
+    amount?: number;
+    status?: string;
+  };
+}
+
 class AdminApiClient {
   private async getAuthHeaders() {
     const session = await getSession();
@@ -106,6 +143,98 @@ class AdminApiClient {
     }
   }
 
+  // ============================================================================
+  // DASHBOARD API METHODS
+  // ============================================================================
+
+  async getDashboardStats(): Promise<DashboardStats> {
+    return this.request<DashboardStats>('/admin/dashboard/stats');
+  }
+
+  async getUsersCount(): Promise<{ total: number }> {
+    return this.request<{ total: number }>('/admin/users/count');
+  }
+
+  async getMonthlyGrowthStats(): Promise<{
+    homestaysGrowth: number;
+    usersGrowth: number;
+    bookingsGrowth: number;
+    revenueGrowth: number;
+  }> {
+    return this.request('/admin/dashboard/growth');
+  }
+
+  async getSystemActivity(limit: number = 10): Promise<ActivityItem[]> {
+    return this.request<ActivityItem[]>(`/admin/dashboard/activity?limit=${limit}`);
+  }
+
+  async getHomestaysByStatus(): Promise<{
+    pending: number;
+    approved: number;
+    rejected: number;
+    total: number;
+  }> {
+    return this.request('/admin/homestays/stats');
+  }
+
+  async getAverageRating(): Promise<{ averageRating: number; totalRatings: number }> {
+    return this.request('/admin/homestays/ratings/average');
+  }
+
+  async getTotalRoomsCount(): Promise<{ totalRooms: number }> {
+    return this.request('/admin/homestays/rooms/count');
+  }
+
+  // Analytics endpoints
+  async getHomestaysAnalytics(period: 'week' | 'month' | 'quarter' | 'year' = 'month') {
+    return this.request<{
+      totalHomestays: number;
+      newHomestays: number;
+      approvedHomestays: number;
+      rejectedHomestays: number;
+      pendingHomestays: number;
+      growthPercentage: number;
+      chartData: Array<{
+        date: string;
+        count: number;
+        status: string;
+      }>;
+    }>(`/admin/analytics/homestays?period=${period}`);
+  }
+
+  async getUsersAnalytics(period: 'week' | 'month' | 'quarter' | 'year' = 'month') {
+    return this.request<{
+      totalUsers: number;
+      newUsers: number;
+      activeUsers: number;
+      growthPercentage: number;
+      chartData: Array<{
+        date: string;
+        count: number;
+        type: string;
+      }>;
+    }>(`/admin/analytics/users?period=${period}`);
+  }
+
+  async getBookingsAnalytics(period: 'week' | 'month' | 'quarter' | 'year' = 'month') {
+    return this.request<{
+      totalBookings: number;
+      revenue: number;
+      averageBookingValue: number;
+      occupancyRate: number;
+      growthPercentage: number;
+      chartData: Array<{
+        date: string;
+        bookings: number;
+        revenue: number;
+      }>;
+    }>(`/admin/analytics/bookings?period=${period}`);
+  }
+
+  // ============================================================================
+  // HELPER METHODS (existing code)
+  // ============================================================================
+
   // Helper to clean image metadata for API
   private cleanImageMetadata(images: any[]) {
     return images.map(img => ({
@@ -122,6 +251,10 @@ class AdminApiClient {
       tags: Array.isArray(img.tags) ? img.tags : []
     }));
   }
+
+  // ============================================================================
+  // HOMESTAY OPERATIONS (existing code)
+  // ============================================================================
 
   async createHomestay(homestayData: CreateHomestayDto, imageFiles: File[] = []) {
     const session = await getSession();
@@ -489,6 +622,10 @@ class AdminApiClient {
       );
     }
   }
+
+  // ============================================================================
+  // MASTER DATA OPERATIONS (existing code)
+  // ============================================================================
 
   async getFacilities() {
     return this.request<any[]>('/admin/facilities');

@@ -26,6 +26,43 @@ export interface ApiState<T> {
   error: string | null;
 }
 
+export interface DashboardStats {
+  totalHomestays: number;
+  pendingHomestays: number;
+  approvedHomestays: number;
+  rejectedHomestays: number;
+  totalUsers: number;
+  activeUsers: number;
+  totalRooms: number;
+  averageRating: number;
+  totalBookings: number;
+  totalRevenue: number;
+  occupancyRate: number;
+  recentActivity: ActivityItem[];
+  growthStats: {
+    homestaysGrowth: number;
+    usersGrowth: number;
+    bookingsGrowth: number;
+    revenueGrowth: number;
+  };
+}
+
+export interface ActivityItem {
+  id: number;
+  type: 'homestay_created' | 'homestay_approved' | 'homestay_rejected' | 'user_registered' | 'booking_created' | 'payment_received';
+  description: string;
+  timestamp: string;
+  userId?: number;
+  homestayId?: number;
+  bookingId?: number;
+  metadata?: {
+    userName?: string;
+    homestayName?: string;
+    amount?: number;
+    status?: string;
+  };
+}
+
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
@@ -211,6 +248,92 @@ class ValidationHelper {
   }
 }
 
+// Helper functions for dashboard calculations
+export const calculateHomestayStats = (homestays: any[]) => {
+  const stats = {
+    totalHomestays: homestays.length,
+    pendingHomestays: homestays.filter(h => h.status === 'PENDING').length,
+    approvedHomestays: homestays.filter(h => h.status === 'APPROVED').length,
+    rejectedHomestays: homestays.filter(h => h.status === 'REJECTED').length,
+    totalRooms: homestays.reduce((total, h) => total + (h.rooms?.length || 0), 0),
+    averageRating: 0
+  };
+
+  // Calculate average rating from homestays that have ratings
+  const homestaysWithRatings = homestays.filter(h => h.rating && h.rating > 0);
+  if (homestaysWithRatings.length > 0) {
+    const totalRating = homestaysWithRatings.reduce((sum, h) => sum + h.rating, 0);
+    stats.averageRating = Number((totalRating / homestaysWithRatings.length).toFixed(1));
+  }
+
+  return stats;
+};
+
+export const generateRecentActivity = (homestays: any[]): ActivityItem[] => {
+  const activities: ActivityItem[] = [];
+  
+  // Sort homestays by createdAt or updatedAt, most recent first
+  const sortedHomestays = [...homestays].sort((a, b) => {
+    const dateA = new Date(a.updatedAt || a.createdAt || 0);
+    const dateB = new Date(b.updatedAt || b.createdAt || 0);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  // Generate activities for recent homestays
+  sortedHomestays.slice(0, 10).forEach((homestay, index) => {
+    const createdAt = new Date(homestay.createdAt);
+    const updatedAt = new Date(homestay.updatedAt);
+    
+    // If updated recently and different from created date, show update activity
+    if (homestay.updatedAt && updatedAt.getTime() !== createdAt.getTime()) {
+      activities.push({
+        id: homestay.id * 1000 + 1, // Generate unique ID
+        type: 'homestay_approved', // Assume update means status change
+        description: `Homestay "${homestay.name}" was updated`,
+        timestamp: homestay.updatedAt,
+        homestayId: homestay.id,
+        metadata: {
+          homestayName: homestay.name,
+          status: homestay.status
+        }
+      });
+    }
+    
+    // Show creation activity
+    if (homestay.createdAt) {
+      let description = `New homestay "${homestay.name}" was created`;
+      let type: ActivityItem['type'] = 'homestay_created';
+      
+      if (homestay.status === 'APPROVED') {
+        description = `Homestay "${homestay.name}" was approved`;
+        type = 'homestay_approved';
+      } else if (homestay.status === 'REJECTED') {
+        description = `Homestay "${homestay.name}" was rejected`;
+        type = 'homestay_rejected';
+      } else if (homestay.status === 'PENDING') {
+        description = `New homestay "${homestay.name}" submitted for approval`;
+      }
+      
+      activities.push({
+        id: homestay.id * 1000, // Generate unique ID
+        type,
+        description,
+        timestamp: homestay.createdAt,
+        homestayId: homestay.id,
+        metadata: {
+          homestayName: homestay.name,
+          status: homestay.status
+        }
+      });
+    }
+  });
+
+  // Sort activities by timestamp, most recent first
+  return activities
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, 5); // Show only 5 most recent activities
+};
+
 // ============================================================================
 // CORE HOOKS
 // ============================================================================
@@ -281,7 +404,84 @@ export function useFilters<T extends Record<string, any>>(initialFilters: T) {
 }
 
 // ============================================================================
-// HOMESTAY OPERATIONS
+// DASHBOARD HOOKS
+// ============================================================================
+
+export function useDashboardStats() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const { loading, error, execute, clearError } = useAsyncOperation<DashboardStats>();
+
+  const loadDashboardStats = useCallback(async () => {
+    try {
+      const result = await execute(() => adminApi.getDashboardStats());
+      setStats(result);
+      return result;
+    } catch (error) {
+      console.error('Error loading dashboard stats:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const loadCompleteStats = useCallback(async () => {
+    try {
+      // Load all dashboard data in parallel
+      const [
+        dashboardStats,
+        homestayStats,
+        usersCount,
+        monthlyGrowth,
+        recentActivity,
+        averageRating
+      ] = await Promise.all([
+        adminApi.getDashboardStats().catch(() => null),
+        adminApi.getHomestaysByStatus().catch(() => null),
+        adminApi.getUsersCount().catch(() => null),
+        adminApi.getMonthlyGrowthStats().catch(() => null),
+        adminApi.getSystemActivity(10).catch(() => []),
+        adminApi.getAverageRating().catch(() => null)
+      ]);
+
+      const combinedStats: DashboardStats = {
+        totalHomestays: homestayStats?.total || dashboardStats?.totalHomestays || 0,
+        pendingHomestays: homestayStats?.pending || dashboardStats?.pendingHomestays || 0,
+        approvedHomestays: homestayStats?.approved || dashboardStats?.approvedHomestays || 0,
+        rejectedHomestays: homestayStats?.rejected || dashboardStats?.rejectedHomestays || 0,
+        totalUsers: usersCount?.total || dashboardStats?.totalUsers || 0,
+        activeUsers: dashboardStats?.activeUsers || 0,
+        totalRooms: dashboardStats?.totalRooms || 0,
+        averageRating: averageRating?.averageRating || dashboardStats?.averageRating || 0,
+        totalBookings: dashboardStats?.totalBookings || 0,
+        totalRevenue: dashboardStats?.totalRevenue || 0,
+        occupancyRate: dashboardStats?.occupancyRate || 0,
+        recentActivity: recentActivity || [],
+        growthStats: monthlyGrowth || {
+          homestaysGrowth: 0,
+          usersGrowth: 0,
+          bookingsGrowth: 0,
+          revenueGrowth: 0
+        }
+      };
+
+      setStats(combinedStats);
+      return combinedStats;
+    } catch (error) {
+      console.error('Error loading complete dashboard stats:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  return {
+    stats,
+    loading,
+    error,
+    loadDashboardStats,
+    loadCompleteStats,
+    clearError
+  };
+}
+
+// ============================================================================
+// HOMESTAY OPERATIONS (existing code remains the same)
 // ============================================================================
 
 export function useHomestays() {
@@ -428,7 +628,7 @@ export function useHomestays() {
 }
 
 // ============================================================================
-// HOMESTAY DETAIL
+// REST OF THE HOOKS (unchanged)
 // ============================================================================
 
 export function useHomestayDetail(homestayId: number) {
@@ -467,10 +667,6 @@ export function useHomestayDetail(homestayId: number) {
   };
 }
 
-// ============================================================================
-// MASTER DATA
-// ============================================================================
-
 export function useMasterData() {
   const [facilities, setFacilities] = useState<any[]>([]);
   const [bedTypes, setBedTypes] = useState<any[]>([]);
@@ -502,7 +698,7 @@ export function useMasterData() {
     }
   }, [execute]);
 
-  // Master data CRUD operations
+  // Master data CRUD operations (unchanged from original)
   const createFacility = useCallback(async (data: any) => {
     const result = await execute(() => adminApi.createFacility(data));
     await loadAllData();
@@ -605,7 +801,7 @@ export function useMasterData() {
 }
 
 // ============================================================================
-// IMAGE MANAGEMENT
+// IMAGE MANAGEMENT (unchanged)
 // ============================================================================
 
 export function useImageManager() {
@@ -663,7 +859,7 @@ export function useImageManager() {
 }
 
 // ============================================================================
-// VALIDATION HOOKS
+// VALIDATION HOOKS (unchanged)
 // ============================================================================
 
 export function useHomestayValidation() {
@@ -682,7 +878,7 @@ export function useHomestayValidation() {
 }
 
 // ============================================================================
-// FORM STATE MANAGEMENT
+// FORM STATE MANAGEMENT (unchanged)
 // ============================================================================
 
 export function useFormState<T>(initialState: T) {

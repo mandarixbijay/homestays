@@ -41,7 +41,82 @@ interface DashboardStats {
 }
 
 // ============================================================================
-// COMPONENTS
+// UTILITIES
+// ============================================================================
+
+const calculateHomestayStats = (homestays: any[]) => {
+  const stats = {
+    totalHomestays: homestays.length,
+    pendingHomestays: homestays.filter(h => h.status === 'PENDING').length,
+    approvedHomestays: homestays.filter(h => h.status === 'APPROVED').length,
+    rejectedHomestays: homestays.filter(h => h.status === 'REJECTED').length,
+    totalRooms: homestays.reduce((total, h) => total + (h.rooms?.length || 0), 0),
+    averageRating: 0
+  };
+
+  // Calculate average rating from homestays that have ratings
+  const homestaysWithRatings = homestays.filter(h => h.rating && h.rating > 0);
+  if (homestaysWithRatings.length > 0) {
+    const totalRating = homestaysWithRatings.reduce((sum, h) => sum + h.rating, 0);
+    stats.averageRating = Number((totalRating / homestaysWithRatings.length).toFixed(1));
+  }
+
+  return stats;
+};
+
+const generateRecentActivity = (homestays: any[]) => {
+  const activities: any[] = [];
+  
+  // Sort homestays by createdAt or updatedAt, most recent first
+  const sortedHomestays = [...homestays].sort((a, b) => {
+    const dateA = new Date(a.updatedAt || a.createdAt || 0);
+    const dateB = new Date(b.updatedAt || b.createdAt || 0);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  // Generate activities for recent homestays
+  sortedHomestays.slice(0, 10).forEach(homestay => {
+    const createdAt = new Date(homestay.createdAt);
+    const updatedAt = new Date(homestay.updatedAt);
+    
+    // If updated recently and different from created date, show update activity
+    if (homestay.updatedAt && updatedAt.getTime() !== createdAt.getTime()) {
+      activities.push({
+        description: `Homestay "${homestay.name}" was updated`,
+        timestamp: homestay.updatedAt,
+        type: 'update',
+        homestayId: homestay.id
+      });
+    }
+    
+    // Show creation activity
+    if (homestay.createdAt) {
+      let description = `New homestay "${homestay.name}" was created`;
+      if (homestay.status === 'APPROVED') {
+        description = `Homestay "${homestay.name}" was approved`;
+      } else if (homestay.status === 'REJECTED') {
+        description = `Homestay "${homestay.name}" was rejected`;
+      } else if (homestay.status === 'PENDING') {
+        description = `New homestay "${homestay.name}" submitted for approval`;
+      }
+      
+      activities.push({
+        description,
+        timestamp: homestay.createdAt,
+        type: 'create',
+        homestayId: homestay.id
+      });
+    }
+  });
+
+  // Sort activities by timestamp, most recent first
+  return activities
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, 5); // Show only 5 most recent activities
+};
+
+// ============================================================================
+// COMPONENTS (StatCard, QuickActionCard, RecentHomestayCard, ActivityFeed remain the same)
 // ============================================================================
 
 const StatCard: React.FC<{
@@ -284,7 +359,7 @@ export default function ImprovedAdminDashboard() {
     pendingHomestays: 0,
     approvedHomestays: 0,
     rejectedHomestays: 0,
-    totalUsers: 0,
+    totalUsers: 0, // This would need a separate API call
     totalRooms: 0,
     averageRating: 0,
     recentActivity: []
@@ -304,53 +379,45 @@ export default function ImprovedAdminDashboard() {
     }
   }, [status, session, router]);
 
+  // Update stats when homestays data changes
+  useEffect(() => {
+    if (homestays && homestays.length >= 0) {
+      const calculatedStats = calculateHomestayStats(homestays);
+      const recentActivity = generateRecentActivity(homestays);
+      
+      setStats(prevStats => ({
+        ...prevStats,
+        ...calculatedStats,
+        recentActivity
+      }));
+    }
+  }, [homestays]);
+
   // Data loading
   const loadDashboardData = useCallback(async () => {
     try {
       setRefreshing(true);
       
-      // Load recent homestays
-      await loadHomestays({ limit: 5, page: 1 });
+      // Load all homestays (we need all for accurate stats)
+      await loadHomestays({ limit: 1000, page: 1 }); // Load many homestays for accurate stats
       
-      // Load dashboard stats (mock data for now)
+      // Load additional dashboard stats that require separate API calls
+      // TODO: Add these API endpoints to get real data
+      /*
       await loadStats(async () => {
-        // This would be replaced with actual API call
+        const [usersCount] = await Promise.all([
+          adminApi.getUsersCount(), // Need to add this endpoint
+          // Could add more endpoints like:
+          // adminApi.getMonthlyGrowthStats(),
+          // adminApi.getSystemStats(),
+        ]);
+        
         return {
-          totalHomestays: 125,
-          pendingHomestays: 8,
-          approvedHomestays: 110,
-          rejectedHomestays: 7,
-          totalUsers: 1250,
-          totalRooms: 340,
-          averageRating: 4.6,
-          recentActivity: [
-            {
-              description: 'New homestay "Mountain View Lodge" submitted for approval',
-              timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString()
-            },
-            {
-              description: 'Homestay "Beach Villa" approved by admin',
-              timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-            },
-            {
-              description: 'New user registration: John Doe',
-              timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
-            },
-            {
-              description: 'Homestay "City Center Apartment" updated',
-              timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
-            }
-          ]
+          totalUsers: usersCount,
+          // Add other stats that need separate API calls
         };
       });
-
-      setStats(prevStats => ({
-        ...prevStats,
-        totalHomestays: homestays.length || 125,
-        pendingHomestays: homestays.filter((h: any) => h.status === 'PENDING').length || 8,
-        approvedHomestays: homestays.filter((h: any) => h.status === 'APPROVED').length || 110,
-        rejectedHomestays: homestays.filter((h: any) => h.status === 'REJECTED').length || 7,
-      }));
+      */
 
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -362,7 +429,7 @@ export default function ImprovedAdminDashboard() {
     } finally {
       setRefreshing(false);
     }
-  }, [loadHomestays, loadStats, homestays, addToast]);
+  }, [loadHomestays, addToast]);
 
   // Handlers
   const handleQuickAction = useCallback((action: string) => {
@@ -477,8 +544,6 @@ export default function ImprovedAdminDashboard() {
           <StatCard
             title="Total Homestays"
             value={stats.totalHomestays}
-            change={12}
-            changeType="increase"
             icon={<Home className="h-6 w-6" />}
             color="blue"
             onClick={() => handleQuickAction('homestays')}
@@ -487,8 +552,6 @@ export default function ImprovedAdminDashboard() {
           <StatCard
             title="Pending Approval"
             value={stats.pendingHomestays}
-            change={5}
-            changeType="decrease"
             icon={<Clock className="h-6 w-6" />}
             color="yellow"
             onClick={() => router.push('/admin/homestays?status=PENDING')}
@@ -497,8 +560,6 @@ export default function ImprovedAdminDashboard() {
           <StatCard
             title="Approved"
             value={stats.approvedHomestays}
-            change={8}
-            changeType="increase"
             icon={<CheckCircle className="h-6 w-6" />}
             color="green"
             onClick={() => router.push('/admin/homestays?status=APPROVED')}
@@ -506,9 +567,7 @@ export default function ImprovedAdminDashboard() {
           
           <StatCard
             title="Average Rating"
-            value={stats.averageRating.toFixed(1)}
-            change={2}
-            changeType="increase"
+            value={stats.averageRating || 'N/A'}
             icon={<Star className="h-6 w-6" />}
             color="purple"
           />
@@ -518,9 +577,7 @@ export default function ImprovedAdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatCard
             title="Total Users"
-            value={stats.totalUsers}
-            change={15}
-            changeType="increase"
+            value={stats.totalUsers || 'N/A'}
             icon={<Users className="h-6 w-6" />}
             color="blue"
             onClick={() => handleQuickAction('users')}
@@ -529,8 +586,6 @@ export default function ImprovedAdminDashboard() {
           <StatCard
             title="Total Rooms"
             value={stats.totalRooms}
-            change={18}
-            changeType="increase"
             icon={<Bed className="h-6 w-6" />}
             color="green"
           />
@@ -538,8 +593,6 @@ export default function ImprovedAdminDashboard() {
           <StatCard
             title="Rejected"
             value={stats.rejectedHomestays}
-            change={3}
-            changeType="decrease"
             icon={<AlertCircle className="h-6 w-6" />}
             color="red"
             onClick={() => router.push('/admin/homestays?status=REJECTED')}
@@ -589,7 +642,7 @@ export default function ImprovedAdminDashboard() {
 
           {/* Recent Activity */}
           <div>
-            <Card title="Recent Activity" loading={statsLoading}>
+            <Card title="Recent Activity" loading={homestaysLoading}>
               <ActivityFeed activities={stats.recentActivity} />
             </Card>
           </div>
