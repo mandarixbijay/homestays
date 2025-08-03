@@ -13,6 +13,21 @@ export interface ImageWithPreview {
   tags: string[];
 }
 
+export interface HomestayData {
+  propertyName: string;
+  propertyAddress: string;
+  contactNumber: string;
+  description?: string;
+  imageMetadata: ImageWithPreview[];
+  facilityIds?: number[];
+  customFacilities?: string[];
+  ownerId: number | string;
+  rooms: any[];
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  discount?: number | string;
+  vipAccess?: boolean;
+}
+
 export interface HomestayFilters {
   search: string;
   status?: 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -69,12 +84,12 @@ export interface ActivityItem {
 
 class FileProcessor {
   static readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-  
+
   static validateImageFile(file: File): { isValid: boolean; error?: string } {
     if (!file.type.startsWith('image/')) {
       return { isValid: false, error: 'Please select a valid image file' };
     }
-    
+
     if (file.size > this.MAX_FILE_SIZE) {
       return { isValid: false, error: 'Image file size must be less than 10MB' };
     }
@@ -82,10 +97,10 @@ class FileProcessor {
     if (file.size === 0) {
       return { isValid: false, error: 'Image file cannot be empty' };
     }
-    
+
     return { isValid: true };
   }
-  
+
   static async createImagePreview(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -95,39 +110,39 @@ class FileProcessor {
     });
   }
 
-  static extractFilesFromHomestay(homestayData: any): { cleanData: any; files: File[] } {
+  static extractFilesFromHomestay(homestayData: HomestayData): { cleanData: any; files: File[] } {
     const files: File[] = [];
-    
+
     // Process homestay images
-    const cleanImageMetadata = homestayData.imageMetadata?.map((img: any) => {
+    const cleanImageMetadata = homestayData.imageMetadata?.map((img: ImageWithPreview) => {
       if (img.file && img.file instanceof File) {
         files.push(img.file);
         return {
           isMain: img.isMain,
-          tags: img.tags || []
+          tags: img.tags || [],
         };
       }
       return {
         url: img.url,
         isMain: img.isMain,
-        tags: img.tags || []
+        tags: img.tags || [],
       };
     }).filter((img: any) => img.url || !img.url) || [];
 
     // Process rooms
     const cleanRooms = homestayData.rooms?.map((room: any) => {
-      const cleanRoomImages = room.images?.map((img: any) => {
+      const cleanRoomImages = room.images?.map((img: ImageWithPreview) => {
         if (img.file && img.file instanceof File) {
           files.push(img.file);
           return {
             isMain: img.isMain,
-            tags: img.tags || []
+            tags: img.tags || [],
           };
         }
         return {
           url: img.url,
           isMain: img.isMain,
-          tags: img.tags || []
+          tags: img.tags || [],
         };
       }).filter((img: any) => img.url || !img.url) || [];
 
@@ -136,22 +151,22 @@ class FileProcessor {
         totalArea: Number(room.totalArea) || 0,
         maxOccupancy: {
           adults: Number(room.maxOccupancy?.adults) || 0,
-          children: Number(room.maxOccupancy?.children) || 0
+          children: Number(room.maxOccupancy?.children) || 0,
         },
         minOccupancy: {
           adults: Number(room.minOccupancy?.adults) || 0,
-          children: Number(room.minOccupancy?.children) || 0
+          children: Number(room.minOccupancy?.children) || 0,
         },
         price: {
           value: Number(room.price?.value) || 0,
-          currency: room.price?.currency || 'NPR'
+          currency: room.price?.currency || 'NPR',
         },
         includeBreakfast: Boolean(room.includeBreakfast),
         beds: room.beds?.map((bed: any) => ({
           bedTypeId: Number(bed.bedTypeId),
-          quantity: Number(bed.quantity) || 1
+          quantity: Number(bed.quantity) || 1,
         })) || [],
-        images: cleanRoomImages
+        images: cleanRoomImages,
       };
     }) || [];
 
@@ -167,7 +182,7 @@ class FileProcessor {
       rooms: cleanRooms,
       status: homestayData.status || 'PENDING',
       discount: Number(homestayData.discount) || 0,
-      vipAccess: Boolean(homestayData.vipAccess)
+      vipAccess: Boolean(homestayData.vipAccess),
     };
 
     return { cleanData, files };
@@ -177,19 +192,19 @@ class FileProcessor {
 class ValidationHelper {
   static validateHomestay(data: any): string[] {
     const errors: string[] = [];
-    
+
     if (!data.propertyName?.trim()) {
       errors.push('Property name is required');
     }
-    
+
     if (!data.propertyAddress?.trim()) {
       errors.push('Property address is required');
     }
-    
+
     if (!data.contactNumber?.trim()) {
       errors.push('Contact number is required');
     }
-    
+
     if (!data.ownerId || data.ownerId <= 0) {
       errors.push('Valid owner ID is required');
     }
@@ -210,11 +225,11 @@ class ValidationHelper {
         if (!room.name?.trim()) {
           errors.push(`Room ${index + 1}: Name is required`);
         }
-        
+
         if (!room.price?.value || room.price.value <= 0) {
           errors.push(`Room ${index + 1}: Valid price is required`);
         }
-        
+
         if (!room.images || room.images.length === 0) {
           errors.push(`Room ${index + 1}: At least one image is required`);
         } else {
@@ -225,13 +240,13 @@ class ValidationHelper {
         }
       });
     }
-    
+
     return errors;
   }
 
   static validateBulkHomestays(homestays: any[]): Record<number, string[]> {
     const errors: Record<number, string[]> = {};
-    
+
     if (!homestays || homestays.length === 0) {
       errors[0] = ['At least one homestay is required'];
       return errors;
@@ -271,7 +286,7 @@ export const calculateHomestayStats = (homestays: any[]) => {
 
 export const generateRecentActivity = (homestays: any[]): ActivityItem[] => {
   const activities: ActivityItem[] = [];
-  
+
   // Sort homestays by createdAt or updatedAt, most recent first
   const sortedHomestays = [...homestays].sort((a, b) => {
     const dateA = new Date(a.updatedAt || a.createdAt || 0);
@@ -283,7 +298,7 @@ export const generateRecentActivity = (homestays: any[]): ActivityItem[] => {
   sortedHomestays.slice(0, 10).forEach((homestay, index) => {
     const createdAt = new Date(homestay.createdAt);
     const updatedAt = new Date(homestay.updatedAt);
-    
+
     // If updated recently and different from created date, show update activity
     if (homestay.updatedAt && updatedAt.getTime() !== createdAt.getTime()) {
       activities.push({
@@ -298,12 +313,12 @@ export const generateRecentActivity = (homestays: any[]): ActivityItem[] => {
         }
       });
     }
-    
+
     // Show creation activity
     if (homestay.createdAt) {
       let description = `New homestay "${homestay.name}" was created`;
       let type: ActivityItem['type'] = 'homestay_created';
-      
+
       if (homestay.status === 'APPROVED') {
         description = `Homestay "${homestay.name}" was approved`;
         type = 'homestay_approved';
@@ -313,7 +328,7 @@ export const generateRecentActivity = (homestays: any[]): ActivityItem[] => {
       } else if (homestay.status === 'PENDING') {
         description = `New homestay "${homestay.name}" submitted for approval`;
       }
-      
+
       activities.push({
         id: homestay.id * 1000, // Generate unique ID
         type,
@@ -347,7 +362,7 @@ export function useAsyncOperation<T = any>() {
 
   const execute = useCallback(async (operation: () => Promise<T>) => {
     setState(prev => ({ ...prev, loading: true, error: null }));
-    
+
     try {
       const result = await operation();
       setState({ data: result, loading: false, error: null });
@@ -394,12 +409,12 @@ export function useFilters<T extends Record<string, any>>(initialFilters: T) {
     setFilters(clearedFilters);
   }, [initialFilters]);
 
-  return { 
-    filters, 
-    updateFilter, 
-    resetFilters, 
+  return {
+    filters,
+    updateFilter,
+    resetFilters,
     clearFilters,
-    setFilters 
+    setFilters
   };
 }
 
@@ -512,7 +527,7 @@ export function useHomestays() {
   const createHomestay = useCallback(async (homestayData: any) => {
     try {
       const { cleanData, files } = FileProcessor.extractFilesFromHomestay(homestayData);
-      
+
       // Validate before sending
       const validationErrors = ValidationHelper.validateHomestay(cleanData);
       if (validationErrors.length > 0) {
@@ -814,16 +829,16 @@ export function useImageManager() {
     onError?: (error: string) => void
   ) => {
     setUploadingImages(prev => ({ ...prev, [key]: true }));
-    
+
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const validation = FileProcessor.validateImageFile(file);
-        
+
         if (!validation.isValid) {
           throw new Error(validation.error);
         }
-        
+
         const preview = await FileProcessor.createImagePreview(file);
         const imageData: ImageWithPreview = {
           file,
@@ -831,7 +846,7 @@ export function useImageManager() {
           isMain: false,
           tags: [],
         };
-        
+
         onImageAdd(imageData);
       }
     } catch (error) {
@@ -888,7 +903,7 @@ export function useFormState<T>(initialState: T) {
 
   const updateField = useCallback((field: keyof T, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     // Clear error when field is updated
     if (errors[field as string]) {
       setErrors(prev => ({ ...prev, [field as string]: '' }));
