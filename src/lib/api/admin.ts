@@ -4,7 +4,7 @@ import { CreateHomestayDto } from '@/types/admin';
 // Use proxy path for client-side requests, direct URL for server-side
 const API_BASE_URL = typeof window !== 'undefined' 
   ? '/api/backend' // Use proxy path for client-side requests
-  : 'http://13.61.8.56:3001/api'; // Direct URL for server-side requests
+  : 'http://13.61.8.56:3001'; // Direct URL for server-side requests
 
 class AdminApiClient {
   private async getAuthHeaders() {
