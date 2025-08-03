@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import React, { useEffect, useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -9,37 +9,192 @@ import {
   Users,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  LogOut,
+  RefreshCw,
+  AlertTriangle,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
+import { useAdminAuth, useSessionManager } from '@/hooks/useSessionManager';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
   title?: string;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
-  const { data: session, status } = useSession();
+// Loading component for admin areas
+const AdminLoadingScreen = () => (
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Loading Admin Panel</h3>
+        <p className="text-gray-600 dark:text-gray-400">Verifying your permissions...</p>
+      </div>
+    </div>
+  </div>
+);
+
+// Unauthorized access component
+const UnauthorizedScreen = () => {
   const router = useRouter();
-  const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  
+  return (
+    <div className="min-h-screen bg-red-50 dark:bg-red-900 flex items-center justify-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-md w-full mx-4 text-center">
+        <div className="text-red-600 dark:text-red-400 mb-4">
+          <X className="mx-auto h-16 w-16" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">You don't have permission to access the admin panel.</p>
+        <div className="space-y-3">
+          <button
+            onClick={() => router.push('/')}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Go to Homepage
+          </button>
+          <button
+            onClick={() => router.push('/signin')}
+            className="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          >
+            Sign In with Different Account
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Admin session status indicator
+const AdminSessionIndicator = () => {
+  const { isTokenNearExpiry, refreshSession, isRefreshing } = useSessionManager();
+  const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
-      router.push('/');
-      return;
+    if (isTokenNearExpiry) {
+      setShowWarning(true);
+      // Auto-hide warning after 10 seconds
+      const timer = setTimeout(() => setShowWarning(false), 10000);
+      return () => clearTimeout(timer);
     }
-  }, [status, session, router]);
+  }, [isTokenNearExpiry]);
 
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
+  if (!showWarning && !isRefreshing) return null;
+
+  return (
+    <div className="fixed top-4 right-4 z-50">
+      {isRefreshing && (
+        <div className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 mb-2">
+          <RefreshCw className="h-4 w-4 animate-spin" />
+          <span className="text-sm">Refreshing session...</span>
+        </div>
+      )}
+      
+      {showWarning && !isRefreshing && (
+        <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          <div className="flex items-center justify-between space-x-4">
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm">Session expiring soon</span>
+            </div>
+            <button
+              onClick={refreshSession}
+              className="text-xs bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded transition-colors flex items-center space-x-1"
+            >
+              <RefreshCw className="h-3 w-3" />
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Connection status indicator
+const ConnectionStatus = () => {
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return (
+    <div className="flex items-center space-x-2">
+      {isOnline ? (
+        <>
+          <Wifi className="h-4 w-4 text-green-500" />
+          <span className="text-sm text-gray-600 dark:text-gray-400">Online</span>
+        </>
+      ) : (
+        <>
+          <WifiOff className="h-4 w-4 text-red-500" />
+          <span className="text-sm text-gray-600 dark:text-gray-400">Offline</span>
+        </>
+      )}
+    </div>
+  );
+};
+
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
+  const { data: session, status } = useSession();
+  const { isAuthenticated, isLoading, isAdmin, user } = useAdminAuth();
+  const { hasRefreshError } = useSessionManager();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    // Allow time for session to load
+    const timer = setTimeout(() => {
+      setIsInitializing(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    // Only proceed if component is mounted and router is available
+    if (!isMounted || !router) return;
+
+    // Redirect to signin if not authenticated after loading
+    if (!isLoading && !isAuthenticated && !isInitializing) {
+      const returnUrl = encodeURIComponent(pathname);
+      router.push(`/signin?returnUrl=${returnUrl}&error=AdminRequired`);
+    }
+  }, [isAuthenticated, isLoading, isInitializing, router, pathname, isMounted]);
+
+  // Show loading screen while session is being established or not mounted
+  if (!isMounted || isLoading || isInitializing || status === 'loading') {
+    return <AdminLoadingScreen />;
   }
 
-  if (session?.user?.role !== 'ADMIN') {
-    return null;
+  // Show unauthorized screen if user is authenticated but not admin
+  if (isAuthenticated && !isAdmin) {
+    return <UnauthorizedScreen />;
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!isAuthenticated || hasRefreshError) {
+    return <AdminLoadingScreen />;
   }
 
   const navigation = [
@@ -76,8 +231,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     ] : [])
   ];
 
+  const handleSignOut = async () => {
+    await signOut({ 
+      redirect: true,
+      callbackUrl: '/signin?message=AdminSignedOut'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Session Management Indicators */}
+      <AdminSessionIndicator />
+
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
@@ -123,6 +288,36 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             );
           })}
         </nav>
+
+        {/* Mobile User info and Sign Out */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center min-w-0 flex-1">
+              <div className="flex-shrink-0">
+                <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                  <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
+                    {user?.name?.charAt(0)?.toUpperCase() || session?.user?.name?.charAt(0)?.toUpperCase() || 'A'}
+                  </span>
+                </div>
+              </div>
+              <div className="ml-3 flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  {user?.name || session?.user?.name || 'Admin'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  Administrator
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="ml-2 p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+              title="Sign Out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Desktop sidebar */}
@@ -154,23 +349,38 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             })}
           </nav>
           
-          {/* User info */}
+          {/* Desktop User info with enhanced features */}
           <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-3">
+              <ConnectionStatus />
+              <button
+                onClick={handleSignOut}
+                className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                title="Sign Out"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                   <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
-                    {session.user.name?.charAt(0).toUpperCase()}
+                    {user?.name?.charAt(0)?.toUpperCase() || session?.user?.name?.charAt(0)?.toUpperCase() || 'A'}
                   </span>
                 </div>
               </div>
               <div className="ml-3 flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {session.user.name}
+                  {user?.name || session?.user?.name || 'Admin'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                   Administrator
                 </p>
+                {user?.email && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {user.email}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -179,7 +389,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
       {/* Main content */}
       <div className="lg:pl-64 flex flex-col flex-1">
-        {/* Top bar */}
+        {/* Enhanced Top bar */}
         <div className="lg:hidden sticky top-0 z-30 flex h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -192,6 +402,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
               <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {title || 'Admin Dashboard'}
               </h1>
+            </div>
+            <div className="flex items-center space-x-3">
+              <ConnectionStatus />
             </div>
           </div>
         </div>

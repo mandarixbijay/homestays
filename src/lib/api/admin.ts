@@ -1,6 +1,20 @@
 import { getSession, signOut } from 'next-auth/react';
 import { CreateHomestayDto } from '@/types/admin';
 
+// Extend the session user type to include accessToken and refreshToken
+declare module 'next-auth' {
+  interface Session {
+    user?: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      accessToken?: string;
+      refreshToken?: string;
+      [key: string]: any;
+    };
+  }
+}
+
 // Use proxy path for client-side requests, direct URL for server-side
 const API_BASE_URL = typeof window !== 'undefined' 
   ? '/api/backend' // Use proxy path for client-side requests
@@ -57,9 +71,25 @@ class AdminApiClient {
 
   private async refreshToken(): Promise<{ accessToken: string; refreshToken: string; user: any }> {
     try {
+      console.log('[refreshToken] Attempting to refresh token...');
+      
+      // Get current session to extract refresh token
+      const session = await getSession();
+      const refreshToken = session?.user?.refreshToken;
+      
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
       const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
         method: 'POST',
-        credentials: 'include', // Send cookies
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          refreshToken: refreshToken
+        }),
       });
 
       if (!response.ok) {
@@ -73,7 +103,23 @@ class AdminApiClient {
         throw new Error('Invalid refresh token response');
       }
 
-      // Update session with new tokens (handled by next-auth automatically via cookies)
+      console.log('[refreshToken] Token refreshed successfully');
+
+      // Update the session with new tokens
+      // This requires triggering a session update
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          action: 'updateTokens',
+          accessToken: result.data.accessToken,
+          refreshToken: result.data.refreshToken,
+        }),
+      });
+
       return result.data;
     } catch (error) {
       console.error('[refreshToken] Error:', error);
@@ -88,24 +134,32 @@ class AdminApiClient {
     options: RequestInit = {},
     retryCount = 0
   ): Promise<T> {
-    const headers = await this.getAuthHeaders();
-    
     try {
+      const headers = await this.getAuthHeaders();
+      
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: {
           ...headers,
-          'Content-Type': 'application/json',
+          ...(options.body instanceof FormData
+            ? {}
+            : { 'Content-Type': 'application/json' }),
           ...options.headers,
         },
-        credentials: 'include', // Include cookies for refresh token
+        credentials: 'include',
       });
 
+      // Handle 401 Unauthorized - try to refresh token
       if (response.status === 401 && retryCount < 1) {
-        // Token expired, try refreshing
-        await this.refreshToken();
-        // Retry the original request with new token
-        return this.request<T>(endpoint, options, retryCount + 1);
+        console.log('[API] Token expired, attempting refresh...');
+        try {
+          await this.refreshToken();
+          // Retry the original request with new token
+          return this.request<T>(endpoint, options, retryCount + 1);
+        } catch (refreshError) {
+          console.error('[API] Token refresh failed:', refreshError);
+          throw refreshError;
+        }
       }
 
       if (!response.ok) {
@@ -118,7 +172,7 @@ class AdminApiClient {
         throw new Error(`API Error: ${response.status} - ${errorText}`);
       }
 
-      // Handle empty response (e.g., 204 No Content) or no body
+      // Handle empty response (e.g., 204 No Content)
       if (response.status === 204 || !response.body) {
         return { success: true } as T;
       }
@@ -143,12 +197,22 @@ class AdminApiClient {
     }
   }
 
+  async forceRefreshToken(): Promise<void> {
+    try {
+      await this.refreshToken();
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      throw error;
+    }
+  }
+  
+
   // ============================================================================
   // DASHBOARD API METHODS
   // ============================================================================
 
-  async getDashboardStats(): Promise<DashboardStats> {
-    return this.request<DashboardStats>('/admin/dashboard/stats');
+  async getDashboardStats() {
+    return this.request('/admin/dashboard/stats');
   }
 
   async getUsersCount(): Promise<{ total: number }> {
@@ -484,7 +548,7 @@ class AdminApiClient {
     }
   }
 
-  async getHomestays(params?: any) {
+ async getHomestays(params?: any) {
     const searchParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -495,7 +559,7 @@ class AdminApiClient {
     }
     
     const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
-    return this.request<any>(`/admin/homestays${query}`);
+    return this.request(`/admin/homestays${query}`);
   }
 
   async getHomestay(id: number) {

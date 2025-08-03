@@ -1,66 +1,16 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-console.log("[NextAuth] Initializing authOptions");
-
 const API_BASE_URL = process.env.API_BASE_URL || "http://13.61.8.56";
-
-// Type declarations
-declare module "next-auth" {
-  interface User {
-    id: string;
-    role?: string;
-    permissions?: string[];
-    isEmailVerified?: boolean;
-    isMobileVerified?: boolean;
-    accessToken?: string | null;
-    refreshToken?: string | null; // Added refresh token
-    tokenExpiry?: number; // Added token expiry timestamp
-    name?: string | null;
-    email?: string | null;
-    mobileNumber?: string | null;
-    image?: string | null;
-  }
-
-  interface Session {
-    user: {
-      id: string;
-      role?: string;
-      permissions?: string[];
-      isEmailVerified?: boolean;
-      isMobileVerified?: boolean;
-      accessToken?: string | null;
-      refreshToken?: string | null;
-      tokenExpiry?: number;
-      name?: string | null;
-      email?: string | null;
-      mobileNumber?: string | null;
-      image?: string | null;
-    };
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id?: string;
-    role?: string;
-    permissions?: string[];
-    isEmailVerified?: boolean;
-    isMobileVerified?: boolean;
-    accessToken?: string | null;
-    refreshToken?: string | null;
-    tokenExpiry?: number;
-    name?: string | null;
-    email?: string | null;
-    mobileNumber?: string | null;
-    image?: string | null;
-  }
-}
 
 // Helper function to refresh token
 async function refreshAccessToken(token: any) {
   try {
     console.log("[NextAuth] Attempting to refresh token");
+    
+    if (!token.refreshToken) {
+      throw new Error("No refresh token available");
+    }
     
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: "POST",
@@ -72,10 +22,16 @@ async function refreshAccessToken(token: any) {
       }),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[NextAuth] Refresh failed:", errorText);
+      throw new Error(`Refresh failed: ${response.status}`);
+    }
+
     const refreshedTokens = await response.json();
 
-    if (!response.ok) {
-      throw refreshedTokens;
+    if (!refreshedTokens.data?.accessToken) {
+      throw new Error("Invalid refresh response");
     }
 
     console.log("[NextAuth] Token refreshed successfully");
@@ -84,7 +40,8 @@ async function refreshAccessToken(token: any) {
       ...token,
       accessToken: refreshedTokens.data.accessToken,
       refreshToken: refreshedTokens.data.refreshToken ?? token.refreshToken,
-      tokenExpiry: Date.now() + (5 * 24 * 60 * 60 * 1000), // 5 days from now
+      tokenExpiry: Date.now() + (24 * 60 * 60 * 1000), // 24 hours from now
+      error: null,
     };
   } catch (error) {
     console.error("[NextAuth] Error refreshing token:", error);
@@ -107,10 +64,7 @@ export const authOptions: NextAuthOptions = {
         name: { label: "Name", type: "text" },
         action: { label: "Action", type: "text" },
       },
-      async authorize(
-        credentials: Record<"name" | "email" | "mobileNumber" | "password" | "action", string> | undefined,
-        req: any
-      ) {
+      async authorize(credentials, req) {
         console.log("[NextAuth] Authorize called with credentials:", credentials);
         if (!credentials) {
           throw new Error("Credentials are required");
@@ -125,7 +79,6 @@ export const authOptions: NextAuthOptions = {
               throw new Error("Name, either email or mobile number, and password are required");
             }
 
-            console.log("[NextAuth] Registering user:", { name, email, mobileNumber });
             const response = await fetch(`${API_BASE_URL}/auth/register-guest`, {
               method: "POST",
               headers: {
@@ -136,7 +89,6 @@ export const authOptions: NextAuthOptions = {
             });
 
             const result = await response.json();
-            console.log("[NextAuth] Register response:", result);
 
             if (!response.ok) {
               throw new Error(result.message || "Failed to register guest");
@@ -166,7 +118,6 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Password is required");
           }
 
-          console.log("[NextAuth] Logging in user:", { email, mobileNumber });
           const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: "POST",
             headers: {
@@ -177,14 +128,13 @@ export const authOptions: NextAuthOptions = {
           });
 
           const result = await response.json();
-          console.log("[NextAuth] Login response:", result);
 
           if (!response.ok) {
             throw new Error(result.message || "Invalid credentials");
           }
 
-          // Calculate token expiry (5 days from now)
-          const tokenExpiry = Date.now() + (5 * 24 * 60 * 60 * 1000);
+          // Calculate token expiry (24 hours from now for access token)
+          const tokenExpiry = Date.now() + (24 * 60 * 60 * 1000);
 
           return {
             id: result.data.user.id.toString(),
@@ -196,7 +146,7 @@ export const authOptions: NextAuthOptions = {
             isEmailVerified: result.data.user.isEmailVerified,
             isMobileVerified: result.data.user.isMobileVerified,
             accessToken: result.data.accessToken,
-            refreshToken: result.data.refreshToken || null, // If your backend provides refresh token
+            refreshToken: result.data.refreshToken,
             tokenExpiry: tokenExpiry,
             image: null,
           };
@@ -208,71 +158,73 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      console.log("[NextAuth] SignIn callback:", { user, account, profile });
-      return true; // Allow sign in
-    },
-    async redirect({ url, baseUrl }) {
-      console.log("[NextAuth] Redirect callback:", { url, baseUrl });
+    async jwt({ token, user, trigger, session }) {
+      console.log("[NextAuth] JWT callback:", { trigger, hasUser: !!user });
       
-      // Handle role-based redirects
-      if (url.startsWith(baseUrl)) {
-        return url;
+      // Handle manual token updates
+      if (trigger === "update" && session?.accessToken) {
+        token.accessToken = session.accessToken;
+        token.refreshToken = session.refreshToken || token.refreshToken;
+        token.tokenExpiry = Date.now() + (24 * 60 * 60 * 1000);
+        token.error = null;
+        return token;
       }
-      if (url.startsWith("/")) {
-        return `${baseUrl}${url}`;
-      }
-      
-      return baseUrl;
-    },
-    async jwt({ token, user }) {
-      console.log("[NextAuth] JWT callback:", { token, user });
       
       // Initial sign in
-      if (user) {
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
-        token.mobileNumber = user.mobileNumber;
-        token.role = user.role;
-        token.permissions = user.permissions;
-        token.isEmailVerified = user.isEmailVerified;
-        token.isMobileVerified = user.isMobileVerified;
-        token.accessToken = user.accessToken;
-        token.refreshToken = user.refreshToken;
-        token.tokenExpiry = user.tokenExpiry;
-        token.image = user.image;
-        return token;
+      if (
+        user &&
+        typeof user === "object" &&
+        "mobileNumber" in user &&
+        "permissions" in user &&
+        "isEmailVerified" in user &&
+        "isMobileVerified" in user &&
+        "accessToken" in user &&
+        "refreshToken" in user &&
+        "tokenExpiry" in user
+      ) {
+        return {
+          ...token,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          mobileNumber: (user as any).mobileNumber,
+          role: user.role,
+          permissions: (user as any).permissions,
+          isEmailVerified: (user as any).isEmailVerified,
+          isMobileVerified: (user as any).isMobileVerified,
+          accessToken: (user as any).accessToken,
+          refreshToken: (user as any).refreshToken,
+          tokenExpiry: (user as any).tokenExpiry,
+          image: user.image,
+          error: null,
+        };
       }
 
       // Return previous token if the access token has not expired yet
-      if (token.tokenExpiry && Date.now() < token.tokenExpiry) {
-        console.log("[NextAuth] Token still valid, returning existing token");
+      if (
+        token.tokenExpiry &&
+        Date.now() < Number(token.tokenExpiry) - (5 * 60 * 1000)
+      ) { // Refresh 5 mins before expiry
         return token;
       }
 
-      // Access token has expired, try to update it using refresh token
+      // Access token has expired, try to update it
       if (token.refreshToken) {
-        console.log("[NextAuth] Token expired, attempting refresh");
+        console.log("[NextAuth] Token near expiry, attempting refresh");
         return refreshAccessToken(token);
       }
 
-      // If no refresh token or refresh failed, but we want to keep the session alive
-      // Update the expiry to 5 days from now (essentially making it not expire)
-      console.log("[NextAuth] Extending token validity for 5 more days");
-      return {
-        ...token,
-        tokenExpiry: Date.now() + (5 * 24 * 60 * 60 * 1000), // Extend for 5 more days
-      };
+      return token;
     },
     async session({ session, token }) {
-      console.log("[NextAuth] Session callback:", { session, token });
-      
-      // Handle token refresh error
+      // If there was an error refreshing the token, end the session
       if (token.error === "RefreshAccessTokenError") {
-        console.log("[NextAuth] Token refresh failed, but keeping session active");
-        // You can choose to either end the session or keep it active
-        // For now, we'll keep it active but mark the error
+        console.log("[NextAuth] Token refresh failed, ending session");
+        // You could also redirect to sign in here
+        return {
+          ...session,
+          error: "RefreshAccessTokenError"
+        };
       }
       
       if (token) {
@@ -285,10 +237,10 @@ export const authOptions: NextAuthOptions = {
           permissions: token.permissions,
           isEmailVerified: token.isEmailVerified,
           isMobileVerified: token.isMobileVerified,
-          accessToken: token.accessToken,
-          refreshToken: token.refreshToken,
+          accessToken: token.accessToken as string | undefined,
+          refreshToken: token.refreshToken as string | undefined,
           tokenExpiry: token.tokenExpiry,
-          image: token.image,
+          image: token.image as string | null | undefined,
         };
       }
       return session;
@@ -296,26 +248,21 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 5 * 24 * 60 * 60, // 5 days in seconds
+    maxAge: 7 * 24 * 60 * 60, // 7 days
     updateAge: 24 * 60 * 60, // Update session every 24 hours
   },
   jwt: {
-    maxAge: 5 * 24 * 60 * 60, // 5 days in seconds
+    maxAge: 7 * 24 * 60 * 60, // 7 days
   },
   pages: {
     signIn: "/signin",
     error: "/auth/error",
   },
+  events: {
+    async signOut(message) {
+      console.log("[NextAuth] User signed out:", message);
+    },
+  },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
 };
-
-if (!process.env.NEXTAUTH_SECRET) {
-  throwError();
-}
-
-function throwError() {
-  throw new Error("NEXTAUTH_SECRET is not set in environment variables");
-}
-
-console.log("[NextAuth] authOptions initialized successfully");
