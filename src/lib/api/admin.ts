@@ -1,8 +1,8 @@
 import { getSession, signOut } from 'next-auth/react';
 import { CreateHomestayDto } from '@/types/admin';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://13.61.8.56:3001';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
 
 
 class AdminApiClient {
