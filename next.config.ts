@@ -1,5 +1,3 @@
-
-
 /** @type {import('next').NextConfig} */
 const nextConfig: import('next').NextConfig = {
   images: {
@@ -16,12 +14,11 @@ const nextConfig: import('next').NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/bookings/check-availability",
-        destination: "http://13.61.8.56:3001/bookings/check-availability",
+        source: "/api/:path*", // proxy all /api/* calls
+        destination: "http://13.61.8.56:3001/:path*", // to backend server
       },
     ];
   },
-  
 };
 
 export default nextConfig;
