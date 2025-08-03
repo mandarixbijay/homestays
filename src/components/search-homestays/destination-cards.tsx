@@ -94,12 +94,12 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
       className="w-full border border-border rounded-md bg-card cursor-pointer group shadow-sm hover:shadow-md transition-shadow"
-      onClick={onClick} // Add this back
-      role="button" // Optional: for accessibility
+      onClick={onClick}
+      role="button"
       aria-label={`View details for ${hotelName} in ${location}`}
     >
-      <Card className="flex flex-col sm:flex-row w-full rounded-md border-none h-auto sm:h-64">
-        <div className="relative w-full sm:w-64 h-64 sm:h-full flex-shrink-0">
+      <Card className="flex flex-col sm:flex-row w-full rounded-md border-none h-auto">
+        <div className="relative w-full sm:w-64 h-64 flex-shrink-0">
           <Image
             src={imgArr[current]}
             alt={`${hotelName} image ${current + 1}`}
@@ -157,8 +157,8 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
             </Badge>
           )}
         </div>
-        <CardContent className="flex flex-col sm:flex-row p-4 sm:p-6 w-full gap-4 sm:gap-6">
-          <div className="flex flex-col w-full sm:w-1/2 space-y-2">
+        <CardContent className="flex flex-col sm:flex-row p-4 sm:p-6 w-full gap-4 sm:gap-6 min-h-64">
+          <div className="flex flex-col w-full sm:w-1/2 space-y-3">
             <p className="text-sm text-text-secondary">{address}</p>
             <CardTitle className="text-lg font-bold text-text-primary line-clamp-2 font-manrope">
               {hotelName}
@@ -172,7 +172,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
                 ({reviews.split(" ")[1].replace("(", "").replace(")", "")})
               </span>
             </div>
-            <div className="mt-2">
+            <div className="mt-2 flex-1">
               <h4 className="text-sm font-semibold text-text-primary font-manrope">Amenities:</h4>
               <ul className="list-disc pl-4 mt-1 space-y-1 text-xs text-text-secondary font-manrope">
                 {features.slice(0, 3).map((f, i) => (
@@ -217,9 +217,9 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
 
 const DestinationCardSkeleton = () => (
   <div className="w-full border border-border rounded-md bg-card mb-6 shadow-sm">
-    <Card className="flex flex-col sm:flex-row w-full rounded-md border-none h-auto sm:h-64">
-      <Skeleton className="w-full sm:w-64 h-64 sm:h-full rounded-t-md sm:rounded-l-md sm:rounded-t-none" />
-      <CardContent className="flex flex-col sm:flex-row p-4 sm:p-6 w-full gap-4 sm:gap-6">
+    <Card className="flex flex-col sm:flex-row w-full rounded-md border-none h-auto">
+      <Skeleton className="w-full sm:w-64 h-64 rounded-t-md sm:rounded-l-md sm:rounded-t-none" />
+      <CardContent className="flex flex-col sm:flex-row p-4 sm:p-6 w-full gap-4 sm:gap-6 min-h-64">
         <div className="flex flex-col w-full sm:w-1/2 space-y-3">
           <Skeleton className="h-4 w-1/3" />
           <Skeleton className="h-6 w-3/4" />
@@ -284,7 +284,7 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
       : undefined;
     const totalRoomsLeft = homestay.rooms.reduce((sum, room) => sum + (room.roomsLeft || 0), 0);
 
-    // Combine main homestay image with room images - ONLY FIX
+    // Combine main homestay image with room images
     const allImages = [];
     if (homestay.image && homestay.image !== FALLBACK_IMAGE) {
       allImages.push(homestay.image);
@@ -301,7 +301,7 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
 
     return {
       imageSrc: homestay.image || FALLBACK_IMAGE,
-      images: combinedImages, // FIXED: Now includes both main image and room images
+      images: combinedImages,
       location: `${homestay.city}, ${homestay.region}`,
       address: homestay.address || `${homestay.city}, ${homestay.region}`,
       hotelName: homestay.name || homestay.city,
