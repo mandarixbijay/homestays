@@ -23,12 +23,20 @@ import {
   Sun,
   Moon,
   Menu,
+  Shield,
 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import UserProfileDropdown from "./navbar-component/UserProfileDropdown";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+
+// Extend the session user type to include 'role'
+declare module "next-auth" {
+  interface User {
+    role?: string;
+  }
+}
 
 interface NavbarProps {
   hideUserCircle?: boolean;
@@ -42,7 +50,36 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
 
   const isLoggedIn = status === "authenticated";
   const userRole = session?.user?.role;
-  const showListProperty = !isLoggedIn || userRole === "host";
+  const showListProperty = !isLoggedIn || userRole === "HOST";
+
+  // Handle role-based redirect after login - only from specific pages
+  React.useEffect(() => {
+    if (isLoggedIn && userRole && typeof window !== 'undefined') {
+      const currentPath = window.location.pathname;
+      
+      // Only redirect from signin page, and only if not already on correct dashboard
+      if (currentPath === '/signin') {
+        let redirectPath = '';
+        
+        switch (userRole) {
+          case 'HOST':
+            redirectPath = '/host/dashboard';
+            break;
+          case 'ADMIN':
+            redirectPath = '/admin';
+            break;
+          case 'GUEST':
+            redirectPath = '/account';
+            break;
+          default:
+            return;
+        }
+        
+        console.log(`[Navbar] Redirecting ${userRole} from signin to ${redirectPath}`);
+        router.replace(redirectPath); // Use replace instead of push to avoid back button issues
+      }
+    }
+  }, [isLoggedIn, userRole, router]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -57,6 +94,8 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
     closeMenu();
     if (!isLoggedIn) {
       router.push("/list-your-property");
+    } else if (userRole === "HOST") {
+      router.push("/host/dashboard");
     }
   };
 
@@ -69,9 +108,18 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
     ...(showListProperty
       ? [
           {
-            label: "List your property",
-            href: "/list-your-property",
+            label: userRole === "HOST" ? "Dashboard" : "List your property",
+            href: userRole === "HOST" ? "/host/dashboard" : "/list-your-property",
             action: toListProperty,
+          },
+        ]
+      : []),
+    ...(userRole === "ADMIN"
+      ? [
+          {
+            label: "Admin Panel",
+            href: "/admin",
+            icon: <Shield className="w-5 h-5 text-muted-foreground mr-2" />,
           },
         ]
       : []),
@@ -106,9 +154,10 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                   <NavigationMenuLink asChild>
                     <Button
                       variant="ghost"
-                      className="text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-primary/10 transition-colors text-sm px-4 py-2 font-medium"
+                      className="text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-primary/10 transition-colors text-sm px-4 py-2 font-medium flex items-center"
                       onClick={item.action || (() => toPage(item.href))}
                     >
+                      {item.icon}
                       {item.label}
                     </Button>
                   </NavigationMenuLink>
@@ -144,7 +193,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                     <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-80 bg-white dark:bg-gray-800">
+                <DropdownMenuContent align="end" className="w-80 bg-white dark:bg-gray-800 z-[150]">
                   <div className="p-3">
                     <h4 className="font-medium mb-2 text-sm text-gray-900 dark:text-gray-100">
                       Notifications
@@ -219,8 +268,9 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                     <button
                       key={item.label}
                       onClick={item.action || (() => toPage(item.href))}
-                      className="text-base font-medium text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 py-3 px-4 rounded-lg"
+                      className="text-base font-medium text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 py-3 px-4 rounded-lg flex items-center"
                     >
+                      {item.icon}
                       {item.label}
                     </button>
                   ))}

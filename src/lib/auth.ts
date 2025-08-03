@@ -153,6 +153,28 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      console.log("[NextAuth] SignIn callback:", { user, account, profile });
+      return true; // Allow sign in
+    },
+    async redirect({ url, baseUrl }) {
+      console.log("[NextAuth] Redirect callback:", { url, baseUrl });
+      
+      // Handle role-based redirects
+      // We need to get the user's role from the URL or session
+      // Since we can't access session here directly, we'll handle this in the pages
+      
+      // If it's a callback URL, allow it
+      if (url.startsWith(baseUrl)) {
+        return url;
+      }
+      // If it's a relative URL, make it absolute
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       console.log("[NextAuth] JWT callback:", { token, user });
       if (user) {

@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { OtpDialog } from "@/components/dialog/otp-dialog";
 import { useSession, signIn } from "next-auth/react";
 import Navbar from "@/components/navbar/navbar";
+import LoginRedirect from "@/components/LoginRedirect";
 
 const formSchema = z.object({
   identifier: z
@@ -294,6 +295,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br overflow-auto mt-20">
+      <LoginRedirect />
       <Navbar hideUserCircle />
       <div className="w-full max-w-md p-4 sm:p-8 space-y-8 rounded-xl shadow-lg mx-2 bg-background">
         <div className="flex justify-center mb-4">

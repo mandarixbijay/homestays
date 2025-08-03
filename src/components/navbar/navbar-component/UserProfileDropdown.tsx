@@ -7,10 +7,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { UserCircle, LogOut, LayoutDashboard, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  UserCircle,
+  LogOut,
+  ChevronDown,
+  ChevronUp,
+  Shield,
+  Home
+} from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 
 interface UserProfileDropdownProps {
@@ -18,16 +24,11 @@ interface UserProfileDropdownProps {
 }
 
 const UserProfileDropdown = ({ isMobile = false }: UserProfileDropdownProps) => {
-  const [isListPropertyUser, setIsListPropertyUser] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
   const { data: session } = useSession();
 
-  useEffect(() => {
-    const isOnListPropertyPage = pathname.includes("/list-your-property");
-    setIsListPropertyUser(isOnListPropertyPage);
-  }, [pathname]);
+  const userRole = session?.user?.role;
+  const userName = session?.user?.name || "Profile";
 
   const handleLogout = () => {
     signOut({ callbackUrl: "/" });
@@ -36,6 +37,21 @@ const UserProfileDropdown = ({ isMobile = false }: UserProfileDropdownProps) => 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
+
+  // Get the appropriate dashboard/account link based on role
+  const getDashboardLink = () => {
+    switch (userRole) {
+      case 'HOST':
+        return { href: '/host/dashboard', label: 'Host Dashboard', icon: <Home className="h-4 w-4" /> };
+      case 'ADMIN':
+        return { href: '/admin', label: 'Admin Panel', icon: <Shield className="h-4 w-4" /> };
+      case 'GUEST':
+      default:
+        return { href: '/account', label: 'My Account', icon: <UserCircle className="h-4 w-4" /> };
+    }
+  };
+
+  const dashboardLink = getDashboardLink();
 
   if (isMobile) {
     return (
@@ -47,29 +63,21 @@ const UserProfileDropdown = ({ isMobile = false }: UserProfileDropdownProps) => 
         >
           <div className="flex items-center gap-2">
             <UserCircle className="h-5 w-5" />
-            <span>{session?.user?.name || "Profile"}</span>
+            <span>{userName}</span>
           </div>
           {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
         {isExpanded && (
           <div className="mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 space-y-2">
-            {isListPropertyUser ? (
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-3 rounded-md"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                <span>Dashboard</span>
-              </Link>
-            ) : (
-              <Link
-                href="/account"
-                className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-3 rounded-md"
-              >
-                <UserCircle className="h-4 w-4" />
-                <span>Account</span>
-              </Link>
-            )}
+            <Link
+              href={dashboardLink.href}
+              className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-3 rounded-md"
+              onClick={() => setIsExpanded(false)}
+            >
+              {dashboardLink.icon}
+              <span>{dashboardLink.label}</span>
+            </Link>
+
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-gray-100 dark:hover:bg-gray-700 py-2 px-3 rounded-md"
@@ -91,31 +99,24 @@ const UserProfileDropdown = ({ isMobile = false }: UserProfileDropdownProps) => 
           className="relative flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100"
         >
           <UserCircle className="h-5 w-5" />
-          <span>{session?.user?.name || "Profile"}</span>
+          <span>{userName}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44 bg-white dark:bg-gray-800 space-y-1">
-        {isListPropertyUser ? (
-          <DropdownMenuItem asChild>
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 text-xs font-medium text-gray-900 dark:text-gray-100"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              <span>Dashboard</span>
-            </Link>
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem asChild>
-            <Link
-              href="/account"
-              className="flex items-center gap-2 text-xs font-medium text-gray-900 dark:text-gray-100"
-            >
-              <UserCircle className="h-4 w-4" />
-              <span>Account</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
+      <DropdownMenuContent
+        align="end"
+        className="z-50 w-48 bg-white dark:bg-gray-800 space-y-1"
+      >
+
+        <DropdownMenuItem asChild>
+          <Link
+            href={dashboardLink.href}
+            className="flex items-center gap-2 text-xs font-medium text-gray-900 dark:text-gray-100 mt-5"
+          >
+            {dashboardLink.icon}
+            <span>{dashboardLink.label}</span>
+          </Link>
+        </DropdownMenuItem>
+
         <DropdownMenuItem
           onClick={handleLogout}
           className="flex items-center gap-2 text-xs font-medium text-red-600 focus:text-red-700 cursor-pointer"
