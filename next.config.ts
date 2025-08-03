@@ -16,7 +16,7 @@ const nextConfig: import('next').NextConfig = {
       // Proxy all API requests to your backend server
       {
         source: "/api/backend/:path*",
-        destination: "http://13.61.8.56:3001/api/:path*",
+        destination: "http://13.61.8.56:3001/:path*",
       },
     ];
   },
