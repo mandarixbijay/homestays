@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const isAuthenticated = !!authSession?.user?.accessToken;
 
     // For guest bookings, do not include Authorization header
-    if (isAuthenticated) {
+    if (isAuthenticated && authSession.user && authSession.user.accessToken) {
       headers["Authorization"] = `Bearer ${authSession.user.accessToken}`;
     } else {
       console.log("Guest booking detected; no Authorization header included");

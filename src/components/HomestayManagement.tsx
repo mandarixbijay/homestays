@@ -69,7 +69,7 @@ const HomestayManagement = () => {
         ...(filters.address && { address: filters.address })
       };
 
-      const data = await adminApi.getHomestays(params);
+      const data = await adminApi.getHomestays(params) as { data: Homestay[]; totalPages: number };
       setHomestays(data.data);
       setTotalPages(data.totalPages);
     } catch (error) {

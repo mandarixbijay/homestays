@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { adminApi } from '@/lib/api/admin';
+import { useAuthenticatedApi } from '@/hooks/useSessionManager';
 
 // ============================================================================
 // TYPES
@@ -350,7 +351,7 @@ export const generateRecentActivity = (homestays: any[]): ActivityItem[] => {
 };
 
 // ============================================================================
-// CORE HOOKS
+// CORE HOOKS WITH SESSION MANAGEMENT
 // ============================================================================
 
 export function useAsyncOperation<T = any>() {
@@ -359,8 +360,9 @@ export function useAsyncOperation<T = any>() {
     loading: false,
     error: null,
   });
+  const { handleApiError } = useAuthenticatedApi();
 
-  const execute = useCallback(async (operation: () => Promise<T>) => {
+  const execute = useCallback(async (operation: () => Promise<T>): Promise<T> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
@@ -370,9 +372,18 @@ export function useAsyncOperation<T = any>() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setState(prev => ({ ...prev, loading: false, error: errorMessage }));
+      
+      // Handle authentication errors
+      await handleApiError(err, async () => {
+        // Retry the operation after token refresh
+        const retryResult = await operation();
+        setState({ data: retryResult, loading: false, error: null });
+        return retryResult;
+      });
+      
       throw err;
     }
-  }, []);
+  }, [handleApiError]);
 
   const reset = useCallback(() => {
     setState({ data: null, loading: false, error: null });
@@ -419,16 +430,19 @@ export function useFilters<T extends Record<string, any>>(initialFilters: T) {
 }
 
 // ============================================================================
-// DASHBOARD HOOKS
+// DASHBOARD HOOKS WITH PROPER TYPING
 // ============================================================================
 
 export function useDashboardStats() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const { loading, error, execute, clearError } = useAsyncOperation<DashboardStats>();
 
-  const loadDashboardStats = useCallback(async () => {
+  const loadDashboardStats = useCallback(async (): Promise<DashboardStats> => {
     try {
-      const result = await execute(() => adminApi.getDashboardStats());
+      const result = await execute(async (): Promise<DashboardStats> => {
+        const response = await adminApi.getDashboardStats();
+        return response as DashboardStats;
+      });
       setStats(result);
       return result;
     } catch (error) {
@@ -437,48 +451,73 @@ export function useDashboardStats() {
     }
   }, [execute]);
 
-  const loadCompleteStats = useCallback(async () => {
+  const loadCompleteStats = useCallback(async (): Promise<DashboardStats> => {
     try {
-      // Load all dashboard data in parallel
-      const [
-        dashboardStats,
-        homestayStats,
-        usersCount,
-        monthlyGrowth,
-        recentActivity,
-        averageRating
-      ] = await Promise.all([
-        adminApi.getDashboardStats().catch(() => null),
-        adminApi.getHomestaysByStatus().catch(() => null),
-        adminApi.getUsersCount().catch(() => null),
-        adminApi.getMonthlyGrowthStats().catch(() => null),
-        adminApi.getSystemActivity(10).catch(() => []),
-        adminApi.getAverageRating().catch(() => null)
-      ]);
+      const result = await execute(async (): Promise<DashboardStats> => {
+        // Load all dashboard data in parallel with proper error handling
+        const [
+          dashboardStatsRaw,
+          homestayStatsRaw,
+          usersCountRaw,
+          monthlyGrowth,
+          recentActivity,
+          averageRating
+        ] = await Promise.allSettled([
+          adminApi.getDashboardStats(),
+          adminApi.getHomestaysByStatus(),
+          adminApi.getUsersCount(),
+          adminApi.getMonthlyGrowthStats(),
+          adminApi.getSystemActivity(10),
+          adminApi.getAverageRating()
+        ]);
 
-      const combinedStats: DashboardStats = {
-        totalHomestays: homestayStats?.total || dashboardStats?.totalHomestays || 0,
-        pendingHomestays: homestayStats?.pending || dashboardStats?.pendingHomestays || 0,
-        approvedHomestays: homestayStats?.approved || dashboardStats?.approvedHomestays || 0,
-        rejectedHomestays: homestayStats?.rejected || dashboardStats?.rejectedHomestays || 0,
-        totalUsers: usersCount?.total || dashboardStats?.totalUsers || 0,
-        activeUsers: dashboardStats?.activeUsers || 0,
-        totalRooms: dashboardStats?.totalRooms || 0,
-        averageRating: averageRating?.averageRating || dashboardStats?.averageRating || 0,
-        totalBookings: dashboardStats?.totalBookings || 0,
-        totalRevenue: dashboardStats?.totalRevenue || 0,
-        occupancyRate: dashboardStats?.occupancyRate || 0,
-        recentActivity: recentActivity || [],
-        growthStats: monthlyGrowth || {
-          homestaysGrowth: 0,
-          usersGrowth: 0,
-          bookingsGrowth: 0,
-          revenueGrowth: 0
-        }
-      };
+        // Helper function to safely extract values from settled promises
+        const getSettledValue = <T>(result: PromiseSettledResult<T>, fallback: T): T => {
+          return result.status === 'fulfilled' ? result.value : fallback;
+        };
 
-      setStats(combinedStats);
-      return combinedStats;
+        // Safely extract and type the results
+        const dashboardStats = getSettledValue(dashboardStatsRaw, {}) as Partial<DashboardStats>;
+        const homestayStats = getSettledValue(
+          homestayStatsRaw,
+          { total: 0, pending: 0, approved: 0, rejected: 0 }
+        ) as { 
+          total?: number; 
+          pending?: number; 
+          approved?: number; 
+          rejected?: number; 
+        };
+        const usersCount = getSettledValue(usersCountRaw, { total: 0 }) as { total: number };
+        const growthStats = getSettledValue(monthlyGrowth, null);
+        const activities = getSettledValue(recentActivity, []) as ActivityItem[];
+        const rating = getSettledValue(averageRating, null) as { averageRating?: number } | null;
+
+        const combinedStats: DashboardStats = {
+          totalHomestays: homestayStats?.total ?? dashboardStats?.totalHomestays ?? 0,
+          pendingHomestays: homestayStats?.pending ?? dashboardStats?.pendingHomestays ?? 0,
+          approvedHomestays: homestayStats?.approved ?? dashboardStats?.approvedHomestays ?? 0,
+          rejectedHomestays: homestayStats?.rejected ?? dashboardStats?.rejectedHomestays ?? 0,
+          totalUsers: usersCount?.total ?? dashboardStats?.totalUsers ?? 0,
+          activeUsers: dashboardStats?.activeUsers ?? 0,
+          totalRooms: dashboardStats?.totalRooms ?? 0,
+          averageRating: rating?.averageRating ?? dashboardStats?.averageRating ?? 0,
+          totalBookings: dashboardStats?.totalBookings ?? 0,
+          totalRevenue: dashboardStats?.totalRevenue ?? 0,
+          occupancyRate: dashboardStats?.occupancyRate ?? 0,
+          recentActivity: activities,
+          growthStats: growthStats || {
+            homestaysGrowth: 0,
+            usersGrowth: 0,
+            bookingsGrowth: 0,
+            revenueGrowth: 0
+          }
+        };
+
+        return combinedStats;
+      });
+
+      setStats(result);
+      return result;
     } catch (error) {
       console.error('Error loading complete dashboard stats:', error);
       throw error;
@@ -496,14 +535,14 @@ export function useDashboardStats() {
 }
 
 // ============================================================================
-// HOMESTAY OPERATIONS (existing code remains the same)
+// HOMESTAY OPERATIONS WITH SESSION MANAGEMENT
 // ============================================================================
 
 export function useHomestays() {
   const [homestays, setHomestays] = useState<any[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const { loading, error, execute, clearError } = useAsyncOperation();
+  const { loading, error, execute, clearError } = useAsyncOperation<any>();
 
   const loadHomestays = useCallback(async (params?: any) => {
     try {
@@ -511,7 +550,12 @@ export function useHomestays() {
       const filteredParams = Object.fromEntries(
         Object.entries(params || {}).filter(([_, value]) => value !== '' && value !== undefined)
       );
-      const result = await execute(() => adminApi.getHomestays(filteredParams));
+      
+      const result = await execute(async () => {
+        const response = await adminApi.getHomestays(filteredParams);
+        return response;
+      });
+      
       if (result) {
         setHomestays(result.data || []);
         setTotalPages(result.totalPages || 1);
@@ -534,7 +578,10 @@ export function useHomestays() {
         throw new Error(validationErrors.join('; '));
       }
 
-      const result = await execute(() => adminApi.createHomestay(cleanData, files));
+      const result = await execute(async () => {
+        return await adminApi.createHomestay(cleanData, files);
+      });
+      
       return result;
     } catch (error) {
       console.error('Error creating homestay:', error);
@@ -562,7 +609,10 @@ export function useHomestays() {
         throw new Error(errorMessages.join('; '));
       }
 
-      const result = await execute(() => adminApi.createBulkHomestays(cleanHomestays, allFiles));
+      const result = await execute(async () => {
+        return await adminApi.createBulkHomestays(cleanHomestays, allFiles);
+      });
+      
       return result;
     } catch (error) {
       console.error('Error creating bulk homestays:', error);
@@ -573,7 +623,11 @@ export function useHomestays() {
   const updateHomestay = useCallback(async (id: number, homestayData: any) => {
     try {
       const { cleanData, files } = FileProcessor.extractFilesFromHomestay(homestayData);
-      const result = await execute(() => adminApi.updateHomestay(id, cleanData, files));
+      
+      const result = await execute(async () => {
+        return await adminApi.updateHomestay(id, cleanData, files);
+      });
+      
       return result;
     } catch (error) {
       console.error('Error updating homestay:', error);
@@ -643,16 +697,18 @@ export function useHomestays() {
 }
 
 // ============================================================================
-// REST OF THE HOOKS (unchanged)
+// REST OF THE HOOKS WITH PROPER TYPING
 // ============================================================================
 
 export function useHomestayDetail(homestayId: number) {
   const [homestay, setHomestay] = useState<any>(null);
-  const { loading, error, execute, clearError } = useAsyncOperation();
+  const { loading, error, execute, clearError } = useAsyncOperation<any>();
 
   const loadHomestay = useCallback(async () => {
     try {
-      const result = await execute(() => adminApi.getHomestay(homestayId));
+      const result = await execute(async () => {
+        return await adminApi.getHomestay(homestayId);
+      });
       setHomestay(result);
       return result;
     } catch (error) {
@@ -661,9 +717,11 @@ export function useHomestayDetail(homestayId: number) {
     }
   }, [homestayId, execute]);
 
-  const updateHomestay = useCallback(async (data: FormData) => {
+  const updateHomestay = useCallback(async (data: any) => {
     try {
-      const result = await execute(() => adminApi.updateHomestay(homestayId, data));
+      const result = await execute(async () => {
+        return await adminApi.updateHomestay(homestayId, data);
+      });
       setHomestay(result);
       return result;
     } catch (error) {
@@ -687,24 +745,34 @@ export function useMasterData() {
   const [bedTypes, setBedTypes] = useState<any[]>([]);
   const [currencies, setCurrencies] = useState<any[]>([]);
   const [areaUnits, setAreaUnits] = useState<any[]>([]);
-  const { loading, error, execute, clearError } = useAsyncOperation();
+  const { loading, error, execute, clearError } = useAsyncOperation<any>();
 
   const loadAllData = useCallback(async () => {
     try {
       const result = await execute(async () => {
-        const [facilitiesData, bedTypesData, currenciesData, areaUnitsData] = await Promise.all([
-          adminApi.getFacilities().catch(() => []),
-          adminApi.getBedTypes().catch(() => []),
-          adminApi.getCurrencies().catch(() => []),
-          adminApi.getAreaUnits().catch(() => [])
+        const [facilitiesData, bedTypesData, currenciesData, areaUnitsData] = await Promise.allSettled([
+          adminApi.getFacilities(),
+          adminApi.getBedTypes(),
+          adminApi.getCurrencies(),
+          adminApi.getAreaUnits()
         ]);
 
-        setFacilities(facilitiesData || []);
-        setBedTypes(bedTypesData || []);
-        setCurrencies(currenciesData || []);
-        setAreaUnits(areaUnitsData || []);
+        // Helper function to safely extract values
+        const getSettledValue = <T>(result: PromiseSettledResult<T>, fallback: T): T => {
+          return result.status === 'fulfilled' ? result.value : fallback;
+        };
 
-        return { facilitiesData, bedTypesData, currenciesData, areaUnitsData };
+        const facilities = getSettledValue(facilitiesData, []) as any[];
+        const bedTypes = getSettledValue(bedTypesData, []) as any[];
+        const currencies = getSettledValue(currenciesData, []) as any[];
+        const areaUnits = getSettledValue(areaUnitsData, []) as any[];
+
+        setFacilities(facilities);
+        setBedTypes(bedTypes);
+        setCurrencies(currencies);
+        setAreaUnits(areaUnits);
+
+        return { facilities, bedTypes, currencies, areaUnits };
       });
       return result;
     } catch (error) {
@@ -713,76 +781,100 @@ export function useMasterData() {
     }
   }, [execute]);
 
-  // Master data CRUD operations (unchanged from original)
+  // Master data CRUD operations with proper error handling
   const createFacility = useCallback(async (data: any) => {
-    const result = await execute(() => adminApi.createFacility(data));
+    const result = await execute(async () => {
+      return await adminApi.createFacility(data);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   const updateFacility = useCallback(async (id: number, data: any) => {
-    const result = await execute(() => adminApi.updateFacility(id, data));
+    const result = await execute(async () => {
+      return await adminApi.updateFacility(id, data);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   const deleteFacility = useCallback(async (id: number) => {
-    const result = await execute(() => adminApi.deleteFacility(id));
+    const result = await execute(async () => {
+      return await adminApi.deleteFacility(id);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   // Similar methods for bedTypes, currencies, areaUnits...
   const createBedType = useCallback(async (data: any) => {
-    const result = await execute(() => adminApi.createBedType(data));
+    const result = await execute(async () => {
+      return await adminApi.createBedType(data);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   const updateBedType = useCallback(async (id: number, data: any) => {
-    const result = await execute(() => adminApi.updateBedType(id, data));
+    const result = await execute(async () => {
+      return await adminApi.updateBedType(id, data);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   const deleteBedType = useCallback(async (id: number) => {
-    const result = await execute(() => adminApi.deleteBedType(id));
+    const result = await execute(async () => {
+      return await adminApi.deleteBedType(id);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   const createCurrency = useCallback(async (data: any) => {
-    const result = await execute(() => adminApi.createCurrency(data));
+    const result = await execute(async () => {
+      return await adminApi.createCurrency(data);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   const updateCurrency = useCallback(async (id: number, data: any) => {
-    const result = await execute(() => adminApi.updateCurrency(id, data));
+    const result = await execute(async () => {
+      return await adminApi.updateCurrency(id, data);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   const deleteCurrency = useCallback(async (id: number) => {
-    const result = await execute(() => adminApi.deleteCurrency(id));
+    const result = await execute(async () => {
+      return await adminApi.deleteCurrency(id);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   const createAreaUnit = useCallback(async (data: any) => {
-    const result = await execute(() => adminApi.createAreaUnit(data));
+    const result = await execute(async () => {
+      return await adminApi.createAreaUnit(data);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   const updateAreaUnit = useCallback(async (id: number, data: any) => {
-    const result = await execute(() => adminApi.updateAreaUnit(id, data));
+    const result = await execute(async () => {
+      return await adminApi.updateAreaUnit(id, data);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);
 
   const deleteAreaUnit = useCallback(async (id: number) => {
-    const result = await execute(() => adminApi.deleteAreaUnit(id));
+    const result = await execute(async () => {
+      return await adminApi.deleteAreaUnit(id);
+    });
     await loadAllData();
     return result;
   }, [execute, loadAllData]);

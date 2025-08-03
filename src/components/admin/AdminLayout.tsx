@@ -39,7 +39,7 @@ const AdminLoadingScreen = () => (
 // Unauthorized access component
 const UnauthorizedScreen = () => {
   const router = useRouter();
-  
+
   return (
     <div className="min-h-screen bg-red-50 dark:bg-red-900 flex items-center justify-center">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-md w-full mx-4 text-center">
@@ -47,7 +47,9 @@ const UnauthorizedScreen = () => {
           <X className="mx-auto h-16 w-16" />
         </div>
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">You don't have permission to access the admin panel.</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          You don&rsquo;t have permission to access the admin panel.
+        </p>
         <div className="space-y-3">
           <button
             onClick={() => router.push('/')}
@@ -91,7 +93,7 @@ const AdminSessionIndicator = () => {
           <span className="text-sm">Refreshing session...</span>
         </div>
       )}
-      
+
       {showWarning && !isRefreshing && (
         <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg">
           <div className="flex items-center justify-between space-x-4">
@@ -123,7 +125,7 @@ const ConnectionStatus = () => {
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -232,7 +234,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   ];
 
   const handleSignOut = async () => {
-    await signOut({ 
+    await signOut({
       redirect: true,
       callbackUrl: '/signin?message=AdminSignedOut'
     });
@@ -251,9 +253,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       )}
 
       {/* Mobile sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } transition-transform duration-300 ease-in-out lg:hidden`}>
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } transition-transform duration-300 ease-in-out lg:hidden`}>
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
             <LayoutDashboard className="h-8 w-8 text-blue-600" />
@@ -274,15 +275,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                 key={item.name}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  item.current
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${item.current
                     ? 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-200'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
-                }`}
+                  }`}
               >
-                <Icon className={`mr-3 flex-shrink-0 h-6 w-6 ${
-                  item.current ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
-                }`} />
+                <Icon className={`mr-3 flex-shrink-0 h-6 w-6 ${item.current ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+                  }`} />
                 {item.name}
               </Link>
             );
@@ -334,21 +333,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    item.current
+                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${item.current
                       ? 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-200'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
-                  }`}
+                    }`}
                 >
-                  <Icon className={`mr-3 flex-shrink-0 h-6 w-6 ${
-                    item.current ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
-                  }`} />
+                  <Icon className={`mr-3 flex-shrink-0 h-6 w-6 ${item.current ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+                    }`} />
                   {item.name}
                 </Link>
               );
             })}
           </nav>
-          
+
           {/* Desktop User info with enhanced features */}
           <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
@@ -423,11 +420,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                         )}
                         <Link
                           href={breadcrumb.href}
-                          className={`text-sm font-medium ${
-                            index === breadcrumbs.length - 1
+                          className={`text-sm font-medium ${index === breadcrumbs.length - 1
                               ? 'text-gray-900 dark:text-white'
                               : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                          }`}
+                            }`}
                         >
                           {breadcrumb.name}
                         </Link>
