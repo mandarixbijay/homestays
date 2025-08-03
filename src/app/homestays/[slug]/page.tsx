@@ -22,14 +22,15 @@ export default async function HomestayDetail({
     notFound();
   }
 
-  const now = new Date();
-  const checkIn = new Date(checkInDate);
-  const isSameDay = checkIn.toDateString() === now.toDateString();
-  const currentHour = now.getHours();
-  if (isSameDay && currentHour >= 14) {
-    console.error("Server: Same-day check-in not allowed after 14:00");
-    notFound();
-  }
+  // REMOVED: Same-day check-in validation - now allows same-day access at any time
+  // const now = new Date();
+  // const checkIn = new Date(checkInDate);
+  // const isSameDay = checkIn.toDateString() === now.toDateString();
+  // const currentHour = now.getHours();
+  // if (isSameDay && currentHour >= 14) {
+  //   console.error("Server: Same-day check-in not allowed after 14:00");
+  //   notFound();
+  // }
 
   let homestay: Hero3Card | null = null;
 
@@ -48,7 +49,15 @@ export default async function HomestayDetail({
       sort: "PRICE_ASC",
     };
 
-    console.log("Server: Fetching homestay with POST:", `/bookings/check-availability`, body);
+    // Enhanced logging to show same-day detail page access
+    const now = new Date();
+    const checkIn = new Date(checkInDate);
+    const isSameDay = checkIn.toDateString() === now.toDateString();
+    
+    console.log("Server: Fetching homestay with POST:", `/bookings/check-availability`, {
+      ...body,
+      isSameDay: isSameDay ? "YES - Same day detail page access allowed" : "NO"
+    });
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/bookings/check-availability`, {
       method: "POST",
@@ -68,7 +77,7 @@ export default async function HomestayDetail({
 
     const data = await response.json();
     
-    console.log(`Server: API returned ${data.homestays?.length || 0} homestays, looking for slug: ${slug}`);
+    console.log(`Server: API returned ${data.homestays?.length || 0} homestays, looking for slug: ${slug}${isSameDay ? " (SAME-DAY ACCESS)" : ""}`);
     
     const homestayData = data.homestays.find((h: ApiHomestay) => h.slug.toLowerCase() === slug.toLowerCase());
     if (!homestayData) {
@@ -79,7 +88,7 @@ export default async function HomestayDetail({
     }
     homestay = adaptApiHomestay(homestayData);
 
-    console.log("Server: Successfully fetched homestay:", homestay.name);
+    console.log(`Server: Successfully fetched homestay: ${homestay.name}${isSameDay ? " (SAME-DAY)" : ""}`);
   } catch (error) {
     console.error("Server: Error fetching homestay:", error);
     notFound();

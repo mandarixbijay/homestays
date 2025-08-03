@@ -36,15 +36,15 @@ export default async function SearchPage({
     notFound();
   }
 
-  // Validate check-in date
-  const now = new Date();
-  const checkInDate = new Date(checkIn);
-  const isSameDay = checkInDate.toDateString() === now.toDateString();
-  const currentHour = now.getHours();
-  if (isSameDay && currentHour >= 14) {
-    console.error("Server: Same-day check-in not allowed after 14:00 in /search");
-    notFound();
-  }
+  // REMOVED: Same-day check-in validation - now allows same-day searches at any time
+  // const now = new Date();
+  // const checkInDate = new Date(checkIn);
+  // const isSameDay = checkInDate.toDateString() === now.toDateString();
+  // const currentHour = now.getHours();
+  // if (isSameDay && currentHour >= 14) {
+  //   console.error("Server: Same-day check-in not allowed after 14:00 in /search");
+  //   notFound();
+  // }
 
   const adaptApiHomestay = (apiHomestay: ApiHomestay): Hero3Card => ({
     id: apiHomestay.id,
@@ -102,11 +102,17 @@ export default async function SearchPage({
       ...(location && { location }),
     };
 
+    // Enhanced logging to show same-day searches
+    const now = new Date();
+    const checkInDate = new Date(checkIn);
+    const isSameDay = checkInDate.toDateString() === now.toDateString();
+    
     console.log("Server: Fetching homestays...", { 
       checkIn, 
       checkOut, 
       guestCount: body.rooms.length, 
-      location: location || "All locations" 
+      location: location || "All locations",
+      isSameDay: isSameDay ? "YES - Same day search allowed" : "NO"
     });
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/bookings/check-availability`, {
@@ -132,7 +138,7 @@ export default async function SearchPage({
     }
 
     homestays = data.homestays.map(adaptApiHomestay);
-    console.log(`Server: Successfully loaded ${homestays.length} of ${data.totalCount || homestays.length} homestays`);
+    console.log(`Server: Successfully loaded ${homestays.length} of ${data.totalCount || homestays.length} homestays${isSameDay ? " (SAME-DAY SEARCH)" : ""}`);
     
   } catch (err) {
     error = "Failed to load homestays. Please try again or select a different date.";

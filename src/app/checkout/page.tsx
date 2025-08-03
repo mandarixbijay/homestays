@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Calendar, LoaderPinwheel, Users, Bed, Star, Wifi, Car, Phone, Info, Home, Shield } from "lucide-react";
+import { Calendar, LoaderPinwheel, Users, Bed, Star, Wifi, Car, Phone, Info, Home, Shield, Clock } from "lucide-react";
 import SignInCard from "@/components/homestay/components/sign-in-card";
 import React, { Suspense, useEffect, useState } from "react";
 import BookingForm from "@/components/homestay/components/checkout/BookingForm";
@@ -9,7 +9,7 @@ import PaymentMethods from "@/components/homestay/components/checkout/PaymentMet
 import PoliciesAndSummary from "@/components/homestay/components/checkout/PoliciesAndSummary";
 import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
-import { format, differenceInDays } from "date-fns";
+import { format, differenceInDays, isToday, isTomorrow } from "date-fns";
 import { loadStripe } from "@stripe/stripe-js";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -78,12 +78,18 @@ function HomestayCheckoutContent() {
   const rooms = searchParams.get("rooms") || "0";
   const selectedRooms = searchParams.get("selectedRooms")
     ? JSON.parse(searchParams.get("selectedRooms") || "[]").map((room: any) => {
-        if (!room.roomId) {
-          throw new Error(`Room ID missing for selected room: ${room.roomTitle}`);
-        }
-        return room;
-      })
+      if (!room.roomId) {
+        throw new Error(`Room ID missing for selected room: ${room.roomTitle}`);
+      }
+      return room;
+    })
     : [];
+
+  // Enhanced date handling for same-day bookings
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+  const isSameDayBooking = isToday(checkInDate);
+  const isNextDayCheckout = isTomorrow(checkOutDate);
 
   useEffect(() => {
     console.log("Initial selectedPaymentMethod:", selectedPaymentMethod);
@@ -93,6 +99,8 @@ function HomestayCheckoutContent() {
     const fetchUserDetails = async () => {
       if (session?.user?.accessToken) {
         try {
+          console.log("Fetching user details with token:", session.user.accessToken.substring(0, 20) + "...");
+
           const response = await fetch("/api/users/me", {
             method: "GET",
             headers: {
@@ -100,17 +108,113 @@ function HomestayCheckoutContent() {
               Authorization: `Bearer ${session.user.accessToken}`,
             },
           });
-          if (!response.ok) throw new Error(`Failed to fetch user: ${response.status}`);
-          const { data } = await response.json();
-          const [firstName, ...lastNameParts] = (data?.user?.name || "").split(" ");
-          setFirstName(firstName || "");
-          setLastName(lastNameParts.join(" ") || "");
-          setEmail(data?.user?.email || "");
-          setPhoneNumber(data.phone || "");
-          setCountryRegion(data.country || "Nepal +977");
+
+          console.log("User API response status:", response.status);
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("User API error response:", errorText);
+            throw new Error(`Failed to fetch user: ${response.status} - ${errorText}`);
+          }
+
+          const responseData = await response.json();
+          console.log("User API response data:", responseData);
+
+          // Fix: Access the correct data structure
+          // Backend returns: { status: 'success', message: '...', data: UserResponseDto }
+          const userData = responseData.data;
+
+          if (!userData) {
+            throw new Error("No user data returned from API");
+          }
+
+          // Parse name into first and last name
+          const nameParts = (userData.name || "").trim().split(/\s+/);
+          const firstName = nameParts[0] || "";
+          const lastName = nameParts.slice(1).join(" ") || "";
+
+          // Set the form fields
+          setFirstName(firstName);
+          setLastName(lastName);
+          setEmail(userData.email || "");
+
+          // Handle phone number - backend returns mobileNumber, not phone
+          if (userData.mobileNumber) {
+            // Extract country code and phone number
+            const mobileNumber = userData.mobileNumber;
+
+            // Try to parse country code from mobile number
+            let countryCode = "+977"; // Default to Nepal
+            let phoneOnly = mobileNumber;
+
+            // Common country code patterns
+            if (mobileNumber.startsWith("+977")) {
+              countryCode = "+977";
+              phoneOnly = mobileNumber.substring(4);
+            } else if (mobileNumber.startsWith("+1")) {
+              countryCode = "+1";
+              phoneOnly = mobileNumber.substring(2);
+            } else if (mobileNumber.startsWith("+44")) {
+              countryCode = "+44";
+              phoneOnly = mobileNumber.substring(3);
+            } else if (mobileNumber.startsWith("+91")) {
+              countryCode = "+91";
+              phoneOnly = mobileNumber.substring(3);
+            } else if (mobileNumber.startsWith("+61")) {
+              countryCode = "+61";
+              phoneOnly = mobileNumber.substring(3);
+            } else if (mobileNumber.startsWith("+81")) {
+              countryCode = "+81";
+              phoneOnly = mobileNumber.substring(3);
+            } else if (mobileNumber.startsWith("+86")) {
+              countryCode = "+86";
+              phoneOnly = mobileNumber.substring(3);
+            } else if (mobileNumber.startsWith("+65")) {
+              countryCode = "+65";
+              phoneOnly = mobileNumber.substring(3);
+            } else if (mobileNumber.startsWith("+971")) {
+              countryCode = "+971";
+              phoneOnly = mobileNumber.substring(4);
+            }
+            // Add more country codes as needed
+
+            setPhoneNumber(phoneOnly);
+
+            // Set country based on detected country code
+            const countryNames: Record<
+              "+977" | "+1" | "+44" | "+91" | "+61" | "+81" | "+86" | "+65" | "+971",
+              string
+            > = {
+              "+977": "Nepal +977",
+              "+1": "United States +1",
+              "+44": "United Kingdom +44",
+              "+91": "India +91",
+              "+61": "Australia +61",
+              "+81": "Japan +81",
+              "+86": "China +86",
+              "+65": "Singapore +65",
+              "+971": "UAE +971",
+            };
+
+            setCountryRegion(
+              countryNames[countryCode as keyof typeof countryNames] || "Nepal +977"
+            );
+          } else {
+            // No mobile number, keep defaults
+            setPhoneNumber("");
+            setCountryRegion("Nepal +977");
+          }
+
+          console.log("User details loaded successfully:", {
+            firstName,
+            lastName,
+            email: userData.email,
+            mobileNumber: userData.mobileNumber,
+          });
+
         } catch (error) {
           console.error("Error fetching user:", error);
-          toast.error("Failed to load user details.");
+          toast.error("Failed to load user details. Please enter them manually.");
         }
       }
     };
@@ -119,6 +223,22 @@ function HomestayCheckoutContent() {
       fetchUserDetails();
     }
   }, [session, status]);
+
+  // Also add this helper function to detect if you need to create the API route
+  const testApiRoute = async () => {
+    try {
+      const response = await fetch("/api/users/me", {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer test`, // This will fail auth but should reach the endpoint
+        },
+      });
+      console.log("API route test - Status:", response.status);
+    } catch (error) {
+      console.error("API route test failed:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchHomestayDetails = async () => {
@@ -168,13 +288,25 @@ function HomestayCheckoutContent() {
     }
   }, [homestayId, homestayName]);
 
-  let checkInDate = "Today";
-  let checkOutDate = "Tomorrow";
+  // Enhanced date formatting with same-day awareness
+  let displayCheckInDate = "Today";
+  let displayCheckOutDate = "Tomorrow";
   let nightStay = "1-night stay";
+
   try {
-    checkInDate = format(new Date(checkIn), "EEE, MMM d");
-    checkOutDate = format(new Date(checkOut), "EEE, MMM d");
-    const numNights = differenceInDays(new Date(checkOut), new Date(checkIn));
+    if (isSameDayBooking) {
+      displayCheckInDate = "Today";
+    } else {
+      displayCheckInDate = format(checkInDate, "EEE, MMM d");
+    }
+
+    if (isNextDayCheckout && isSameDayBooking) {
+      displayCheckOutDate = "Tomorrow";
+    } else {
+      displayCheckOutDate = format(checkOutDate, "EEE, MMM d");
+    }
+
+    const numNights = differenceInDays(checkOutDate, checkInDate);
     if (numNights > 0) {
       nightStay = `${numNights}-night stay`;
     }
@@ -247,14 +379,27 @@ function HomestayCheckoutContent() {
       };
 
       if (!session?.user) {
+        // Extract country code from countryRegion selection
+        const countryCode = countryRegion.match(/\+\d+/)?.[0] || "+977";
+
         body.guestName = `${firstName} ${lastName}`.trim();
         body.guestEmail = email;
-        body.guestPhone = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
+        // Format phone number with country code for backend
+        // Remove any spaces/dashes and add country code
+        const cleanPhoneNumber = phoneNumber.replace(/[\s-]/g, '');
+        body.guestPhone = `${countryCode}${cleanPhoneNumber}`;
+
+        console.log(`Formatted phone number: ${body.guestPhone} (${countryCode} + ${cleanPhoneNumber})`);
       }
 
       const url = `/api${endpoint}`;
       console.log("Sending booking request to:", url);
       console.log("Request body:", JSON.stringify(body, null, 2));
+
+      // Log same-day booking attempt
+      if (isSameDayBooking) {
+        console.log("Creating same-day booking for:", checkIn);
+      }
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -277,20 +422,33 @@ function HomestayCheckoutContent() {
       }
 
       console.log("Booking created successfully:", responseData);
-      toast.success(
-        paymentMethod === "PAY_AT_PROPERTY"
+
+      // Enhanced success message for same-day bookings
+      const successMessage = isSameDayBooking
+        ? paymentMethod === "PAY_AT_PROPERTY"
+          ? "Same-day booking confirmed successfully! Please contact the property for check-in details."
+          : "Same-day booking created! Please complete payment within 10 minutes to secure your room."
+        : paymentMethod === "PAY_AT_PROPERTY"
           ? "Booking confirmed successfully!"
-          : "Temporary booking created! Please complete payment within 10 minutes."
-      );
+          : "Temporary booking created! Please complete payment within 10 minutes.";
+
+      toast.success(successMessage);
       return responseData;
     } catch (error: any) {
       console.error("Error creating booking:", error.message);
-      toast.error(error.message || "Failed to create booking.");
+
+      // Enhanced error message for same-day bookings
+      const errorMessage = isSameDayBooking && error.message.includes("not available")
+        ? "This room is no longer available for today. Please try selecting different dates or contact the property directly."
+        : error.message || "Failed to create booking.";
+
+      toast.error(errorMessage);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const handleStripeCheckout = async (bookingId: string) => {
     if (!bookingId) throw new Error("Missing bookingId");
@@ -308,7 +466,7 @@ function HomestayCheckoutContent() {
       const payload = {
         amount: amountInUSDCents,
         currency: "usd",
-        description: `Booking for ${homestayName} (Booking ID: ${bookingId})`,
+        description: `Booking for ${homestayName} (Booking ID: ${bookingId})${isSameDayBooking ? " - SAME DAY" : ""}`,
         metadata: {
           homestayName,
           checkIn,
@@ -319,6 +477,7 @@ function HomestayCheckoutContent() {
           bookingId,
           totalPriceNPR: totalPrice.toString(),
           payment_timestamp: new Date().toISOString(),
+          is_same_day: isSameDayBooking.toString(),
         },
       };
 
@@ -372,6 +531,7 @@ function HomestayCheckoutContent() {
           rooms: rooms.toString(),
           selectedRooms: selectedRooms || [],
           paymentMethod: "KHALTI",
+          is_same_day: isSameDayBooking,
         })
       );
 
@@ -391,7 +551,7 @@ function HomestayCheckoutContent() {
         website_url: baseUrl,
         amount: amountInPaisa,
         purchase_order_id: bookingId,
-        purchase_order_name: `Booking for ${homestayName}`,
+        purchase_order_name: `Booking for ${homestayName}${isSameDayBooking ? " (Same Day)" : ""}`,
       };
 
       console.log("Khalti payload:", JSON.stringify(payload, null, 2));
@@ -450,8 +610,96 @@ function HomestayCheckoutContent() {
       if (!email) newErrors.email = "Email address is required.";
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Invalid email address.";
       if (!countryRegion) newErrors.countryRegion = "Country/region is required.";
-      if (!phoneNumber || !/^\+\d{10,15}$/.test(phoneNumber))
-        newErrors.phoneNumber = "Phone number must include country code (e.g., +9771234567890).";
+
+      // UPDATED PHONE VALIDATION - No longer requires country code
+      if (!phoneNumber) {
+        newErrors.phoneNumber = "Phone number is required.";
+      } else {
+        // Remove spaces and dashes for validation
+        const cleanNumber = phoneNumber.replace(/[\s-]/g, '');
+
+        // Get selected country code
+        const selectedCountry = countryRegion.match(/\+\d+/)?.[0];
+
+        // Validate based on country-specific rules
+        let isValidPhone = false;
+        let countryName = countryRegion.split(' ')[0];
+
+        switch (selectedCountry) {
+          case "+977": // Nepal
+            isValidPhone = /^9[678]\d{8}$/.test(cleanNumber); // Mobile: 98xxxxxxxx
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "Nepal mobile numbers should start with 98, 97, or 96 (10 digits total)";
+            }
+            break;
+          case "+1": // US/Canada
+            isValidPhone = /^\d{10}$/.test(cleanNumber); // 10 digits
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "US/Canada phone numbers should be 10 digits";
+            }
+            break;
+          case "+44": // UK
+            isValidPhone = /^[1-9]\d{6,9}$/.test(cleanNumber); // 7-10 digits
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "UK phone numbers should be 7-10 digits";
+            }
+            break;
+          case "+91": // India
+            isValidPhone = /^[6-9]\d{9}$/.test(cleanNumber); // 10 digits starting with 6-9
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "India mobile numbers should start with 6-9 (10 digits total)";
+            }
+            break;
+          case "+61": // Australia
+            isValidPhone = /^[24578]\d{8}$/.test(cleanNumber); // 9 digits
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "Australia mobile numbers should be 9 digits starting with 2,4,5,7,8";
+            }
+            break;
+          case "+81": // Japan
+            isValidPhone = /^[1-9]\d{9,10}$/.test(cleanNumber); // 10-11 digits
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "Japan phone numbers should be 10-11 digits";
+            }
+            break;
+          case "+86": // China
+            isValidPhone = /^1[3-9]\d{9}$/.test(cleanNumber); // 11 digits starting with 1
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "China mobile numbers should start with 1 (11 digits total)";
+            }
+            break;
+          case "+65": // Singapore
+            isValidPhone = /^[3689]\d{7}$/.test(cleanNumber); // 8 digits
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "Singapore numbers should be 8 digits starting with 3,6,8,9";
+            }
+            break;
+          case "+60": // Malaysia
+            isValidPhone = /^1[0-9]\d{7,8}$/.test(cleanNumber); // 9-10 digits starting with 1
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "Malaysia mobile numbers should start with 1 (9-10 digits total)";
+            }
+            break;
+          case "+66": // Thailand
+            isValidPhone = /^[689]\d{8}$/.test(cleanNumber); // 9 digits starting with 6,8,9
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "Thailand mobile numbers should start with 6,8,9 (9 digits total)";
+            }
+            break;
+          case "+971": // UAE
+            isValidPhone = /^5[0-9]\d{7}$/.test(cleanNumber); // 9 digits starting with 5
+            if (!isValidPhone) {
+              newErrors.phoneNumber = "UAE mobile numbers should start with 5 (9 digits total)";
+            }
+            break;
+          default:
+            // Generic validation for other countries (6-15 digits)
+            isValidPhone = /^\d{6,15}$/.test(cleanNumber);
+            if (!isValidPhone) {
+              newErrors.phoneNumber = `Phone number should be 6-15 digits for ${countryName}`;
+            }
+        }
+      }
     }
     if (!selectedPaymentMethod) newErrors.paymentMethod = "Payment method is required.";
 
@@ -485,6 +733,7 @@ function HomestayCheckoutContent() {
           transactionId: bookingData.transactionId || "N/A",
           status: bookingData.status,
           paymentMethod: bookingData.paymentMethod,
+          is_same_day: isSameDayBooking.toString(),
         });
         router.push(`/payment-success?${queryParams.toString()}`);
       } else if (selectedPaymentMethod === "credit-debit") {
@@ -522,7 +771,6 @@ function HomestayCheckoutContent() {
       toast.error(error.message || "Failed to process booking.");
     }
   };
-
   const getImageUrl = (url: string, fallback: string = "/images/placeholder-homestay.jpg") => {
     if (!url || url === "/images/placeholder-homestay.jpg") return fallback;
     return url;
@@ -536,13 +784,29 @@ function HomestayCheckoutContent() {
         <header className="mb-6">
           <h1 className="text-xl font-semibold text-gray-900 mb-2">Secure Reservation</h1>
           <p className="text-sm text-gray-600">Complete your booking at {homestayDetails?.name || homestayName}</p>
+          {isSameDayBooking && (
+            <div className="mt-2 flex items-center gap-2 text-sm text-amber-600">
+              <Clock className="h-4 w-4" />
+              <span className="font-medium">Same-day booking available</span>
+            </div>
+          )}
         </header>
 
         <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4 mb-6 flex items-start gap-3">
           <Shield className="text-primary h-5 w-5 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-green-600">Fully refundable before 3 days prior to check-in</p>
-            <p className="text-xs text-gray-600 mt-1">Change or cancel your stay for a full refund if plans change.</p>
+            <p className="text-sm font-medium text-green-600">
+              {isSameDayBooking
+                ? "Fully refundable before check-in today"
+                : "Fully refundable before 24 Hours prior to check-in"
+              }
+            </p>
+            <p className="text-xs text-gray-600 mt-1">
+              {isSameDayBooking
+                ? "For same-day bookings, contact the property directly for changes or cancellations."
+                : "Change or cancel your stay for a full refund if plans change."
+              }
+            </p>
           </div>
         </div>
 
@@ -551,15 +815,21 @@ function HomestayCheckoutContent() {
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Info className="h-5 w-5 text-primary" />
               Booking Summary
+              {isSameDayBooking && (
+                <span className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full ml-2">
+                  Same Day
+                </span>
+              )}
             </h2>
             <div className="space-y-3 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
-                <span><strong>Check-in:</strong> {checkInDate}</span>
+                <span><strong>Check-in:</strong> {displayCheckInDate}</span>
+                {isSameDayBooking && <span className="text-xs text-amber-600">(Today)</span>}
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
-                <span><strong>Check-out:</strong> {checkOutDate}</span>
+                <span><strong>Check-out:</strong> {displayCheckOutDate}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
@@ -614,6 +884,9 @@ function HomestayCheckoutContent() {
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                   <Phone className="h-4 w-4 text-primary" />
                   <span>{homestayDetails.contactNumber}</span>
+                  {isSameDayBooking && (
+                    <span className="text-xs text-amber-600 font-medium">(Call for same-day check-in)</span>
+                  )}
                 </div>
               )}
               <div className="flex flex-wrap gap-2 mb-4">
@@ -627,6 +900,11 @@ function HomestayCheckoutContent() {
               <div className="text-sm text-gray-600">
                 <p><strong>Check-in Time:</strong> {homestayDetails.checkInTime}</p>
                 <p><strong>Check-out Time:</strong> {homestayDetails.checkOutTime}</p>
+                {isSameDayBooking && (
+                  <p className="text-xs text-amber-600 mt-1 font-medium">
+                    Please call the property for same-day check-in arrangements
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -710,15 +988,21 @@ function HomestayCheckoutContent() {
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Info className="h-5 w-5 text-primary" />
                 Booking Summary
+                {isSameDayBooking && (
+                  <span className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full ml-2">
+                    Same Day
+                  </span>
+                )}
               </h2>
               <div className="space-y-3 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-primary" />
-                  <span><strong>Check-in:</strong> {checkInDate}</span>
+                  <span><strong>Check-in:</strong> {displayCheckInDate}</span>
+                  {isSameDayBooking && <span className="text-xs text-amber-600">(Today)</span>}
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-primary" />
-                  <span><strong>Check-out:</strong> {checkOutDate}</span>
+                  <span><strong>Check-out:</strong> {displayCheckOutDate}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-primary" />
@@ -773,6 +1057,9 @@ function HomestayCheckoutContent() {
                   <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                     <Phone className="h-4 w-4 text-primary" />
                     <span>{homestayDetails.contactNumber}</span>
+                    {isSameDayBooking && (
+                      <span className="text-xs text-amber-600 font-medium">(Call for same-day check-in)</span>
+                    )}
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -786,6 +1073,11 @@ function HomestayCheckoutContent() {
                 <div className="text-sm text-gray-600">
                   <p><strong>Check-in Time:</strong> {homestayDetails.checkInTime}</p>
                   <p><strong>Check-out Time:</strong> {homestayDetails.checkOutTime}</p>
+                  {isSameDayBooking && (
+                    <p className="text-xs text-amber-600 mt-1 font-medium">
+                      Please call the property for same-day check-in arrangements
+                    </p>
+                  )}
                 </div>
               </div>
             )}

@@ -21,8 +21,61 @@ interface BookingFormProps {
   setPhoneNumber: (value: string) => void;
   errors: { [key: string]: string };
   selectedRooms: any[];
-  isAuthenticated: boolean; // Added isAuthenticated prop
+  isAuthenticated: boolean;
 }
+
+const countries = [
+  { name: "Nepal", code: "+977" },
+  { name: "United States", code: "+1" },
+  { name: "Canada", code: "+1" },
+  { name: "United Kingdom", code: "+44" },
+  { name: "India", code: "+91" },
+  { name: "Australia", code: "+61" },
+  { name: "Germany", code: "+49" },
+  { name: "France", code: "+33" },
+  { name: "Japan", code: "+81" },
+  { name: "South Korea", code: "+82" },
+  { name: "China", code: "+86" },
+  { name: "Singapore", code: "+65" },
+  { name: "Malaysia", code: "+60" },
+  { name: "Thailand", code: "+66" },
+  { name: "Philippines", code: "+63" },
+  { name: "Indonesia", code: "+62" },
+  { name: "Vietnam", code: "+84" },
+  { name: "Bangladesh", code: "+880" },
+  { name: "Pakistan", code: "+92" },
+  { name: "Sri Lanka", code: "+94" },
+  { name: "Maldives", code: "+960" },
+  { name: "Bhutan", code: "+975" },
+  { name: "Myanmar", code: "+95" },
+  { name: "Italy", code: "+39" },
+  { name: "Spain", code: "+34" },
+  { name: "Netherlands", code: "+31" },
+  { name: "Switzerland", code: "+41" },
+  { name: "Austria", code: "+43" },
+  { name: "Belgium", code: "+32" },
+  { name: "Sweden", code: "+46" },
+  { name: "Norway", code: "+47" },
+  { name: "Denmark", code: "+45" },
+  { name: "Finland", code: "+358" },
+  { name: "Russia", code: "+7" },
+  { name: "Brazil", code: "+55" },
+  { name: "Argentina", code: "+54" },
+  { name: "Mexico", code: "+52" },
+  { name: "South Africa", code: "+27" },
+  { name: "Egypt", code: "+20" },
+  { name: "Nigeria", code: "+234" },
+  { name: "Kenya", code: "+254" },
+  { name: "Ghana", code: "+233" },
+  { name: "UAE", code: "+971" },
+  { name: "Saudi Arabia", code: "+966" },
+  { name: "Qatar", code: "+974" },
+  { name: "Kuwait", code: "+965" },
+  { name: "Israel", code: "+972" },
+  { name: "Turkey", code: "+90" },
+  { name: "New Zealand", code: "+64" },
+  { name: "Fiji", code: "+679" },
+];
 
 export default function BookingForm({
   bedType,
@@ -43,9 +96,48 @@ export default function BookingForm({
   const [specialRequests, setSpecialRequests] = React.useState("");
   const [receiveTexts, setReceiveTexts] = React.useState(false);
 
+  // Get selected country info
+  const selectedCountry = countries.find(country =>
+    countryRegion.includes(country.name) || countryRegion.includes(country.code)
+  );
+
+  // Handle phone number input - only allow digits and basic formatting
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Remove any non-digit characters except spaces and dashes for formatting
+    const cleanedValue = value.replace(/[^\d\s-]/g, '');
+    setPhoneNumber(cleanedValue);
+  };
+
+  // Generate placeholder based on selected country
+  const getPhoneNumberPlaceholder = () => {
+    if (!selectedCountry) return "e.g., 123 456 7890";
+
+    switch (selectedCountry.code) {
+      case "+977": // Nepal
+        return "e.g., 98 1234 5678";
+      case "+1": // US/Canada
+        return "e.g., 555 123 4567";
+      case "+44": // UK
+        return "e.g., 7700 123456";
+      case "+91": // India
+        return "e.g., 98765 43210";
+      case "+61": // Australia
+        return "e.g., 412 345 678";
+      case "+81": // Japan
+        return "e.g., 90 1234 5678";
+      case "+86": // China
+        return "e.g., 138 0013 8000";
+      case "+65": // Singapore
+        return "e.g., 9123 4567";
+      default:
+        return "e.g., 123 456 7890";
+    }
+  };
+
   return (
     <div className="w-full max-w-full bg-card rounded-lg border border-border p-6 sm:p-8">
-      <h2 className="text-2xl font-semibold text-foreground mb-6 font-manrope">Who’s Checking In?</h2>
+      <h2 className="text-2xl font-semibold text-foreground mb-6 font-manrope">Who&rsquo;s Checking In?</h2>
       <p className="text-sm text-destructive mb-6">
         * Required fields {isAuthenticated ? "(pre-filled from your profile)" : ""}
       </p>
@@ -84,12 +176,11 @@ export default function BookingForm({
             placeholder="e.g., John"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className={`w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.firstName ? "border-destructive focus:ring-destructive focus:border-destructive" : ""
-            }`}
+            className={`w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary ${errors.firstName ? "border-destructive focus:ring-destructive focus:border-destructive" : ""
+              }`}
             aria-invalid={!!errors.firstName}
             aria-describedby={errors.firstName ? "firstName-error" : undefined}
-            disabled={isAuthenticated} // Disable if authenticated
+            disabled={isAuthenticated}
           />
           {errors.firstName && (
             <p id="firstName-error" className="text-destructive text-xs mt-1">
@@ -106,12 +197,11 @@ export default function BookingForm({
             placeholder="e.g., Smith"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            className={`w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.lastName ? "border-destructive focus:ring-destructive focus:border-destructive" : ""
-            }`}
+            className={`w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary ${errors.lastName ? "border-destructive focus:ring-destructive focus:border-destructive" : ""
+              }`}
             aria-invalid={!!errors.lastName}
             aria-describedby={errors.lastName ? "lastName-error" : undefined}
-            disabled={isAuthenticated} // Disable if authenticated
+            disabled={isAuthenticated}
           />
           {errors.lastName && (
             <p id="lastName-error" className="text-destructive text-xs mt-1">
@@ -131,12 +221,11 @@ export default function BookingForm({
           placeholder="e.g., john.smith@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className={`w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary ${
-            errors.email ? "border-destructive focus:ring-destructive focus:border-destructive" : ""
-          }`}
+          className={`w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary ${errors.email ? "border-destructive focus:ring-destructive focus:border-destructive" : ""
+            }`}
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? "email-error" : undefined}
-          disabled={isAuthenticated} // Disable if authenticated
+          disabled={isAuthenticated}
         />
         {errors.email && (
           <p id="email-error" className="text-destructive text-xs mt-1">
@@ -155,22 +244,21 @@ export default function BookingForm({
             onValueChange={setCountryRegion}
             aria-invalid={!!errors.countryRegion}
             aria-describedby={errors.countryRegion ? "countryRegion-error" : undefined}
-            disabled={isAuthenticated} // Disable if authenticated
+            disabled={isAuthenticated}
           >
             <SelectTrigger
               id="countryRegion"
-              className={`w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary ${
-                errors.countryRegion ? "border-destructive focus:ring-destructive focus:border-destructive" : ""
-              }`}
+              className={`w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary ${errors.countryRegion ? "border-destructive focus:ring-destructive focus:border-destructive" : ""
+                }`}
             >
               <SelectValue placeholder="Select country/region" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Nepal +977">Nepal +977</SelectItem>
-              <SelectItem value="USA +1">USA +1</SelectItem>
-              <SelectItem value="India +91">India +91</SelectItem>
-              <SelectItem value="UK +44">UK +44</SelectItem>
-              {/* Add more options as needed */}
+            <SelectContent className="max-h-60 overflow-y-auto">
+              {countries.map((country) => (
+                <SelectItem key={country.name} value={`${country.name} ${country.code}`}>
+                  {country.name} {country.code}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {errors.countryRegion && (
@@ -182,20 +270,34 @@ export default function BookingForm({
         <div>
           <Label htmlFor="phoneNumber" className="text-sm font-medium text-foreground mb-1 block">
             Phone Number <span className="text-destructive">*</span>
+            {selectedCountry && (
+              <span className="text-xs text-muted-foreground ml-1">
+                ({selectedCountry.code})
+              </span>
+            )}
           </Label>
-          <Input
-            id="phoneNumber"
-            type="tel"
-            placeholder="e.g., +977 123 456 7890"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            className={`w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.phoneNumber ? "border-destructive focus:ring-destructive focus:border-destructive" : ""
-            }`}
-            aria-invalid={!!errors.phoneNumber}
-            aria-describedby={errors.phoneNumber ? "phoneNumber-error" : undefined}
-            disabled={isAuthenticated} // Disable if authenticated
-          />
+          <div className="relative">
+            {selectedCountry && (
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                {selectedCountry.code}
+              </div>
+            )}
+            <Input
+              id="phoneNumber"
+              type="tel"
+              placeholder={getPhoneNumberPlaceholder()}
+              value={phoneNumber}
+              onChange={handlePhoneNumberChange}
+              className={`w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary ${selectedCountry ? "pl-16" : ""
+                } ${errors.phoneNumber ? "border-destructive focus:ring-destructive focus:border-destructive" : ""}`}
+              aria-invalid={!!errors.phoneNumber}
+              aria-describedby={errors.phoneNumber ? "phoneNumber-error" : undefined}
+              disabled={isAuthenticated}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Enter your phone number without the country code
+          </p>
           {errors.phoneNumber && (
             <p id="phoneNumber-error" className="text-destructive text-xs mt-1">
               {errors.phoneNumber}
@@ -231,7 +333,7 @@ export default function BookingForm({
         <Textarea
           id="specialRequests"
           rows={4}
-          placeholder="e.g., Wheelchair-accessible room, early check-in"
+          placeholder="e.g., Wheelchair-accessible room, early check-in, vegetarian meals"
           value={specialRequests}
           onChange={(e) => setSpecialRequests(e.target.value)}
           className="w-full rounded-md border-border text-base focus:ring-2 focus:ring-primary focus:border-primary resize-none"
