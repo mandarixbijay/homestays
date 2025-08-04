@@ -11,18 +11,23 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+// Define locations array sorted alphabetically by label
 const locations = [
   { value: "all", label: "All Locations" },
-  { value: "pokhara", label: "Pokhara, Nepal" },
+  { value: "bardiya", label: "Bardiya, Nepal" },
+  { value: "bhaktapur", label: "Bhaktapur, Nepal" },
   { value: "biratnagar", label: "Biratnagar, Nepal" },
-  { value: "kathmandu", label: "Kathmandu, Nepal" },
-  { value: "lumbini", label: "Lumbini, Nepal" },
   { value: "chitwan", label: "Chitwan, Nepal" },
   { value: "dharan", label: "Dharan, Nepal" },
+  { value: "kathmandu", label: "Kathmandu, Nepal" },
+  { value: "lalitpur", label: "Lalitpur, Nepal" },
+  { value: "lumbini", label: "Lumbini, Nepal" },
+  { value: "pokhara", label: "Pokhara, Nepal" },
+  { value: "syangja", label: "Syangja, Nepal" },
   { value: "thori", label: "Thori, Nepal" },
-  { value: "bardiya", label: "Bardiya, Nepal" },
 ];
 
+// Rest of the component remains unchanged
 interface Room {
   adults: number;
   children: number;
@@ -76,12 +81,12 @@ export function DateGuestLocationPicker({
   const handleCheckInSelect = useCallback((date: Date | undefined) => {
     setCheckInDate(date);
     setIsCheckInOpen(false);
-    
+
     // Auto-adjust check-out if it's before or same as check-in
     if (date && checkOutDate && (isBefore(checkOutDate, date) || checkOutDate.toDateString() === date.toDateString())) {
       setCheckOutDate(addDays(date, 1));
     }
-    
+
     // Auto-open check-out picker if check-in is selected but check-out isn't
     if (date && !checkOutDate) {
       setTimeout(() => setIsCheckOutOpen(true), 100);
@@ -96,9 +101,9 @@ export function DateGuestLocationPicker({
 
   // Room management functions
   const handleAdultsChange = useCallback((index: number, delta: number) => {
-    setRooms(prevRooms => 
-      prevRooms.map((room, i) => 
-        i === index 
+    setRooms(prevRooms =>
+      prevRooms.map((room, i) =>
+        i === index
           ? { ...room, adults: Math.max(1, Math.min(10, room.adults + delta)) }
           : room
       )
@@ -106,9 +111,9 @@ export function DateGuestLocationPicker({
   }, []);
 
   const handleChildrenChange = useCallback((index: number, delta: number) => {
-    setRooms(prevRooms => 
-      prevRooms.map((room, i) => 
-        i === index 
+    setRooms(prevRooms =>
+      prevRooms.map((room, i) =>
+        i === index
           ? { ...room, children: Math.max(0, Math.min(8, room.children + delta)) }
           : room
       )
@@ -138,7 +143,7 @@ export function DateGuestLocationPicker({
       setIsCheckInOpen(true);
       return;
     }
-    
+
     if (!checkOutDate) {
       setIsCheckOutOpen(true);
       return;
@@ -158,10 +163,10 @@ export function DateGuestLocationPicker({
     // Send location as null if "All Locations" is selected
     const searchLocation = location === "all" ? null : location;
 
-    onSearch?.({ 
-      location: searchLocation, 
-      date: dateRange, 
-      rooms 
+    onSearch?.({
+      location: searchLocation,
+      date: dateRange,
+      rooms
     });
   }, [checkInDate, checkOutDate, location, rooms, onSearch]);
 
@@ -292,7 +297,7 @@ export function DateGuestLocationPicker({
               mode="single"
               selected={checkOutDate}
               onSelect={handleCheckOutSelect}
-              disabled={{ 
+              disabled={{
                 before: checkInDate ? addDays(checkInDate, 1) : addDays(today, 1)
               }}
               initialFocus
@@ -344,7 +349,7 @@ export function DateGuestLocationPicker({
                   <X className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </div>
-              
+
               <div className="space-y-3 max-h-72 overflow-y-auto">
                 <AnimatePresence mode="popLayout">
                   {rooms.map((room, index) => (
@@ -369,7 +374,7 @@ export function DateGuestLocationPicker({
                           </Button>
                         )}
                       </div>
-                      
+
                       {/* Adults */}
                       <div className="flex justify-between items-center">
                         <div>
@@ -398,7 +403,7 @@ export function DateGuestLocationPicker({
                           </Button>
                         </div>
                       </div>
-                      
+
                       {/* Children */}
                       <div className="flex justify-between items-center">
                         <div>
@@ -431,7 +436,7 @@ export function DateGuestLocationPicker({
                   ))}
                 </AnimatePresence>
               </div>
-              
+
               {/* Add Room Button */}
               {rooms.length < 8 && (
                 <motion.div
@@ -450,7 +455,7 @@ export function DateGuestLocationPicker({
                   </Button>
                 </motion.div>
               )}
-              
+
               {/* Done Button */}
               <motion.div
                 className="mt-3 pt-3 border-t border-border"

@@ -4,6 +4,8 @@ import { Sora } from "next/font/google";
 import "./globals.css";
 import { HomestayProvider } from "@/context/HomestayContext";
 import ClientWrapper from "@/components/ClientWrapper";
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 
 const sora = Sora({
   variable: "--font-sora",
@@ -27,6 +29,8 @@ export default function RootLayout({
         <ClientWrapper>
           <HomestayProvider>{children}</HomestayProvider>
         </ClientWrapper>
+        <SpeedInsights/>
+        <Analytics/>
       </body>
     </html>
   );
