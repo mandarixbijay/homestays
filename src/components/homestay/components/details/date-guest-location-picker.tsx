@@ -19,6 +19,7 @@ const locations = [
   { value: "biratnagar", label: "Biratnagar, Nepal" },
   { value: "chitwan", label: "Chitwan, Nepal" },
   { value: "dharan", label: "Dharan, Nepal" },
+  { value: "ghandruk", label: "Ghandruk, Nepal" },
   { value: "kathmandu", label: "Kathmandu, Nepal" },
   { value: "lalitpur", label: "Lalitpur, Nepal" },
   { value: "lumbini", label: "Lumbini, Nepal" },
