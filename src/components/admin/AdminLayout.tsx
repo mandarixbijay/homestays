@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import {
   LayoutDashboard,
   Home,
@@ -9,437 +11,221 @@ import {
   Users,
   Menu,
   X,
-  ChevronRight,
+  ChevronDown,
   LogOut,
-  RefreshCw,
-  AlertTriangle,
   Wifi,
-  WifiOff
-} from 'lucide-react';
-import { useAdminAuth, useSessionManager } from '@/hooks/useSessionManager';
+  WifiOff,
+  DockIcon,
+  PenTool,
+  Tag,
+  Folder,
+  BarChart3,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAdminAuth, useSessionManager } from "@/hooks/useSessionManager";
 
-interface AdminLayoutProps {
-  children: React.ReactNode;
-  title?: string;
-}
-
-// Loading component for admin areas
-const AdminLoadingScreen = () => (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Loading Admin Panel</h3>
-        <p className="text-gray-600 dark:text-gray-400">Verifying your permissions...</p>
-      </div>
-    </div>
-  </div>
-);
-
-// Unauthorized access component
-const UnauthorizedScreen = () => {
-  const router = useRouter();
-
-  return (
-    <div className="min-h-screen bg-red-50 dark:bg-red-900 flex items-center justify-center">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-md w-full mx-4 text-center">
-        <div className="text-red-600 dark:text-red-400 mb-4">
-          <X className="mx-auto h-16 w-16" />
-        </div>
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
-          You don&rsquo;t have permission to access the admin panel.
-        </p>
-        <div className="space-y-3">
-          <button
-            onClick={() => router.push('/')}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Go to Homepage
-          </button>
-          <button
-            onClick={() => router.push('/signin')}
-            className="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-          >
-            Sign In with Different Account
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Admin session status indicator
-const AdminSessionIndicator = () => {
-  const { isTokenNearExpiry, refreshSession, isRefreshing } = useSessionManager();
-  const [showWarning, setShowWarning] = useState(false);
-
-  useEffect(() => {
-    if (isTokenNearExpiry) {
-      setShowWarning(true);
-      // Auto-hide warning after 10 seconds
-      const timer = setTimeout(() => setShowWarning(false), 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [isTokenNearExpiry]);
-
-  if (!showWarning && !isRefreshing) return null;
-
-  return (
-    <div className="fixed top-4 right-4 z-50">
-      {isRefreshing && (
-        <div className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 mb-2">
-          <RefreshCw className="h-4 w-4 animate-spin" />
-          <span className="text-sm">Refreshing session...</span>
-        </div>
-      )}
-
-      {showWarning && !isRefreshing && (
-        <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg">
-          <div className="flex items-center justify-between space-x-4">
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="text-sm">Session expiring soon</span>
-            </div>
-            <button
-              onClick={refreshSession}
-              className="text-xs bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded transition-colors flex items-center space-x-1"
-            >
-              <RefreshCw className="h-3 w-3" />
-              <span>Refresh</span>
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Connection status indicator
+/* ------------------ Connection Indicator ------------------ */
 const ConnectionStatus = () => {
   const [isOnline, setIsOnline] = useState(true);
-
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
+    const goOnline = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
     };
   }, []);
-
   return (
-    <div className="flex items-center space-x-2">
-      {isOnline ? (
-        <>
-          <Wifi className="h-4 w-4 text-green-500" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">Online</span>
-        </>
-      ) : (
-        <>
-          <WifiOff className="h-4 w-4 text-red-500" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">Offline</span>
-        </>
-      )}
-    </div>
+    <span
+      className={`flex items-center gap-1 text-sm ${isOnline ? "text-green-600" : "text-red-500"
+        }`}
+    >
+      {isOnline ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
+      {isOnline ? "Online" : "Offline"}
+    </span>
   );
 };
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
+/* ------------------ Main Layout ------------------ */
+const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: string }) => {
   const { data: session, status } = useSession();
   const { isAuthenticated, isLoading, isAdmin, user } = useAdminAuth();
   const { hasRefreshError } = useSessionManager();
   const router = useRouter();
   const pathname = usePathname();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [isMounted, setIsMounted] = useState(false);
-
-  // Handle client-side mounting
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    // Allow time for session to load
-    const timer = setTimeout(() => {
-      setIsInitializing(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    // Only proceed if component is mounted and router is available
-    if (!isMounted || !router) return;
-
-    // Redirect to signin if not authenticated after loading
-    if (!isLoading && !isAuthenticated && !isInitializing) {
-      const returnUrl = encodeURIComponent(pathname);
-      router.push(`/signin?returnUrl=${returnUrl}&error=AdminRequired`);
-    }
-  }, [isAuthenticated, isLoading, isInitializing, router, pathname, isMounted]);
-
-  // Show loading screen while session is being established or not mounted
-  if (!isMounted || isLoading || isInitializing || status === 'loading') {
-    return <AdminLoadingScreen />;
-  }
-
-  // Show unauthorized screen if user is authenticated but not admin
-  if (isAuthenticated && !isAdmin) {
-    return <UnauthorizedScreen />;
-  }
-
-  // Don't render anything if not authenticated (will redirect)
-  if (!isAuthenticated || hasRefreshError) {
-    return <AdminLoadingScreen />;
-  }
+  const [blogMenuOpen, setBlogMenuOpen] = useState(false);
 
   const navigation = [
+    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Homestays", href: "/admin/homestays", icon: Home },
+    { name: "Master Data", href: "/admin/master-data", icon: Settings },
+    { name: "Users", href: "/admin/users", icon: Users },
     {
-      name: 'Dashboard',
-      href: '/admin',
-      icon: LayoutDashboard,
-      current: pathname === '/admin'
+      name: "Blog",
+      href: "/admin/blog",
+      icon: DockIcon,
+      subMenu: [
+        { name: "Manage Blog", href: "/admin/blog", icon: DockIcon }, // ✅ added
+        { name: "Create Blog", href: "/admin/blog/create", icon: PenTool },
+        { name: "Tags", href: "/admin/blog/tags", icon: Tag },
+        { name: "Categories", href: "/admin/blog/categories", icon: Folder },
+        { name: "Analytics", href: "/admin/blog/analytics", icon: BarChart3 },
+      ],
     },
-    {
-      name: 'Homestays',
-      href: '/admin/homestays',
-      icon: Home,
-      current: pathname.startsWith('/admin/homestays')
-    },
-    {
-      name: 'Master Data',
-      href: '/admin/master-data',
-      icon: Settings,
-      current: pathname === '/admin/master-data'
-    },
-    {
-      name: 'Users',
-      href: '/admin/users',
-      icon: Users,
-      current: pathname === '/admin/users'
-    }
   ];
 
-  const breadcrumbs = [
-    { name: 'Admin', href: '/admin' },
-    ...(pathname !== '/admin' ? [
-      { name: title || 'Page', href: pathname }
-    ] : [])
-  ];
 
-  const handleSignOut = async () => {
-    await signOut({
-      redirect: true,
-      callbackUrl: '/signin?message=AdminSignedOut'
-    });
-  };
+  const handleSignOut = () =>
+    signOut({ redirect: true, callbackUrl: "/signin?message=AdminSignedOut" });
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Session Management Indicators */}
-      <AdminSessionIndicator />
+  if (isLoading || status === "loading") return <div>Loading...</div>;
+  if (isAuthenticated && !isAdmin) return <div>Unauthorized</div>;
+  if (!isAuthenticated || hasRefreshError) return <div>Loading...</div>;
 
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        </div>
-      )}
-
-      {/* Mobile sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } transition-transform duration-300 ease-in-out lg:hidden`}>
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <LayoutDashboard className="h-8 w-8 text-blue-600" />
-            <span className="ml-2 text-lg font-bold text-gray-900 dark:text-white">Admin Panel</span>
-          </div>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-        <nav className="mt-5 px-2 space-y-1">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            return (
+  const renderNav = () => (
+    <nav className="flex-1 p-4 space-y-1">
+      {navigation.map((item) => {
+        const isActive = pathname.startsWith(item.href);
+        return (
+          <div key={item.name}>
+            {item.subMenu ? (
+              <>
+                <button
+                  onClick={() => setBlogMenuOpen(!blogMenuOpen)}
+                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition ${isActive
+                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                    }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <item.icon className="h-5 w-5" /> {item.name}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 transform transition ${blogMenuOpen ? "rotate-180" : ""
+                      }`}
+                  />
+                </button>
+                <AnimatePresence>
+                  {blogMenuOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="ml-6 mt-1 space-y-1"
+                    >
+                      {item.subMenu.map((sub) => (
+                        <Link
+                          key={sub.name}
+                          href={sub.href}
+                          className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${pathname === sub.href
+                              ? "bg-blue-50 text-blue-700 dark:bg-blue-800 dark:text-blue-200"
+                              : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                            }`}
+                        >
+                          <sub.icon className="h-4 w-4" />
+                          {sub.name}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </>
+            ) : (
               <Link
-                key={item.name}
                 href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${item.current
-                    ? 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-200'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${isActive
+                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                    : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                   }`}
               >
-                <Icon className={`mr-3 flex-shrink-0 h-6 w-6 ${item.current ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
-                  }`} />
-                {item.name}
+                <item.icon className="h-5 w-5" /> {item.name}
               </Link>
-            );
-          })}
-        </nav>
-
-        {/* Mobile User info and Sign Out */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center min-w-0 flex-1">
-              <div className="flex-shrink-0">
-                <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                  <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
-                    {user?.name?.charAt(0)?.toUpperCase() || session?.user?.name?.charAt(0)?.toUpperCase() || 'A'}
-                  </span>
-                </div>
-              </div>
-              <div className="ml-3 flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {user?.name || session?.user?.name || 'Admin'}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  Administrator
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="ml-2 p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
-              title="Sign Out"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+            )}
           </div>
+        );
+      })}
+    </nav>
+  );
+
+  return (
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Sidebar (desktop) */}
+      <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 shadow-lg">
+        <div className="h-16 flex items-center px-4 border-b dark:border-gray-700">
+          <LayoutDashboard className="h-6 w-6 text-blue-600" />
+          <span className="ml-2 text-lg font-bold text-gray-900 dark:text-white">
+            Admin Panel
+          </span>
+        </div>
+        {renderNav()}
+        <div className="border-t p-4 flex items-center justify-between">
+          <ConnectionStatus />
+          <button
+            onClick={handleSignOut}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
-        <div className="flex flex-col flex-grow bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
-          <div className="flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
-            <LayoutDashboard className="h-8 w-8 text-blue-600" />
-            <span className="ml-2 text-lg font-bold text-gray-900 dark:text-white">Admin Panel</span>
-          </div>
-          <nav className="mt-5 flex-1 px-2 pb-4 space-y-1">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${item.current
-                      ? 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-200'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
-                    }`}
-                >
-                  <Icon className={`mr-3 flex-shrink-0 h-6 w-6 ${item.current ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
-                    }`} />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Desktop User info with enhanced features */}
-          <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-3">
+      {/* Sidebar (mobile) */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: -300 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 shadow-xl lg:hidden flex flex-col"
+          >
+            <div className="flex items-center justify-between h-16 px-4 border-b dark:border-gray-700">
+              <span className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+                <LayoutDashboard className="h-6 w-6 text-blue-600" /> Admin
+              </span>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {renderNav()}
+            <div className="border-t p-4 flex items-center justify-between">
               <ConnectionStatus />
               <button
                 onClick={handleSignOut}
-                className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-                title="Sign Out"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
               >
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                  <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
-                    {user?.name?.charAt(0)?.toUpperCase() || session?.user?.name?.charAt(0)?.toUpperCase() || 'A'}
-                  </span>
-                </div>
-              </div>
-              <div className="ml-3 flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {user?.name || session?.user?.name || 'Admin'}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  Administrator
-                </p>
-                {user?.email && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {user.email}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Main content */}
-      <div className="lg:pl-64 flex flex-col flex-1">
-        {/* Enhanced Top bar */}
-        <div className="lg:hidden sticky top-0 z-30 flex h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      {/* Content */}
+      <div className="flex flex-1 flex-col lg:pl-64">
+        {/* Mobile top bar */}
+        <div className="lg:hidden sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-white px-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="px-4 border-r border-gray-200 dark:border-gray-700 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
+            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
           >
-            <Menu className="h-6 w-6" />
+            <Menu className="h-5 w-5" />
           </button>
-          <div className="flex-1 px-4 flex items-center justify-between">
-            <div className="flex-1">
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {title || 'Admin Dashboard'}
-              </h1>
-            </div>
-            <div className="flex items-center space-x-3">
-              <ConnectionStatus />
-            </div>
-          </div>
+          <h1 className="text-sm font-semibold text-gray-900 dark:text-white">
+            {title || "Admin Dashboard"}
+          </h1>
+          <ConnectionStatus />
         </div>
 
-        {/* Breadcrumbs - Desktop only */}
-        <div className="hidden lg:block bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center space-x-4 py-3">
-              <nav className="flex" aria-label="Breadcrumb">
-                <ol className="flex items-center space-x-4">
-                  {breadcrumbs.map((breadcrumb, index) => (
-                    <li key={breadcrumb.href}>
-                      <div className="flex items-center">
-                        {index > 0 && (
-                          <ChevronRight className="flex-shrink-0 h-4 w-4 text-gray-400 mr-4" />
-                        )}
-                        <Link
-                          href={breadcrumb.href}
-                          className={`text-sm font-medium ${index === breadcrumbs.length - 1
-                              ? 'text-gray-900 dark:text-white'
-                              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                            }`}
-                        >
-                          {breadcrumb.name}
-                        </Link>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </nav>
-            </div>
-          </div>
-        </div>
-
-        {/* Page content */}
-        <main className="flex-1">
-          {children}
-        </main>
+        {/* Main content */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );
