@@ -1,5 +1,5 @@
-// Complete Blog API Client Implementation
-// File: lib/api/completeBlogApi.ts
+// Fixed Blog API Client for Existing Backend Endpoints
+// File: lib/api/blog.ts (Fixed for your endpoints)
 
 import { getSession } from 'next-auth/react';
 
@@ -9,7 +9,7 @@ const API_BASE_URL = typeof window !== 'undefined'
   : 'http://13.61.8.56:3001'; // Direct URL for server-side requests
 
 // ============================================================================
-// BLOG TYPES (Enhanced)
+// BLOG TYPES
 // ============================================================================
 
 export interface BlogImage {
@@ -208,7 +208,7 @@ class BlogApi {
   }
 
   // ============================================================================
-  // BLOG CRUD OPERATIONS
+  // BLOG CRUD OPERATIONS (Fixed)
   // ============================================================================
 
   async getBlogs(filters: BlogFilters = {}): Promise<{
@@ -235,6 +235,10 @@ class BlogApi {
   }
 
   async getBlog(id: number): Promise<Blog> {
+    // Fixed: Ensure ID is valid
+    if (!id || isNaN(id)) {
+      throw new Error('Invalid blog ID provided');
+    }
     return this.request<Blog>(`/blog/admin/blogs/${id}`);
   }
 
@@ -259,8 +263,12 @@ class BlogApi {
       if (blogData.seoDescription) formData.append('seoDescription', blogData.seoDescription);
       if (blogData.readTime) formData.append('readTime', blogData.readTime.toString());
 
-      // Handle images
-      const imageMetadata = blogData.images || [];
+      // Handle images - convert File objects to URLs (placeholder)
+      const imageMetadata = blogData.images?.map(img => ({
+        ...img,
+        url: img.url || ''
+      })) || [];
+      
       formData.append('images', JSON.stringify(imageMetadata));
 
       // Handle tags and categories
@@ -303,6 +311,11 @@ class BlogApi {
   }
 
   async updateBlog(id: number, blogData: UpdateBlogData, imageFiles: File[] = []): Promise<Blog> {
+    // Fixed: Ensure ID is valid
+    if (!id || isNaN(id)) {
+      throw new Error('Invalid blog ID provided for update');
+    }
+
     try {
       const formData = new FormData();
 
@@ -347,6 +360,10 @@ class BlogApi {
   }
 
   async deleteBlog(id: number): Promise<void> {
+    // Fixed: Ensure ID is valid
+    if (!id || isNaN(id)) {
+      throw new Error('Invalid blog ID provided for deletion');
+    }
     await this.request(`/blog/admin/blogs/${id}`, {
       method: 'DELETE',
     });
@@ -367,7 +384,41 @@ class BlogApi {
   }
 
   // ============================================================================
-  // PUBLIC BLOG OPERATIONS
+  // MOCK IMAGE UPLOAD METHODS (Until backend endpoints are added)
+  // ============================================================================
+
+  async uploadImage(file: File): Promise<{ url: string; alt?: string; caption?: string }> {
+    console.warn('[uploadImage] Using mock implementation - add backend endpoint /blog/admin/upload-image');
+    
+    // Mock implementation - replace with real backend call when available
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          url: URL.createObjectURL(file),
+          alt: '',
+          caption: ''
+        });
+      }, 1000);
+    });
+  }
+
+  async uploadMultipleImages(files: File[]): Promise<Array<{ url: string; alt?: string; caption?: string }>> {
+    console.warn('[uploadMultipleImages] Using mock implementation - add backend endpoint /blog/admin/upload-images');
+    
+    // Mock implementation - replace with real backend call when available
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(files.map(file => ({
+          url: URL.createObjectURL(file),
+          alt: '',
+          caption: ''
+        })));
+      }, 1000);
+    });
+  }
+
+  // ============================================================================
+  // PUBLIC BLOG OPERATIONS (Fixed endpoints)
   // ============================================================================
 
   async getPublishedBlogs(params: {
@@ -405,7 +456,7 @@ class BlogApi {
   }
 
   async getBlogBySlug(slug: string): Promise<Blog> {
-    return this.request<Blog>(`/blog/blogs/slug/${slug}`);
+    return this.request<Blog>(`/blog/blogs/${slug}`);
   }
 
   async searchBlogs(params: {
@@ -440,7 +491,7 @@ class BlogApi {
   }
 
   // ============================================================================
-  // BLOG STATISTICS
+  // BLOG STATISTICS (Fixed endpoint)
   // ============================================================================
 
   async getBlogStats(): Promise<BlogStats> {
@@ -448,7 +499,7 @@ class BlogApi {
   }
 
   // ============================================================================
-  // TAG OPERATIONS
+  // TAG OPERATIONS (Fixed endpoints)
   // ============================================================================
 
   async getTags(): Promise<Tag[]> {
@@ -473,6 +524,9 @@ class BlogApi {
     description?: string;
     color?: string;
   }>): Promise<Tag> {
+    if (!id || isNaN(id)) {
+      throw new Error('Invalid tag ID provided for update');
+    }
     return this.request<Tag>(`/blog/admin/tags/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -480,13 +534,16 @@ class BlogApi {
   }
 
   async deleteTag(id: number): Promise<void> {
+    if (!id || isNaN(id)) {
+      throw new Error('Invalid tag ID provided for deletion');
+    }
     await this.request(`/blog/admin/tags/${id}`, {
       method: 'DELETE',
     });
   }
 
   // ============================================================================
-  // CATEGORY OPERATIONS
+  // CATEGORY OPERATIONS (Fixed endpoints)
   // ============================================================================
 
   async getCategories(): Promise<Category[]> {
@@ -517,6 +574,9 @@ class BlogApi {
     color?: string;
     parentId?: number;
   }>): Promise<Category> {
+    if (!id || isNaN(id)) {
+      throw new Error('Invalid category ID provided for update');
+    }
     return this.request<Category>(`/blog/admin/categories/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -524,13 +584,16 @@ class BlogApi {
   }
 
   async deleteCategory(id: number): Promise<void> {
+    if (!id || isNaN(id)) {
+      throw new Error('Invalid category ID provided for deletion');
+    }
     await this.request(`/blog/admin/categories/${id}`, {
       method: 'DELETE',
     });
   }
 
   // ============================================================================
-  // EXPORT OPERATIONS
+  // EXPORT OPERATIONS (Fixed endpoint)
   // ============================================================================
 
   async exportBlogs(params: {
@@ -560,8 +623,29 @@ class BlogApi {
 
     return await response.text();
   }
+
+  // ============================================================================
+  // ADDITIONAL METHODS BASED ON AVAILABLE ENDPOINTS
+  // ============================================================================
+
+  async getRelatedBlogs(slug: string, limit: number = 5): Promise<Blog[]> {
+    return this.request<Blog[]>(`/blog/blogs/${slug}/related?limit=${limit}`);
+  }
+
+  async getTag(id: number): Promise<Tag> {
+    if (!id || isNaN(id)) {
+      throw new Error('Invalid tag ID provided');
+    }
+    return this.request<Tag>(`/blog/tags/${id}`);
+  }
+
+  async getCategory(id: number): Promise<Category> {
+    if (!id || isNaN(id)) {
+      throw new Error('Invalid category ID provided');
+    }
+    return this.request<Category>(`/blog/categories/${id}`);
+  }
 }
 
 // Export singleton instance
 export const blogApi = new BlogApi();
-

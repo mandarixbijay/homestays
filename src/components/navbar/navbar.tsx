@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -45,8 +45,14 @@ interface NavbarProps {
 function Navbar({ hideUserCircle = false }: NavbarProps) {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [mounted, setMounted] = useState(false); // Add mounted state for hydration
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  // Prevent hydration mismatch by ensuring component is mounted
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isLoggedIn = status === "authenticated";
   const userRole = session?.user?.role;
@@ -128,6 +134,70 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
     { label: "Support", href: "/contact-support" },
   ];
 
+  // Fixed Desktop Theme Toggle Component
+  const DesktopThemeToggle = () => {
+    if (!mounted) {
+      // Return a placeholder that matches the button layout
+      return (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hover:bg-primary/10 transition-colors"
+          disabled
+        >
+          <div className="h-6 w-6" /> {/* Invisible placeholder */}
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        className="hover:bg-primary/10 transition-colors"
+      >
+        {theme === "dark" ? (
+          <Sun className="h-6 w-6" />
+        ) : (
+          <Moon className="h-6 w-6" />
+        )}
+      </Button>
+    );
+  };
+
+  // Fixed Mobile Theme Toggle Component
+  const MobileThemeToggle = () => {
+    if (!mounted) {
+      // Return a placeholder that matches the button layout
+      return (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hover:bg-primary/10 transition-colors"
+          disabled
+        >
+          <div className="h-6 w-6" /> {/* Invisible placeholder */}
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        className="hover:bg-primary/10 transition-colors"
+      >
+        {theme === "dark" ? (
+          <Sun className="h-6 w-6" />
+        ) : (
+          <Moon className="h-6 w-6" />
+        )}
+      </Button>
+    );
+  };
+
   return (
     <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-[100] border-b border-gray-200/20 dark:border-gray-700/20">
       <div className="flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-20">
@@ -169,18 +239,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
           {/* Desktop User Actions */}
           {!hideUserCircle && (
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="hover:bg-primary/10 transition-colors"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-6 w-6" />
-                ) : (
-                  <Moon className="h-6 w-6" />
-                )}
-              </Button>
+              <DesktopThemeToggle />
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -221,18 +280,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
 
         {/* Mobile Menu */}
         <div className="flex items-center gap-3 lg:hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="hover:bg-primary/10 transition-colors"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-6 w-6" />
-            ) : (
-              <Moon className="h-6 w-6" />
-            )}
-          </Button>
+          <MobileThemeToggle />
 
           <Drawer direction="bottom" open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DrawerTrigger asChild>

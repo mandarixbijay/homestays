@@ -1,124 +1,82 @@
+// components/blog/SocialShare.tsx
 "use client";
 
-import React from "react";
-import { Facebook, Twitter, Linkedin, Link, Copy, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import React, { useState } from 'react';
+import { Facebook, Twitter, Linkedin, Link as LinkIcon, Share2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface SocialShareProps {
   slug: string;
   title: string;
-  excerpt?: string;
+  className?: string;
 }
 
-export default function SocialShare({ slug, title, excerpt }: SocialShareProps) {
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const url = `${baseUrl}/blogs/${slug}`;
-  const encodedTitle = encodeURIComponent(title);
-  const encodedUrl = encodeURIComponent(url);
-  const encodedExcerpt = encodeURIComponent(excerpt || title);
+export default function SocialShare({ slug, title, className = '' }: SocialShareProps) {
+  const [copied, setCopied] = useState(false);
 
-  const shareLinks = {
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-    twitter: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-    whatsapp: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`
-  };
+  const shareUrl = typeof window !== 'undefined' 
+    ? `${window.location.origin}/blogs/${slug}` 
+    : `https://nepalhomestays.com/blogs/${slug}`;
 
   const handleShare = (platform: string) => {
-    if (platform === 'copy') {
-      navigator.clipboard.writeText(url).then(() => {
-        toast.success('Link copied to clipboard!');
-      }).catch(() => {
-        toast.error('Failed to copy link');
-      });
-      return;
+    let url = '';
+
+    switch (platform) {
+      case 'facebook':
+        url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+        break;
+      case 'twitter':
+        url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}`;
+        break;
+      case 'linkedin':
+        url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+        break;
+      case 'copy':
+        navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        return;
     }
 
-    // For mobile devices, try native sharing first
-    if (navigator.share && platform === 'native') {
-      navigator.share({
-        title,
-        text: excerpt,
-        url
-      }).catch(() => {
-        // Fallback to Twitter if native sharing fails
-        window.open(shareLinks.twitter, '_blank', 'noopener,noreferrer');
-      });
-      return;
-    }
-
-    // Open social platform
-    const shareUrl = shareLinks[platform as keyof typeof shareLinks];
-    if (shareUrl) {
-      window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=400');
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
   return (
-    <div className="flex flex-wrap gap-3">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleShare('facebook')}
-        className="hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2] transition-colors"
-      >
-        <Facebook className="w-4 h-4 mr-2" />
-        Facebook
-      </Button>
-      
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleShare('twitter')}
-        className="hover:bg-[#1DA1F2] hover:text-white hover:border-[#1DA1F2] transition-colors"
-      >
-        <Twitter className="w-4 h-4 mr-2" />
-        Twitter
-      </Button>
-      
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleShare('linkedin')}
-        className="hover:bg-[#0077B5] hover:text-white hover:border-[#0077B5] transition-colors"
-      >
-        <Linkedin className="w-4 h-4 mr-2" />
-        LinkedIn
-      </Button>
-      
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleShare('whatsapp')}
-        className="hover:bg-[#25D366] hover:text-white hover:border-[#25D366] transition-colors"
-      >
-        <MessageCircle className="w-4 h-4 mr-2" />
-        WhatsApp
-      </Button>
-      
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleShare('copy')}
-        className="hover:bg-gray-700 hover:text-white hover:border-gray-700 transition-colors"
-      >
-        <Copy className="w-4 h-4 mr-2" />
-        Copy Link
-      </Button>
-
-      {/* Native Share button for mobile */}
-      {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleShare('native')}
-          className="sm:hidden hover:bg-primary hover:text-white hover:border-primary transition-colors"
-        >
-          <Link className="w-4 h-4 mr-2" />
-          Share
-        </Button>
-      )}
+    <div className={className}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm">
+            <Share2 className="w-4 h-4 mr-2" />
+            Share
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={() => handleShare('facebook')}>
+            <Facebook className="w-4 h-4 mr-2" />
+            Facebook
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShare('twitter')}>
+            <Twitter className="w-4 h-4 mr-2" />
+            Twitter
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShare('linkedin')}>
+            <Linkedin className="w-4 h-4 mr-2" />
+            LinkedIn
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShare('copy')}>
+            <LinkIcon className="w-4 h-4 mr-2" />
+            {copied ? 'Copied!' : 'Copy Link'}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

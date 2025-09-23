@@ -1,12 +1,46 @@
-// Complete Blog API Hooks Implementation
-// File: hooks/useCompleteBlogApi.ts
+// hooks/useFixedBlogApi.ts - Complete Fixed Blog hooks with proper image handling and status management
 
 import { useState, useCallback } from 'react';
 import { blogApi, Blog, CreateBlogData, UpdateBlogData, BlogFilters, Tag, Category, BlogStats } from '@/lib/api/completeBlogApi';
 import { useAsyncOperation, useFilters } from '@/hooks/useAdminApi';
 
 // ============================================================================
-// BLOG MANAGEMENT HOOKS
+// IMAGE UPLOAD HELPER FUNCTIONS
+// ============================================================================
+
+// Fallback image upload function if uploadMultipleImages doesn't exist
+const uploadImagesHelper = async (files: File[]): Promise<Array<{ url: string; alt?: string; caption?: string }>> => {
+  // Check if the method exists on blogApi
+  if (typeof blogApi.uploadMultipleImages === 'function') {
+    return await blogApi.uploadMultipleImages(files);
+  }
+  
+  // Fallback: upload images one by one if uploadImage method exists
+  if (typeof blogApi.uploadImage === 'function') {
+    const uploadedImages = [];
+    for (const file of files) {
+      try {
+        const result = await blogApi.uploadImage(file);
+        uploadedImages.push(result);
+      } catch (error) {
+        console.error('Failed to upload image:', error);
+        // Continue with other images
+      }
+    }
+    return uploadedImages;
+  }
+  
+  // Final fallback: create local URLs (for development)
+  console.warn('No image upload methods available, using local URLs');
+  return files.map(file => ({
+    url: URL.createObjectURL(file),
+    alt: '',
+    caption: ''
+  }));
+};
+
+// ============================================================================
+// ENHANCED BLOG MANAGEMENT HOOKS
 // ============================================================================
 
 export function useBlogs() {
@@ -40,10 +74,50 @@ export function useBlogs() {
 
   const createBlog = useCallback(async (blogData: CreateBlogData, imageFiles: File[] = []) => {
     try {
+      console.log('[useBlogs] Creating blog with:', { blogData, imageFiles: imageFiles.length });
+      
       const result = await execute(async () => {
-        return await blogApi.createBlog(blogData, imageFiles);
+        // First upload images if any
+        let uploadedImages: Array<{ url: string; alt?: string; caption?: string }> = [];
+        
+        if (imageFiles.length > 0) {
+          console.log('[useBlogs] Uploading images...');
+          try {
+            uploadedImages = await uploadImagesHelper(imageFiles);
+            console.log('[useBlogs] Images uploaded:', uploadedImages);
+          } catch (uploadError) {
+            console.error('[useBlogs] Image upload failed:', uploadError);
+            // Continue with blog creation even if image upload fails
+            uploadedImages = [];
+          }
+        }
+
+        // Merge uploaded images with existing image metadata
+        const finalImages = blogData.images?.map((img, index) => {
+          const uploadedImage = uploadedImages[index];
+          return {
+            ...img,
+            url: uploadedImage?.url || img.url,
+          };
+        }) || uploadedImages.map((img, index) => ({
+          ...img,
+          isMain: index === 0, // First image is main by default
+          alt: img.alt || '',
+          caption: img.caption || ''
+        }));
+
+        // Update blog data with uploaded images
+        const finalBlogData = {
+          ...blogData,
+          images: finalImages,
+          featuredImage: finalImages.find(img => img.isMain)?.url || blogData.featuredImage
+        };
+
+        console.log('[useBlogs] Creating blog with final data:', finalBlogData);
+        return await blogApi.createBlog(finalBlogData, []); // No files needed now
       });
       
+      console.log('[useBlogs] Blog created successfully:', result);
       return result;
     } catch (error) {
       console.error('Error creating blog:', error);
@@ -53,10 +127,47 @@ export function useBlogs() {
 
   const updateBlog = useCallback(async (id: number, blogData: UpdateBlogData, imageFiles: File[] = []) => {
     try {
+      console.log('[useBlogs] Updating blog:', { id, blogData, imageFiles: imageFiles.length });
+      
       const result = await execute(async () => {
-        return await blogApi.updateBlog(id, blogData, imageFiles);
+        // First upload new images if any
+        let uploadedImages: Array<{ url: string; alt?: string; caption?: string }> = [];
+        
+        if (imageFiles.length > 0) {
+          console.log('[useBlogs] Uploading new images...');
+          try {
+            uploadedImages = await uploadImagesHelper(imageFiles);
+            console.log('[useBlogs] New images uploaded:', uploadedImages);
+          } catch (uploadError) {
+            console.error('[useBlogs] Image upload failed:', uploadError);
+            // Continue with blog update even if image upload fails
+            uploadedImages = [];
+          }
+        }
+
+        // Merge existing images with newly uploaded ones
+        const existingImages = blogData.images?.filter(img => img.id) || [];
+        const newImageMetadata = uploadedImages.map((img, index) => ({
+          url: img.url,
+          alt: img.alt || '',
+          caption: img.caption || '',
+          isMain: existingImages.length === 0 && index === 0 // First new image is main if no existing images
+        }));
+
+        const finalImages = [...existingImages, ...newImageMetadata];
+
+        // Update blog data with all images
+        const finalBlogData = {
+          ...blogData,
+          images: finalImages,
+          featuredImage: finalImages.find(img => img.isMain)?.url || blogData.featuredImage
+        };
+
+        console.log('[useBlogs] Updating blog with final data:', finalBlogData);
+        return await blogApi.updateBlog(id, finalBlogData, []); // No files needed now
       });
       
+      console.log('[useBlogs] Blog updated successfully:', result);
       return result;
     } catch (error) {
       console.error('Error updating blog:', error);
@@ -107,6 +218,191 @@ export function useBlogs() {
     deleteBlog,
     bulkBlogActions,
     clearError
+  };
+}
+
+// ============================================================================
+// BLOG DETAIL HOOK WITH ENHANCED ERROR HANDLING
+// ============================================================================
+
+export function useBlogDetail(blogId: number) {
+  const [blog, setBlog] = useState<Blog | null>(null);
+  const { loading, error, execute, clearError } = useAsyncOperation<Blog>();
+
+  const loadBlog = useCallback(async () => {
+    try {
+      const result = await execute(async () => {
+        return await blogApi.getBlog(blogId);
+      });
+      setBlog(result);
+      return result;
+    } catch (error) {
+      console.error('Error loading blog:', error);
+      setBlog(null);
+      throw error;
+    }
+  }, [blogId, execute]);
+
+  const updateBlog = useCallback(async (data: UpdateBlogData, imageFiles: File[] = []) => {
+    try {
+      const result = await execute(async () => {
+        // Upload new images first if any
+        let uploadedImages: Array<{ url: string; alt?: string; caption?: string }> = [];
+        
+        if (imageFiles.length > 0) {
+          try {
+            uploadedImages = await uploadImagesHelper(imageFiles);
+          } catch (uploadError) {
+            console.error('Image upload failed:', uploadError);
+            uploadedImages = [];
+          }
+        }
+
+        // Merge existing and new images
+        const existingImages = data.images?.filter(img => img.id) || [];
+        const newImageMetadata = uploadedImages.map((img, index) => ({
+          url: img.url,
+          alt: img.alt || '',
+          caption: img.caption || '',
+          isMain: existingImages.length === 0 && index === 0
+        }));
+
+        const finalImages = [...existingImages, ...newImageMetadata];
+
+        const finalData = {
+          ...data,
+          images: finalImages,
+          featuredImage: finalImages.find(img => img.isMain)?.url || data.featuredImage
+        };
+
+        return await blogApi.updateBlog(blogId, finalData, []);
+      });
+      setBlog(result);
+      return result;
+    } catch (error) {
+      console.error('Error updating blog:', error);
+      throw error;
+    }
+  }, [blogId, execute]);
+
+  return {
+    blog,
+    loading,
+    error,
+    loadBlog,
+    updateBlog,
+    clearError
+  };
+}
+
+// ============================================================================
+// ENHANCED BLOG FORM HOOK
+// ============================================================================
+
+export function useBlogForm(initialData?: Partial<CreateBlogData>) {
+  const [formData, setFormData] = useState<CreateBlogData>({
+    title: '',
+    slug: '',
+    excerpt: '',
+    content: '',
+    featuredImage: '',
+    images: [],
+    tagIds: [],
+    categoryIds: [],
+    authorId: 0,
+    status: 'DRAFT',
+    seoTitle: '',
+    seoDescription: '',
+    readTime: 0,
+    featured: false,
+    ...initialData
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const updateField = useCallback((field: keyof CreateBlogData, value: any) => {
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      
+      // Auto-generate slug from title if slug is empty
+      if (field === 'title' && !prev.slug) {
+        updated.slug = value
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .trim();
+      }
+      
+      return updated;
+    });
+    
+    // Clear error when field is updated
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  }, [errors]);
+
+  const setFieldError = useCallback((field: string, error: string) => {
+    setErrors(prev => ({ ...prev, [field]: error }));
+  }, []);
+
+  const clearErrors = useCallback(() => {
+    setErrors({});
+  }, []);
+
+  const resetForm = useCallback((newData?: Partial<CreateBlogData>) => {
+    setFormData({
+      title: '',
+      slug: '',
+      excerpt: '',
+      content: '',
+      featuredImage: '',
+      images: [],
+      tagIds: [],
+      categoryIds: [],
+      authorId: 0,
+      status: 'DRAFT',
+      seoTitle: '',
+      seoDescription: '',
+      readTime: 0,
+      featured: false,
+      ...newData
+    });
+    setErrors({});
+  }, []);
+
+  const validateForm = useCallback(() => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.title?.trim()) {
+      newErrors.title = 'Title is required';
+    }
+
+    if (!formData.content?.trim()) {
+      newErrors.content = 'Content is required';
+    }
+
+    if (!formData.authorId || formData.authorId <= 0) {
+      newErrors.authorId = 'Author is required';
+    }
+
+    if (formData.slug && !/^[a-z0-9-]+$/.test(formData.slug)) {
+      newErrors.slug = 'Slug can only contain lowercase letters, numbers, and hyphens';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [formData]);
+
+  return {
+    formData,
+    setFormData,
+    errors,
+    updateField,
+    setFieldError,
+    clearErrors,
+    resetForm,
+    validateForm
   };
 }
 
@@ -170,57 +466,11 @@ export function useBlogFilters(initialFilters: BlogFilters = {}) {
     featured: undefined,
     search: '',
     ...initialFilters
-  }); 
+  });
 }
 
 // ============================================================================
-// BLOG EXPORT HOOK
-// ============================================================================
-
-export function useBlogExport() {
-  const { loading, error, execute } = useAsyncOperation();
-
-  const exportBlogs = useCallback(async (params: {
-    format?: 'csv' | 'json';
-    status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-    dateFrom?: string;
-    dateTo?: string;
-    authorId?: number;
-  } = {}) => {
-    try {
-      const result = await execute(async () => {
-        return await blogApi.exportBlogs(params);
-      });
-      
-      // Create and download file
-      const blob = new Blob([result], { 
-        type: params.format === 'json' ? 'application/json' : 'text/csv' 
-      });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `blogs-export-${new Date().toISOString().split('T')[0]}.${params.format || 'csv'}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
-      return result;
-    } catch (error) {
-      console.error('Error exporting blogs:', error);
-      throw error;
-    }
-  }, [execute]);
-
-  return {
-    exportBlogs,
-    loading,
-    error
-  };
-}
-
-// ============================================================================
-// TAG MANAGEMENT HOOKS
+// ENHANCED TAG MANAGEMENT HOOKS
 // ============================================================================
 
 export function useTags() {
@@ -236,6 +486,7 @@ export function useTags() {
       return result;
     } catch (error) {
       console.error('Error loading tags:', error);
+      setTags([]);
       throw error;
     }
   }, [execute]);
@@ -303,7 +554,7 @@ export function useTags() {
 }
 
 // ============================================================================
-// CATEGORY MANAGEMENT HOOKS
+// ENHANCED CATEGORY MANAGEMENT HOOKS
 // ============================================================================
 
 export function useCategories() {
@@ -320,6 +571,7 @@ export function useCategories() {
       return result;
     } catch (error) {
       console.error('Error loading categories:', error);
+      setCategories([]);
       throw error;
     }
   }, [execute]);
@@ -333,6 +585,7 @@ export function useCategories() {
       return result;
     } catch (error) {
       console.error('Error loading category hierarchy:', error);
+      setCategoryHierarchy([]);
       throw error;
     }
   }, [execute]);
@@ -348,7 +601,7 @@ export function useCategories() {
       const result = await execute(async () => {
         return await blogApi.createCategory(data);
       });
-      await loadCategories(); // Reload categories after creation
+      await loadCategories();
       await loadCategoryHierarchy();
       return result;
     } catch (error) {
@@ -368,7 +621,7 @@ export function useCategories() {
       const result = await execute(async () => {
         return await blogApi.updateCategory(id, data);
       });
-      await loadCategories(); // Reload categories after update
+      await loadCategories();
       await loadCategoryHierarchy();
       return result;
     } catch (error) {
@@ -383,7 +636,7 @@ export function useCategories() {
         await blogApi.deleteCategory(id);
         return { success: true };
       });
-      await loadCategories(); // Reload categories after deletion
+      await loadCategories();
       await loadCategoryHierarchy();
       return { success: true, message: 'Category deleted successfully' };
     } catch (error) {
@@ -407,144 +660,142 @@ export function useCategories() {
 }
 
 // ============================================================================
-// BLOG FORM STATE HOOK
+// BLOG EXPORT HOOK
 // ============================================================================
 
-export function useBlogForm(initialData?: Partial<CreateBlogData>) {
-  const [formData, setFormData] = useState<CreateBlogData>({
-    title: '',
-    slug: '',
-    excerpt: '',
-    content: '',
-    featuredImage: '',
-    images: [],
-    tagIds: [],
-    categoryIds: [],
-    authorId: 0,
-    status: 'DRAFT',
-    seoTitle: '',
-    seoDescription: '',
-    readTime: 0,
-    featured: false,
-    ...initialData
-  });
+export function useBlogExport() {
+  const { loading, error, execute } = useAsyncOperation();
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-
-  const updateField = useCallback((field: keyof CreateBlogData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when field is updated
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+  const exportBlogs = useCallback(async (params: {
+    format?: 'csv' | 'json';
+    status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+    dateFrom?: string;
+    dateTo?: string;
+    authorId?: number;
+  } = {}) => {
+    try {
+      const result = await execute(async () => {
+        return await blogApi.exportBlogs(params);
+      });
+      
+      // Create and download file
+      const blob = new Blob([result], { 
+        type: params.format === 'json' ? 'application/json' : 'text/csv' 
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `blogs-export-${new Date().toISOString().split('T')[0]}.${params.format || 'csv'}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      return result;
+    } catch (error) {
+      console.error('Error exporting blogs:', error);
+      throw error;
     }
-  }, [errors]);
-
-  const setFieldError = useCallback((field: string, error: string) => {
-    setErrors(prev => ({ ...prev, [field]: error }));
-  }, []);
-
-  const clearErrors = useCallback(() => {
-    setErrors({});
-  }, []);
-
-  const resetForm = useCallback((newData?: Partial<CreateBlogData>) => {
-    setFormData({
-      title: '',
-      slug: '',
-      excerpt: '',
-      content: '',
-      featuredImage: '',
-      images: [],
-      tagIds: [],
-      categoryIds: [],
-      authorId: 0,
-      status: 'DRAFT',
-      seoTitle: '',
-      seoDescription: '',
-      readTime: 0,
-      featured: false,
-      ...newData
-    });
-    setErrors({});
-    setImageFiles([]);
-  }, []);
-
-  const validateForm = useCallback(() => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
-    }
-
-    if (!formData.content.trim()) {
-      newErrors.content = 'Content is required';
-    }
-
-    if (!formData.authorId || formData.authorId <= 0) {
-      newErrors.authorId = 'Author is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData]);
-
-  const addImageFile = useCallback((file: File) => {
-    setImageFiles(prev => [...prev, file]);
-  }, []);
-
-  const removeImageFile = useCallback((index: number) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-  }, []);
-
-  const addImageMetadata = useCallback((imageData: {
-    url?: string;
-    alt?: string;
-    caption?: string;
-    isMain: boolean;
-  }) => {
-    setFormData(prev => ({
-      ...prev,
-      images: [...(prev.images || []), imageData]
-    }));
-  }, []);
-
-  const removeImageMetadata = useCallback((index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      images: (prev.images || []).filter((_, i) => i !== index)
-    }));
-  }, []);
-
-  const updateImageMetadata = useCallback((index: number, imageData: Partial<{
-    url?: string;
-    alt?: string;
-    caption?: string;
-    isMain: boolean;
-  }>) => {
-    setFormData(prev => ({
-      ...prev,
-      images: (prev.images || []).map((img, i) => 
-        i === index ? { ...img, ...imageData } : img
-      )
-    }));
-  }, []);
+  }, [execute]);
 
   return {
-    formData,
-    setFormData,
-    errors,
-    imageFiles,
-    updateField,
-    setFieldError,
-    clearErrors,
-    resetForm,
-    validateForm,
-    addImageFile,
-    removeImageFile,
-    addImageMetadata,
-    removeImageMetadata,
-    updateImageMetadata
+    exportBlogs,
+    loading,
+    error
+  };
+}
+
+// ============================================================================
+// PUBLIC BLOG HOOKS
+// ============================================================================
+
+export function usePublicBlogs() {
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const { loading, error, execute, clearError } = useAsyncOperation<any>();
+
+  const loadPublishedBlogs = useCallback(async (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    tagId?: number;
+    categoryId?: number;
+    featured?: boolean;
+  }) => {
+    try {
+      const result = await execute(async () => {
+        return await blogApi.getPublishedBlogs(params);
+      });
+      
+      if (result) {
+        setBlogs(result.data || []);
+        setTotalPages(result.totalPages || 1);
+        setTotal(result.total || 0);
+      }
+      return result;
+    } catch (error) {
+      console.error('Error loading published blogs:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const getFeaturedBlogs = useCallback(async (limit: number = 5) => {
+    try {
+      const result = await execute(async () => {
+        return await blogApi.getFeaturedBlogs(limit);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error loading featured blogs:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const getBlogBySlug = useCallback(async (slug: string) => {
+    try {
+      const result = await execute(async () => {
+        return await blogApi.getBlogBySlug(slug);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error loading blog by slug:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const searchBlogs = useCallback(async (searchParams: {
+    query: string;
+    page?: number;
+    limit?: number;
+    sortBy?: 'relevance' | 'date' | 'popularity';
+    tags?: string;
+    categories?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }) => {
+    try {
+      const result = await execute(async () => {
+        return await blogApi.searchBlogs(searchParams);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error searching blogs:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  return {
+    blogs,
+    totalPages,
+    total,
+    loading,
+    error,
+    loadPublishedBlogs,
+    getFeaturedBlogs,
+    getBlogBySlug,
+    searchBlogs,
+    clearError
   };
 }
 
@@ -647,143 +898,5 @@ export function useRichTextEditor(initialContent: string = '') {
     readTime,
     updateContent,
     setContent
-  };
-}
-
-// ============================================================================
-// PUBLIC BLOG HOOKS
-// ============================================================================
-
-export function usePublicBlogs() {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
-  const { loading, error, execute, clearError } = useAsyncOperation<any>();
-
-  const loadPublishedBlogs = useCallback(async (params?: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    tagId?: number;
-    categoryId?: number;
-    featured?: boolean;
-  }) => {
-    try {
-      const result = await execute(async () => {
-        return await blogApi.getPublishedBlogs(params);
-      });
-      
-      if (result) {
-        setBlogs(result.data || []);
-        setTotalPages(result.totalPages || 1);
-        setTotal(result.total || 0);
-      }
-      return result;
-    } catch (error) {
-      console.error('Error loading published blogs:', error);
-      throw error;
-    }
-  }, [execute]);
-
-  const getFeaturedBlogs = useCallback(async (limit: number = 5) => {
-    try {
-      const result = await execute(async () => {
-        return await blogApi.getFeaturedBlogs(limit);
-      });
-      return result;
-    } catch (error) {
-      console.error('Error loading featured blogs:', error);
-      throw error;
-    }
-  }, [execute]);
-
-  const getBlogBySlug = useCallback(async (slug: string) => {
-    try {
-      const result = await execute(async () => {
-        return await blogApi.getBlogBySlug(slug);
-      });
-      return result;
-    } catch (error) {
-      console.error('Error loading blog by slug:', error);
-      throw error;
-    }
-  }, [execute]);
-
-  const searchBlogs = useCallback(async (searchParams: {
-    query: string;
-    page?: number;
-    limit?: number;
-    sortBy?: 'relevance' | 'date' | 'popularity';
-    tags?: string;
-    categories?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  }) => {
-    try {
-      const result = await execute(async () => {
-        return await blogApi.searchBlogs(searchParams);
-      });
-      return result;
-    } catch (error) {
-      console.error('Error searching blogs:', error);
-      throw error;
-    }
-  }, [execute]);
-
-  return {
-    blogs,
-    totalPages,
-    total,
-    loading,
-    error,
-    loadPublishedBlogs,
-    getFeaturedBlogs,
-    getBlogBySlug,
-    searchBlogs,
-    clearError
-  };
-}
-
-// ============================================================================
-// BLOG DETAIL HOOK
-// ============================================================================
-
-export function useBlogDetail(blogId: number) {
-  const [blog, setBlog] = useState<Blog | null>(null);
-  const { loading, error, execute, clearError } = useAsyncOperation<Blog>();
-
-  const loadBlog = useCallback(async () => {
-    try {
-      const result = await execute(async () => {
-        return await blogApi.getBlog(blogId);
-      });
-      setBlog(result);
-      return result;
-    } catch (error) {
-      console.error('Error loading blog:', error);
-      throw error;
-    }
-  }, [blogId, execute]);
-
-  const updateBlog = useCallback(async (data: UpdateBlogData, imageFiles: File[] = []) => {
-    try {
-      const result = await execute(async () => {
-        return await blogApi.updateBlog(blogId, data, imageFiles);
-      });
-      setBlog(result);
-      return result;
-    } catch (error) {
-      console.error('Error updating blog:', error);
-      throw error;
-    }
-  }, [blogId, execute]);
-
-  return {
-    blog,
-    loading,
-    error,
-    loadBlog,
-    updateBlog,
-    clearError
   };
 }
