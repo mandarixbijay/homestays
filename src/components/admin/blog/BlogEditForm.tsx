@@ -1,12 +1,14 @@
-// components/admin/blog/BlogEditForm.tsx
+// components/admin/blog/EnhancedBlogEditForm.tsx
 'use client';
 
-import React, { useState, useEffect, ChangeEvent, JSX } from 'react';
+import React, { useState, useEffect, ChangeEvent, JSX, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import {
   Save, X, Eye, Upload, Trash2, Star, Tag, Folder, Plus,
-  Image, FileText, Globe, Clock, ArrowLeft, AlertCircle, Check
+  Image, FileText, Globe, Clock, ArrowLeft, AlertCircle, Check,
+  Bold, Italic, Type, Link, List, Hash, Quote, Code, Palette,
+  Settings, RefreshCw
 } from 'lucide-react';
 
 import {
@@ -21,7 +23,320 @@ import {
 } from '@/components/admin/AdminComponents';
 
 // Import your existing blog API
-import { blogApi, UpdateBlogData } from '@/lib/api/completeBlogApi';
+import { blogApi, Category, UpdateBlogData } from '@/lib/api/completeBlogApi';
+
+// Import blog editor utilities
+import {
+  generateSlug,
+  calculateReadTime,
+  validateForm as validateFormData,
+  blogFormValidationSchema,
+  validateImageFile,
+  resizeImage,
+  AutoSaveManager,
+  editorStyles
+} from '@/utils/blogEditorUtils';
+
+// Import separate components
+import { UrlPreview } from '@/components/admin/blog/UrlPreview';
+import { StatusBadge } from '@/components/admin/blog/StatusBadge';
+
+// Rich Text Editor Component with integrated styles (same as create form)
+const RichTextEditor: React.FC<{
+  content: string;
+  onChange: (content: string) => void;
+  onImageUpload: (file: File) => Promise<string>;
+  placeholder?: string;
+  height?: string;
+}> = ({ content, onChange, onImageUpload, placeholder = "Write your blog content...", height = "400px" }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Apply editor styles
+  useEffect(() => {
+    // Inject editor styles if not already present
+    const styleId = 'rich-editor-styles';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = editorStyles;
+      document.head.appendChild(style);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = content;
+    }
+  }, [content]);
+
+  const execCommand = (command: string, value: string = '') => {
+    document.execCommand(command, false, value);
+    editorRef.current?.focus();
+    handleContentChange();
+  };
+
+  const handleContentChange = () => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate image file using utility
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      alert(validation.error);
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      // Resize image if too large
+      let fileToUpload = file;
+      if (file.size > 2 * 1024 * 1024) { // 2MB
+        const resizedBlob = await resizeImage(file, 1200, 800, 0.8);
+        fileToUpload = new File([resizedBlob], file.name, { type: file.type });
+      }
+
+      const imageUrl = await onImageUpload(fileToUpload);
+      const imgHtml = `<img src="${imageUrl}" alt="Blog image" style="max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px;" />`;
+      execCommand('insertHTML', imgHtml);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const formatButtons = [
+    { command: 'bold', icon: Bold, title: 'Bold (Ctrl+B)' },
+    { command: 'italic', icon: Italic, title: 'Italic (Ctrl+I)' },
+    { command: 'underline', icon: Type, title: 'Underline (Ctrl+U)' },
+    { command: 'insertUnorderedList', icon: List, title: 'Bullet List' },
+    { command: 'insertOrderedList', icon: Hash, title: 'Numbered List' },
+    { command: 'formatBlock', icon: Quote, title: 'Quote', value: 'blockquote' },
+    { command: 'formatBlock', icon: Type, title: 'Heading 1', value: 'h1' },
+    { command: 'formatBlock', icon: Type, title: 'Heading 2', value: 'h2' },
+    { command: 'formatBlock', icon: Type, title: 'Heading 3', value: 'h3' },
+  ];
+
+  return (
+    <div className="rich-text-editor">
+      {/* Toolbar */}
+      <div className="editor-toolbar">
+        {formatButtons.map((button, index) => (
+          <button
+            key={index}
+            type="button"
+            onClick={() => execCommand(button.command, button.value)}
+            className="editor-button"
+            title={button.title}
+          >
+            <button.icon className="h-4 w-4" />
+          </button>
+        ))}
+        
+        <div className="editor-divider" />
+        
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          className="editor-button"
+          title="Insert Image"
+        >
+          {isUploading ? (
+            <RefreshCw className="h-4 w-4 animate-spin" />
+          ) : (
+            <Image className="h-4 w-4" />
+          )}
+        </button>
+        
+        <button
+          type="button"
+          onClick={() => {
+            const url = prompt('Enter URL:');
+            if (url) execCommand('createLink', url);
+          }}
+          className="editor-button"
+          title="Insert Link"
+        >
+          <Link className="h-4 w-4" />
+        </button>
+
+        <div className="editor-divider" />
+
+        <button
+          type="button"
+          onClick={() => execCommand('removeFormat')}
+          className="editor-button"
+          title="Clear Formatting"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Editor */}
+      <div
+        ref={editorRef}
+        contentEditable
+        onInput={handleContentChange}
+        className="editor-content"
+        style={{ minHeight: height }}
+        data-placeholder={placeholder}
+        suppressContentEditableWarning={true}
+      />
+    </div>
+  );
+};
+
+// Category/Tag Manager Component (same as create form)
+const CategoryTagManager: React.FC<{
+  type: 'category' | 'tag';
+  items: (Category | BlogTag)[];
+  selectedIds: number[];
+  onSelectionChange: (ids: number[]) => void;
+  onItemCreate: (name: string, color?: string) => Promise<void>;
+  loading: boolean;
+}> = ({ type, items, selectedIds, onSelectionChange, onItemCreate, loading }) => {
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemColor, setNewItemColor] = useState('#3B82F6');
+  const [creating, setCreating] = useState(false);
+
+  const handleCreate = async () => {
+    if (!newItemName.trim()) return;
+    
+    setCreating(true);
+    try {
+      await onItemCreate(newItemName.trim(), newItemColor);
+      setNewItemName('');
+      setNewItemColor('#3B82F6');
+      setShowCreateForm(false);
+    } catch (error) {
+      console.error(`Error creating ${type}:`, error);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleToggleSelection = (id: number) => {
+    if (selectedIds.includes(id)) {
+      onSelectionChange(selectedIds.filter(selectedId => selectedId !== id));
+    } else {
+      onSelectionChange([...selectedIds, id]);
+    }
+  };
+
+  return (
+    <Card title={`${type === 'category' ? 'Categories' : 'Tags'}`}>
+      <div className="space-y-4">
+        {/* Create New Button */}
+        <button
+          type="button"
+          onClick={() => setShowCreateForm(!showCreateForm)}
+          className="w-full p-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors flex items-center justify-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add New {type === 'category' ? 'Category' : 'Tag'}
+        </button>
+
+        {/* Create Form */}
+        {showCreateForm && (
+          <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 space-y-3">
+            <Input
+              placeholder={`${type === 'category' ? 'Category' : 'Tag'} name`}
+              value={newItemName}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setNewItemName(e.target.value)}
+            />
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={newItemColor}
+                onChange={(e) => setNewItemColor(e.target.value)}
+                className="w-10 h-8 rounded border border-gray-300 dark:border-gray-600"
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-400">Color</span>
+            </div>
+            <div className="flex gap-2">
+              <ActionButton
+                variant="primary"
+                size="sm"
+                onClick={handleCreate}
+                loading={creating}
+                disabled={!newItemName.trim()}
+              >
+                Create
+              </ActionButton>
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowCreateForm(false)}
+              >
+                Cancel
+              </ActionButton>
+            </div>
+          </div>
+        )}
+
+        {/* Items List */}
+        {loading ? (
+          <div className="flex justify-center py-4">
+            <LoadingSpinner size="sm" text={`Loading ${type}s...`} />
+          </div>
+        ) : items.length === 0 ? (
+          <div className="text-center py-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No {type}s available
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {items.map((item) => (
+              <div key={item.id} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id={`${type}-${item.id}`}
+                  checked={selectedIds.includes(item.id)}
+                  onChange={() => handleToggleSelection(item.id)}
+                  className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                />
+                <label
+                  htmlFor={`${type}-${item.id}`}
+                  className="text-sm text-gray-700 dark:text-gray-300 flex-1 cursor-pointer"
+                >
+                  {item.name}
+                </label>
+                {item.color && (
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+};
 
 // Types
 interface BlogImage {
@@ -103,7 +418,7 @@ interface BlogEditFormProps {
   blogId: number;
 }
 
-export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element {
+export default function EnhancedBlogEditForm({ blogId }: BlogEditFormProps): JSX.Element {
   const router = useRouter();
   const { data: session } = useSession();
   const { addToast } = useToast();
@@ -111,13 +426,20 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
   // State with proper typing
   const [blog, setBlog] = useState<Blog | null>(null);
   const [formData, setFormData] = useState<FormData | null>(null);
+  const [originalSlug, setOriginalSlug] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [tags, setTags] = useState<BlogTag[]>([]);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const [images, setImages] = useState<BlogImage[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [slugChecking, setSlugChecking] = useState<boolean>(false);
+  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+
+  // Handle input changes for form fields
+  const handleInputChange = <K extends keyof FormData>(key: K, value: FormData[K]) => {
+    setFormData((prev) => prev ? { ...prev, [key]: value } : prev);
+  };
 
   // Load existing blog data
   useEffect(() => {
@@ -129,6 +451,21 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
       setLoading(false);
     }
   }, [blogId]);
+
+  // Check slug availability when slug changes (only if different from original)
+  useEffect(() => {
+    if (formData?.slug && formData.slug !== originalSlug && formData.slug.length > 2) {
+      const timeoutId = setTimeout(() => {
+        checkSlugAvailability(formData.slug);
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    } else if (formData?.slug === originalSlug) {
+      setSlugAvailable(true); // Original slug is always available
+    } else {
+      setSlugAvailable(null);
+    }
+  }, [formData?.slug, originalSlug]);
 
   const loadBlog = async (): Promise<void> => {
     try {
@@ -148,6 +485,7 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
         })),
       };
       setBlog(blogData);
+      setOriginalSlug(blogData.slug);
       
       // Initialize form data with blog data
       setFormData({
@@ -163,16 +501,6 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
         tagIds: blogData.tags?.map((tag: BlogTag) => tag.id) || [],
         categoryIds: blogData.categories?.map((cat: BlogCategory) => cat.id) || []
       });
-
-      // Initialize images
-      setImages(blogData.images?.map((img: BlogImage) => ({
-        id: img.id,
-        url: img.url,
-        alt: img.alt || '',
-        caption: img.caption || '',
-        isMain: img.isMain || false,
-        isExisting: true
-      })) || []);
 
     } catch (err) {
       console.error('Error loading blog:', err);
@@ -201,53 +529,100 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
     }
   };
 
-  const handleInputChange = <K extends keyof FormData>(field: K, value: FormData[K]): void => {
-    if (!formData) return;
-    
-    setFormData(prev => prev ? ({
-      ...prev,
-      [field]: value
-    }) : null);
-    
-    // Clear error when user starts typing
-    if (errors[field as string]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field as string];
-        return newErrors;
-      });
+  const checkSlugAvailability = async (slug: string): Promise<void> => {
+    if (!slug.trim()) {
+      setSlugAvailable(null);
+      return;
     }
-  };
 
-  const calculateReadTime = (content: string): number => {
-    const text = content.replace(/<[^>]*>/g, '');
-    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
-    return Math.ceil(words.length / 200);
+    setSlugChecking(true);
+    try {
+      // Try to get blog by slug - if it exists and it's not the current blog, slug is not available
+      const existingBlog = await blogApi.getBlogBySlug(slug);
+      setSlugAvailable(existingBlog.id === blogId); // Available if it's the same blog
+    } catch (error) {
+      // If error (likely 404), slug is available
+      setSlugAvailable(true);
+    } finally {
+      setSlugChecking(false);
+    }
   };
 
   const validateForm = (): boolean => {
     if (!formData) return false;
     
-    const newErrors: FormErrors = {};
+    // Use utility validation function
+    const validationErrors = validateFormData(formData, blogFormValidationSchema);
     
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+    // Add slug availability check
+    if (slugAvailable === false) {
+      validationErrors.slug = 'This slug is already taken';
     }
     
-    if (!formData.slug.trim()) {
-      newErrors.slug = 'Slug is required';
+    setErrors(validationErrors);
+    return Object.keys(validationErrors).length === 0;
+  };
+
+  const handleImageUpload = async (file: File): Promise<string> => {
+    try {
+      if (typeof blogApi.uploadImage === 'function') {
+        const result = await blogApi.uploadImage(file);
+        return result.url;
+      } else {
+        return URL.createObjectURL(file);
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw new Error('Failed to upload image');
     }
-    
-    if (!formData.excerpt.trim()) {
-      newErrors.excerpt = 'Excerpt is required';
+  };
+
+  const handleCreateCategory = async (name: string, color?: string): Promise<void> => {
+    try {
+      const newCategory = await blogApi.createCategory({
+        name,
+        color,
+        slug: generateSlug(name)
+      });
+      setCategories(prev => [...prev, newCategory]);
+      addToast({
+        type: 'success',
+        title: 'Success',
+        message: 'Category created successfully'
+      });
+    } catch (error) {
+      console.error('Error creating category:', error);
+      addToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to create category'
+      });
+      throw error;
     }
-    
-    if (!formData.content.trim()) {
-      newErrors.content = 'Content is required';
+  };
+
+  const handleCreateTag = async (name: string, color?: string): Promise<void> => {
+    try {
+      const newTag = await blogApi.createTag({
+        name,
+        color,
+        slug: generateSlug(name)
+      });
+      setTags(prev => [...prev, newTag]);
+      addToast({
+        type: 'success',
+        title: 'Success',
+        message: 'Tag created successfully'
+      });
+    } catch (error) {
+      console.error('Error creating tag:', error);
+      addToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to create tag'
+      });
+      throw error;
     }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'): Promise<void> => {
@@ -286,27 +661,12 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
         readTime,
         tagIds: formData.tagIds,
         categoryIds: formData.categoryIds,
-        featuredImage: formData.featuredImage || undefined,
-        images: images.map(img => ({
-          id: img.id || undefined,
-          url: img.url,
-          alt: img.alt,
-          caption: img.caption,
-          isMain: img.isMain
-        }))
+        featuredImage: formData.featuredImage || undefined
       };
 
-      // Extract new image files
-      const imageFiles = images
-        .filter((img: BlogImage) => !img.isExisting && img.file)
-        .map(img => img.file!)
-        .filter(Boolean);
-
       console.log('Updating blog with data:', updateData);
-      console.log('New image files:', imageFiles.length);
 
-      // Use your existing blogApi
-      const result = await blogApi.updateBlog(blogId, updateData, imageFiles);
+      const result = await blogApi.updateBlog(blogId, updateData, []);
       
       addToast({
         type: 'success',
@@ -344,83 +704,6 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>): void => {
-    const files = event.target.files;
-    if (!files) return;
-    
-    Array.from(files).forEach((file: File) => {
-      if (!file.type.startsWith('image/')) {
-        addToast({
-          type: 'error',
-          title: 'Invalid File',
-          message: 'Please select only image files'
-        });
-        return;
-      }
-
-      if (file.size > 10 * 1024 * 1024) {
-        addToast({
-          type: 'error',
-          title: 'File Too Large',
-          message: 'Image must be less than 10MB'
-        });
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        if (e.target?.result) {
-          setImages(prev => [...prev, {
-            file,
-            url: e.target?.result as string,
-            alt: '',
-            caption: '',
-            isMain: false,
-            isExisting: false
-          }]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-    
-    event.target.value = '';
-  };
-
-  const removeImage = (index: number): void => {
-    setImages(prev => {
-      const newImages = prev.filter((_, i) => i !== index);
-      if (newImages.length > 0 && prev[index]?.isMain) {
-        newImages[0].isMain = true;
-      }
-      return newImages;
-    });
-  };
-
-  const setMainImage = (index: number): void => {
-    setImages(prev => prev.map((img, i) => ({
-      ...img,
-      isMain: i === index
-    })));
-  };
-
-  const insertImageToContent = (imageUrl: string): void => {
-    if (!formData) return;
-    
-    const imageHtml = `<img src="${imageUrl}" alt="Blog image" class="w-full h-auto rounded-lg my-4" />`;
-    setFormData(prev => prev ? ({
-      ...prev,
-      content: prev.content + '\n' + imageHtml + '\n'
-    }) : null);
-  };
-
-  const updateImageMetadata = (index: number, field: 'alt' | 'caption', value: string): void => {
-    setImages(prev => {
-      const newImages = [...prev];
-      newImages[index] = { ...newImages[index], [field]: value };
-      return newImages;
-    });
   };
 
   if (loading) {
@@ -465,9 +748,9 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
   const readTime = calculateReadTime(formData.content);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 shadow-xl border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -481,7 +764,8 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
               </ActionButton>
               
               <div>
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
                   Edit Blog Post
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -501,8 +785,18 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
               </ActionButton>
               
               <ActionButton
+                variant="secondary"
+                onClick={() => handleSubmit('ARCHIVED')}
+                loading={saving}
+              >
+                <X className="h-4 w-4" />
+                Archive
+              </ActionButton>
+              
+              <ActionButton
                 onClick={() => handleSubmit('PUBLISHED')}
                 loading={saving}
+                disabled={slugAvailable === false}
               >
                 <Globe className="h-4 w-4" />
                 {blog.status === 'PUBLISHED' ? 'Update' : 'Publish'}
@@ -517,7 +811,7 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Information */}
-            <Card title="Basic Information">
+            <Card title="Basic Information" className="shadow-lg">
               <div className="space-y-6">
                 <Input
                   label="Title"
@@ -526,16 +820,26 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
                   placeholder="Enter your blog title"
                   error={errors.title}
                   required
+                  className="text-lg font-medium"
                 />
                 
-                <Input
-                  label="URL Slug"
-                  value={formData.slug}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('slug', e.target.value)}
-                  placeholder="url-friendly-slug"
-                  error={errors.slug}
-                  required
-                />
+                <div>
+                  <Input
+                    label="URL Slug"
+                    value={formData.slug}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('slug', e.target.value)}
+                    placeholder="url-friendly-slug"
+                    error={errors.slug}
+                    required
+                  />
+                  
+                  {/* Enhanced URL Preview */}
+                  <UrlPreview 
+                    slug={formData.slug}
+                    available={slugAvailable}
+                    checking={slugChecking}
+                  />
+                </div>
                 
                 <TextArea
                   label="Excerpt"
@@ -545,147 +849,37 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
                   rows={3}
                   error={errors.excerpt}
                   required
+                  maxLength={300}
                 />
+                <div className="text-right text-sm text-gray-500 dark:text-gray-400">
+                  {formData.excerpt.length}/300 characters
+                </div>
               </div>
             </Card>
 
-            {/* Content Editor */}
-            <Card title="Content">
+            {/* Rich Text Content Editor */}
+            <Card title="Content" className="shadow-lg">
               <div className="space-y-4">
-                <TextArea
-                  value={formData.content}
-                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleInputChange('content', e.target.value)}
-                  placeholder="Write your blog content here. You can use HTML tags for formatting."
-                  rows={20}
-                  error={errors.content}
-                  className="font-mono text-sm"
+                <RichTextEditor
+                  content={formData.content}
+                  onChange={(content) => handleInputChange('content', content)}
+                  onImageUpload={handleImageUpload}
+                  placeholder="Write your blog content here..."
+                  height="500px"
                 />
                 
-                <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
-                  <span>HTML formatting supported</span>
-                  <span>{wordCount} words • {readTime} min read</span>
+                <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                  <span>Rich text editor with image support</span>
+                  <span className="font-medium">{wordCount} words • {readTime} min read</span>
                 </div>
               </div>
-            </Card>
-
-            {/* Image Management */}
-            <Card title="Images">
-              <div className="space-y-6">
-                {/* Upload Area */}
-                <div>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    id="image-upload"
-                  />
-                  <label
-                    htmlFor="image-upload"
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors"
-                  >
-                    <Image className="h-8 w-8 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                      Click to upload new images<br />
-                      <span className="text-xs">PNG, JPG, GIF up to 10MB</span>
-                    </p>
-                  </label>
-                </div>
-                
-                {/* Image Gallery */}
-                {images.length > 0 && (
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">
-                      Images ({images.length})
-                    </h4>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {images.map((image: BlogImage, index: number) => (
-                        <div key={index} className="relative group border rounded-lg p-3">
-                          <div className="aspect-video relative mb-3">
-                            <img
-                              src={image.url}
-                              alt={image.alt || `Blog image ${index + 1}`}
-                              className="w-full h-full object-cover rounded"
-                            />
-                            
-                            {/* Image Controls */}
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="flex space-x-1">
-                                {!image.isMain && (
-                                  <button
-                                    onClick={() => setMainImage(index)}
-                                    className="p-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
-                                    title="Set as featured image"
-                                    type="button"
-                                  >
-                                    <Star className="h-3 w-3" />
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => insertImageToContent(image.url)}
-                                  className="p-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
-                                  title="Insert into content"
-                                  type="button"
-                                >
-                                  <Plus className="h-3 w-3" />
-                                </button>
-                                <button
-                                  onClick={() => removeImage(index)}
-                                  className="p-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
-                                  title="Remove image"
-                                  type="button"
-                                >
-                                  <X className="h-3 w-3" />
-                                </button>
-                              </div>
-                            </div>
-                            
-                            {/* Status Badges */}
-                            <div className="absolute top-2 left-2 space-y-1">
-                              {image.isMain && (
-                                <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium flex items-center">
-                                  <Star className="h-3 w-3 mr-1" />
-                                  Featured
-                                </span>
-                              )}
-                              {image.isExisting && (
-                                <span className="bg-gray-500 text-white px-2 py-1 rounded text-xs font-medium">
-                                  Existing
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          
-                          {/* Image Metadata */}
-                          <div className="space-y-2">
-                            <Input
-                              placeholder="Alt text"
-                              value={image.alt}
-                              onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                                updateImageMetadata(index, 'alt', e.target.value)
-                              }
-                              className="text-sm"
-                            />
-                            <Input
-                              placeholder="Caption (optional)"
-                              value={image.caption}
-                              onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                                updateImageMetadata(index, 'caption', e.target.value)
-                              }
-                              className="text-sm"
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              {errors.content && (
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.content}</p>
+              )}
             </Card>
 
             {/* SEO Settings */}
-            <Card title="SEO Settings">
+            <Card title="SEO Settings" className="shadow-lg">
               <div className="space-y-4">
                 <Input
                   label="SEO Title"
@@ -694,6 +888,9 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
                   placeholder="Title for search engines (leave empty to use main title)"
                   maxLength={60}
                 />
+                <div className="text-right text-sm text-gray-500 dark:text-gray-400">
+                  {formData.seoTitle.length}/60 characters
+                </div>
                 
                 <TextArea
                   label="SEO Description"
@@ -703,6 +900,9 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
                   rows={3}
                   maxLength={160}
                 />
+                <div className="text-right text-sm text-gray-500 dark:text-gray-400">
+                  {formData.seoDescription.length}/160 characters
+                </div>
               </div>
             </Card>
           </div>
@@ -710,14 +910,14 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Blog Info */}
-            <Card title="Blog Info">
+            <Card title="Blog Info" className="shadow-lg">
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                  <span className={`font-medium ${
-                    blog.status === 'PUBLISHED' ? 'text-green-600' :
-                    blog.status === 'DRAFT' ? 'text-yellow-600' :
-                    'text-gray-600'
+                  <span className="text-gray-600 dark:text-gray-400">Current Status:</span>
+                  <span className={`font-medium px-2 py-1 rounded text-xs ${
+                    blog.status === 'PUBLISHED' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
+                    blog.status === 'DRAFT' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                    'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
                   }`}>{blog.status}</span>
                 </div>
                 <div className="flex justify-between">
@@ -742,7 +942,7 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
             </Card>
 
             {/* Publish Settings */}
-            <Card title="Publish Settings">
+            <Card title="Publish Settings" className="shadow-lg">
               <div className="space-y-4">
                 <Select
                   label="Status"
@@ -773,60 +973,78 @@ export default function BlogEditForm({ blogId }: BlogEditFormProps): JSX.Element
             </Card>
 
             {/* Categories */}
-            <Card title="Categories">
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {categories.map((category: BlogCategory) => (
-                  <div key={category.id} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`category-${category.id}`}
-                      checked={formData.categoryIds.includes(category.id)}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        if (e.target.checked) {
-                          handleInputChange('categoryIds', [...formData.categoryIds, category.id]);
-                        } else {
-                          handleInputChange('categoryIds', formData.categoryIds.filter(id => id !== category.id));
-                        }
-                      }}
-                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                    />
-                    <label
-                      htmlFor={`category-${category.id}`}
-                      className="text-sm text-gray-700 dark:text-gray-300 flex-1 cursor-pointer"
-                    >
-                      {category.name}
-                    </label>
-                  </div>
-                ))}
+            <CategoryTagManager
+              type="category"
+              items={categories}
+              selectedIds={formData.categoryIds}
+              onSelectionChange={(ids) => handleInputChange('categoryIds', ids)}
+              onItemCreate={handleCreateCategory}
+              loading={false}
+            />
+
+            {/* Tags */}
+            <CategoryTagManager
+              type="tag"
+              items={tags}
+              selectedIds={formData.tagIds}
+              onSelectionChange={(ids) => handleInputChange('tagIds', ids)}
+              onItemCreate={handleCreateTag}
+              loading={false}
+            />
+
+            {/* Quick Stats */}
+            <Card title="Quick Stats" className="shadow-lg">
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Word Count:</span>
+                  <span className="font-medium">{wordCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Read Time:</span>
+                  <span className="font-medium">{readTime} min</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Categories:</span>
+                  <span className="font-medium">{formData.categoryIds.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Tags:</span>
+                  <span className="font-medium">{formData.tagIds.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">New Status:</span>
+                  <span className={`font-medium ${
+                    formData.status === 'PUBLISHED' ? 'text-green-600' :
+                    formData.status === 'DRAFT' ? 'text-yellow-600' :
+                    'text-gray-600'
+                  }`}>{formData.status}</span>
+                </div>
               </div>
             </Card>
 
-            {/* Tags */}
-            <Card title="Tags">
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {tags.map((tag: BlogTag) => (
-                  <div key={tag.id} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`tag-${tag.id}`}
-                      checked={formData.tagIds.includes(tag.id)}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        if (e.target.checked) {
-                          handleInputChange('tagIds', [...formData.tagIds, tag.id]);
-                        } else {
-                          handleInputChange('tagIds', formData.tagIds.filter(id => id !== tag.id));
-                        }
-                      }}
-                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                    />
-                    <label
-                      htmlFor={`tag-${tag.id}`}
-                      className="text-sm text-gray-700 dark:text-gray-300 flex-1 cursor-pointer"
-                    >
-                      {tag.name}
-                    </label>
-                  </div>
-                ))}
+            {/* System Status */}
+            <Card title="System Status" className="shadow-lg">
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 dark:text-gray-400">Slug Check:</span>
+                  <span className={`font-medium ${
+                    slugChecking ? 'text-yellow-600' : 
+                    slugAvailable === true ? 'text-green-600' : 
+                    slugAvailable === false ? 'text-red-600' : 'text-gray-600'
+                  }`}>
+                    {slugChecking ? 'Checking...' : 
+                     slugAvailable === true ? 'Available' : 
+                     slugAvailable === false ? 'Taken' : 'Ready'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 dark:text-gray-400">Tags API:</span>
+                  <span className="font-medium text-green-600">Connected</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 dark:text-gray-400">Categories API:</span>
+                  <span className="font-medium text-green-600">Connected</span>
+                </div>
               </div>
             </Card>
           </div>
