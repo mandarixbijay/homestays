@@ -1,53 +1,28 @@
-// src/components/admin/blog/EnhancedBlogCreateForm.tsx
+// src/components/admin/blog/EnhancedBlogComponents.tsx
 'use client';
 
-import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 import {
-  Save, Eye, Upload, Trash2, Star, Tag, Folder, Plus,
-  Image, Globe, Clock, ArrowLeft, AlertCircle, Check,
-  Bold, Italic, Type, List, Hash, Quote, X, Sparkles,
-  FileText, Search
+  Bold, Italic, Type, List, Hash, Quote, Image, Clock, X,
+  Star, Trash2, Upload, Search, Tag, Folder, Check, Sparkles
 } from 'lucide-react';
 
-import {
-  Input,
-  TextArea,
-  ActionButton,
-  Card,
-  Alert,
-  LoadingSpinner,
-  Select,
-  useToast
-} from '@/components/admin/AdminComponents';
-
 import { 
-  blogApi, 
-  CreateBlogData, 
-  Tag as BlogTag, 
+  BlogImage, 
   Category, 
-  BlogImage 
+  Tag as BlogTag 
 } from '@/lib/api/completeBlogApi';
 
 import {
-  generateSlug,
-  calculateReadTime,
-  validateForm as validateFormData,
-  blogFormValidationSchema,
   validateImageFile,
   resizeImage,
-  AutoSaveManager,
   editorStyles
 } from '@/utils/blogEditorUtils';
-
-import { UrlPreview } from '@/components/admin/blog/UrlPreview';
-import { StatusBadge } from '@/components/admin/blog/StatusBadge';
 
 // ============================================================================
 // ENHANCED RICH TEXT EDITOR
 // ============================================================================
-const EnhancedRichTextEditor: React.FC<{
+export const EnhancedRichTextEditor: React.FC<{
   content: string;
   onChange: (content: string) => void;
   onImageUpload: (file: File) => Promise<string>;
@@ -355,25 +330,35 @@ export const EnhancedImageUploader: React.FC<{
 };
 
 // ============================================================================
-// ENHANCED CATEGORY & TAG MANAGER
+// ENHANCED CATEGORY & TAG MANAGER WITH ADD NEW FUNCTIONALITY
 // ============================================================================
-const EnhancedCategoryTagManager: React.FC<{
+export const EnhancedCategoryTagManager: React.FC<{
   selectedCategories: number[];
   selectedTags: number[];
   availableCategories: Category[];
   availableTags: BlogTag[];
   onCategoriesChange: (ids: number[]) => void;
   onTagsChange: (ids: number[]) => void;
+  onAddCategory?: (name: string) => Promise<Category>;
+  onAddTag?: (name: string) => Promise<BlogTag>;
 }> = ({ 
   selectedCategories, 
   selectedTags, 
   availableCategories, 
   availableTags,
   onCategoriesChange,
-  onTagsChange 
+  onTagsChange,
+  onAddCategory,
+  onAddTag
 }) => {
   const [categorySearch, setCategorySearch] = useState('');
   const [tagSearch, setTagSearch] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newTagName, setNewTagName] = useState('');
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [addingTag, setAddingTag] = useState(false);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [showAddTag, setShowAddTag] = useState(false);
 
   const filteredCategories = availableCategories.filter(cat =>
     cat.name.toLowerCase().includes(categorySearch.toLowerCase())
@@ -396,6 +381,40 @@ const EnhancedCategoryTagManager: React.FC<{
       onTagsChange(selectedTags.filter(tid => tid !== id));
     } else {
       onTagsChange([...selectedTags, id]);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim() || !onAddCategory) return;
+    
+    setAddingCategory(true);
+    try {
+      const newCategory = await onAddCategory(newCategoryName.trim());
+      onCategoriesChange([...selectedCategories, newCategory.id]);
+      setNewCategoryName('');
+      setShowAddCategory(false);
+    } catch (error) {
+      console.error('Failed to add category:', error);
+      alert('Failed to add category');
+    } finally {
+      setAddingCategory(false);
+    }
+  };
+
+  const handleAddTag = async () => {
+    if (!newTagName.trim() || !onAddTag) return;
+    
+    setAddingTag(true);
+    try {
+      const newTag = await onAddTag(newTagName.trim());
+      onTagsChange([...selectedTags, newTag.id]);
+      setNewTagName('');
+      setShowAddTag(false);
+    } catch (error) {
+      console.error('Failed to add tag:', error);
+      alert('Failed to add tag');
+    } finally {
+      setAddingTag(false);
     }
   };
 
@@ -430,7 +449,7 @@ const EnhancedCategoryTagManager: React.FC<{
               />
               <Folder className="h-4 w-4 text-gray-400 mx-2" />
               <span className="text-sm text-gray-700 dark:text-gray-300">{cat.name}</span>
-              {typeof (cat as any).blogCount === 'number' && (
+              {(cat as any).blogCount !== undefined && (
                 <span className="ml-auto text-xs text-gray-500">({(cat as any).blogCount})</span>
               )}
             </label>
@@ -482,6 +501,9 @@ const EnhancedCategoryTagManager: React.FC<{
               />
               <Tag className="h-4 w-4 text-gray-400 mx-2" />
               <span className="text-sm text-gray-700 dark:text-gray-300">{tag.name}</span>
+              {(tag as any).blogCount !== undefined && (
+                <span className="ml-auto text-xs text-gray-500">({(tag as any).blogCount})</span>
+              )}
             </label>
           ))}
         </div>
@@ -509,7 +531,7 @@ const EnhancedCategoryTagManager: React.FC<{
 // ============================================================================
 // SEO OPTIMIZER
 // ============================================================================
-const SEOOptimizer: React.FC<{
+export const SEOOptimizer: React.FC<{
   seoTitle: string;
   seoDescription: string;
   onSeoTitleChange: (value: string) => void;
@@ -581,6 +603,17 @@ const SEOOptimizer: React.FC<{
           <span className={descStatus.color}>{descStatus.message}</span>
         </div>
       </div>
+
+      <div className="p-3 bg-white dark:bg-gray-800 rounded border border-purple-200 dark:border-purple-700">
+        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+          <strong>SEO Tips:</strong>
+        </p>
+        <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+          <li>• Include primary keywords naturally</li>
+          <li>• Make titles compelling and clickable</li>
+          <li>• Write unique descriptions for each post</li>
+        </ul>
+      </div>
     </div>
   );
 };
@@ -588,7 +621,7 @@ const SEOOptimizer: React.FC<{
 // ============================================================================
 // AUTO-SAVE INDICATOR
 // ============================================================================
-const AutoSaveIndicator: React.FC<{
+export const AutoSaveIndicator: React.FC<{
   lastSaved?: Date;
   saving?: boolean;
 }> = ({ lastSaved, saving }) => {
@@ -621,509 +654,3 @@ const AutoSaveIndicator: React.FC<{
 
   return null;
 };
-
-// ============================================================================
-// MAIN FORM COMPONENT
-// ============================================================================
-interface FormData {
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  featuredImage: string;
-  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-  featured: boolean;
-  seoTitle: string;
-  seoDescription: string;
-  tagIds: number[];
-  categoryIds: number[];
-  images: BlogImage[];
-}
-
-interface FormErrors {
-  [key: string]: string;
-}
-
-export default function EnhancedBlogCreateForm() {
-  const router = useRouter();
-  const { data: session } = useSession();
-  const { addToast } = useToast();
-  
-  const [formData, setFormData] = useState<FormData>({
-    title: '',
-    slug: '',
-    excerpt: '',
-    content: '',
-    featuredImage: '',
-    status: 'DRAFT',
-    featured: false,
-    seoTitle: '',
-    seoDescription: '',
-    tagIds: [],
-    categoryIds: [],
-    images: []
-  });
-
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(false);
-  const [tags, setTags] = useState<BlogTag[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [tagsLoading, setTagsLoading] = useState(true);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [slugChecking, setSlugChecking] = useState(false);
-  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date>();
-  const [autoSaving, setAutoSaving] = useState(false);
-  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Load tags and categories
-  useEffect(() => {
-    loadTagsAndCategories();
-  }, []);
-
-  // Auto-generate slug from title with suggestions
-  useEffect(() => {
-    if (formData.title) {
-      const generatedSlug = generateSlug(formData.title);
-      // Only auto-update if user hasn't manually changed the slug
-      if (!formData.slug || formData.slug === generateSlug(formData.title.slice(0, -1))) {
-        handleInputChange('slug', generatedSlug);
-      }
-    }
-  }, [formData.title]);
-
-  // Check slug availability
-  useEffect(() => {
-    if (formData.slug && formData.slug.length > 2) {
-      const timeoutId = setTimeout(() => {
-        checkSlugAvailability(formData.slug);
-      }, 500);
-      return () => clearTimeout(timeoutId);
-    } else {
-      setSlugAvailable(null);
-    }
-  }, [formData.slug]);
-
-  // Auto-save
-  useEffect(() => {
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
-    }
-
-    autoSaveTimeoutRef.current = setTimeout(() => {
-      if (formData.title && formData.content) {
-        performAutoSave();
-      }
-    }, 3000);
-
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-    };
-  }, [formData]);
-
-  const loadTagsAndCategories = async () => {
-    setTagsLoading(true);
-    setCategoriesLoading(true);
-    try {
-      const [tagsData, categoriesData] = await Promise.all([
-        blogApi.getTags(),
-        blogApi.getCategories()
-      ]);
-      setTags(tagsData);
-      setCategories(categoriesData);
-    } catch (error) {
-      console.error('Error loading tags/categories:', error);
-      addToast({
-        type: 'warning',
-        title: 'Warning',
-        message: 'Failed to load tags and categories'
-      });
-    } finally {
-      setTagsLoading(false);
-      setCategoriesLoading(false);
-    }
-  };
-
-  const checkSlugAvailability = async (slug: string) => {
-    setSlugChecking(true);
-    try {
-      // If the blogApi exposes a slug check at runtime use it (cast to any to avoid TS error),
-      // otherwise fall back to a network request to a conventional endpoint.
-      if ((blogApi as any)?.checkSlugAvailability) {
-        const isAvailable = await (blogApi as any).checkSlugAvailability(slug);
-        setSlugAvailable(Boolean(isAvailable));
-      } else {
-        // Fallback: try a server endpoint that returns { available: boolean }
-        const res = await fetch(`/api/blogs/check-slug?slug=${encodeURIComponent(slug)}`);
-        if (res.ok) {
-          const data = await res.json();
-          setSlugAvailable(typeof data.available === 'boolean' ? data.available : null);
-        } else if (res.status === 404) {
-          // treat 404 as "not found" -> slug available
-          setSlugAvailable(true);
-        } else {
-          setSlugAvailable(null);
-        }
-      }
-    } catch (error) {
-      console.error('Error checking slug:', error);
-      setSlugAvailable(null);
-    } finally {
-      setSlugChecking(false);
-    }
-  };
-
-  const performAutoSave = async () => {
-    setAutoSaving(true);
-    try {
-      // Auto-save logic here (save to localStorage or draft API)
-      localStorage.setItem('blog_draft', JSON.stringify(formData));
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error('Auto-save failed:', error);
-    } finally {
-      setAutoSaving(false);
-    }
-  };
-
-  const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  };
-
-  const handleImageUpload = async (file: File): Promise<string> => {
-    try {
-      const result = await blogApi.uploadImage(file);
-      return result.url;
-    } catch (error) {
-      console.error('Image upload failed:', error);
-      throw error;
-    }
-  };
-
-  const validateForm = (): boolean => {
-    const validationErrors = validateFormData(formData, blogFormValidationSchema);
-    
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      addToast({
-        type: 'error',
-        title: 'Validation Error',
-        message: 'Please fix the errors before submitting'
-      });
-      return false;
-    }
-
-    if (slugAvailable === false) {
-      setErrors({ slug: 'This slug is already taken' });
-      addToast({
-        type: 'error',
-        title: 'Validation Error',
-        message: 'The slug is already taken'
-      });
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = async (status: 'DRAFT' | 'PUBLISHED') => {
-    if (!validateForm()) return;
-    if (!session?.user?.id) {
-      addToast({
-        type: 'error',
-        title: 'Error',
-        message: 'You must be logged in to create a blog'
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const featuredImage = formData.images.find(img => img.isMain)?.url || formData.images[0]?.url || '';
-      
-      const blogData: CreateBlogData = {
-        title: formData.title,
-        slug: formData.slug,
-        excerpt: formData.excerpt,
-        content: formData.content,
-        featuredImage,
-        status,
-        featured: formData.featured,
-        seoTitle: formData.seoTitle || formData.title,
-        seoDescription: formData.seoDescription || formData.excerpt,
-        readTime: calculateReadTime(formData.content),
-        tagIds: formData.tagIds,
-        categoryIds: formData.categoryIds,
-        images: formData.images,
-        authorId: parseInt(session.user.id)
-      };
-
-      const result = await blogApi.createBlog(blogData);
-      
-      addToast({
-        type: 'success',
-        title: 'Success',
-        message: `Blog ${status === 'PUBLISHED' ? 'published' : 'saved as draft'} successfully!`
-      });
-
-      // Clear auto-save
-      localStorage.removeItem('blog_draft');
-      
-      router.push(`/admin/blog/${result.id}`);
-    } catch (error: any) {
-      console.error('Error creating blog:', error);
-      addToast({
-        type: 'error',
-        title: 'Error',
-        message: error.message || 'Failed to create blog'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (tagsLoading || categoriesLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Loading editor..." />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <ActionButton
-                variant="secondary"
-                size="sm"
-                onClick={() => router.push('/admin/blog')}
-                icon={<ArrowLeft className="h-4 w-4" />}
-              >
-                Back
-              </ActionButton>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Create New Blog Post
-              </h1>
-              <AutoSaveIndicator lastSaved={lastSaved} saving={autoSaving} />
-            </div>
-            <div className="flex items-center gap-2">
-              <ActionButton
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowPreview(!showPreview)}
-                icon={<Eye className="h-4 w-4" />}
-              >
-                {showPreview ? 'Edit' : 'Preview'}
-              </ActionButton>
-              <ActionButton
-                variant="secondary"
-                onClick={() => handleSubmit('DRAFT')}
-                loading={loading}
-                icon={<Save className="h-4 w-4" />}
-              >
-                Save Draft
-              </ActionButton>
-              <ActionButton
-                variant="success"
-                onClick={() => handleSubmit('PUBLISHED')}
-                loading={loading}
-                disabled={slugAvailable === false}
-                icon={<Globe className="h-4 w-4" />}
-              >
-                Publish
-              </ActionButton>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {showPreview ? (
-          /* Preview Mode */
-          <Card className="shadow-lg">
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <h1>{formData.title || 'Untitled Post'}</h1>
-              {formData.images.find(img => img.isMain) && (
-                <img 
-                  src={formData.images.find(img => img.isMain)?.url} 
-                  alt="Featured" 
-                  className="w-full h-96 object-cover rounded-lg mb-6" 
-                />
-              )}
-              <p className="text-lg text-gray-600 dark:text-gray-400">{formData.excerpt}</p>
-              <div dangerouslySetInnerHTML={{ __html: formData.content }} />
-              
-              <div className="mt-8 flex flex-wrap gap-3">
-                {formData.categoryIds.map(id => {
-                  const cat = categories.find(c => c.id === id);
-                  return cat ? (
-                    <span key={id} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-sm">
-                      {cat.name}
-                    </span>
-                  ) : null;
-                })}
-              </div>
-              
-              <div className="mt-4 flex flex-wrap gap-2">
-                {formData.tagIds.map(id => {
-                  const tag = tags.find(t => t.id === id);
-                  return tag ? (
-                    <span key={id} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
-                      #{tag.name}
-                    </span>
-                  ) : null;
-                })}
-              </div>
-            </div>
-          </Card>
-        ) : (
-          /* Edit Mode */
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Editor Column */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Basic Information Card */}
-              <Card title="Basic Information" className="shadow-sm">
-                <div className="space-y-4">
-                  <Input
-                    label="Blog Title"
-                    value={formData.title}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                      handleInputChange('title', e.target.value)
-                    }
-                    placeholder="Enter an engaging blog title..."
-                    error={errors.title}
-                    required
-                    className="text-lg font-medium"
-                  />
-
-                  <div>
-                    <Input
-                      label="URL Slug"
-                      value={formData.slug}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                        handleInputChange('slug', e.target.value)
-                      }
-                      placeholder="url-friendly-slug"
-                      error={errors.slug}
-                      required
-                    />
-                    <UrlPreview
-                      slug={formData.slug}
-                      available={slugAvailable}
-                      checking={slugChecking}
-                    />
-                  </div>
-
-                  <TextArea
-                    label="Excerpt"
-                    value={formData.excerpt}
-                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => 
-                      handleInputChange('excerpt', e.target.value)
-                    }
-                    placeholder="Write a compelling excerpt (10-300 characters)..."
-                    rows={3}
-                    error={errors.excerpt}
-                    required
-                    hint={`${formData.excerpt.length}/300 characters`}
-                  />
-                </div>
-              </Card>
-
-              {/* Content Editor Card */}
-              <Card title="Blog Content" className="shadow-sm">
-                <EnhancedRichTextEditor
-                  content={formData.content}
-                  onChange={(content) => handleInputChange('content', content)}
-                  onImageUpload={handleImageUpload}
-                  placeholder="Start writing your amazing blog post..."
-                />
-                {errors.content && (
-                  <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    {errors.content}
-                  </p>
-                )}
-              </Card>
-            </div>
-
-            {/* Sidebar Column */}
-            <div className="space-y-6">
-              {/* Publishing Options */}
-              <Card title="Publishing Options" className="shadow-sm">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      <Star className="h-4 w-4" />
-                      Featured Post
-                    </label>
-                    <input
-                      type="checkbox"
-                      checked={formData.featured}
-                      onChange={(e) => handleInputChange('featured', e.target.checked)}
-                      className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                  </div>
-                  
-                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200 mb-2">
-                      <FileText className="h-4 w-4" />
-                      <span className="font-medium">Reading Time</span>
-                    </div>
-                    <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                      {calculateReadTime(formData.content)} min read
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Image Gallery */}
-              <Card title="Blog Images" className="shadow-sm">
-                <EnhancedImageUploader
-                  images={formData.images}
-                  onChange={(images) => handleInputChange('images', images)}
-                  onUpload={handleImageUpload}
-                  maxImages={5}
-                />
-              </Card>
-
-              {/* Categories & Tags */}
-              <Card title="Categories & Tags" className="shadow-sm">
-                <EnhancedCategoryTagManager
-                  selectedCategories={formData.categoryIds}
-                  selectedTags={formData.tagIds}
-                  availableCategories={categories}
-                  availableTags={tags}
-                  onCategoriesChange={(ids) => handleInputChange('categoryIds', ids)}
-                  onTagsChange={(ids) => handleInputChange('tagIds', ids)}
-                />
-              </Card>
-
-              {/* SEO Optimization */}
-              <SEOOptimizer
-                seoTitle={formData.seoTitle}
-                seoDescription={formData.seoDescription}
-                onSeoTitleChange={(value) => handleInputChange('seoTitle', value)}
-                onSeoDescriptionChange={(value) => handleInputChange('seoDescription', value)}
-              />
-            </div>
-          </div>
-        )}
-      </main>
-    </div>
-  );
-}

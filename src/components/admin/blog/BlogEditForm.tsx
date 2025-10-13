@@ -1,14 +1,12 @@
-// components/admin/blog/EnhancedBlogEditForm.tsx
+// src/components/admin/blog/EnhancedBlogEditForm.tsx
 'use client';
 
-import React, { useState, useEffect, ChangeEvent, JSX, useRef } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import {
-  Save, X, Eye, Upload, Trash2, Star, Tag, Folder, Plus,
-  Image, FileText, Globe, Clock, ArrowLeft, AlertCircle, Check,
-  Bold, Italic, Type, Link, List, Hash, Quote, Code, Palette,
-  Settings, RefreshCw
+  Save, Eye, Trash2, Star, ArrowLeft, AlertCircle, Check,
+  Globe, Clock, X, Archive
 } from 'lucide-react';
 
 import {
@@ -18,379 +16,37 @@ import {
   Card,
   Alert,
   LoadingSpinner,
-  Select,
-  useToast
+  useToast,
+  Modal
 } from '@/components/admin/AdminComponents';
 
-// Import your existing blog API
-import { blogApi, Category, UpdateBlogData } from '@/lib/api/completeBlogApi';
+import { 
+  blogApi, 
+  UpdateBlogData, 
+  Tag as BlogTag, 
+  Category, 
+  BlogImage,
+  Blog
+} from '@/lib/api/completeBlogApi';
 
-// Import blog editor utilities
 import {
   generateSlug,
   calculateReadTime,
   validateForm as validateFormData,
-  blogFormValidationSchema,
-  validateImageFile,
-  resizeImage,
-  AutoSaveManager,
-  editorStyles
+  blogFormValidationSchema
 } from '@/utils/blogEditorUtils';
 
-// Import separate components
 import { UrlPreview } from '@/components/admin/blog/UrlPreview';
 import { StatusBadge } from '@/components/admin/blog/StatusBadge';
 
-// Rich Text Editor Component with integrated styles (same as create form)
-const RichTextEditor: React.FC<{
-  content: string;
-  onChange: (content: string) => void;
-  onImageUpload: (file: File) => Promise<string>;
-  placeholder?: string;
-  height?: string;
-}> = ({ content, onChange, onImageUpload, placeholder = "Write your blog content...", height = "400px" }) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
-
-  // Apply editor styles
-  useEffect(() => {
-    // Inject editor styles if not already present
-    const styleId = 'rich-editor-styles';
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.textContent = editorStyles;
-      document.head.appendChild(style);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.innerHTML = content;
-    }
-  }, [content]);
-
-  const execCommand = (command: string, value: string = '') => {
-    document.execCommand(command, false, value);
-    editorRef.current?.focus();
-    handleContentChange();
-  };
-
-  const handleContentChange = () => {
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
-  };
-
-  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate image file using utility
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-      alert(validation.error);
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      // Resize image if too large
-      let fileToUpload = file;
-      if (file.size > 2 * 1024 * 1024) { // 2MB
-        const resizedBlob = await resizeImage(file, 1200, 800, 0.8);
-        fileToUpload = new File([resizedBlob], file.name, { type: file.type });
-      }
-
-      const imageUrl = await onImageUpload(fileToUpload);
-      const imgHtml = `<img src="${imageUrl}" alt="Blog image" style="max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px;" />`;
-      execCommand('insertHTML', imgHtml);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Failed to upload image');
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const formatButtons = [
-    { command: 'bold', icon: Bold, title: 'Bold (Ctrl+B)' },
-    { command: 'italic', icon: Italic, title: 'Italic (Ctrl+I)' },
-    { command: 'underline', icon: Type, title: 'Underline (Ctrl+U)' },
-    { command: 'insertUnorderedList', icon: List, title: 'Bullet List' },
-    { command: 'insertOrderedList', icon: Hash, title: 'Numbered List' },
-    { command: 'formatBlock', icon: Quote, title: 'Quote', value: 'blockquote' },
-    { command: 'formatBlock', icon: Type, title: 'Heading 1', value: 'h1' },
-    { command: 'formatBlock', icon: Type, title: 'Heading 2', value: 'h2' },
-    { command: 'formatBlock', icon: Type, title: 'Heading 3', value: 'h3' },
-  ];
-
-  return (
-    <div className="rich-text-editor">
-      {/* Toolbar */}
-      <div className="editor-toolbar">
-        {formatButtons.map((button, index) => (
-          <button
-            key={index}
-            type="button"
-            onClick={() => execCommand(button.command, button.value)}
-            className="editor-button"
-            title={button.title}
-          >
-            <button.icon className="h-4 w-4" />
-          </button>
-        ))}
-        
-        <div className="editor-divider" />
-        
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="hidden"
-        />
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-          className="editor-button"
-          title="Insert Image"
-        >
-          {isUploading ? (
-            <RefreshCw className="h-4 w-4 animate-spin" />
-          ) : (
-            <Image className="h-4 w-4" />
-          )}
-        </button>
-        
-        <button
-          type="button"
-          onClick={() => {
-            const url = prompt('Enter URL:');
-            if (url) execCommand('createLink', url);
-          }}
-          className="editor-button"
-          title="Insert Link"
-        >
-          <Link className="h-4 w-4" />
-        </button>
-
-        <div className="editor-divider" />
-
-        <button
-          type="button"
-          onClick={() => execCommand('removeFormat')}
-          className="editor-button"
-          title="Clear Formatting"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-
-      {/* Editor */}
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={handleContentChange}
-        className="editor-content"
-        style={{ minHeight: height }}
-        data-placeholder={placeholder}
-        suppressContentEditableWarning={true}
-      />
-    </div>
-  );
-};
-
-// Category/Tag Manager Component (same as create form)
-const CategoryTagManager: React.FC<{
-  type: 'category' | 'tag';
-  items: (Category | BlogTag)[];
-  selectedIds: number[];
-  onSelectionChange: (ids: number[]) => void;
-  onItemCreate: (name: string, color?: string) => Promise<void>;
-  loading: boolean;
-}> = ({ type, items, selectedIds, onSelectionChange, onItemCreate, loading }) => {
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newItemName, setNewItemName] = useState('');
-  const [newItemColor, setNewItemColor] = useState('#3B82F6');
-  const [creating, setCreating] = useState(false);
-
-  const handleCreate = async () => {
-    if (!newItemName.trim()) return;
-    
-    setCreating(true);
-    try {
-      await onItemCreate(newItemName.trim(), newItemColor);
-      setNewItemName('');
-      setNewItemColor('#3B82F6');
-      setShowCreateForm(false);
-    } catch (error) {
-      console.error(`Error creating ${type}:`, error);
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  const handleToggleSelection = (id: number) => {
-    if (selectedIds.includes(id)) {
-      onSelectionChange(selectedIds.filter(selectedId => selectedId !== id));
-    } else {
-      onSelectionChange([...selectedIds, id]);
-    }
-  };
-
-  return (
-    <Card title={`${type === 'category' ? 'Categories' : 'Tags'}`}>
-      <div className="space-y-4">
-        {/* Create New Button */}
-        <button
-          type="button"
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="w-full p-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors flex items-center justify-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add New {type === 'category' ? 'Category' : 'Tag'}
-        </button>
-
-        {/* Create Form */}
-        {showCreateForm && (
-          <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 space-y-3">
-            <Input
-              placeholder={`${type === 'category' ? 'Category' : 'Tag'} name`}
-              value={newItemName}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setNewItemName(e.target.value)}
-            />
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={newItemColor}
-                onChange={(e) => setNewItemColor(e.target.value)}
-                className="w-10 h-8 rounded border border-gray-300 dark:border-gray-600"
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Color</span>
-            </div>
-            <div className="flex gap-2">
-              <ActionButton
-                variant="primary"
-                size="sm"
-                onClick={handleCreate}
-                loading={creating}
-                disabled={!newItemName.trim()}
-              >
-                Create
-              </ActionButton>
-              <ActionButton
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowCreateForm(false)}
-              >
-                Cancel
-              </ActionButton>
-            </div>
-          </div>
-        )}
-
-        {/* Items List */}
-        {loading ? (
-          <div className="flex justify-center py-4">
-            <LoadingSpinner size="sm" text={`Loading ${type}s...`} />
-          </div>
-        ) : items.length === 0 ? (
-          <div className="text-center py-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              No {type}s available
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {items.map((item) => (
-              <div key={item.id} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id={`${type}-${item.id}`}
-                  checked={selectedIds.includes(item.id)}
-                  onChange={() => handleToggleSelection(item.id)}
-                  className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                />
-                <label
-                  htmlFor={`${type}-${item.id}`}
-                  className="text-sm text-gray-700 dark:text-gray-300 flex-1 cursor-pointer"
-                >
-                  {item.name}
-                </label>
-                {item.color && (
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </Card>
-  );
-};
-
-// Types
-interface BlogImage {
-  id?: number;
-  url: string;
-  alt: string;
-  caption: string;
-  isMain: boolean;
-  isExisting?: boolean;
-  file?: File;
-}
-
-interface BlogTag {
-  id: number;
-  name: string;
-  slug: string;
-  color?: string;
-}
-
-interface BlogCategory {
-  id: number;
-  name: string;
-  slug: string;
-  color?: string;
-  parentId?: number;
-}
-
-interface BlogAuthor {
-  id: number;
-  name: string;
-  email: string;
-}
-
-interface Blog {
-  id: number;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  featuredImage?: string;
-  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-  featured: boolean;
-  seoTitle?: string;
-  seoDescription?: string;
-  readTime?: number;
-  viewCount: number;
-  createdAt: string;
-  updatedAt: string;
-  publishedAt?: string;
-  author: BlogAuthor;
-  images: BlogImage[];
-  tags: BlogTag[];
-  categories: BlogCategory[];
-}
+// Import the enhanced components from shared file
+import { 
+  EnhancedRichTextEditor,
+  EnhancedCategoryTagManager,
+  SEOOptimizer,
+  AutoSaveIndicator,
+  EnhancedImageUploader
+} from './EnhancedBlogComponents';
 
 interface FormData {
   title: string;
@@ -404,652 +60,593 @@ interface FormData {
   seoDescription: string;
   tagIds: number[];
   categoryIds: number[];
+  images: BlogImage[];
 }
 
 interface FormErrors {
-  title?: string;
-  slug?: string;
-  excerpt?: string;
-  content?: string;
-  [key: string]: string | undefined;
+  [key: string]: string;
 }
 
-interface BlogEditFormProps {
+interface EnhancedBlogEditFormProps {
   blogId: number;
 }
 
-export default function EnhancedBlogEditForm({ blogId }: BlogEditFormProps): JSX.Element {
+export default function EnhancedBlogEditForm({ blogId }: EnhancedBlogEditFormProps) {
   const router = useRouter();
   const { data: session } = useSession();
   const { addToast } = useToast();
-
-  // State with proper typing
+  
   const [blog, setBlog] = useState<Blog | null>(null);
-  const [formData, setFormData] = useState<FormData | null>(null);
-  const [originalSlug, setOriginalSlug] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
-  const [saving, setSaving] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [tags, setTags] = useState<BlogTag[]>([]);
-  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [formData, setFormData] = useState<FormData>({
+    title: '',
+    slug: '',
+    excerpt: '',
+    content: '',
+    featuredImage: '',
+    status: 'DRAFT',
+    featured: false,
+    seoTitle: '',
+    seoDescription: '',
+    tagIds: [],
+    categoryIds: [],
+    images: []
+  });
+
   const [errors, setErrors] = useState<FormErrors>({});
-  const [slugChecking, setSlugChecking] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [tags, setTags] = useState<BlogTag[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [slugChecking, setSlugChecking] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date>();
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
-  // Handle input changes for form fields
-  const handleInputChange = <K extends keyof FormData>(key: K, value: FormData[K]) => {
-    setFormData((prev) => prev ? { ...prev, [key]: value } : prev);
-  };
-
-  // Load existing blog data
+  // Load blog data
   useEffect(() => {
-    if (blogId && !isNaN(blogId) && blogId > 0) {
-      loadBlog();
-      loadTagsAndCategories();
-    } else {
-      setError('Invalid blog ID provided');
-      setLoading(false);
-    }
+    loadBlogData();
+    loadTagsAndCategories();
   }, [blogId]);
 
-  // Check slug availability when slug changes (only if different from original)
+  // Track changes
   useEffect(() => {
-    if (formData?.slug && formData.slug !== originalSlug && formData.slug.length > 2) {
+    if (blog) {
+      setHasChanges(true);
+    }
+  }, [formData]);
+
+  // Check slug availability when slug changes
+  useEffect(() => {
+    if (formData.slug && formData.slug !== blog?.slug && formData.slug.length > 2) {
       const timeoutId = setTimeout(() => {
         checkSlugAvailability(formData.slug);
       }, 500);
-
       return () => clearTimeout(timeoutId);
-    } else if (formData?.slug === originalSlug) {
-      setSlugAvailable(true); // Original slug is always available
     } else {
       setSlugAvailable(null);
     }
-  }, [formData?.slug, originalSlug]);
+  }, [formData.slug, blog?.slug]);
 
-  const loadBlog = async (): Promise<void> => {
+  const loadBlogData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      setError(null);
-      
-      const rawBlogData = await blogApi.getBlog(blogId);
-      const blogData: Blog = {
-        ...rawBlogData,
-        excerpt: rawBlogData.excerpt ?? '',
-        images: (rawBlogData.images ?? []).map((img: any) => ({
-          id: img.id,
-          url: img.url,
-          alt: typeof img.alt === 'string' ? img.alt : '',
-          caption: typeof img.caption === 'string' ? img.caption : '',
-          isMain: img.isMain || false,
-        })),
-      };
+      const blogData = await blogApi.getBlog(blogId);
       setBlog(blogData);
-      setOriginalSlug(blogData.slug);
       
-      // Initialize form data with blog data
       setFormData({
-        title: blogData.title || '',
-        slug: blogData.slug || '',
+        title: blogData.title,
+        slug: blogData.slug,
         excerpt: blogData.excerpt || '',
         content: blogData.content || '',
         featuredImage: blogData.featuredImage || '',
-        status: blogData.status || 'DRAFT',
-        featured: blogData.featured || false,
+        status: blogData.status,
+        featured: blogData.featured,
         seoTitle: blogData.seoTitle || '',
         seoDescription: blogData.seoDescription || '',
-        tagIds: blogData.tags?.map((tag: BlogTag) => tag.id) || [],
-        categoryIds: blogData.categories?.map((cat: BlogCategory) => cat.id) || []
+        tagIds: blogData.tags?.map(t => t.id) || [],
+        categoryIds: blogData.categories?.map(c => c.id) || [],
+        images: blogData.images || []
       });
-
-    } catch (err) {
-      console.error('Error loading blog:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load blog');
+    } catch (error: any) {
+      console.error('Error loading blog:', error);
+      addToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to load blog data'
+      });
+      router.push('/admin/blog');
     } finally {
       setLoading(false);
     }
   };
 
-  const loadTagsAndCategories = async (): Promise<void> => {
+  const loadTagsAndCategories = async () => {
     try {
       const [tagsData, categoriesData] = await Promise.all([
         blogApi.getTags(),
         blogApi.getCategories()
       ]);
-      
       setTags(tagsData);
       setCategories(categoriesData);
     } catch (error) {
-      console.error('Error loading tags and categories:', error);
-      addToast({
-        type: 'warning',
-        title: 'Warning',
-        message: 'Failed to load tags and categories. You can still edit the blog.'
-      });
+      console.error('Error loading tags/categories:', error);
     }
   };
 
-  const checkSlugAvailability = async (slug: string): Promise<void> => {
-    if (!slug.trim()) {
-      setSlugAvailable(null);
-      return;
-    }
-
+  const checkSlugAvailability = async (slug: string) => {
     setSlugChecking(true);
     try {
-      // Try to get blog by slug - if it exists and it's not the current blog, slug is not available
-      const existingBlog = await blogApi.getBlogBySlug(slug);
-      setSlugAvailable(existingBlog.id === blogId); // Available if it's the same blog
+      // Call a backend endpoint that returns JSON like: { available: boolean }
+      const res = await fetch(`/api/admin/blogs/check-slug?slug=${encodeURIComponent(slug)}`);
+      if (!res.ok) {
+        throw new Error('Failed to check slug availability');
+      }
+      const data = await res.json();
+      const isAvailable = typeof data?.available === 'boolean' ? data.available : null;
+      setSlugAvailable(isAvailable);
     } catch (error) {
-      // If error (likely 404), slug is available
-      setSlugAvailable(true);
+      console.error('Error checking slug:', error);
+      setSlugAvailable(null);
     } finally {
       setSlugChecking(false);
     }
   };
 
-  const validateForm = (): boolean => {
-    if (!formData) return false;
-    
-    // Use utility validation function
-    const validationErrors = validateFormData(formData, blogFormValidationSchema);
-    
-    // Add slug availability check
-    if (slugAvailable === false) {
-      validationErrors.slug = 'This slug is already taken';
+  const handleInputChange = (field: keyof FormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
-    
-    setErrors(validationErrors);
-    return Object.keys(validationErrors).length === 0;
   };
 
   const handleImageUpload = async (file: File): Promise<string> => {
     try {
-      if (typeof blogApi.uploadImage === 'function') {
-        const result = await blogApi.uploadImage(file);
-        return result.url;
-      } else {
-        return URL.createObjectURL(file);
-      }
+      const result = await blogApi.uploadImage(file);
+      return result.url;
     } catch (error) {
-      console.error('Error uploading image:', error);
-      throw new Error('Failed to upload image');
-    }
-  };
-
-  const handleCreateCategory = async (name: string, color?: string): Promise<void> => {
-    try {
-      const newCategory = await blogApi.createCategory({
-        name,
-        color,
-        slug: generateSlug(name)
-      });
-      setCategories(prev => [...prev, newCategory]);
-      addToast({
-        type: 'success',
-        title: 'Success',
-        message: 'Category created successfully'
-      });
-    } catch (error) {
-      console.error('Error creating category:', error);
-      addToast({
-        type: 'error',
-        title: 'Error',
-        message: 'Failed to create category'
-      });
+      console.error('Image upload failed:', error);
       throw error;
     }
   };
 
-  const handleCreateTag = async (name: string, color?: string): Promise<void> => {
-    try {
-      const newTag = await blogApi.createTag({
-        name,
-        color,
-        slug: generateSlug(name)
-      });
-      setTags(prev => [...prev, newTag]);
-      addToast({
-        type: 'success',
-        title: 'Success',
-        message: 'Tag created successfully'
-      });
-    } catch (error) {
-      console.error('Error creating tag:', error);
-      addToast({
-        type: 'error',
-        title: 'Error',
-        message: 'Failed to create tag'
-      });
-      throw error;
-    }
-  };
-
-  const handleSubmit = async (status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'): Promise<void> => {
-    if (!formData || !validateForm()) {
+  const validateForm = (): boolean => {
+    const validationErrors = validateFormData(formData, blogFormValidationSchema);
+    
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       addToast({
         type: 'error',
         title: 'Validation Error',
-        message: 'Please fix the errors in the form'
+        message: 'Please fix the errors before submitting'
       });
-      return;
+      return false;
     }
 
-    if (!session?.user?.id) {
+    if (slugAvailable === false && formData.slug !== blog?.slug) {
+      setErrors({ slug: 'This slug is already taken' });
       addToast({
         type: 'error',
-        title: 'Authentication Error',
-        message: 'You must be logged in to update a blog'
+        title: 'Validation Error',
+        message: 'The slug is already taken'
       });
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  const handleSubmit = async (status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED') => {
+    if (!validateForm()) return;
 
     setSaving(true);
     try {
-      const readTime = calculateReadTime(formData.content);
+      const featuredImage = formData.images.find(img => img.isMain)?.url || formData.images[0]?.url || '';
       
-      // Prepare blog data using your API types
       const updateData: UpdateBlogData = {
         title: formData.title,
         slug: formData.slug,
         excerpt: formData.excerpt,
         content: formData.content,
+        featuredImage,
         status: status || formData.status,
         featured: formData.featured,
-        seoTitle: formData.seoTitle || undefined,
-        seoDescription: formData.seoDescription || undefined,
-        readTime,
+        seoTitle: formData.seoTitle || formData.title,
+        seoDescription: formData.seoDescription || formData.excerpt,
+        readTime: calculateReadTime(formData.content),
         tagIds: formData.tagIds,
         categoryIds: formData.categoryIds,
-        featuredImage: formData.featuredImage || undefined
+        images: formData.images
       };
 
-      console.log('Updating blog with data:', updateData);
-
-      const result = await blogApi.updateBlog(blogId, updateData, []);
+      await blogApi.updateBlog(blogId, updateData);
+      
+      setLastSaved(new Date());
+      setHasChanges(false);
       
       addToast({
         type: 'success',
         title: 'Success',
-        message: `Blog ${status ? `${status.toLowerCase()}` : 'updated'} successfully`
+        message: `Blog ${status === 'PUBLISHED' ? 'published' : status === 'ARCHIVED' ? 'archived' : 'updated'} successfully!`
       });
-      
-      // Reload the blog to get updated data
-      await loadBlog();
-      
-    } catch (err) {
-      console.error('Error updating blog:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update blog';
-      
+
+      if (status) {
+        router.push('/admin/blog');
+      } else {
+        loadBlogData(); // Reload to get updated data
+      }
+    } catch (error: any) {
+      console.error('Error updating blog:', error);
       addToast({
         type: 'error',
         title: 'Error',
-        message: errorMessage
+        message: error.message || 'Failed to update blog'
       });
-
-      // Provide guidance for common errors
-      if (errorMessage.includes('401') || errorMessage.includes('unauthorized')) {
-        addToast({
-          type: 'info',
-          title: 'Authentication',
-          message: 'Please check your login status and try again'
-        });
-      } else if (errorMessage.includes('404')) {
-        addToast({
-          type: 'info',
-          title: 'API Endpoint',
-          message: 'Blog not found or API endpoint unavailable.'
-        });
-      }
     } finally {
       setSaving(false);
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await blogApi.deleteBlog(blogId);
+      addToast({
+        type: 'success',
+        title: 'Success',
+        message: 'Blog deleted successfully'
+      });
+      router.push('/admin/blog');
+    } catch (error: any) {
+      console.error('Error deleting blog:', error);
+      addToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to delete blog'
+      });
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" text="Loading blog..." />
       </div>
     );
   }
 
-  if (error) {
+  if (!blog) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Alert type="error" title="Error" message={error} />
-          <div className="mt-4">
-            <ActionButton onClick={() => router.push('/admin/blog')}>
-              Back to Blog Dashboard
-            </ActionButton>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Alert
+          type="error"
+          title="Blog Not Found"
+          message="The requested blog post could not be found."
+        />
       </div>
     );
   }
 
-  if (!blog || !formData) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Alert type="error" title="Not Found" message="Blog not found" />
-          <div className="mt-4">
-            <ActionButton onClick={() => router.push('/admin/blog')}>
-              Back to Blog Dashboard
-            </ActionButton>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const wordCount = formData.content.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(w => w).length;
+  const wordCount = formData.content.replace(/<[^>]*>/g, '').trim().split(/\s+/).length;
   const readTime = calculateReadTime(formData.content);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-xl border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
               <ActionButton
                 variant="secondary"
+                size="sm"
                 onClick={() => router.push('/admin/blog')}
-                disabled={saving}
+                icon={<ArrowLeft className="h-4 w-4" />}
               >
-                <ArrowLeft className="h-4 w-4" />
                 Back
               </ActionButton>
-              
               <div>
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-blue-600" />
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                   Edit Blog Post
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {blog.title} • {wordCount} words • {readTime} min read
                 </p>
               </div>
+              <StatusBadge status={formData.status} />
+              <AutoSaveIndicator lastSaved={lastSaved} saving={autoSaving} />
             </div>
-            
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-2">
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowPreview(!showPreview)}
+                icon={<Eye className="h-4 w-4" />}
+              >
+                {showPreview ? 'Edit' : 'Preview'}
+              </ActionButton>
+              <ActionButton
+                variant="danger"
+                size="sm"
+                onClick={() => setShowDeleteModal(true)}
+                icon={<Trash2 className="h-4 w-4" />}
+              >
+                Delete
+              </ActionButton>
               <ActionButton
                 variant="secondary"
                 onClick={() => handleSubmit('DRAFT')}
                 loading={saving}
+                icon={<Save className="h-4 w-4" />}
               >
-                <Save className="h-4 w-4" />
                 Save Draft
               </ActionButton>
-              
+              {formData.status === 'PUBLISHED' && (
+                <ActionButton
+                  variant="warning"
+                  onClick={() => handleSubmit('ARCHIVED')}
+                  loading={saving}
+                  icon={<Archive className="h-4 w-4" />}
+                >
+                  Archive
+                </ActionButton>
+              )}
               <ActionButton
-                variant="secondary"
-                onClick={() => handleSubmit('ARCHIVED')}
-                loading={saving}
-              >
-                <X className="h-4 w-4" />
-                Archive
-              </ActionButton>
-              
-              <ActionButton
+                variant="success"
                 onClick={() => handleSubmit('PUBLISHED')}
                 loading={saving}
-                disabled={slugAvailable === false}
+                disabled={slugAvailable === false && formData.slug !== blog.slug}
+                icon={<Globe className="h-4 w-4" />}
               >
-                <Globe className="h-4 w-4" />
-                {blog.status === 'PUBLISHED' ? 'Update' : 'Publish'}
+                {formData.status === 'PUBLISHED' ? 'Update' : 'Publish'}
               </ActionButton>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Basic Information */}
-            <Card title="Basic Information" className="shadow-lg">
-              <div className="space-y-6">
-                <Input
-                  label="Title"
-                  value={formData.title}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('title', e.target.value)}
-                  placeholder="Enter your blog title"
-                  error={errors.title}
-                  required
-                  className="text-lg font-medium"
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {hasChanges && (
+          <Alert
+            type="warning"
+            message="You have unsaved changes"
+            className="mb-6"
+          />
+        )}
+
+        {showPreview ? (
+          /* Preview Mode */
+          <Card className="shadow-lg">
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <h1>{formData.title}</h1>
+              {formData.images.find(img => img.isMain) && (
+                <img 
+                  src={formData.images.find(img => img.isMain)?.url} 
+                  alt="Featured" 
+                  className="w-full h-96 object-cover rounded-lg mb-6" 
                 />
-                
-                <div>
-                  <Input
-                    label="URL Slug"
-                    value={formData.slug}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('slug', e.target.value)}
-                    placeholder="url-friendly-slug"
-                    error={errors.slug}
-                    required
-                  />
-                  
-                  {/* Enhanced URL Preview */}
-                  <UrlPreview 
-                    slug={formData.slug}
-                    available={slugAvailable}
-                    checking={slugChecking}
-                  />
-                </div>
-                
-                <TextArea
-                  label="Excerpt"
-                  value={formData.excerpt}
-                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleInputChange('excerpt', e.target.value)}
-                  placeholder="Brief description for previews and SEO"
-                  rows={3}
-                  error={errors.excerpt}
-                  required
-                  maxLength={300}
-                />
-                <div className="text-right text-sm text-gray-500 dark:text-gray-400">
-                  {formData.excerpt.length}/300 characters
-                </div>
+              )}
+              <p className="text-lg text-gray-600 dark:text-gray-400">{formData.excerpt}</p>
+              <div dangerouslySetInnerHTML={{ __html: formData.content }} />
+              
+              <div className="mt-8 flex flex-wrap gap-3">
+                {formData.categoryIds.map(id => {
+                  const cat = categories.find(c => c.id === id);
+                  return cat ? (
+                    <span key={id} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-sm">
+                      {cat.name}
+                    </span>
+                  ) : null;
+                })}
               </div>
-            </Card>
+              
+              <div className="mt-4 flex flex-wrap gap-2">
+                {formData.tagIds.map(id => {
+                  const tag = tags.find(t => t.id === id);
+                  return tag ? (
+                    <span key={id} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                      #{tag.name}
+                    </span>
+                  ) : null;
+                })}
+              </div>
+            </div>
+          </Card>
+        ) : (
+          /* Edit Mode */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Editor Column */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Basic Information Card */}
+              <Card title="Basic Information" className="shadow-sm">
+                <div className="space-y-4">
+                  <Input
+                    label="Blog Title"
+                    value={formData.title}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => 
+                      handleInputChange('title', e.target.value)
+                    }
+                    placeholder="Enter an engaging blog title..."
+                    error={errors.title}
+                    required
+                    className="text-lg font-medium"
+                  />
 
-            {/* Rich Text Content Editor */}
-            <Card title="Content" className="shadow-lg">
-              <div className="space-y-4">
-                <RichTextEditor
+                  <div>
+                    <Input
+                      label="URL Slug"
+                      value={formData.slug}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => 
+                        handleInputChange('slug', e.target.value)
+                      }
+                      placeholder="url-friendly-slug"
+                      error={errors.slug}
+                      required
+                    />
+                    <UrlPreview
+                      slug={formData.slug}
+                      available={slugAvailable}
+                      checking={slugChecking}
+                    />
+                  </div>
+
+                  <TextArea
+                    label="Excerpt"
+                    value={formData.excerpt}
+                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => 
+                      handleInputChange('excerpt', e.target.value)
+                    }
+                    placeholder="Write a compelling excerpt (10-300 characters)..."
+                    rows={3}
+                    error={errors.excerpt}
+                    required
+                    hint={`${formData.excerpt.length}/300 characters`}
+                  />
+                </div>
+              </Card>
+
+              {/* Content Editor Card */}
+              <Card title="Blog Content" className="shadow-sm">
+                <EnhancedRichTextEditor
                   content={formData.content}
                   onChange={(content) => handleInputChange('content', content)}
                   onImageUpload={handleImageUpload}
-                  placeholder="Write your blog content here..."
-                  height="500px"
+                  placeholder="Continue writing your amazing blog post..."
                 />
-                
-                <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded">
-                  <span>Rich text editor with image support</span>
-                  <span className="font-medium">{wordCount} words • {readTime} min read</span>
-                </div>
-              </div>
-              {errors.content && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.content}</p>
-              )}
-            </Card>
-
-            {/* SEO Settings */}
-            <Card title="SEO Settings" className="shadow-lg">
-              <div className="space-y-4">
-                <Input
-                  label="SEO Title"
-                  value={formData.seoTitle}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('seoTitle', e.target.value)}
-                  placeholder="Title for search engines (leave empty to use main title)"
-                  maxLength={60}
-                />
-                <div className="text-right text-sm text-gray-500 dark:text-gray-400">
-                  {formData.seoTitle.length}/60 characters
-                </div>
-                
-                <TextArea
-                  label="SEO Description"
-                  value={formData.seoDescription}
-                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleInputChange('seoDescription', e.target.value)}
-                  placeholder="Description for search engines (leave empty to use excerpt)"
-                  rows={3}
-                  maxLength={160}
-                />
-                <div className="text-right text-sm text-gray-500 dark:text-gray-400">
-                  {formData.seoDescription.length}/160 characters
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Blog Info */}
-            <Card title="Blog Info" className="shadow-lg">
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Current Status:</span>
-                  <span className={`font-medium px-2 py-1 rounded text-xs ${
-                    blog.status === 'PUBLISHED' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                    blog.status === 'DRAFT' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                    'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
-                  }`}>{blog.status}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Author:</span>
-                  <span className="font-medium">{blog.author.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Created:</span>
-                  <span className="font-medium">{new Date(blog.createdAt).toLocaleDateString()}</span>
-                </div>
-                {blog.publishedAt && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Published:</span>
-                    <span className="font-medium">{new Date(blog.publishedAt).toLocaleDateString()}</span>
-                  </div>
+                {errors.content && (
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    {errors.content}
+                  </p>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Views:</span>
-                  <span className="font-medium">{blog.viewCount || 0}</span>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            </div>
 
-            {/* Publish Settings */}
-            <Card title="Publish Settings" className="shadow-lg">
-              <div className="space-y-4">
-                <Select
-                  label="Status"
-                  value={formData.status}
-                  onChange={(e: ChangeEvent<HTMLSelectElement>) => 
-                    handleInputChange('status', e.target.value as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED')
-                  }
-                >
-                  <option value="DRAFT">Draft</option>
-                  <option value="PUBLISHED">Published</option>
-                  <option value="ARCHIVED">Archived</option>
-                </Select>
-                
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    id="featured"
-                    checked={formData.featured}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('featured', e.target.checked)}
-                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                  />
-                  <label htmlFor="featured" className="text-sm text-gray-700 dark:text-gray-300 flex items-center">
-                    <Star className="h-4 w-4 mr-1 text-yellow-500" />
-                    Featured post
-                  </label>
-                </div>
-              </div>
-            </Card>
+            {/* Sidebar Column */}
+            <div className="space-y-6">
+              {/* Publishing Options */}
+              <Card title="Publishing Options" className="shadow-sm">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <Star className="h-4 w-4" />
+                      Featured Post
+                    </label>
+                    <input
+                      type="checkbox"
+                      checked={formData.featured}
+                      onChange={(e) => handleInputChange('featured', e.target.checked)}
+                      className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200 mb-2">
+                      <Clock className="h-4 w-4" />
+                      <span className="font-medium">Reading Time</span>
+                    </div>
+                    <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                      {readTime} min read
+                    </p>
+                  </div>
 
-            {/* Categories */}
-            <CategoryTagManager
-              type="category"
-              items={categories}
-              selectedIds={formData.categoryIds}
-              onSelectionChange={(ids) => handleInputChange('categoryIds', ids)}
-              onItemCreate={handleCreateCategory}
-              loading={false}
-            />
+                  <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                      <div className="flex justify-between">
+                        <span>Created:</span>
+                        <span className="font-medium">{new Date(blog.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Updated:</span>
+                        <span className="font-medium">{new Date(blog.updatedAt).toLocaleDateString()}</span>
+                      </div>
+                      {blog.author && (
+                        <div className="flex justify-between">
+                          <span>Author:</span>
+                          <span className="font-medium">{blog.author.name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
 
-            {/* Tags */}
-            <CategoryTagManager
-              type="tag"
-              items={tags}
-              selectedIds={formData.tagIds}
-              onSelectionChange={(ids) => handleInputChange('tagIds', ids)}
-              onItemCreate={handleCreateTag}
-              loading={false}
-            />
+              {/* Image Gallery */}
+              <Card title="Blog Images" className="shadow-sm">
+                <EnhancedImageUploader
+                  images={formData.images}
+                  onChange={(images) => handleInputChange('images', images)}
+                  onUpload={handleImageUpload}
+                  maxImages={5}
+                />
+              </Card>
 
-            {/* Quick Stats */}
-            <Card title="Quick Stats" className="shadow-lg">
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Word Count:</span>
-                  <span className="font-medium">{wordCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Read Time:</span>
-                  <span className="font-medium">{readTime} min</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Categories:</span>
-                  <span className="font-medium">{formData.categoryIds.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Tags:</span>
-                  <span className="font-medium">{formData.tagIds.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">New Status:</span>
-                  <span className={`font-medium ${
-                    formData.status === 'PUBLISHED' ? 'text-green-600' :
-                    formData.status === 'DRAFT' ? 'text-yellow-600' :
-                    'text-gray-600'
-                  }`}>{formData.status}</span>
-                </div>
-              </div>
-            </Card>
+              {/* Categories & Tags */}
+              <Card title="Categories & Tags" className="shadow-sm">
+                <EnhancedCategoryTagManager
+                  selectedCategories={formData.categoryIds}
+                  selectedTags={formData.tagIds}
+                  availableCategories={categories}
+                  availableTags={tags}
+                  onCategoriesChange={(ids) => handleInputChange('categoryIds', ids)}
+                  onTagsChange={(ids) => handleInputChange('tagIds', ids)}
+                />
+              </Card>
 
-            {/* System Status */}
-            <Card title="System Status" className="shadow-lg">
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 dark:text-gray-400">Slug Check:</span>
-                  <span className={`font-medium ${
-                    slugChecking ? 'text-yellow-600' : 
-                    slugAvailable === true ? 'text-green-600' : 
-                    slugAvailable === false ? 'text-red-600' : 'text-gray-600'
-                  }`}>
-                    {slugChecking ? 'Checking...' : 
-                     slugAvailable === true ? 'Available' : 
-                     slugAvailable === false ? 'Taken' : 'Ready'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 dark:text-gray-400">Tags API:</span>
-                  <span className="font-medium text-green-600">Connected</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 dark:text-gray-400">Categories API:</span>
-                  <span className="font-medium text-green-600">Connected</span>
-                </div>
-              </div>
-            </Card>
+              {/* SEO Optimization */}
+              <SEOOptimizer
+                seoTitle={formData.seoTitle}
+                seoDescription={formData.seoDescription}
+                onSeoTitleChange={(value) => handleInputChange('seoTitle', value)}
+                onSeoDescriptionChange={(value) => handleInputChange('seoDescription', value)}
+              />
+            </div>
           </div>
-        </div>
-      </div>
+        )}
+      </main>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <Modal
+          isOpen={showDeleteModal}
+          title="Delete Blog Post"
+          onClose={() => setShowDeleteModal(false)}
+        >
+          <div className="space-y-4">
+            <Alert
+              type="warning"
+              message="This action cannot be undone. Are you sure you want to delete this blog post?"
+            />
+            <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">{blog.title}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Created on {new Date(blog.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <ActionButton
+                variant="secondary"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </ActionButton>
+              <ActionButton
+                variant="danger"
+                onClick={handleDelete}
+                icon={<Trash2 className="h-4 w-4" />}
+              >
+                Delete Permanently
+              </ActionButton>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
