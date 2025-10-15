@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { LoadingSpinner } from '@/components/admin/AdminComponents';
-import BlogForm from '@/components/admin/blog/BlogCreateForm';
+import UnifiedBlogForm from '@/components/admin/blog/UnifiedBlogForm';
 
 export default function CreateBlogPage() {
   return (
@@ -11,7 +11,7 @@ export default function CreateBlogPage() {
         <LoadingSpinner size="lg" text="Loading blog form..." />
       </div>
     }>
-      <BlogForm />
+      <UnifiedBlogForm />
     </Suspense>
   );
 }

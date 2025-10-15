@@ -3,7 +3,7 @@
 import { Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import { LoadingSpinner } from '@/components/admin/AdminComponents';
-import BlogEditForm from '@/components/admin/blog/BlogEditForm';
+import UnifiedBlogForm from '@/components/admin/blog/UnifiedBlogForm';
 
 export default function EditBlogPage() {
   const params = useParams();
@@ -26,7 +26,7 @@ export default function EditBlogPage() {
         <LoadingSpinner size="lg" text="Loading blog editor..." />
       </div>
     }>
-      <BlogEditForm blogId={blogId} />
+      <UnifiedBlogForm blogId={blogId} />
     </Suspense>
   );
 }

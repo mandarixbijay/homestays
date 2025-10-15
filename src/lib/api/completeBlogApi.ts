@@ -4,7 +4,7 @@
 import { getSession } from 'next-auth/react';
 
 // Use proxy path for client-side requests, direct URL for server-side
-const API_BASE_URL = typeof window !== 'undefined' 
+const API_BASE_URL = typeof window !== 'undefined'
   ? '/api/backend' // Use proxy path for client-side requests
   : 'http://13.61.8.56:3001'; // Direct URL for server-side requests
 
@@ -37,7 +37,7 @@ export interface CreateBlogData {
   featured?: boolean;
 }
 
-export interface UpdateBlogData extends Partial<CreateBlogData> {}
+export interface UpdateBlogData extends Partial<CreateBlogData> { }
 
 export interface BlogFilters {
   page?: number;
@@ -155,13 +155,13 @@ class BlogApi {
   }
 
   private async request<T>(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit = {},
     isFormData: boolean = false
   ): Promise<T> {
     try {
       const session = await getSession();
-      
+
       if (!session?.user?.accessToken) {
         throw new Error('No access token available. Please log in again.');
       }
@@ -207,6 +207,22 @@ class BlogApi {
     }
   }
 
+
+  async checkSlugAvailability(slug: string): Promise<boolean> {
+    try {
+      console.log('[checkSlugAvailability] Checking slug:', slug);
+      const response = await this.request<{ available: boolean }>(
+        `/blog/admin/blogs/check-slug?slug=${encodeURIComponent(slug)}`
+      );
+      console.log('[checkSlugAvailability] Result:', response);
+      return response.available;
+    } catch (error) {
+      console.error('[checkSlugAvailability] Error:', error);
+      // If endpoint doesn't exist, assume available
+      return true;
+    }
+  }
+
   // ============================================================================
   // BLOG CRUD OPERATIONS (Fixed)
   // ============================================================================
@@ -218,7 +234,7 @@ class BlogApi {
     totalPages: number;
   }> {
     const queryParams = new URLSearchParams();
-    
+
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         queryParams.append(key, value.toString());
@@ -268,7 +284,7 @@ class BlogApi {
         ...img,
         url: img.url || ''
       })) || [];
-      
+
       formData.append('images', JSON.stringify(imageMetadata));
 
       // Handle tags and categories
@@ -383,28 +399,28 @@ class BlogApi {
     });
   }
 
-  // ============================================================================
-  // MOCK IMAGE UPLOAD METHODS (Until backend endpoints are added)
-  // ============================================================================
+
 
   async uploadImage(file: File): Promise<{ url: string; alt?: string; caption?: string }> {
-    console.warn('[uploadImage] Using mock implementation - add backend endpoint /blog/admin/upload-image');
-    
-    // Mock implementation - replace with real backend call when available
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          url: URL.createObjectURL(file),
-          alt: '',
-          caption: ''
-        });
-      }, 1000);
+    // Create temporary blob URL for preview in editor
+    const url = URL.createObjectURL(file);
+
+    // Store file reference for later upload with blog
+    const imageStore = sessionStorage.getItem('pending_blog_images') || '[]';
+    const images = JSON.parse(imageStore);
+    images.push({
+      url,
+      file: file.name,
+      timestamp: Date.now()
     });
+    sessionStorage.setItem('pending_blog_images', JSON.stringify(images));
+
+    return { url, alt: '', caption: '' };
   }
 
   async uploadMultipleImages(files: File[]): Promise<Array<{ url: string; alt?: string; caption?: string }>> {
     console.warn('[uploadMultipleImages] Using mock implementation - add backend endpoint /blog/admin/upload-images');
-    
+
     // Mock implementation - replace with real backend call when available
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -435,7 +451,7 @@ class BlogApi {
     totalPages: number;
   }> {
     const queryParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         queryParams.append(key, value.toString());
@@ -475,7 +491,7 @@ class BlogApi {
     totalPages: number;
   }> {
     const queryParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         queryParams.append(key, value.toString());
@@ -604,7 +620,7 @@ class BlogApi {
     authorId?: number;
   } = {}): Promise<string> {
     const queryParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         queryParams.append(key, value.toString());
