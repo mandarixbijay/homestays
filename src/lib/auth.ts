@@ -1,25 +1,20 @@
+// lib/auth.ts
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-const API_BASE_URL = process.env.API_BASE_URL || "http://13.61.8.56";
+const API_BASE_URL = process.env.NEXTAUTH_URL || "http://13.61.8.56";
 
 // Helper function to refresh token
 async function refreshAccessToken(token: any) {
   try {
     console.log("[NextAuth] Attempting to refresh token");
     
-    if (!token.refreshToken) {
-      throw new Error("No refresh token available");
-    }
-    
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        refreshToken: token.refreshToken,
-      }),
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -40,7 +35,7 @@ async function refreshAccessToken(token: any) {
       ...token,
       accessToken: refreshedTokens.data.accessToken,
       refreshToken: refreshedTokens.data.refreshToken ?? token.refreshToken,
-      tokenExpiry: Date.now() + (24 * 60 * 60 * 1000), // 24 hours from now
+      tokenExpiry: Date.now() + (55 * 60 * 1000),
       error: null,
     };
   } catch (error) {
@@ -85,6 +80,7 @@ export const authOptions: NextAuthOptions = {
                 Accept: "application/json",
                 "Content-Type": "application/json",
               },
+              credentials: "include",
               body: JSON.stringify({ name, email, mobileNumber, password }),
             });
 
@@ -118,23 +114,31 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Password is required");
           }
 
+          console.log("[NextAuth] Calling login API:", `${API_BASE_URL}/auth/login`);
+          
           const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: "POST",
             headers: {
               Accept: "application/json",
               "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify({ email, mobileNumber, password }),
           });
 
           const result = await response.json();
+          
+          console.log("[NextAuth] Login response:", { 
+            ok: response.ok, 
+            status: response.status,
+            hasData: !!result.data 
+          });
 
           if (!response.ok) {
             throw new Error(result.message || "Invalid credentials");
           }
 
-          // Calculate token expiry (24 hours from now for access token)
-          const tokenExpiry = Date.now() + (24 * 60 * 60 * 1000);
+          const tokenExpiry = Date.now() + (55 * 60 * 1000);
 
           return {
             id: result.data.user.id.toString(),
@@ -161,16 +165,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger, session }) {
       console.log("[NextAuth] JWT callback:", { trigger, hasUser: !!user });
       
-      // Handle manual token updates
       if (trigger === "update" && session?.accessToken) {
         token.accessToken = session.accessToken;
         token.refreshToken = session.refreshToken || token.refreshToken;
-        token.tokenExpiry = Date.now() + (24 * 60 * 60 * 1000);
+        token.tokenExpiry = Date.now() + (55 * 60 * 1000);
         token.error = null;
         return token;
       }
       
-      // Initial sign in
       if (
         user &&
         typeof user === "object" &&
@@ -200,15 +202,13 @@ export const authOptions: NextAuthOptions = {
         };
       }
 
-      // Return previous token if the access token has not expired yet
       if (
         token.tokenExpiry &&
         Date.now() < Number(token.tokenExpiry) - (5 * 60 * 1000)
-      ) { // Refresh 5 mins before expiry
+      ) {
         return token;
       }
 
-      // Access token has expired, try to update it
       if (token.refreshToken) {
         console.log("[NextAuth] Token near expiry, attempting refresh");
         return refreshAccessToken(token);
@@ -217,10 +217,8 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      // If there was an error refreshing the token, end the session
       if (token.error === "RefreshAccessTokenError") {
         console.log("[NextAuth] Token refresh failed, ending session");
-        // You could also redirect to sign in here
         return {
           ...session,
           error: "RefreshAccessTokenError"
@@ -248,11 +246,11 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
-    updateAge: 24 * 60 * 60, // Update session every 24 hours
+    maxAge: 7 * 24 * 60 * 60,
+    updateAge: 24 * 60 * 60,
   },
   jwt: {
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60,
   },
   pages: {
     signIn: "/signin",
@@ -261,6 +259,15 @@ export const authOptions: NextAuthOptions = {
   events: {
     async signOut(message) {
       console.log("[NextAuth] User signed out:", message);
+      
+      try {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: "POST",
+          credentials: "include",
+        });
+      } catch (error) {
+        console.error("[NextAuth] Logout API call failed:", error);
+      }
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

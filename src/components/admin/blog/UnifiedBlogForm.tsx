@@ -1154,19 +1154,23 @@ export default function UnifiedBlogForm({ blogId, initialData }: UnifiedBlogForm
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSave = async (publishNow: boolean = false) => {
+ const handleSave = async (publishNow: boolean = false) => {
         if (!validateForm()) return;
 
         setSaving(true);
         try {
             const authorId = session?.user?.id ? Number(session.user.id) : 0;
+            
+            // Properly set status for publishing
+            const newStatus = publishNow ? 'PUBLISHED' as const : formData.status;
+            
             const dataToSave = {
                 title: formData.title,
                 slug: formData.slug || generateSlug(formData.title),
                 excerpt: formData.excerpt,
                 content: formData.content,
                 authorId,
-                status: publishNow ? 'PUBLISHED' as const : formData.status,
+                status: newStatus,
                 categoryIds: formData.categoryIds,
                 tagIds: formData.tagIds,
                 seoTitle: formData.seoTitle || formData.title,
@@ -1175,6 +1179,13 @@ export default function UnifiedBlogForm({ blogId, initialData }: UnifiedBlogForm
                 readTime: calculateReadTime(formData.content),
                 images: formData.images,
             };
+
+            console.log('[handleSave] Saving blog with data:', {
+                ...dataToSave,
+                imageFilesCount: imageFilesRef.current.length,
+                publishNow,
+                isEditMode
+            });
 
             let result;
             if (isEditMode) {
@@ -1185,8 +1196,21 @@ export default function UnifiedBlogForm({ blogId, initialData }: UnifiedBlogForm
                 addToast({ type: 'success', title: 'Success', message: '🎉 Blog created successfully!' });
             }
 
-            setTimeout(() => router.push(`/admin/blog/${result.id}/edit`), 1500);
+            // Clear image files after successful save
+            imageFilesRef.current = [];
+            
+            // Navigate after a short delay
+            setTimeout(() => {
+                if (isEditMode) {
+                    // Reload the current edit page with fresh data
+                    window.location.reload();
+                } else {
+                    // Navigate to the edit page for the new blog
+                    router.push(`/admin/blog/${result.id}/edit`);
+                }
+            }, 1500);
         } catch (error: any) {
+            console.error('[handleSave] Error:', error);
             addToast({ type: 'error', title: 'Error', message: error.message || 'Failed to save blog' });
         } finally {
             setSaving(false);

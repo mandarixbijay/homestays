@@ -146,6 +146,9 @@ export interface Blog {
 // ============================================================================
 
 class BlogApi {
+  // Map to store file URLs and their corresponding File objects
+  private fileMap = new Map<string, File>();
+
   private async getAuthHeaders() {
     const session = await getSession();
     return {
@@ -207,6 +210,28 @@ class BlogApi {
     }
   }
 
+  // Upload image to S3
+  private async uploadImageToS3(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const session = await getSession();
+    const response = await fetch(`${API_BASE_URL}/s3/upload/blog-images`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session?.user?.accessToken}`,
+      },
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload image');
+    }
+
+    const result = await response.json();
+    return result.url;
+  }
 
   async checkSlugAvailability(slug: string): Promise<boolean> {
     try {
@@ -279,20 +304,30 @@ class BlogApi {
       if (blogData.seoDescription) formData.append('seoDescription', blogData.seoDescription);
       if (blogData.readTime) formData.append('readTime', blogData.readTime.toString());
 
-      // Handle images - convert File objects to URLs (placeholder)
-      const imageMetadata = blogData.images?.map(img => ({
-        ...img,
-        url: img.url || ''
-      })) || [];
+      // Process images - match blob URLs with actual files
+      const processedImages = blogData.images?.map(img => {
+        // Check if this is a blob URL and we have the corresponding file
+        const file = this.fileMap.get(img.url || '');
+        if (file) {
+          // This is a new file to upload
+          imageFiles.push(file);
+          return {
+            ...img,
+            url: '' // Clear URL since we'll upload the file
+          };
+        }
+        return img;
+      }) || [];
 
-      formData.append('images', JSON.stringify(imageMetadata));
+      formData.append('images', JSON.stringify(processedImages));
 
       // Handle tags and categories
       formData.append('tagIds', JSON.stringify(blogData.tagIds || []));
       formData.append('categoryIds', JSON.stringify(blogData.categoryIds || []));
 
-      // Add image files
-      imageFiles.forEach((file, index) => {
+      // Add ALL image files (from gallery and content)
+      const allImageFiles = [...imageFiles, ...Array.from(this.fileMap.values())];
+      allImageFiles.forEach((file, index) => {
         formData.append('files', file);
         console.log(`[createBlog] Added image file ${index}:`, file.name);
       });
@@ -319,6 +354,10 @@ class BlogApi {
 
       const result = await response.json();
       console.log('[createBlog] Success:', result);
+      
+      // Clear the file map after successful upload
+      this.fileMap.clear();
+      
       return result;
     } catch (error) {
       console.error('[createBlog] Error:', error);
@@ -339,18 +378,32 @@ class BlogApi {
       Object.entries(blogData).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (key === 'images') {
-            formData.append(key, JSON.stringify(value));
+            // Process images - match blob URLs with actual files
+            const processedImages = (value as BlogImage[]).map(img => {
+              const file = this.fileMap.get(img.url || '');
+              if (file) {
+                imageFiles.push(file);
+                return { ...img, url: '' };
+              }
+              return img;
+            });
+            formData.append(key, JSON.stringify(processedImages));
           } else if (key === 'tagIds' || key === 'categoryIds') {
             formData.append(key, JSON.stringify(value));
+          } else if (key === 'status') {
+            // Ensure status is properly set
+            formData.append(key, value.toString());
           } else {
             formData.append(key, value.toString());
           }
         }
       });
 
-      // Add image files
-      imageFiles.forEach((file) => {
+      // Add ALL image files (from gallery and content)
+      const allImageFiles = [...imageFiles, ...Array.from(this.fileMap.values())];
+      allImageFiles.forEach((file) => {
         formData.append('files', file);
+        console.log('[updateBlog] Added image file:', file.name);
       });
 
       const session = await getSession();
@@ -368,7 +421,12 @@ class BlogApi {
         throw new Error(`Failed to update blog: ${response.status} - ${errorText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      
+      // Clear the file map after successful update
+      this.fileMap.clear();
+      
+      return result;
     } catch (error) {
       console.error('Error updating blog:', error);
       throw error;
@@ -399,38 +457,18 @@ class BlogApi {
     });
   }
 
-
-
   async uploadImage(file: File): Promise<{ url: string; alt?: string; caption?: string }> {
-    // Create temporary blob URL for preview in editor
-    const url = URL.createObjectURL(file);
-
-    // Store file reference for later upload with blog
-    const imageStore = sessionStorage.getItem('pending_blog_images') || '[]';
-    const images = JSON.parse(imageStore);
-    images.push({
-      url,
-      file: file.name,
-      timestamp: Date.now()
-    });
-    sessionStorage.setItem('pending_blog_images', JSON.stringify(images));
-
-    return { url, alt: '', caption: '' };
+    // Create temporary blob URL for preview
+    const blobUrl = URL.createObjectURL(file);
+    
+    // Store the file with its blob URL for later upload
+    this.fileMap.set(blobUrl, file);
+    
+    return { url: blobUrl, alt: '', caption: '' };
   }
 
   async uploadMultipleImages(files: File[]): Promise<Array<{ url: string; alt?: string; caption?: string }>> {
-    console.warn('[uploadMultipleImages] Using mock implementation - add backend endpoint /blog/admin/upload-images');
-
-    // Mock implementation - replace with real backend call when available
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(files.map(file => ({
-          url: URL.createObjectURL(file),
-          alt: '',
-          caption: ''
-        })));
-      }, 1000);
-    });
+    return Promise.all(files.map(file => this.uploadImage(file)));
   }
 
   // ============================================================================

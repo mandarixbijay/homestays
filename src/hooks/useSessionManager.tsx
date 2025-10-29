@@ -1,9 +1,9 @@
+// hooks/useSessionManager.ts
 import { useSession, signOut } from 'next-auth/react';
 import { useEffect, useCallback, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
-// Type definitions for better TypeScript support
 interface ExtendedSession {
   user?: {
     id: string;
@@ -26,22 +26,20 @@ export function useSessionManager() {
   const { data: session, status, update } = useSession();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Type the session properly
   const typedSession = session as ExtendedSession | null;
-
-  // Check if session has refresh error
   const hasRefreshError = typedSession?.error === 'RefreshAccessTokenError';
 
-  // Auto-refresh session periodically
+  // ✅ Auto-refresh is now handled by NextAuth JWT callback
+  // This effect just monitors for near-expiry and triggers update()
   useEffect(() => {
     if (status === 'authenticated' && typedSession?.user?.tokenExpiry) {
       const timeUntilExpiry = typedSession.user.tokenExpiry - Date.now();
-      const refreshTime = Math.max(timeUntilExpiry - (5 * 60 * 1000), 60000); // Refresh 5 mins before expiry, minimum 1 minute
+      const refreshTime = Math.max(timeUntilExpiry - (5 * 60 * 1000), 60000);
 
-      if (refreshTime > 0) {
+      if (refreshTime > 0 && refreshTime < (50 * 60 * 1000)) {
         const refreshTimer = setTimeout(() => {
-          console.log('[SessionManager] Auto-refreshing session...');
-          update(); // This will trigger the JWT callback
+          console.log('[SessionManager] Triggering session refresh...');
+          update(); // This triggers JWT callback which will refresh if needed
         }, refreshTime);
 
         return () => clearTimeout(refreshTimer);
@@ -67,7 +65,7 @@ export function useSessionManager() {
     setIsRefreshing(true);
     try {
       console.log('[SessionManager] Manually refreshing session...');
-      await update();
+      await update(); // JWT callback will handle the actual refresh
     } catch (error) {
       console.error('[SessionManager] Manual refresh failed:', error);
       await signOut({ 
@@ -79,14 +77,12 @@ export function useSessionManager() {
     }
   }, [update, isRefreshing]);
 
-  // Check if token is about to expire
   const isTokenNearExpiry = useCallback(() => {
     if (!typedSession?.user?.tokenExpiry) return false;
     const timeUntilExpiry = typedSession.user.tokenExpiry - Date.now();
-    return timeUntilExpiry < (10 * 60 * 1000); // Less than 10 minutes
+    return timeUntilExpiry < (10 * 60 * 1000);
   }, [typedSession]);
 
-  // Force sign out (without router dependency)
   const forceSignOut = useCallback(async (reason?: string) => {
     console.log('[SessionManager] Force sign out:', reason);
     await signOut({ 
@@ -110,10 +106,8 @@ export function useSessionManager() {
 export function useAuthenticatedApi() {
   const { session, status, hasRefreshError, refreshSession, forceSignOut } = useSessionManager();
 
-  // Check if we have a valid session for API calls
   const isAuthenticated = status === 'authenticated' && !hasRefreshError && session?.user?.accessToken;
 
-  // Get authorization headers
   const getAuthHeaders = useCallback(() => {
     if (!isAuthenticated || !session?.user?.accessToken) {
       throw new Error('No valid access token available');
@@ -124,15 +118,13 @@ export function useAuthenticatedApi() {
     };
   }, [isAuthenticated, session]);
 
-  // Handle API errors (401, etc.)
   const handleApiError = useCallback(async (error: any, retry?: () => Promise<any>) => {
-    if (error.status === 401 || error.message?.includes('401')) {
+    if (error.response?.status === 401) {
       console.log('[AuthAPI] 401 error detected, attempting refresh...');
       
       try {
         await refreshSession();
         
-        // If retry function provided, try the API call again
         if (retry) {
           return await retry();
         }
@@ -156,7 +148,7 @@ export function useAuthenticatedApi() {
   };
 }
 
-// Router-aware session hook (use this in components where router is available)
+// Router-aware session hook
 export function useSessionManagerWithRouter() {
   const sessionManager = useSessionManager();
   const router = useRouter();
@@ -178,7 +170,7 @@ export function useSessionManagerWithRouter() {
   };
 }
 
-// HOC to protect pages that require authentication
+// HOC to protect pages
 export function withAuth<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   options?: {
@@ -191,13 +183,12 @@ export function withAuth<P extends object>(
     const router = useRouter();
     const [isMounted, setIsMounted] = useState(false);
 
-    // Handle client-side mounting
     useEffect(() => {
       setIsMounted(true);
     }, []);
 
     useEffect(() => {
-      if (!isMounted || status === 'loading') return; // Wait for mounting and session loading
+      if (!isMounted || status === 'loading') return;
 
       if (status === 'unauthenticated' || hasRefreshError) {
         const currentPath = window.location.pathname;
@@ -212,25 +203,23 @@ export function withAuth<P extends object>(
       }
     }, [session, status, hasRefreshError, router, isMounted]);
 
-    // Show loading until mounted and session is loaded
     if (!isMounted || status === 'loading') {
       return <div>Loading...</div>;
     }
 
     if (status === 'unauthenticated' || hasRefreshError) {
-      return null; // Will redirect
+      return null;
     }
 
     return <WrappedComponent {...props} />;
   };
 
-  // Set display name for debugging
   AuthenticatedComponent.displayName = `withAuth(${WrappedComponent.displayName || WrappedComponent.name})`;
 
   return AuthenticatedComponent;
 }
 
-// Component wrapper for protecting specific UI elements
+// Component wrapper
 interface AuthRequiredProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
@@ -259,7 +248,7 @@ export const AuthRequired: React.FC<AuthRequiredProps> = ({
   return <>{children}</>;
 };
 
-// Hook for checking authentication status without automatic redirects
+// Hook for checking auth status
 export function useAuthStatus() {
   const { data: session, status } = useSession();
   const typedSession = session as ExtendedSession | null;
@@ -274,7 +263,7 @@ export function useAuthStatus() {
   };
 }
 
-// Hook for admin-specific functionality
+// Hook for admin functionality
 export function useAdminAuth() {
   const authStatus = useAuthStatus();
   const { forceSignOut } = useSessionManager();
@@ -296,7 +285,7 @@ export function useAdminAuth() {
   };
 }
 
-// Hook for admin with router capabilities (use in components where router is available)
+// Hook for admin with router
 export function useAdminAuthWithRouter() {
   const adminAuth = useAdminAuth();
   const router = useRouter();

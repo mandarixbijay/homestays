@@ -70,7 +70,6 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@types/axios": "^0.9.36",
     "@types/lodash": "^4.17.17",
     "@types/node": "^20.19.7",
     "@types/react": "^19.1.8",
