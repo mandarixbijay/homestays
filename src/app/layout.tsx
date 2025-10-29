@@ -1,7 +1,6 @@
 // src/app/layout.tsx
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
-// @ts-ignore: allow side-effect CSS import without type declarations
 import "./globals.css";
 import { HomestayProvider } from "@/context/HomestayContext";
 import ClientWrapper from "@/components/ClientWrapper";
