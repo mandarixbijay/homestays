@@ -1,13 +1,11 @@
+// components/ClientWrapper.tsx
 "use client";
 
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/hooks/theme-provider/theme-provider";
 import { Toaster } from "sonner";
-import Navbar from "@/components/navbar/navbar";
-import Footer from "@/components/footer/footer";
 import { ReactNode } from "react";
 import { useSessionManager } from "@/hooks/useSessionManager";
-import { usePathname } from "next/navigation";
 
 // Session management component that runs inside SessionProvider
 function SessionManager({ children }: { children: ReactNode }) {
@@ -25,7 +23,7 @@ function SessionManager({ children }: { children: ReactNode }) {
     );
   }
 
-  // Show error state if session refresh failed (this should rarely show as it auto-redirects)
+  // Show error state if session refresh failed
   if (hasRefreshError) {
     return (
       <div className="fixed inset-0 bg-red-50 z-50 flex items-center justify-center">
@@ -49,10 +47,11 @@ function SessionManager({ children }: { children: ReactNode }) {
 export default function ClientWrapper({ children }: { children: ReactNode }) {
   return (
     <SessionProvider
-      // Refetch session every 5 minutes to keep it fresh
-      refetchInterval={5 * 60}
-      // Refetch session when window gains focus
-      refetchOnWindowFocus={true}
+      // ✅ FIX: Disable automatic refetch on window focus
+      refetchInterval={0}
+      refetchOnWindowFocus={false}
+      // Only refetch when session is actually about to expire
+      refetchWhenOffline={false}
     >
       <ThemeProvider
         attribute="class"
