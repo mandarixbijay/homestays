@@ -1,17 +1,16 @@
 // components/admin/ImprovedAdminDashboard.tsx
+'use client';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
-  LayoutDashboard, Home, Users, Settings, TrendingUp, Clock, CheckCircle,
-  AlertCircle, Plus, Eye, Edit, Trash2, Search, Filter, Activity,
-  Calendar, Star, MapPin, Phone, BarChart3, PieChart, ArrowUp,
-  ArrowDown, RefreshCw, Download, Bell, User,
-  Bed
+  LayoutDashboard, Home, Users, Settings, Clock, CheckCircle,
+  AlertCircle, Plus, Eye, Edit, Activity, Star, MapPin,
+  RefreshCw, Download, Bed
 } from 'lucide-react';
 
 import {
-  useAsyncOperation,
   useHomestays,
 } from '@/hooks/useAdminApi';
 
@@ -34,7 +33,6 @@ interface DashboardStats {
   pendingHomestays: number;
   approvedHomestays: number;
   rejectedHomestays: number;
-  totalUsers: number;
   totalRooms: number;
   averageRating: number;
   recentActivity: any[];
@@ -45,6 +43,12 @@ interface DashboardStats {
 // ============================================================================
 
 const calculateHomestayStats = (homestays: any[]) => {
+  console.log('[Dashboard] Calculating stats from homestays:', {
+    total: homestays.length,
+    sample: homestays.slice(0, 2),
+    allStatuses: homestays.map(h => ({ id: h.id, status: h.status, rooms: h.rooms?.length }))
+  });
+
   const stats = {
     totalHomestays: homestays.length,
     pendingHomestays: homestays.filter(h => h.status === 'PENDING').length,
@@ -54,7 +58,8 @@ const calculateHomestayStats = (homestays: any[]) => {
     averageRating: 0
   };
 
-  // Calculate average rating from homestays that have ratings
+  console.log('[Dashboard] Calculated stats:', stats);
+
   const homestaysWithRatings = homestays.filter(h => h.rating && h.rating > 0);
   if (homestaysWithRatings.length > 0) {
     const totalRating = homestaysWithRatings.reduce((sum, h) => sum + h.rating, 0);
@@ -67,29 +72,13 @@ const calculateHomestayStats = (homestays: any[]) => {
 const generateRecentActivity = (homestays: any[]) => {
   const activities: any[] = [];
   
-  // Sort homestays by createdAt or updatedAt, most recent first
   const sortedHomestays = [...homestays].sort((a, b) => {
     const dateA = new Date(a.updatedAt || a.createdAt || 0);
     const dateB = new Date(b.updatedAt || b.createdAt || 0);
     return dateB.getTime() - dateA.getTime();
   });
 
-  // Generate activities for recent homestays
-  sortedHomestays.slice(0, 10).forEach(homestay => {
-    const createdAt = new Date(homestay.createdAt);
-    const updatedAt = new Date(homestay.updatedAt);
-    
-    // If updated recently and different from created date, show update activity
-    if (homestay.updatedAt && updatedAt.getTime() !== createdAt.getTime()) {
-      activities.push({
-        description: `Homestay "${homestay.name}" was updated`,
-        timestamp: homestay.updatedAt,
-        type: 'update',
-        homestayId: homestay.id
-      });
-    }
-    
-    // Show creation activity
+  sortedHomestays.slice(0, 5).forEach(homestay => {
     if (homestay.createdAt) {
       let description = `New homestay "${homestay.name}" was created`;
       if (homestay.status === 'APPROVED') {
@@ -109,37 +98,29 @@ const generateRecentActivity = (homestays: any[]) => {
     }
   });
 
-  // Sort activities by timestamp, most recent first
   return activities
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    .slice(0, 5); // Show only 5 most recent activities
+    .slice(0, 5);
 };
 
 // ============================================================================
-// COMPONENTS (StatCard, QuickActionCard, RecentHomestayCard, ActivityFeed remain the same)
+// COMPONENTS
 // ============================================================================
 
 const StatCard: React.FC<{
   title: string;
   value: number | string;
-  change?: number;
-  changeType?: 'increase' | 'decrease' | 'neutral';
   icon: React.ReactNode;
   color: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
   onClick?: () => void;
-}> = ({ title, value, change, changeType, icon, color, onClick }) => {
+  loading?: boolean;
+}> = ({ title, value, icon, color, onClick, loading }) => {
   const colorClasses = {
     blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
     green: 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400',
     yellow: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400',
     red: 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400',
     purple: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400'
-  };
-
-  const changeColorClasses = {
-    increase: 'text-green-600 dark:text-green-400',
-    decrease: 'text-red-600 dark:text-red-400',
-    neutral: 'text-gray-600 dark:text-gray-400'
   };
 
   return (
@@ -154,17 +135,14 @@ const StatCard: React.FC<{
         role={onClick ? 'button' : undefined}
         onKeyPress={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
       >
-        <div>
+        <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
-          {change !== undefined && (
-            <div className={`flex items-center mt-2 ${changeColorClasses[changeType || 'neutral']}`}>
-              {changeType === 'increase' && <ArrowUp className="h-3 w-3 mr-1" />}
-              {changeType === 'decrease' && <ArrowDown className="h-3 w-3 mr-1" />}
-              <span className="text-xs font-medium">
-                {Math.abs(change)}% from last month
-              </span>
+          {loading ? (
+            <div className="mt-1">
+              <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             </div>
+          ) : (
+            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
           )}
         </div>
         <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
@@ -209,9 +187,7 @@ const RecentHomestayCard: React.FC<{
   homestay: any;
   onView: (id: number) => void;
   onEdit: (id: number) => void;
-  onApprove?: (id: number) => void;
-  onReject?: (id: number) => void;
-}> = ({ homestay, onView, onEdit, onApprove, onReject }) => {
+}> = ({ homestay, onView, onEdit }) => {
   const mainImage = homestay.images?.find((img: any) => img.isMain) || homestay.images?.[0];
 
   return (
@@ -260,23 +236,6 @@ const RecentHomestayCard: React.FC<{
             </div>
 
             <div className="flex items-center space-x-1 ml-4">
-              {homestay.status === 'PENDING' && onApprove && onReject && (
-                <>
-                  <ActionButton
-                    onClick={() => onApprove(homestay.id)}
-                    variant="success"
-                    size="xs"
-                    icon={<CheckCircle className="h-3 w-3" />}
-                  />
-                  <ActionButton
-                    onClick={() => onReject(homestay.id)}
-                    variant="danger"
-                    size="xs"
-                    icon={<AlertCircle className="h-3 w-3" />}
-                  />
-                </>
-              )}
-              
               <ActionButton
                 onClick={() => onView(homestay.id)}
                 variant="secondary"
@@ -300,7 +259,24 @@ const RecentHomestayCard: React.FC<{
 
 const ActivityFeed: React.FC<{
   activities: any[];
-}> = ({ activities }) => {
+  loading?: boolean;
+}> = ({ activities, loading }) => {
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="flex items-start space-x-3">
+            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (!activities || activities.length === 0) {
     return (
       <div className="text-center py-8">
@@ -351,15 +327,12 @@ export default function ImprovedAdminDashboard() {
     clearError 
   } = useHomestays();
 
-  const { loading: statsLoading, execute: loadStats } = useAsyncOperation<DashboardStats>();
-
   // State
   const [stats, setStats] = useState<DashboardStats>({
     totalHomestays: 0,
     pendingHomestays: 0,
     approvedHomestays: 0,
     rejectedHomestays: 0,
-    totalUsers: 0, // This would need a separate API call
     totalRooms: 0,
     averageRating: 0,
     recentActivity: []
@@ -379,17 +352,17 @@ export default function ImprovedAdminDashboard() {
     }
   }, [status, session, router]);
 
-  // Update stats when homestays data changes
+  // ✅ Update stats when homestays data changes
   useEffect(() => {
     if (homestays && homestays.length >= 0) {
+      console.log('[Dashboard] Homestays loaded:', homestays.length);
       const calculatedStats = calculateHomestayStats(homestays);
       const recentActivity = generateRecentActivity(homestays);
       
-      setStats(prevStats => ({
-        ...prevStats,
+      setStats({
         ...calculatedStats,
         recentActivity
-      }));
+      });
     }
   }, [homestays]);
 
@@ -397,30 +370,12 @@ export default function ImprovedAdminDashboard() {
   const loadDashboardData = useCallback(async () => {
     try {
       setRefreshing(true);
-      
-      // Load all homestays (we need all for accurate stats)
-      await loadHomestays({ limit: 1000, page: 1 }); // Load many homestays for accurate stats
-      
-      // Load additional dashboard stats that require separate API calls
-      // TODO: Add these API endpoints to get real data
-      /*
-      await loadStats(async () => {
-        const [usersCount] = await Promise.all([
-          adminApi.getUsersCount(), // Need to add this endpoint
-          // Could add more endpoints like:
-          // adminApi.getMonthlyGrowthStats(),
-          // adminApi.getSystemStats(),
-        ]);
-        
-        return {
-          totalUsers: usersCount,
-          // Add other stats that need separate API calls
-        };
-      });
-      */
-
+      console.log('[Dashboard] Loading homestays...');
+      // ✅ Load ALL homestays to get accurate counts
+      await loadHomestays({ limit: 10000, page: 1 });
+      console.log('[Dashboard] Homestays loaded successfully');
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('[Dashboard] Error loading dashboard data:', error);
       addToast({
         type: 'error',
         title: 'Error',
@@ -509,13 +464,6 @@ export default function ImprovedAdminDashboard() {
               >
                 Refresh
               </ActionButton>
-              <ActionButton
-                onClick={() => {/* Export functionality */}}
-                variant="secondary"
-                icon={<Download className="h-4 w-4" />}
-              >
-                Export
-              </ActionButton>
             </div>
           </div>
         </div>
@@ -547,6 +495,7 @@ export default function ImprovedAdminDashboard() {
             icon={<Home className="h-6 w-6" />}
             color="blue"
             onClick={() => handleQuickAction('homestays')}
+            loading={homestaysLoading}
           />
           
           <StatCard
@@ -555,6 +504,7 @@ export default function ImprovedAdminDashboard() {
             icon={<Clock className="h-6 w-6" />}
             color="yellow"
             onClick={() => router.push('/admin/homestays?status=PENDING')}
+            loading={homestaysLoading}
           />
           
           <StatCard
@@ -563,31 +513,7 @@ export default function ImprovedAdminDashboard() {
             icon={<CheckCircle className="h-6 w-6" />}
             color="green"
             onClick={() => router.push('/admin/homestays?status=APPROVED')}
-          />
-          
-          <StatCard
-            title="Average Rating"
-            value={stats.averageRating || 'N/A'}
-            icon={<Star className="h-6 w-6" />}
-            color="purple"
-          />
-        </div>
-
-        {/* Additional Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatCard
-            title="Total Users"
-            value={stats.totalUsers || 'N/A'}
-            icon={<Users className="h-6 w-6" />}
-            color="blue"
-            onClick={() => handleQuickAction('users')}
-          />
-          
-          <StatCard
-            title="Total Rooms"
-            value={stats.totalRooms}
-            icon={<Bed className="h-6 w-6" />}
-            color="green"
+            loading={homestaysLoading}
           />
           
           <StatCard
@@ -596,6 +522,34 @@ export default function ImprovedAdminDashboard() {
             icon={<AlertCircle className="h-6 w-6" />}
             color="red"
             onClick={() => router.push('/admin/homestays?status=REJECTED')}
+            loading={homestaysLoading}
+          />
+        </div>
+
+        {/* Secondary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <StatCard
+            title="Total Rooms"
+            value={stats.totalRooms}
+            icon={<Bed className="h-6 w-6" />}
+            color="purple"
+            loading={homestaysLoading}
+          />
+          
+          <StatCard
+            title="Average Rating"
+            value={stats.averageRating || 'N/A'}
+            icon={<Star className="h-6 w-6" />}
+            color="yellow"
+            loading={homestaysLoading}
+          />
+          
+          <StatCard
+            title="Active Listings"
+            value={stats.approvedHomestays}
+            icon={<CheckCircle className="h-6 w-6" />}
+            color="green"
+            loading={homestaysLoading}
           />
         </div>
 
@@ -642,8 +596,11 @@ export default function ImprovedAdminDashboard() {
 
           {/* Recent Activity */}
           <div>
-            <Card title="Recent Activity" loading={homestaysLoading}>
-              <ActivityFeed activities={stats.recentActivity} />
+            <Card title="Recent Activity">
+              <ActivityFeed 
+                activities={stats.recentActivity} 
+                loading={homestaysLoading}
+              />
             </Card>
           </div>
         </div>
@@ -680,20 +637,6 @@ export default function ImprovedAdminDashboard() {
                   homestay={homestay}
                   onView={(id) => router.push(`/admin/homestays/${id}`)}
                   onEdit={(id) => router.push(`/admin/homestays/${id}/edit`)}
-                  onApprove={(id) => {
-                    addToast({
-                      type: 'success',
-                      title: 'Approved',
-                      message: 'Homestay approved successfully'
-                    });
-                  }}
-                  onReject={(id) => {
-                    addToast({
-                      type: 'success', 
-                      title: 'Rejected',
-                      message: 'Homestay rejected'
-                    });
-                  }}
                 />
               ))}
               {filteredHomestays.length > 5 && (
