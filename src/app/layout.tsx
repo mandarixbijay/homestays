@@ -17,6 +17,9 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: "Nepal Homestays",
   description: "",
+  verification: {
+    google: "-NHCSFQEg9wPjYMJgljuZ_fZeGOgTKNDx81QFQHj3bw", // ✅ Site verification added here
+  },
 };
 
 export default function RootLayout({
