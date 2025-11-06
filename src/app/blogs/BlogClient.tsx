@@ -1,16 +1,21 @@
+// src/app/blogs/BlogListClient.tsx
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
-import { Search, Calendar, Clock, User, ChevronRight, ArrowRight } from "lucide-react";
+import { 
+  Search, Calendar, Clock, User, ChevronRight, ArrowRight, 
+  Filter, X, TrendingUp, Sparkles, Eye, Tag, Folder
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { publicBlogApi, PublicBlog } from '@/lib/api/public-blog-api';
 import SafeBlogImage from "@/components/blog/SafeBlogImage";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface BlogClientProps {
   searchParams: { 
@@ -21,12 +26,12 @@ interface BlogClientProps {
   };
 }
 
-
 interface Category {
   id: number;
   name: string;
   slug: string;
   color?: string;
+  _count?: { blogs: number };
 }
 
 interface Tag {
@@ -34,9 +39,10 @@ interface Tag {
   name: string;
   slug: string;
   color?: string;
+  _count?: { blogs: number };
 }
 
-export default function BlogClient({ searchParams }: BlogClientProps) {
+export default function BlogListClient({ searchParams }: BlogClientProps) {
   const [blogs, setBlogs] = useState<PublicBlog[]>([]);
   const [featuredBlogs, setFeaturedBlogs] = useState<PublicBlog[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -45,21 +51,20 @@ export default function BlogClient({ searchParams }: BlogClientProps) {
   const [searchLoading, setSearchLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
   
-  // Local search state
   const [localSearch, setLocalSearch] = useState(searchParams.search || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.category || "");
+  const [selectedTag, setSelectedTag] = useState(searchParams.tag || "");
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.page || "1"));
 
-  // Load initial data
   useEffect(() => {
     loadInitialData();
   }, []);
 
-  // Load blogs when filters change
   useEffect(() => {
     loadBlogs();
-  }, [selectedCategory, currentPage]);
+  }, [selectedCategory, selectedTag, currentPage]);
 
   const loadInitialData = async () => {
     try {
@@ -68,7 +73,6 @@ export default function BlogClient({ searchParams }: BlogClientProps) {
         publicBlogApi.getPublishedBlogs({ 
           page: currentPage, 
           limit: 12,
-          category: selectedCategory || undefined,
           search: searchParams.search || undefined,
         }),
         publicBlogApi.getFeaturedBlogs(3),
@@ -84,11 +88,6 @@ export default function BlogClient({ searchParams }: BlogClientProps) {
       setTags(tagsResponse as Tag[]);
     } catch (error) {
       console.error('Error loading blog data:', error);
-      // Set empty data as fallback
-      setBlogs([]);
-      setFeaturedBlogs([]);
-      setCategories([]);
-      setTags([]);
     } finally {
       setLoading(false);
     }
@@ -100,7 +99,6 @@ export default function BlogClient({ searchParams }: BlogClientProps) {
       const response = await publicBlogApi.getPublishedBlogs({
         page: currentPage,
         limit: 12,
-        category: selectedCategory || undefined,
         search: localSearch || undefined,
       });
 
@@ -109,499 +107,539 @@ export default function BlogClient({ searchParams }: BlogClientProps) {
       setTotal(response.total);
     } catch (error) {
       console.error('Error loading blogs:', error);
-      setBlogs([]);
     } finally {
       setSearchLoading(false);
     }
   };
 
-  const handleSearch = async (searchTerm: string) => {
-    setLocalSearch(searchTerm);
+  const handleSearch = () => {
     setCurrentPage(1);
-    
-    try {
-      setSearchLoading(true);
-      const response = await publicBlogApi.getPublishedBlogs({
-        page: 1,
-        limit: 12,
-        category: selectedCategory || undefined,
-        search: searchTerm || undefined,
-      });
-
-      setBlogs(response.data);
-      setTotalPages(response.totalPages);
-      setTotal(response.total);
-    } catch (error) {
-      console.error('Error searching blogs:', error);
-    } finally {
-      setSearchLoading(false);
-    }
+    loadBlogs();
   };
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
+  const handleCategorySelect = (categorySlug: string) => {
+    setSelectedCategory(categorySlug === selectedCategory ? "" : categorySlug);
     setCurrentPage(1);
+  };
+
+  const handleTagSelect = (tagSlug: string) => {
+    setSelectedTag(tagSlug === selectedTag ? "" : tagSlug);
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
     setLocalSearch("");
+    setSelectedCategory("");
+    setSelectedTag("");
+    setCurrentPage(1);
+    loadBlogs();
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Get unique categories for filter
-  const allCategories = ["All", ...categories.map(cat => cat.name)];
-
-  // Filter featured blogs to avoid duplicates with regular blogs
-  const displayFeaturedBlogs = featuredBlogs.filter(featured => 
-    !blogs.some(blog => blog.id === featured.id)
-  );
+  const hasActiveFilters = localSearch || selectedCategory || selectedTag;
 
   if (loading) {
     return (
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="animate-pulse">
-          {/* Search and Filter Skeleton */}
-          <div className="mb-12">
-            <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-              <div className="w-full md:max-w-md h-12 bg-gray-200 dark:bg-gray-700 rounded" />
-              <div className="flex gap-2">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded" />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Featured Posts Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-                <div className="h-64 bg-gray-200 dark:bg-gray-700" />
-                <div className="p-6 space-y-3">
-                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded" />
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Regular Posts Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-                <div className="h-48 bg-gray-200 dark:bg-gray-700" />
-                <div className="p-6 space-y-3">
-                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded" />
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading amazing stories...</p>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      {/* Search and Filter */}
-      <div className="mb-12">
-        <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-          <div className="relative w-full md:max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <Input
-              type="text"
-              placeholder="Search articles..."
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch(localSearch)}
-              className="pl-10 h-12"
-            />
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {allCategories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category || (category === "All" && !selectedCategory) ? "default" : "outline"}
-                onClick={() => handleCategoryChange(category === "All" ? "" : category)}
-                className="whitespace-nowrap"
-                size="sm"
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-        </div>
-        
-        {localSearch && (
-          <div className="mt-4 flex gap-4 items-center">
-            <Button 
-              onClick={() => handleSearch(localSearch)} 
-              disabled={searchLoading}
-              size="sm"
-            >
-              {searchLoading ? "Searching..." : "Search"}
-            </Button>
-            {(localSearch || selectedCategory) && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setLocalSearch("");
-                  setSelectedCategory("");
-                  setCurrentPage(1);
-                  loadBlogs();
-                }}
-                size="sm"
-              >
-                Clear All
-              </Button>
-            )}
-          </div>
-        )}
-        
-        {total > 0 && (
-          <p className="text-gray-600 dark:text-gray-400 mt-4">
-            {total} article{total !== 1 ? 's' : ''} found
-            {selectedCategory && ` in ${selectedCategory}`}
-            {localSearch && ` for "${localSearch}"`}
-          </p>
-        )}
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-secondary/10 pt-24 pb-16 sm:pt-32 sm:pb-24">
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-4xl mx-auto"
+          >
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-600 to-pink-600">
+              Discover Amazing Stories
+            </h1>
+            <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Explore authentic travel experiences, insider tips, and comprehensive guides 
+              to help you plan your perfect homestay adventure in Nepal
+            </p>
 
-      {/* Featured Posts */}
-      {!localSearch && !selectedCategory && displayFeaturedBlogs.length > 0 && (
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Featured Articles</h2>
-            <div className="flex items-center text-primary hover:text-primary/80 transition-colors">
-              <span className="text-sm font-medium">View all featured</span>
-              <ArrowRight className="ml-1 w-4 h-4" />
+            {/* Search Bar */}
+            <div className="max-w-2xl mx-auto">
+              <div className="relative flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search for travel tips, destinations, experiences..."
+                    value={localSearch}
+                    onChange={(e) => setLocalSearch(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    className="pl-12 h-14 text-base rounded-full border-2 focus:border-primary shadow-lg"
+                  />
+                </div>
+                <Button 
+                  onClick={handleSearch}
+                  disabled={searchLoading}
+                  className="h-14 px-8 rounded-full shadow-lg hover:shadow-xl transition-all"
+                >
+                  {searchLoading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                  ) : (
+                    'Search'
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span><strong className="text-foreground">{total}</strong> inspiring articles</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Folder className="h-4 w-4 text-primary" />
+                <span><strong className="text-foreground">{categories.length}</strong> categories</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-primary" />
+                <span><strong className="text-foreground">{tags.length}</strong> topics</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Featured Blogs */}
+      {featuredBlogs.length > 0 && (
+        <section className="py-12 sm:py-16 bg-muted/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-3 mb-8">
+              <TrendingUp className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl sm:text-3xl font-bold">Featured Stories</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {featuredBlogs.map((blog, index) => (
+                <motion.div
+                  key={blog.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <FeaturedBlogCard blog={blog} />
+                </motion.div>
+              ))}
             </div>
           </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-            {displayFeaturedBlogs.map((post) => (
-              <article key={post.id}>
-                <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                  <Link href={`/blogs/${post.slug}`}>
-                    <div className="relative h-64">
-                      <SafeBlogImage
-                        src={post.featuredImage || '/images/default-blog.jpg'}
-                        alt={post.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
-                      <div className="absolute top-4 left-4">
-                        {post.categories[0] && (
-                          <Badge 
-                            className="bg-primary text-white"
-                            style={{ backgroundColor: post.categories[0].color }}
-                          >
-                            {post.categories[0].name}
-                          </Badge>
-                        )}
-                      </div>
-                      {post.featured && (
-                        <div className="absolute top-4 right-4">
-                          <Badge className="bg-yellow-500 text-white">
-                            Featured
-                          </Badge>
-                        </div>
+        </section>
+      )}
+
+      {/* Filters and Content */}
+      <section className="py-12 sm:py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Sidebar Filters */}
+            <aside className="lg:w-72 flex-shrink-0">
+              <div className="lg:sticky lg:top-24 space-y-6">
+                {/* Mobile Filter Toggle */}
+                <div className="lg:hidden">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      Filters {hasActiveFilters && `(${[selectedCategory, selectedTag].filter(Boolean).length})`}
+                    </span>
+                    {showFilters ? <X className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </Button>
+                </div>
+
+                <AnimatePresence>
+                  {(showFilters || window.innerWidth >= 1024) && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-6"
+                    >
+                      {/* Active Filters */}
+                      {hasActiveFilters && (
+                        <Card className="p-4 bg-primary/5 border-primary/20">
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold text-sm">Active Filters</h3>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={clearFilters}
+                              className="h-auto py-1 text-xs"
+                            >
+                              Clear All
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            {selectedCategory && (
+                              <Badge variant="secondary" className="mr-2">
+                                Category: {categories.find(c => c.slug === selectedCategory)?.name}
+                                <X
+                                  className="h-3 w-3 ml-1 cursor-pointer"
+                                  onClick={() => setSelectedCategory("")}
+                                />
+                              </Badge>
+                            )}
+                            {selectedTag && (
+                              <Badge variant="secondary" className="mr-2">
+                                Tag: {tags.find(t => t.slug === selectedTag)?.name}
+                                <X
+                                  className="h-3 w-3 ml-1 cursor-pointer"
+                                  onClick={() => setSelectedTag("")}
+                                />
+                              </Badge>
+                            )}
+                          </div>
+                        </Card>
                       )}
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                        {post.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                        {post.excerpt}
-                      </p>
-                      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                        <div className="flex items-center space-x-4">
-                          <div className="flex items-center">
-                            <User className="w-4 h-4 mr-1" />
-                            <span>{post.author.name}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-1" />
-                            <span>{format(parseISO(post.publishedAt), "MMM dd, yyyy")}</span>
-                          </div>
+
+                      {/* Categories Filter */}
+                      <Card className="p-6">
+                        <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                          <Folder className="h-5 w-5 text-primary" />
+                          Categories
+                        </h3>
+                        <div className="space-y-2">
+                          {categories.slice(0, 8).map((category) => (
+                            <button
+                              key={category.id}
+                              onClick={() => handleCategorySelect(category.slug)}
+                              className={`w-full text-left px-3 py-2 rounded-lg transition-all hover:bg-accent group ${
+                                selectedCategory === category.slug
+                                  ? 'bg-primary/10 text-primary font-medium'
+                                  : 'text-muted-foreground'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="flex items-center gap-2">
+                                  {category.color && (
+                                    <span
+                                      className="h-2 w-2 rounded-full"
+                                      style={{ backgroundColor: category.color }}
+                                    />
+                                  )}
+                                  {category.name}
+                                </span>
+                                <span className="text-xs opacity-60">
+                                  {category._count?.blogs || 0}
+                                </span>
+                              </div>
+                            </button>
+                          ))}
                         </div>
-                        {post.readTime && (
-                          <div className="flex items-center">
-                            <Clock className="w-4 h-4 mr-1" />
-                            <span>{post.readTime} min read</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Tags */}
-                      {post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-4">
-                          {post.tags.slice(0, 3).map(tag => (
-                            <Badge 
-                              key={tag.id} 
-                              variant="secondary" 
-                              className="text-xs"
-                              style={{ backgroundColor: tag.color ? `${tag.color}20` : undefined }}
+                      </Card>
+
+                      {/* Popular Tags */}
+                      <Card className="p-6">
+                        <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                          <Tag className="h-5 w-5 text-primary" />
+                          Popular Tags
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {tags.slice(0, 12).map((tag) => (
+                            <Badge
+                              key={tag.id}
+                              variant={selectedTag === tag.slug ? "default" : "outline"}
+                              className="cursor-pointer hover:bg-primary/10 transition-colors"
+                              onClick={() => handleTagSelect(tag.slug)}
+                              style={
+                                tag.color && selectedTag === tag.slug
+                                  ? { backgroundColor: tag.color, borderColor: tag.color }
+                                  : undefined
+                              }
                             >
                               {tag.name}
+                              {tag._count?.blogs && (
+                                <span className="ml-1 text-xs opacity-60">
+                                  ({tag._count.blogs})
+                                </span>
+                              )}
                             </Badge>
                           ))}
                         </div>
-                      )}
+                      </Card>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </aside>
+
+            {/* Main Content */}
+            <div className="flex-1">
+              {searchLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <BlogCardSkeleton key={i} />
+                  ))}
+                </div>
+              ) : blogs.length === 0 ? (
+                <Card className="p-12 text-center">
+                  <div className="max-w-md mx-auto space-y-4">
+                    <div className="h-24 w-24 mx-auto bg-muted rounded-full flex items-center justify-center">
+                      <Search className="h-12 w-12 text-muted-foreground" />
                     </div>
-                  </Link>
-                </Card>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* All Posts Grid */}
-      <section>
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {localSearch ? `Search Results` : selectedCategory ? selectedCategory : 'Latest Articles'}
-          </h2>
-          {totalPages > 1 && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Page {currentPage} of {totalPages}
-            </p>
-          )}
-        </div>
-        
-        {searchLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden animate-pulse">
-                <div className="h-48 bg-gray-200 dark:bg-gray-700" />
-                <div className="p-6 space-y-3">
-                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded" />
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : blogs.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogs.map((post) => (
-                <article key={post.id}>
-                  <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 group">
-                    <Link href={`/blogs/${post.slug}`}>
-                      <div className="relative h-48">
-                        <SafeBlogImage
-                          src={post.featuredImage || '/images/default-blog.jpg'}
-                          alt={post.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                        <div className="absolute top-4 left-4">
-                          {post.categories[0] && (
-                            <Badge 
-                              className="bg-primary text-white"
-                              style={{ backgroundColor: post.categories[0].color }}
-                            >
-                              {post.categories[0].name}
-                            </Badge>
-                          )}
-                        </div>
-                        {post.featured && (
-                          <div className="absolute top-4 right-4">
-                            <Badge className="bg-yellow-500 text-white text-xs">
-                              Featured
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-6 flex flex-col h-[calc(100%-12rem)]">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                          {post.title}
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3 flex-grow">
-                          {post.excerpt}
-                        </p>
-                        
-                        {/* Tags */}
-                        {post.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-4">
-                            {post.tags.slice(0, 2).map(tag => (
-                              <Badge 
-                                key={tag.id} 
-                                variant="secondary" 
-                                className="text-xs"
-                                style={{ backgroundColor: tag.color ? `${tag.color}20` : undefined }}
-                              >
-                                {tag.name}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                        
-                        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mt-auto">
-                          <div className="flex flex-col space-y-1">
-                            <div className="flex items-center">
-                              <User className="w-3 h-3 mr-1" />
-                              <span className="text-xs">{post.author.name}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Calendar className="w-3 h-3 mr-1" />
-                              <span className="text-xs">{format(parseISO(post.publishedAt), "MMM dd, yyyy")}</span>
-                            </div>
-                          </div>
-                          {post.readTime && (
-                            <div className="flex items-center">
-                              <Clock className="w-3 h-3 mr-1" />
-                              <span className="text-xs">{post.readTime} min</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  </Card>
-                </article>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center space-x-2 mt-12">
-                <Button
-                  variant="outline"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage <= 1}
-                  size="sm"
-                >
-                  Previous
-                </Button>
-                
-                {/* Page numbers */}
-                <div className="flex space-x-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        onClick={() => handlePageChange(pageNum)}
-                        size="sm"
-                        className="w-10 h-10"
-                      >
-                        {pageNum}
+                    <h3 className="text-2xl font-bold">No blogs found</h3>
+                    <p className="text-muted-foreground">
+                      Try adjusting your search or filters to find what you're looking for
+                    </p>
+                    {hasActiveFilters && (
+                      <Button onClick={clearFilters} variant="outline">
+                        Clear Filters
                       </Button>
-                    );
-                  })}
-                </div>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage >= totalPages}
-                  size="sm"
-                >
-                  Next
-                </Button>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center py-16">
-            <div className="max-w-md mx-auto">
-              <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                <Search className="w-12 h-12 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                No articles found
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                {localSearch || selectedCategory
-                  ? "Try adjusting your search or browse different categories."
-                  : "No articles have been published yet. Check back soon!"}
-              </p>
-              {(localSearch || selectedCategory) && (
-                <Button onClick={() => {
-                  setLocalSearch("");
-                  setSelectedCategory("");
-                  setCurrentPage(1);
-                  loadBlogs();
-                }}>
-                  Show All Articles
-                </Button>
+                    )}
+                  </div>
+                </Card>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold">
+                      {hasActiveFilters ? 'Filtered Results' : 'All Articles'}
+                      <span className="ml-2 text-sm text-muted-foreground font-normal">
+                        ({total} {total === 1 ? 'article' : 'articles'})
+                      </span>
+                    </h2>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                    {blogs.map((blog, index) => (
+                      <motion.div
+                        key={blog.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <BlogCard blog={blog} />
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="mt-12 flex justify-center">
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
-        )}
-      </section>
-
-      {/* Newsletter Signup */}
-      <section className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-xl p-8 mt-16 text-center">
-        <div className="max-w-2xl mx-auto">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Stay Updated with Our Latest Stories
-          </h3>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Get travel tips, cultural insights, and adventure guides delivered to your inbox. 
-            Join our community of travelers exploring authentic Nepal.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <Input 
-              type="email" 
-              placeholder="Enter your email" 
-              className="flex-1 h-12"
-            />
-            <Button className="whitespace-nowrap h-12 px-8">
-              Subscribe
-            </Button>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-            No spam, unsubscribe at any time
-          </p>
         </div>
       </section>
+    </div>
+  );
+}
 
-      {/* Related Tags */}
-      {tags.length > 0 && (
-        <section className="mt-16">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Explore by Topics
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {tags.slice(0, 10).map(tag => (
-              <Button
-                key={tag.id}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  // Could implement tag filtering here
-                  console.log('Filter by tag:', tag.slug);
-                }}
-                className="text-sm"
-              >
-                #{tag.name}
-              </Button>
-            ))}
+// Featured Blog Card Component
+function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
+  return (
+    <Link href={`/blogs/${blog.slug}`}>
+      <Card className="group overflow-hidden h-full hover:shadow-2xl transition-all duration-300 border-2 hover:border-primary/50">
+        <div className="relative h-56 overflow-hidden">
+          <SafeBlogImage
+            src={blog.featuredImage || '/images/default-blog.jpg'}
+            alt={blog.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+          <Badge className="absolute top-4 left-4 bg-primary/90 backdrop-blur">
+            <Sparkles className="h-3 w-3 mr-1" />
+            Featured
+          </Badge>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              <span>{blog.readTime || 5} min</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Eye className="h-4 w-4" />
+              <span>{blog.viewCount} views</span>
+            </div>
           </div>
-        </section>
+          <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
+            {blog.title}
+          </h3>
+          <p className="text-muted-foreground line-clamp-2 text-sm">
+            {blog.excerpt}
+          </p>
+          <div className="flex items-center justify-between pt-4 border-t">
+            <div className="flex items-center gap-2 text-sm">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">{blog.author.name}</span>
+            </div>
+            <ArrowRight className="h-5 w-5 text-primary group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+      </Card>
+    </Link>
+  );
+}
+
+// Regular Blog Card Component
+function BlogCard({ blog }: { blog: PublicBlog }) {
+  return (
+    <Link href={`/blogs/${blog.slug}`}>
+      <Card className="group overflow-hidden h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <div className="relative h-48 overflow-hidden">
+          <SafeBlogImage
+            src={blog.featuredImage || '/images/default-blog.jpg'}
+            alt={blog.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+        </div>
+        <div className="p-5 space-y-3">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              <span>{blog.readTime || 5} min</span>
+            </div>
+            {blog.publishedAt && (
+              <div className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                <span>{format(parseISO(blog.publishedAt), 'MMM d, yyyy')}</span>
+              </div>
+            )}
+          </div>
+          <h3 className="text-lg font-bold line-clamp-2 group-hover:text-primary transition-colors">
+            {blog.title}
+          </h3>
+          <p className="text-muted-foreground line-clamp-2 text-sm">
+            {blog.excerpt}
+          </p>
+          {blog.categories && blog.categories.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {blog.categories.slice(0, 2).map((cat: any) => (
+                <Badge key={cat.id} variant="secondary" className="text-xs">
+                  {cat.name}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      </Card>
+    </Link>
+  );
+}
+
+// Skeleton Loader
+function BlogCardSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <div className="h-48 bg-muted animate-pulse"></div>
+      <div className="p-5 space-y-3">
+        <div className="flex gap-3">
+          <div className="h-4 w-16 bg-muted animate-pulse rounded"></div>
+          <div className="h-4 w-24 bg-muted animate-pulse rounded"></div>
+        </div>
+        <div className="h-6 bg-muted animate-pulse rounded"></div>
+        <div className="h-6 w-3/4 bg-muted animate-pulse rounded"></div>
+        <div className="h-12 bg-muted animate-pulse rounded"></div>
+      </div>
+    </Card>
+  );
+}
+
+// Pagination Component
+function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  const pages = [];
+  const maxVisiblePages = 5;
+  
+  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+  
+  if (endPage - startPage < maxVisiblePages - 1) {
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+  
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(i);
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        Previous
+      </Button>
+      
+      {startPage > 1 && (
+        <>
+          <Button
+            variant={1 === currentPage ? "default" : "outline"}
+            size="sm"
+            onClick={() => onPageChange(1)}
+          >
+            1
+          </Button>
+          {startPage > 2 && <span className="px-2">...</span>}
+        </>
       )}
-    </main>
+      
+      {pages.map((page) => (
+        <Button
+          key={page}
+          variant={page === currentPage ? "default" : "outline"}
+          size="sm"
+          onClick={() => onPageChange(page)}
+        >
+          {page}
+        </Button>
+      ))}
+      
+      {endPage < totalPages && (
+        <>
+          {endPage < totalPages - 1 && <span className="px-2">...</span>}
+          <Button
+            variant={totalPages === currentPage ? "default" : "outline"}
+            size="sm"
+            onClick={() => onPageChange(totalPages)}
+          >
+            {totalPages}
+          </Button>
+        </>
+      )}
+      
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </Button>
+    </div>
   );
 }
