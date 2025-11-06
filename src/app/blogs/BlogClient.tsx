@@ -4,8 +4,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
-import { 
-  Search, Calendar, Clock, User, ChevronRight, ArrowRight, 
+import {
+  Search, Calendar, Clock, User, ChevronRight, ArrowRight,
   Filter, X, Star, Book, List, Hash,
   Eye,
   Sparkles
@@ -20,11 +20,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 interface BlogClientProps {
-  searchParams: { 
-    page?: string; 
-    category?: string; 
-    search?: string; 
-    tag?: string; 
+  searchParams: {
+    page?: string;
+    category?: string;
+    search?: string;
+    tag?: string;
   };
 }
 
@@ -55,7 +55,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const [localSearch, setLocalSearch] = useState(searchParams.search || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.category || "");
   const [selectedTag, setSelectedTag] = useState(searchParams.tag || "");
@@ -73,8 +73,8 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
     try {
       setLoading(true);
       const [blogsResponse, featuredResponse, categoriesResponse, tagsResponse] = await Promise.all([
-        publicBlogApi.getPublishedBlogs({ 
-          page: currentPage, 
+        publicBlogApi.getPublishedBlogs({
+          page: currentPage,
           limit: 12,
           search: localSearch || undefined,
         }),
@@ -170,11 +170,11 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
             transition={{ duration: 0.6 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-600 to-pink-600">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-teal-800">
               Discover Amazing Stories
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Explore authentic travel experiences, insider tips, and comprehensive guides 
+              Explore authentic travel experiences, insider tips, and comprehensive guides
               to help you plan your perfect homestay adventure in Nepal
             </p>
 
@@ -208,7 +208,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                     className="pl-12 h-14 text-base rounded-full border-2 focus:border-primary shadow-lg focus:outline-none focus:ring-0"
                   />
                 </div>
-                <Button 
+                <Button
                   onClick={handleSearch}
                   disabled={searchLoading}
                   className="h-14 px-8 rounded-full shadow-lg hover:shadow-xl transition-all bg-primary text-white hover:bg-primary/90"
@@ -573,14 +573,14 @@ function Pagination({
 }) {
   const pages = [];
   const maxVisiblePages = 5;
-  
+
   let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
   let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-  
+
   if (endPage - startPage < maxVisiblePages - 1) {
     startPage = Math.max(1, endPage - maxVisiblePages + 1);
   }
-  
+
   for (let i = startPage; i <= endPage; i++) {
     pages.push(i);
   }
@@ -596,7 +596,7 @@ function Pagination({
       >
         Previous
       </Button>
-      
+
       {startPage > 1 && (
         <>
           <Button
@@ -610,7 +610,7 @@ function Pagination({
           {startPage > 2 && <span className="px-2 text-muted-foreground">...</span>}
         </>
       )}
-      
+
       {pages.map((page) => (
         <Button
           key={page}
@@ -622,7 +622,7 @@ function Pagination({
           {page}
         </Button>
       ))}
-      
+
       {endPage < totalPages && (
         <>
           {endPage < totalPages - 1 && <span className="px-2 text-muted-foreground">...</span>}
@@ -636,7 +636,7 @@ function Pagination({
           </Button>
         </>
       )}
-      
+
       <Button
         variant="outline"
         size="sm"
