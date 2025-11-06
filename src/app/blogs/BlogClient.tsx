@@ -392,9 +392,8 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                       <Search className="h-12 w-12 text-muted-foreground" />
                     </div>
                     <h3 className="text-2xl font-bold">No blogs found</h3>
-                    <p className="text-muted-foreground">
-                      Try adjusting your search or filters to find what you're looking for
-                    </p>
+                   <p>Try adjusting your search or filters to find what you&apos;re looking for</p>
+
                     {hasActiveFilters && (
                       <Button onClick={clearFilters} variant="outline">
                         Clear Filters
