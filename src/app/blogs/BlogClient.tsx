@@ -1,4 +1,3 @@
-// src/app/blogs/BlogListClient.tsx
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
@@ -7,7 +6,9 @@ import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { 
   Search, Calendar, Clock, User, ChevronRight, ArrowRight, 
-  Filter, X, TrendingUp, Sparkles, Eye, Tag, Folder
+  Filter, X, Star, Book, List, Hash,
+  Eye,
+  Sparkles
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { publicBlogApi, PublicBlog } from '@/lib/api/public-blog-api';
 import SafeBlogImage from "@/components/blog/SafeBlogImage";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface BlogClientProps {
   searchParams: { 
@@ -43,6 +45,7 @@ interface Tag {
 }
 
 export default function BlogListClient({ searchParams }: BlogClientProps) {
+  const router = useRouter();
   const [blogs, setBlogs] = useState<PublicBlog[]>([]);
   const [featuredBlogs, setFeaturedBlogs] = useState<PublicBlog[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -73,7 +76,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
         publicBlogApi.getPublishedBlogs({ 
           page: currentPage, 
           limit: 12,
-          search: searchParams.search || undefined,
+          search: localSearch || undefined,
         }),
         publicBlogApi.getFeaturedBlogs(3),
         publicBlogApi.getCategories(),
@@ -99,12 +102,17 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
       const response = await publicBlogApi.getPublishedBlogs({
         page: currentPage,
         limit: 12,
+        category: selectedCategory || undefined,
         search: localSearch || undefined,
+        tag: selectedTag || undefined,
       });
 
       setBlogs(response.data);
       setTotalPages(response.totalPages);
       setTotal(response.total);
+      router.push(
+        `/blogs?page=${currentPage}${localSearch ? `&search=${localSearch}` : ''}${selectedCategory ? `&category=${selectedCategory}` : ''}${selectedTag ? `&tag=${selectedTag}` : ''}`
+      );
     } catch (error) {
       console.error('Error loading blogs:', error);
     } finally {
@@ -120,11 +128,13 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
   const handleCategorySelect = (categorySlug: string) => {
     setSelectedCategory(categorySlug === selectedCategory ? "" : categorySlug);
     setCurrentPage(1);
+    loadBlogs();
   };
 
   const handleTagSelect = (tagSlug: string) => {
     setSelectedTag(tagSlug === selectedTag ? "" : tagSlug);
     setCurrentPage(1);
+    loadBlogs();
   };
 
   const clearFilters = () => {
@@ -168,8 +178,24 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
               to help you plan your perfect homestay adventure in Nepal
             </p>
 
+            {/* Stats */}
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground mb-8">
+              <div className="flex items-center gap-2">
+                <Book className="h-4 w-4 text-primary" /> {/* Changed from Sparkles */}
+                <span><strong className="text-foreground">{total}</strong> inspiring articles</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <List className="h-4 w-4 text-primary" /> {/* Changed from Folder */}
+                <span><strong className="text-foreground">{categories.length}</strong> categories</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Hash className="h-4 w-4 text-primary" /> {/* Changed from Tag */}
+                <span><strong className="text-foreground">{tags.length}</strong> topics</span>
+              </div>
+            </div>
+
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-2xl mx-auto mb-8">
               <div className="relative flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -179,13 +205,13 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                     value={localSearch}
                     onChange={(e) => setLocalSearch(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    className="pl-12 h-14 text-base rounded-full border-2 focus:border-primary shadow-lg"
+                    className="pl-12 h-14 text-base rounded-full border-2 focus:border-primary shadow-lg focus:outline-none focus:ring-0"
                   />
                 </div>
                 <Button 
                   onClick={handleSearch}
                   disabled={searchLoading}
-                  className="h-14 px-8 rounded-full shadow-lg hover:shadow-xl transition-all"
+                  className="h-14 px-8 rounded-full shadow-lg hover:shadow-xl transition-all bg-primary text-white hover:bg-primary/90"
                 >
                   {searchLoading ? (
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
@@ -196,20 +222,27 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
               </div>
             </div>
 
-            {/* Stats */}
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span><strong className="text-foreground">{total}</strong> inspiring articles</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Folder className="h-4 w-4 text-primary" />
-                <span><strong className="text-foreground">{categories.length}</strong> categories</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4 text-primary" />
-                <span><strong className="text-foreground">{tags.length}</strong> topics</span>
-              </div>
+            {/* Category Buttons */}
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button
+                variant={!selectedCategory ? "default" : "outline"}
+                onClick={() => handleCategorySelect("")}
+                className="whitespace-nowrap"
+                size="sm"
+              >
+                All
+              </Button>
+              {categories.slice(0, 6).map((category) => (
+                <Button
+                  key={category.id}
+                  variant={selectedCategory === category.slug ? "default" : "outline"}
+                  onClick={() => handleCategorySelect(category.slug)}
+                  className="whitespace-nowrap"
+                  size="sm"
+                >
+                  {category.name}
+                </Button>
+              ))}
             </div>
           </motion.div>
         </div>
@@ -220,7 +253,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
         <section className="py-12 sm:py-16 bg-muted/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3 mb-8">
-              <TrendingUp className="h-6 w-6 text-primary" />
+              <Star className="h-6 w-6 text-primary" /> {/* Changed from TrendingUp */}
               <h2 className="text-2xl sm:text-3xl font-bold">Featured Stories</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -306,46 +339,10 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                         </Card>
                       )}
 
-                      {/* Categories Filter */}
-                      <Card className="p-6">
-                        <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                          <Folder className="h-5 w-5 text-primary" />
-                          Categories
-                        </h3>
-                        <div className="space-y-2">
-                          {categories.slice(0, 8).map((category) => (
-                            <button
-                              key={category.id}
-                              onClick={() => handleCategorySelect(category.slug)}
-                              className={`w-full text-left px-3 py-2 rounded-lg transition-all hover:bg-accent group ${
-                                selectedCategory === category.slug
-                                  ? 'bg-primary/10 text-primary font-medium'
-                                  : 'text-muted-foreground'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="flex items-center gap-2">
-                                  {category.color && (
-                                    <span
-                                      className="h-2 w-2 rounded-full"
-                                      style={{ backgroundColor: category.color }}
-                                    />
-                                  )}
-                                  {category.name}
-                                </span>
-                                <span className="text-xs opacity-60">
-                                  {category._count?.blogs || 0}
-                                </span>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </Card>
-
                       {/* Popular Tags */}
                       <Card className="p-6">
                         <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                          <Tag className="h-5 w-5 text-primary" />
+                          <Hash className="h-5 w-5 text-primary" />
                           Popular Tags
                         </h3>
                         <div className="flex flex-wrap gap-2">
@@ -392,8 +389,9 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                       <Search className="h-12 w-12 text-muted-foreground" />
                     </div>
                     <h3 className="text-2xl font-bold">No blogs found</h3>
-                   <p>Try adjusting your search or filters to find what you&apos;re looking for</p>
-
+                    <p className="text-muted-foreground">
+                      Try adjusting your search or filters to find what you're looking for
+                    </p>
                     {hasActiveFilters && (
                       <Button onClick={clearFilters} variant="outline">
                         Clear Filters
@@ -447,12 +445,15 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
 
 // Featured Blog Card Component
 function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
+  const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/default-blog.jpg";
+  const randomImage = blog.images && blog.images.length > 1 ? blog.images[Math.floor(Math.random() * blog.images.length)]?.url : null;
+
   return (
     <Link href={`/blogs/${blog.slug}`}>
       <Card className="group overflow-hidden h-full hover:shadow-2xl transition-all duration-300 border-2 hover:border-primary/50">
-        <div className="relative h-56 overflow-hidden">
+        <div className="relative h-40 overflow-hidden"> {/* Adjusted to 16:9 thumbnail */}
           <SafeBlogImage
-            src={blog.featuredImage || '/images/default-blog.jpg'}
+            src={randomImage || mainImage}
             alt={blog.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -495,12 +496,15 @@ function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
 
 // Regular Blog Card Component
 function BlogCard({ blog }: { blog: PublicBlog }) {
+  const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/default-blog.jpg";
+  const randomImage = blog.images && blog.images.length > 1 ? blog.images[Math.floor(Math.random() * blog.images.length)]?.url : null;
+
   return (
     <Link href={`/blogs/${blog.slug}`}>
       <Card className="group overflow-hidden h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <div className="relative h-48 overflow-hidden">
+        <div className="relative h-32 overflow-hidden"> {/* Adjusted to 16:9 thumbnail */}
           <SafeBlogImage
-            src={blog.featuredImage || '/images/default-blog.jpg'}
+            src={randomImage || mainImage}
             alt={blog.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -513,12 +517,10 @@ function BlogCard({ blog }: { blog: PublicBlog }) {
               <Clock className="h-3 w-3" />
               <span>{blog.readTime || 5} min</span>
             </div>
-            {blog.publishedAt && (
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                <span>{format(parseISO(blog.publishedAt), 'MMM d, yyyy')}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>{blog.publishedAt ? format(parseISO(blog.publishedAt), 'MMM d, yyyy') : '—'}</span>
+            </div>
           </div>
           <h3 className="text-lg font-bold line-clamp-2 group-hover:text-primary transition-colors">
             {blog.title}
@@ -545,7 +547,7 @@ function BlogCard({ blog }: { blog: PublicBlog }) {
 function BlogCardSkeleton() {
   return (
     <Card className="overflow-hidden">
-      <div className="h-48 bg-muted animate-pulse"></div>
+      <div className="h-32 bg-muted animate-pulse"></div> {/* Adjusted to match thumbnail height */}
       <div className="p-5 space-y-3">
         <div className="flex gap-3">
           <div className="h-4 w-16 bg-muted animate-pulse rounded"></div>
@@ -590,6 +592,7 @@ function Pagination({
         size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
+        className="text-primary border-primary hover:bg-primary/10"
       >
         Previous
       </Button>
@@ -600,10 +603,11 @@ function Pagination({
             variant={1 === currentPage ? "default" : "outline"}
             size="sm"
             onClick={() => onPageChange(1)}
+            className="text-primary border-primary hover:bg-primary/10"
           >
             1
           </Button>
-          {startPage > 2 && <span className="px-2">...</span>}
+          {startPage > 2 && <span className="px-2 text-muted-foreground">...</span>}
         </>
       )}
       
@@ -613,6 +617,7 @@ function Pagination({
           variant={page === currentPage ? "default" : "outline"}
           size="sm"
           onClick={() => onPageChange(page)}
+          className="text-primary border-primary hover:bg-primary/10"
         >
           {page}
         </Button>
@@ -620,11 +625,12 @@ function Pagination({
       
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="px-2">...</span>}
+          {endPage < totalPages - 1 && <span className="px-2 text-muted-foreground">...</span>}
           <Button
             variant={totalPages === currentPage ? "default" : "outline"}
             size="sm"
             onClick={() => onPageChange(totalPages)}
+            className="text-primary border-primary hover:bg-primary/10"
           >
             {totalPages}
           </Button>
@@ -636,6 +642,7 @@ function Pagination({
         size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
+        className="text-primary border-primary hover:bg-primary/10"
       >
         Next
       </Button>

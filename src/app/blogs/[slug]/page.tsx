@@ -66,7 +66,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         authors: [blog.author.name],
         section: blog.categories[0]?.name || 'Travel',
         tags: blog.tags.map(tag => tag.name),
-        images: [
+        images: blog.images?.map(img => ({
+          url: img.url || blog.featuredImage || '/images/default-blog.jpg',
+          width: 1200,
+          height: 630,
+          alt: blog.title,
+          type: 'image/jpeg',
+        })) || [
           {
             url: blog.featuredImage || '/images/default-blog.jpg',
             width: 1200,
@@ -106,7 +112,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export async function generateStaticParams() {
   try {
-    // Generate static params for the first few pages of blogs
     const response = await publicBlogApi.getPublishedBlogs({ limit: 50 });
     return response.data.map((blog) => ({
       slug: blog.slug,
@@ -131,13 +136,12 @@ export default async function BlogDetailPage({ params }: Props) {
 
     console.log(`[BlogDetailPage] Blog loaded successfully:`, blog.title);
 
-    // Generate JSON-LD structured data
     const jsonLd = {
       '@context': 'https://schema.org',
       '@type': 'BlogPosting',
       headline: blog.title,
       description: blog.excerpt,
-      image: [blog.featuredImage || '/images/default-blog.jpg'],
+      image: blog.images?.map(img => img.url) || [blog.featuredImage || '/images/default-blog.jpg'],
       datePublished: blog.publishedAt,
       dateModified: blog.publishedAt,
       author: {
@@ -178,7 +182,6 @@ export default async function BlogDetailPage({ params }: Props) {
   } catch (error: any) {
     console.error('[BlogDetailPage] Error loading blog post:', error);
     
-    // For development, show more detailed error
     if (process.env.NODE_ENV === 'development') {
       return (
         <div className="bg-background min-h-screen font-manrope">
@@ -204,7 +207,6 @@ export default async function BlogDetailPage({ params }: Props) {
       );
     }
     
-    // For production, show generic error or redirect
     notFound();
   }
 }
