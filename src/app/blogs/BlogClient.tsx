@@ -256,7 +256,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
               <Star className="h-6 w-6 text-primary" /> {/* Changed from TrendingUp */}
               <h2 className="text-2xl sm:text-3xl font-bold">Featured Stories</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Restored gap to 6 */}
               {featuredBlogs.map((blog, index) => (
                 <motion.div
                   key={blog.id}
@@ -377,7 +377,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
             {/* Main Content */}
             <div className="flex-1">
               {searchLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Restored gap to 6 */}
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <BlogCardSkeleton key={i} />
                   ))}
@@ -410,7 +410,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                     </h2>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Restored gap to 6 */}
                     {blogs.map((blog, index) => (
                       <motion.div
                         key={blog.id}
@@ -451,7 +451,7 @@ function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
   return (
     <Link href={`/blogs/${blog.slug}`}>
       <Card className="group overflow-hidden h-full hover:shadow-2xl transition-all duration-300 border-2 hover:border-primary/50">
-        <div className="relative h-40 overflow-hidden"> {/* Adjusted to 16:9 thumbnail */}
+        <div className="relative h-32 overflow-hidden"> {/* Adjusted to h-32 (8rem) */}
           <SafeBlogImage
             src={randomImage || mainImage}
             alt={blog.title}
@@ -464,8 +464,8 @@ function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
             Featured
           </Badge>
         </div>
-        <div className="p-6 space-y-4">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="p-4 space-y-3">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
               <span>{blog.readTime || 5} min</span>
@@ -475,13 +475,13 @@ function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
               <span>{blog.viewCount} views</span>
             </div>
           </div>
-          <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="text-lg font-bold line-clamp-2 group-hover:text-primary transition-colors">
             {blog.title}
           </h3>
           <p className="text-muted-foreground line-clamp-2 text-sm">
             {blog.excerpt}
           </p>
-          <div className="flex items-center justify-between pt-4 border-t">
+          <div className="flex items-center justify-between pt-3 border-t">
             <div className="flex items-center gap-2 text-sm">
               <User className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">{blog.author.name}</span>
@@ -502,7 +502,7 @@ function BlogCard({ blog }: { blog: PublicBlog }) {
   return (
     <Link href={`/blogs/${blog.slug}`}>
       <Card className="group overflow-hidden h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <div className="relative h-32 overflow-hidden"> {/* Adjusted to 16:9 thumbnail */}
+        <div className="relative h-28 overflow-hidden"> {/* Adjusted to h-28 (7rem) */}
           <SafeBlogImage
             src={randomImage || mainImage}
             alt={blog.title}
@@ -511,8 +511,8 @@ function BlogCard({ blog }: { blog: PublicBlog }) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
         </div>
-        <div className="p-5 space-y-3">
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="p-4 space-y-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               <span>{blog.readTime || 5} min</span>
@@ -522,14 +522,14 @@ function BlogCard({ blog }: { blog: PublicBlog }) {
               <span>{blog.publishedAt ? format(parseISO(blog.publishedAt), 'MMM d, yyyy') : '—'}</span>
             </div>
           </div>
-          <h3 className="text-lg font-bold line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="text-base font-bold line-clamp-2 group-hover:text-primary transition-colors">
             {blog.title}
           </h3>
           <p className="text-muted-foreground line-clamp-2 text-sm">
             {blog.excerpt}
           </p>
           {blog.categories && blog.categories.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1">
               {blog.categories.slice(0, 2).map((cat: any) => (
                 <Badge key={cat.id} variant="secondary" className="text-xs">
                   {cat.name}
@@ -547,15 +547,15 @@ function BlogCard({ blog }: { blog: PublicBlog }) {
 function BlogCardSkeleton() {
   return (
     <Card className="overflow-hidden">
-      <div className="h-32 bg-muted animate-pulse"></div> {/* Adjusted to match thumbnail height */}
-      <div className="p-5 space-y-3">
-        <div className="flex gap-3">
+      <div className="h-28 bg-muted animate-pulse"></div> {/* Adjusted to match thumbnail height */}
+      <div className="p-4 space-y-2">
+        <div className="flex gap-2">
+          <div className="h-4 w-12 bg-muted animate-pulse rounded"></div>
           <div className="h-4 w-16 bg-muted animate-pulse rounded"></div>
-          <div className="h-4 w-24 bg-muted animate-pulse rounded"></div>
         </div>
-        <div className="h-6 bg-muted animate-pulse rounded"></div>
-        <div className="h-6 w-3/4 bg-muted animate-pulse rounded"></div>
-        <div className="h-12 bg-muted animate-pulse rounded"></div>
+        <div className="h-5 bg-muted animate-pulse rounded"></div>
+        <div className="h-5 w-2/3 bg-muted animate-pulse rounded"></div>
+        <div className="h-10 bg-muted animate-pulse rounded"></div>
       </div>
     </Card>
   );
