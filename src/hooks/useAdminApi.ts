@@ -403,13 +403,20 @@ export function useAsyncOperation<T = any>() {
 
 export function useFilters<T extends Record<string, any>>(initialFilters: T) {
   const [filters, setFilters] = useState<T>(initialFilters);
+  const [filterKey, setFilterKey] = useState(0); // Force re-render
 
   const updateFilter = useCallback((key: keyof T, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters(prev => {
+      const updated = { ...prev, [key]: value };
+      console.log('[useFilters] Updated:', { key, value, newFilters: updated });
+      return updated;
+    });
+    setFilterKey(prev => prev + 1); // Force dependency change
   }, []);
 
   const resetFilters = useCallback(() => {
     setFilters(initialFilters);
+    setFilterKey(prev => prev + 1);
   }, [initialFilters]);
 
   const clearFilters = useCallback(() => {
@@ -418,16 +425,23 @@ export function useFilters<T extends Record<string, any>>(initialFilters: T) {
       return acc;
     }, {} as T);
     setFilters(clearedFilters);
+    setFilterKey(prev => prev + 1);
   }, [initialFilters]);
 
   return {
     filters,
+    filterKey, // Add this to track changes
     updateFilter,
     resetFilters,
     clearFilters,
     setFilters
   };
 }
+
+
+
+
+
 
 // ============================================================================
 // DASHBOARD HOOKS WITH PROPER TYPING
