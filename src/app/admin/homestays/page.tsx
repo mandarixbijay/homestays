@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import HomestayManagement from '@/components/admin/HomestayManagement';
+import ImprovedHomestayManagement from '@/components/admin/ImprovedHomestayManagement';
 
 export default function HomestaysPage() {
-  return <HomestayManagement />;
+  return <ImprovedHomestayManagement />;
 }

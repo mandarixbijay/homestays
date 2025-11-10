@@ -135,7 +135,9 @@ const StatCard: React.FC<{
   color: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
   onClick?: () => void;
   loading?: boolean;
-}> = ({ title, value, icon, color, onClick, loading }) => {
+}> = ({ title, value, icon, color
+
+, onClick, loading }) => {
   const colorClasses = {
     blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
     green: 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400',
@@ -345,7 +347,7 @@ export default function ImprovedAdminDashboard() {
     loading: homestaysLoading, 
     error: homestaysError, 
     loadHomestays,
-    setHomestays, // Added
+    setHomestays,
     clearError 
   } = useHomestays();
 
@@ -405,7 +407,7 @@ export default function ImprovedAdminDashboard() {
       let allHomestays: Homestay[] = [];
       let page = 1;
       let totalPages = 1;
-      const limit = 100; // Match API page size
+      const limit = 100;
 
       while (page <= totalPages) {
         const result = await loadHomestays({ limit, page });

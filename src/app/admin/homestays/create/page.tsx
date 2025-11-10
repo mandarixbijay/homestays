@@ -615,7 +615,14 @@ export default function ImprovedHomestayCreate() {
         message: 'Homestay created successfully!'
       });
 
-      router.push(`/admin/homestays/${result.id}?created=true`);
+      // support different response shapes (direct Homestay or paginated wrapper)
+      const createdId = (result as any)?.id ?? (result as any)?.data?.id ?? (result as any)?.items?.[0]?.id ?? (result as any)?.result?.id;
+      if (createdId) {
+        router.push(`/admin/homestays/${createdId}?created=true`);
+      } else {
+        // fallback to list if we cannot determine created id
+        router.push('/admin/homestays');
+      }
     } catch (error) {
       addToast({
         type: 'error',

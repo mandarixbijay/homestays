@@ -185,7 +185,6 @@ const ApprovalModal: React.FC<{ isOpen: boolean; onClose: () => void; data: Appr
 };
 
 // ============================================================================
-//doğan
 // MAIN COMPONENT
 // ============================================================================
 
@@ -204,42 +203,39 @@ export default function ImprovedHomestayManagement() {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approvalData, setApprovalData] = useState<ApprovalModalData | null>(null);
 
-  // Debounced search
-  const handleSearchChange = useMemo(
-    () => debounce((value: string) => {
-      console.log('Search changed:', value);
-      setSearch(value);
-      setCurrentPage(1);
-    }, 300),
-    []
+  // Debounced API call for loading data
+  const debouncedLoadData = useMemo(
+    () => debounce((params: any) => {
+      console.log('[HomestayManagement] Debounced load with params:', params);
+      loadHomestays(params).catch(error => {
+        addToast({ type: 'error', title: 'Error', message: 'Failed to load homestays' });
+      });
+    }, 500),
+    [loadHomestays, addToast]
   );
 
-  useEffect(() => {
-    return () => handleSearchChange.cancel();
-  }, [handleSearchChange]);
-
-  const stats = useMemo(() => {
-    const pendingCount = homestays.filter((h: any) => h.status === 'PENDING').length;
-    const approvedCount = homestays.filter((h: any) => h.status === 'APPROVED').length;
-    const rejectedCount = homestays.filter((h: any) => h.status === 'REJECTED').length;
-    const totalRooms = homestays.reduce((sum: number, h: any) => sum + (h.rooms?.length || 0), 0);
-    return { total, pending: pendingCount, approved: approvedCount, rejected: rejectedCount, totalRooms };
-  }, [homestays, total]);
-
   const loadData = useCallback(async () => {
-    try {
-      const params: any = { page: currentPage, limit: 10 };
-      if (search.trim()) params.name = search.trim();
-      if (statusFilter) params.status = statusFilter;
-      if (ownerIdFilter.trim()) params.ownerId = ownerIdFilter.trim();
-      if (addressFilter.trim()) params.address = addressFilter.trim();
+    const params: any = { page: currentPage, limit: 10 };
+    if (search.trim()) params.name = search.trim();
+    if (statusFilter) params.status = statusFilter;
+    if (ownerIdFilter.trim()) params.ownerId = ownerIdFilter.trim();
+    if (addressFilter.trim()) params.address = addressFilter.trim();
+    debouncedLoadData(params);
+  }, [currentPage, search, statusFilter, ownerIdFilter, addressFilter, debouncedLoadData]);
 
-      console.log('Loading with params:', params);
-      await loadHomestays(params);
-    } catch (error) {
-      addToast({ type: 'error', title: 'Error', message: 'Failed to load homestays' });
+  // Handle search input change (instant state update for smooth typing)
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    console.log('[HomestayManagement] Search input changed:', value);
+    setSearch(value);
+    if (value !== search) {
+      setCurrentPage(1);
     }
-  }, [currentPage, search, statusFilter, ownerIdFilter, addressFilter, loadHomestays, addToast]);
+  }, [search]);
+
+  useEffect(() => {
+    return () => debouncedLoadData.cancel();
+  }, [debouncedLoadData]);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
@@ -249,15 +245,15 @@ export default function ImprovedHomestayManagement() {
     if (status === 'authenticated') {
       loadData();
     }
-  }, [status, session?.user?.role, router, currentPage, search, statusFilter, ownerIdFilter, addressFilter]);
+  }, [status, session?.user?.role, router, loadData]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setSearch('');
     setStatusFilter('');
     setOwnerIdFilter('');
     setAddressFilter('');
     setCurrentPage(1);
-  };
+  }, []);
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete?')) return;
@@ -283,6 +279,14 @@ export default function ImprovedHomestayManagement() {
       setShowApprovalModal(false);
     } catch (error: any) { }
   };
+
+  const stats = useMemo(() => {
+    const pendingCount = homestays.filter((h: any) => h.status === 'PENDING').length;
+    const approvedCount = homestays.filter((h: any) => h.status === 'APPROVED').length;
+    const rejectedCount = homestays.filter((h: any) => h.status === 'REJECTED').length;
+    const totalRooms = homestays.reduce((sum: number, h: any) => sum + (h.rooms?.length || 0), 0);
+    return { total, pending: pendingCount, approved: approvedCount, rejected: rejectedCount, totalRooms };
+  }, [homestays, total]);
 
   if (status === 'loading') return (<div className="min-h-screen flex items-center justify-center"><LoadingSpinner size="lg" text="Loading..." /></div>);
   if (session?.user?.role !== 'ADMIN') return null;
@@ -314,7 +318,7 @@ export default function ImprovedHomestayManagement() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                onChange={handleSearchChange}
                 placeholder="Search by homestay name..."
                 autoComplete="off"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
