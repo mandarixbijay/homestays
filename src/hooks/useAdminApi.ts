@@ -718,18 +718,27 @@ export function useHomestayDetail(homestayId: number) {
   const [homestay, setHomestay] = useState<any>(null);
   const { loading, error, execute, clearError } = useAsyncOperation<any>();
 
-  const loadHomestay = useCallback(async () => {
-    try {
-      const result = await execute(async () => {
-        return await adminApi.getHomestay(homestayId);
-      });
+const loadHomestay = useCallback(async () => {
+  try {
+    const result = await execute(async () => {
+      // Fetch single homestay by ID from the API
+      const response = await adminApi.getHomestay(homestayId);
+      return response;
+    });
+
+    if (result) {
       setHomestay(result);
-      return result;
-    } catch (error) {
-      console.error('Error loading homestay:', error);
-      throw error;
+    } else {
+      setHomestay(null);
     }
-  }, [homestayId, execute]);
+
+    return result;
+  } catch (error) {
+    console.error('Error loading homestay detail:', error);
+    setHomestay(null);
+    throw error;
+  }
+}, [homestayId, execute]);
 
   const updateHomestay = useCallback(async (data: any) => {
     try {

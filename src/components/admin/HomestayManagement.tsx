@@ -145,7 +145,7 @@ const ApprovalModal: React.FC<{ isOpen: boolean; onClose: () => void; data: Appr
     try {
       await execute(() => onSubmit(formData));
       onClose();
-    } catch (error: any) {}
+    } catch (error: any) { }
   };
 
   if (!formData) return null;
@@ -187,15 +187,15 @@ export default function ImprovedHomestayManagement() {
   const loadData = useCallback(async () => {
     try {
       const params: any = { page: currentPage, limit: 10 };
-      if (search.trim()) params.search = search.trim();
+      if (search.trim()) params.name = search.trim();        // ← THIS LINE FIXED
       if (statusFilter) params.status = statusFilter;
       if (ownerIdFilter.trim()) params.ownerId = ownerIdFilter.trim();
       if (addressFilter.trim()) params.address = addressFilter.trim();
-      
+
       console.log('Loading with params:', params);
       await loadHomestays(params);
     } catch (error) {
-      addToast({ type: 'error', title: 'Error', message: 'Failed to load' });
+      addToast({ type: 'error', title: 'Error', message: 'Failed to load homestays' });
     }
   }, [currentPage, search, statusFilter, ownerIdFilter, addressFilter, loadHomestays, addToast]);
 
@@ -245,7 +245,7 @@ export default function ImprovedHomestayManagement() {
       await loadData();
       addToast({ type: 'success', title: 'Success', message: 'Done' });
       setShowApprovalModal(false);
-    } catch (error: any) {}
+    } catch (error: any) { }
   };
 
   if (status === 'loading') return (<div className="min-h-screen flex items-center justify-center"><LoadingSpinner size="lg" text="Loading..." /></div>);
@@ -271,7 +271,7 @@ export default function ImprovedHomestayManagement() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (<div className="mb-6"><Alert type="error" title="Error" message={error} onClose={clearError} /></div>)}
-        
+
         <Card title="Filters" className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
@@ -279,7 +279,8 @@ export default function ImprovedHomestayManagement() {
                 type="text"
                 value={search}
                 onChange={handleSearchChange}
-                placeholder="Search by name..."
+                placeholder="Search by homestay name..."  // ← Updated placeholder
+                autoComplete="off"                        // ← Prevents content_script.js error
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
