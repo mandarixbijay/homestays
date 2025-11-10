@@ -1077,38 +1077,126 @@ export default function UnifiedBlogForm({ blogId, initialData }: UnifiedBlogForm
         };
     }, [formData, isEditMode]);
 
-    const loadData = async () => {
-        setLoading(true);
-        try {
-            const [categoriesData, tagsData] = await Promise.all([
-                blogApi.getCategories(),
-                blogApi.getTags(),
-            ]);
-            setCategories(categoriesData);
-            setTags(tagsData);
+const loadData = async () => {
+    setLoading(true);
+    try {
+        const [categoriesData, tagsData] = await Promise.all([
+            blogApi.getCategories(),
+            blogApi.getTags(),
+        ]);
+        setCategories(categoriesData);
+        setTags(tagsData);
 
-            if (isEditMode && !initialData) {
-                const blogData = await blogApi.getBlog(blogId!);
-                setFormData({
-                    title: blogData.title,
-                    slug: blogData.slug,
-                    excerpt: blogData.excerpt || '',
-                    content: blogData.content || '',
-                    status: blogData.status,
-                    featured: blogData.featured,
-                    seoTitle: blogData.seoTitle || '',
-                    seoDescription: blogData.seoDescription || '',
-                    tagIds: blogData.tags?.map(t => t.id) || [],
-                    categoryIds: blogData.categories?.map(c => c.id) || [],
-                    images: blogData.images || [],
-                });
-            }
-        } catch (error) {
-            addToast({ type: 'error', title: 'Error', message: 'Failed to load data' });
-        } finally {
-            setLoading(false);
+        if (isEditMode && !initialData) {
+            const blogData = await blogApi.getBlog(blogId!);
+            
+            // ✅ DEBUG: Log the response structure
+            console.log('[loadData] ===== BLOG DATA LOADED =====');
+            console.log('[loadData] Full blog data:', blogData);
+            console.log('[loadData] Categories structure:', blogData.categories);
+            console.log('[loadData] Tags structure:', blogData.tags);
+            
+            // ✅ FIX: Extract IDs with support for multiple response formats
+            const extractCategoryIds = (): number[] => {
+                if (!blogData.categories || blogData.categories.length === 0) {
+                    console.log('[loadData] No categories found');
+                    return [];
+                }
+                
+                const firstItem = blogData.categories[0];
+                console.log('[loadData] First category item:', firstItem);
+                
+                // Format 1: Nested structure { id, blogId, categoryId, category: {...} }
+                if (typeof firstItem === 'object' && 'category' in firstItem && (firstItem as any).category?.id) {
+                    const ids = blogData.categories.map((bc: any) => bc.category ? bc.category.id : bc.id);
+                    console.log('[loadData] Extracted from nested structure:', ids);
+                    return ids;
+                }
+                
+                // Format 2: Direct structure { id, name, ... }
+                if (typeof firstItem === 'object' && 'id' in firstItem && (firstItem as any).id) {
+                    const ids = blogData.categories.map((c: any) => c.id);
+                    console.log('[loadData] Extracted from flat structure:', ids);
+                    return ids;
+                }
+                
+                console.warn('[loadData] Unknown category structure:', firstItem);
+                return [];
+            };
+            
+            const extractTagIds = (): number[] => {
+                if (!blogData.tags || blogData.tags.length === 0) {
+                    console.log('[loadData] No tags found');
+                    return [];
+                }
+                
+                const firstItem = blogData.tags[0];
+                console.log('[loadData] First tag item:', firstItem);
+                
+                // Format 1: Nested structure { id, blogId, tagId, tag: {...} }
+                if (typeof firstItem === 'object' && 'tag' in firstItem && (firstItem as any).tag?.id) {
+                    const ids = blogData.tags.map((bt: any) => bt.tag ? bt.tag.id : bt.id);
+                    console.log('[loadData] Extracted from nested structure:', ids);
+                    return ids;
+                }
+                
+                // Format 2: Direct structure { id, name, ... }
+                if (typeof firstItem === 'object' && 'id' in firstItem && (firstItem as any).id) {
+                    const ids = blogData.tags.map((t: any) => t.id);
+                    console.log('[loadData] Extracted from flat structure:', ids);
+                    return ids;
+                }
+                
+                console.warn('[loadData] Unknown tag structure:', firstItem);
+                return [];
+            };
+            
+            const categoryIds = extractCategoryIds();
+            const tagIds = extractTagIds();
+            
+            console.log('[loadData] ===== EXTRACTED IDs =====');
+            console.log('[loadData] Category IDs:', categoryIds);
+            console.log('[loadData] Tag IDs:', tagIds);
+            
+            const newFormData = {
+                title: blogData.title,
+                slug: blogData.slug,
+                excerpt: blogData.excerpt || '',
+                content: blogData.content || '',
+                status: blogData.status,
+                featured: blogData.featured,
+                seoTitle: blogData.seoTitle || '',
+                seoDescription: blogData.seoDescription || '',
+                tagIds: tagIds,
+                categoryIds: categoryIds,
+                images: blogData.images || [],
+            };
+            
+            console.log('[loadData] ===== SETTING FORM DATA =====');
+            console.log('[loadData] Form data to set:', {
+                categoryIds: newFormData.categoryIds,
+                tagIds: newFormData.tagIds,
+                title: newFormData.title
+            });
+            
+            setFormData(newFormData);
+            
+            // ✅ Verify the state was set
+            setTimeout(() => {
+                console.log('[loadData] ===== VERIFICATION =====');
+                console.log('[loadData] Form data state should now have:');
+                console.log('[loadData] - categoryIds:', categoryIds);
+                console.log('[loadData] - tagIds:', tagIds);
+            }, 100);
         }
-    };
+    } catch (error) {
+        console.error('[loadData] ===== ERROR =====');
+        console.error('[loadData] Error details:', error);
+        addToast({ type: 'error', title: 'Error', message: 'Failed to load data' });
+    } finally {
+        setLoading(false);
+    }
+};
 
     const handleChange = (field: keyof FormData, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));

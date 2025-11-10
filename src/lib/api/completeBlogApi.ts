@@ -145,6 +145,14 @@ export interface Blog {
 // BLOG API CLASS
 // ============================================================================
 
+export function sanitizeIds(ids: any[] | undefined): number[] {
+  if (!ids || !Array.isArray(ids)) return [];
+  return ids
+    .filter(id => id !== null && id !== undefined && id !== 0 && id !== '')
+    .map(id => typeof id === 'string' ? parseInt(id, 10) : id)
+    .filter(id => !isNaN(id) && id > 0);
+}
+
 class BlogApi {
   // Map to store file URLs and their corresponding File objects
   private fileMap = new Map<string, File>();
@@ -281,56 +289,206 @@ class BlogApi {
       throw new Error('Invalid blog ID provided');
     }
     return this.request<Blog>(`/blog/admin/blogs/${id}`);
+}
+
+async updateBlog(id: number, blogData: UpdateBlogData, imageFiles: File[] = []): Promise<Blog> {
+  // Fixed: Ensure ID is valid
+  if (!id || isNaN(id)) {
+    throw new Error('Invalid blog ID provided for update');
   }
 
-  async createBlog(blogData: CreateBlogData, imageFiles: File[] = []): Promise<Blog> {
-    console.log('[createBlog] Starting creation...', { blogData, imageFiles: imageFiles.length });
+  try {
+    console.log('[updateBlog] ===== START =====');
+    console.log('[updateBlog] Original blogData:', {
+      categoryIds: blogData.categoryIds,
+      tagIds: blogData.tagIds,
+      status: blogData.status
+    });
 
+    // ✅ CRITICAL FIX: Sanitize categoryIds and tagIds BEFORE processing
+    const sanitizedBlogData = {
+      ...blogData,
+      categoryIds: sanitizeIds(blogData.categoryIds),
+      tagIds: sanitizeIds(blogData.tagIds)
+    };
+
+    console.log('[updateBlog] After sanitization:', {
+      categoryIds: sanitizedBlogData.categoryIds,
+      tagIds: sanitizedBlogData.tagIds
+    });
+
+    const formData = new FormData();
+
+    // Add fields that are being updated
+    Object.entries(sanitizedBlogData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        if (key === 'images') {
+          // Process images - match blob URLs with actual files
+          const processedImages = (value as BlogImage[]).map(img => {
+            const file = this.fileMap.get(img.url || '');
+            if (file) {
+              imageFiles.push(file);
+              return { ...img, url: '' };
+            }
+            return img;
+          });
+          formData.append(key, JSON.stringify(processedImages));
+        } else if (key === 'tagIds' || key === 'categoryIds') {
+          // ✅ FIX: Only append if array has valid values
+          const sanitizedArray = sanitizeIds(value as any[]);
+          
+          if (sanitizedArray.length > 0) {
+            formData.append(key, JSON.stringify(sanitizedArray));
+            console.log(`[updateBlog] Appending ${key}:`, sanitizedArray);
+          } else {
+            console.log(`[updateBlog] Skipping empty ${key}`);
+            // Append empty array to explicitly clear categories/tags
+            formData.append(key, JSON.stringify([]));
+          }
+        } else if (key === 'status') {
+          // Ensure status is properly set
+          formData.append(key, value.toString());
+        } else if (Array.isArray(value)) {
+          // Handle other arrays
+          formData.append(key, JSON.stringify(value));
+        } else if (typeof value === 'object') {
+          // Handle objects
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value.toString());
+        }
+      }
+    });
+
+    // Add ALL image files (from gallery and content)
+    const allImageFiles = [...imageFiles, ...Array.from(this.fileMap.values())];
+    allImageFiles.forEach((file) => {
+      formData.append('files', file);
+      console.log('[updateBlog] Added image file:', file.name);
+    });
+
+    console.log('[updateBlog] FormData contents:');
+    for (const [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`  ${key}: [File] ${(value as File).name}`);
+      } else {
+        console.log(`  ${key}:`, value);
+      }
+    }
+
+    const session = await getSession();
+    const response = await fetch(`${API_BASE_URL}/blog/admin/blogs/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${session?.user?.accessToken}`,
+      },
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[updateBlog] Error response:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText
+      });
+      throw new Error(`Failed to update blog: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    
+    // Clear the file map after successful update
+    this.fileMap.clear();
+    
+    console.log('[updateBlog] ===== SUCCESS =====');
+    console.log('[updateBlog] Result:', {
+      id: result.id,
+      categories: result.categories?.length,
+      tags: result.tags?.length
+    });
+    
+    return result;
+  } catch (error) {
+    console.error('[updateBlog] ===== ERROR =====');
+    console.error('[updateBlog] Error details:', error);
+    throw error;
+  }
+}
+  
+
+  
+
+  async createBlog(blogData: CreateBlogData, imageFiles: File[] = []): Promise<Blog> {
     try {
+      console.log('[createBlog] ===== START =====');
+      console.log('[createBlog] Original blogData:', {
+        categoryIds: blogData.categoryIds,
+        tagIds: blogData.tagIds
+      });
+
+      // ✅ CRITICAL FIX: Sanitize categoryIds and tagIds BEFORE processing
+      const sanitizedBlogData = {
+        ...blogData,
+        categoryIds: sanitizeIds(blogData.categoryIds),
+        tagIds: sanitizeIds(blogData.tagIds)
+      };
+
+      console.log('[createBlog] After sanitization:', {
+        categoryIds: sanitizedBlogData.categoryIds,
+        tagIds: sanitizedBlogData.tagIds
+      });
+
       const formData = new FormData();
 
-      // Add basic fields
-      formData.append('title', blogData.title);
-      formData.append('authorId', blogData.authorId.toString());
-      formData.append('status', blogData.status || 'DRAFT');
-      formData.append('featured', (blogData.featured || false).toString());
+      // Add all blog data fields
+      Object.entries(sanitizedBlogData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (key === 'images') {
+            const processedImages = (value as BlogImage[]).map(img => {
+              const file = this.fileMap.get(img.url || '');
+              if (file) {
+                imageFiles.push(file);
+                return { ...img, url: '' };
+              }
+              return img;
+            });
+            formData.append(key, JSON.stringify(processedImages));
+          } else if (key === 'tagIds' || key === 'categoryIds') {
+            // ✅ FIX: Only append if array has valid values
+            const sanitizedArray = sanitizeIds(value as any[]);
 
-      // Add optional fields
-      if (blogData.slug) formData.append('slug', blogData.slug);
-      if (blogData.excerpt) formData.append('excerpt', blogData.excerpt);
-      if (blogData.content) formData.append('content', blogData.content);
-      if (blogData.featuredImage) formData.append('featuredImage', blogData.featuredImage);
-      if (blogData.seoTitle) formData.append('seoTitle', blogData.seoTitle);
-      if (blogData.seoDescription) formData.append('seoDescription', blogData.seoDescription);
-      if (blogData.readTime) formData.append('readTime', blogData.readTime.toString());
-
-      // Process images - match blob URLs with actual files
-      const processedImages = blogData.images?.map(img => {
-        // Check if this is a blob URL and we have the corresponding file
-        const file = this.fileMap.get(img.url || '');
-        if (file) {
-          // This is a new file to upload
-          imageFiles.push(file);
-          return {
-            ...img,
-            url: '' // Clear URL since we'll upload the file
-          };
+            if (sanitizedArray.length > 0) {
+              formData.append(key, JSON.stringify(sanitizedArray));
+              console.log(`[createBlog] Appending ${key}:`, sanitizedArray);
+            } else {
+              console.log(`[createBlog] Skipping empty ${key}`);
+            }
+          } else if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+          } else if (typeof value === 'object') {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value.toString());
+          }
         }
-        return img;
-      }) || [];
-
-      formData.append('images', JSON.stringify(processedImages));
-
-      // Handle tags and categories
-      formData.append('tagIds', JSON.stringify(blogData.tagIds || []));
-      formData.append('categoryIds', JSON.stringify(blogData.categoryIds || []));
-
-      // Add ALL image files (from gallery and content)
-      const allImageFiles = [...imageFiles, ...Array.from(this.fileMap.values())];
-      allImageFiles.forEach((file, index) => {
-        formData.append('files', file);
-        console.log(`[createBlog] Added image file ${index}:`, file.name);
       });
+
+      // Add image files
+      const allImageFiles = [...imageFiles, ...Array.from(this.fileMap.values())];
+      allImageFiles.forEach((file) => {
+        formData.append('files', file);
+        console.log('[createBlog] Added image file:', file.name);
+      });
+
+      console.log('[createBlog] FormData contents:');
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`  ${key}: [File] ${value.name}`);
+        } else {
+          console.log(`  ${key}:`, value);
+        }
+      }
 
       const session = await getSession();
       const response = await fetch(`${API_BASE_URL}/blog/admin/blogs`, {
@@ -353,85 +511,26 @@ class BlogApi {
       }
 
       const result = await response.json();
-      console.log('[createBlog] Success:', result);
-      
-      // Clear the file map after successful upload
+
+      // Clear the file map after successful creation
       this.fileMap.clear();
-      
+
+      console.log('[createBlog] ===== SUCCESS =====');
+      console.log('[createBlog] Result:', {
+        id: result.id,
+        categories: result.categories?.length,
+        tags: result.tags?.length
+      });
+
       return result;
     } catch (error) {
-      console.error('[createBlog] Error:', error);
+      console.error('[createBlog] ===== ERROR =====');
+      console.error('[createBlog] Error details:', error);
       throw error;
     }
   }
 
-  async updateBlog(id: number, blogData: UpdateBlogData, imageFiles: File[] = []): Promise<Blog> {
-    // Fixed: Ensure ID is valid
-    if (!id || isNaN(id)) {
-      throw new Error('Invalid blog ID provided for update');
-    }
 
-    try {
-      const formData = new FormData();
-
-      // Add fields that are being updated
-      Object.entries(blogData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (key === 'images') {
-            // Process images - match blob URLs with actual files
-            const processedImages = (value as BlogImage[]).map(img => {
-              const file = this.fileMap.get(img.url || '');
-              if (file) {
-                imageFiles.push(file);
-                return { ...img, url: '' };
-              }
-              return img;
-            });
-            formData.append(key, JSON.stringify(processedImages));
-          } else if (key === 'tagIds' || key === 'categoryIds') {
-            formData.append(key, JSON.stringify(value));
-          } else if (key === 'status') {
-            // Ensure status is properly set
-            formData.append(key, value.toString());
-          } else {
-            formData.append(key, value.toString());
-          }
-        }
-      });
-
-      // Add ALL image files (from gallery and content)
-      const allImageFiles = [...imageFiles, ...Array.from(this.fileMap.values())];
-      allImageFiles.forEach((file) => {
-        formData.append('files', file);
-        console.log('[updateBlog] Added image file:', file.name);
-      });
-
-      const session = await getSession();
-      const response = await fetch(`${API_BASE_URL}/blog/admin/blogs/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${session?.user?.accessToken}`,
-        },
-        body: formData,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update blog: ${response.status} - ${errorText}`);
-      }
-
-      const result = await response.json();
-      
-      // Clear the file map after successful update
-      this.fileMap.clear();
-      
-      return result;
-    } catch (error) {
-      console.error('Error updating blog:', error);
-      throw error;
-    }
-  }
 
   async deleteBlog(id: number): Promise<void> {
     // Fixed: Ensure ID is valid
@@ -460,10 +559,10 @@ class BlogApi {
   async uploadImage(file: File): Promise<{ url: string; alt?: string; caption?: string }> {
     // Create temporary blob URL for preview
     const blobUrl = URL.createObjectURL(file);
-    
+
     // Store the file with its blob URL for later upload
     this.fileMap.set(blobUrl, file);
-    
+
     return { url: blobUrl, alt: '', caption: '' };
   }
 

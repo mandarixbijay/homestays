@@ -1,8 +1,36 @@
-// hooks/useFixedBlogApi.ts - Complete Fixed Blog hooks with proper image handling and status management
+// hooks/useCompleteBlogApi.ts - Complete Fixed Blog hooks with proper image handling, status management, and category/tag sanitization
 
 import { useState, useCallback } from 'react';
 import { blogApi, Blog, CreateBlogData, UpdateBlogData, BlogFilters, Tag, Category, BlogStats } from '@/lib/api/completeBlogApi';
 import { useAsyncOperation, useFilters } from '@/hooks/useAdminApi';
+
+// ============================================================================
+// ID SANITIZATION HELPER
+// ============================================================================
+
+/**
+ * Sanitizes category and tag IDs by removing null, undefined, 0, and invalid values
+ * Ensures only valid positive integers are returned
+ */
+export function sanitizeIds(ids: any[] | undefined): number[] {
+  if (!ids || !Array.isArray(ids)) {
+    return [];
+  }
+  
+  return ids
+    .filter(id => {
+      // Remove null, undefined, empty strings, and zero
+      return id !== null && id !== undefined && id !== 0 && id !== '';
+    })
+    .map(id => {
+      // Convert strings to numbers
+      return typeof id === 'string' ? parseInt(id, 10) : id;
+    })
+    .filter(id => {
+      // Remove NaN and negative numbers
+      return !isNaN(id) && id > 0;
+    });
+}
 
 // ============================================================================
 // IMAGE UPLOAD HELPER FUNCTIONS
@@ -76,6 +104,33 @@ export function useBlogs() {
     try {
       console.log('[useBlogs] Creating blog with:', { blogData, imageFiles: imageFiles.length });
       
+      // ✅ FIX: Sanitize categoryIds and tagIds before processing
+      const sanitizedBlogData = {
+        ...blogData,
+        categoryIds: sanitizeIds(blogData.categoryIds),
+        tagIds: sanitizeIds(blogData.tagIds)
+      };
+
+      console.log('[useBlogs] Sanitized IDs:', {
+        originalCategoryIds: blogData.categoryIds,
+        sanitizedCategoryIds: sanitizedBlogData.categoryIds,
+        originalTagIds: blogData.tagIds,
+        sanitizedTagIds: sanitizedBlogData.tagIds
+      });
+
+      // Validate required fields
+      if (!sanitizedBlogData.title?.trim()) {
+        throw new Error('Blog title is required');
+      }
+
+      if (!sanitizedBlogData.content?.trim()) {
+        throw new Error('Blog content is required');
+      }
+
+      if (!sanitizedBlogData.authorId || sanitizedBlogData.authorId <= 0) {
+        throw new Error('Valid author ID is required');
+      }
+      
       const result = await execute(async () => {
         // First upload images if any
         let uploadedImages: Array<{ url: string; alt?: string; caption?: string }> = [];
@@ -93,7 +148,7 @@ export function useBlogs() {
         }
 
         // Merge uploaded images with existing image metadata
-        const finalImages = blogData.images?.map((img, index) => {
+        const finalImages = sanitizedBlogData.images?.map((img, index) => {
           const uploadedImage = uploadedImages[index];
           return {
             ...img,
@@ -106,14 +161,19 @@ export function useBlogs() {
           caption: img.caption || ''
         }));
 
-        // Update blog data with uploaded images
+        // Update blog data with uploaded images and sanitized IDs
         const finalBlogData = {
-          ...blogData,
+          ...sanitizedBlogData,
           images: finalImages,
-          featuredImage: finalImages.find(img => img.isMain)?.url || blogData.featuredImage
+          featuredImage: finalImages.find(img => img.isMain)?.url || sanitizedBlogData.featuredImage
         };
 
-        console.log('[useBlogs] Creating blog with final data:', finalBlogData);
+        console.log('[useBlogs] Creating blog with final data:', {
+          ...finalBlogData,
+          categoryIds: finalBlogData.categoryIds,
+          tagIds: finalBlogData.tagIds
+        });
+
         return await blogApi.createBlog(finalBlogData, []); // No files needed now
       });
       
@@ -128,6 +188,29 @@ export function useBlogs() {
   const updateBlog = useCallback(async (id: number, blogData: UpdateBlogData, imageFiles: File[] = []) => {
     try {
       console.log('[useBlogs] Updating blog:', { id, blogData, imageFiles: imageFiles.length });
+      
+      // ✅ FIX: Sanitize categoryIds and tagIds before processing
+      const sanitizedBlogData = {
+        ...blogData,
+        categoryIds: sanitizeIds(blogData.categoryIds),
+        tagIds: sanitizeIds(blogData.tagIds)
+      };
+
+      console.log('[useBlogs] Sanitized IDs for update:', {
+        originalCategoryIds: blogData.categoryIds,
+        sanitizedCategoryIds: sanitizedBlogData.categoryIds,
+        originalTagIds: blogData.tagIds,
+        sanitizedTagIds: sanitizedBlogData.tagIds
+      });
+
+      // Validate if updating critical fields
+      if (sanitizedBlogData.title !== undefined && !sanitizedBlogData.title?.trim()) {
+        throw new Error('Blog title cannot be empty');
+      }
+
+      if (sanitizedBlogData.content !== undefined && !sanitizedBlogData.content?.trim()) {
+        throw new Error('Blog content cannot be empty');
+      }
       
       const result = await execute(async () => {
         // First upload new images if any
@@ -146,7 +229,7 @@ export function useBlogs() {
         }
 
         // Merge existing images with newly uploaded ones
-        const existingImages = blogData.images?.filter(img => img.id) || [];
+        const existingImages = sanitizedBlogData.images?.filter(img => img.id) || [];
         const newImageMetadata = uploadedImages.map((img, index) => ({
           url: img.url,
           alt: img.alt || '',
@@ -156,14 +239,20 @@ export function useBlogs() {
 
         const finalImages = [...existingImages, ...newImageMetadata];
 
-        // Update blog data with all images
+        // Update blog data with all images and sanitized IDs
         const finalBlogData = {
-          ...blogData,
-          images: finalImages,
-          featuredImage: finalImages.find(img => img.isMain)?.url || blogData.featuredImage
+          ...sanitizedBlogData,
+          images: finalImages.length > 0 ? finalImages : undefined,
+          featuredImage: finalImages.find(img => img.isMain)?.url || sanitizedBlogData.featuredImage
         };
 
-        console.log('[useBlogs] Updating blog with final data:', finalBlogData);
+        console.log('[useBlogs] Updating blog with final data:', {
+          id,
+          categoryIds: finalBlogData.categoryIds,
+          tagIds: finalBlogData.tagIds,
+          imageCount: finalImages.length
+        });
+
         return await blogApi.updateBlog(id, finalBlogData, []); // No files needed now
       });
       
@@ -196,8 +285,21 @@ export function useBlogs() {
     action: 'publish' | 'archive' | 'draft' | 'delete' | 'feature' | 'unfeature'
   ) => {
     try {
+      // ✅ FIX: Validate blog IDs
+      const validBlogIds = sanitizeIds(blogIds);
+      
+      if (validBlogIds.length === 0) {
+        throw new Error('No valid blog IDs provided');
+      }
+
+      console.log('[useBlogs] Bulk action:', {
+        action,
+        originalIds: blogIds,
+        validIds: validBlogIds
+      });
+
       const result = await execute(async () => {
-        return await blogApi.bulkBlogActions({ blogIds, action });
+        return await blogApi.bulkBlogActions({ blogIds: validBlogIds, action });
       });
       return result;
     } catch (error) {
@@ -245,6 +347,20 @@ export function useBlogDetail(blogId: number) {
 
   const updateBlog = useCallback(async (data: UpdateBlogData, imageFiles: File[] = []) => {
     try {
+      // ✅ FIX: Sanitize IDs
+      const sanitizedData = {
+        ...data,
+        categoryIds: sanitizeIds(data.categoryIds),
+        tagIds: sanitizeIds(data.tagIds)
+      };
+
+      console.log('[useBlogDetail] Updating with sanitized data:', {
+        originalCategoryIds: data.categoryIds,
+        sanitizedCategoryIds: sanitizedData.categoryIds,
+        originalTagIds: data.tagIds,
+        sanitizedTagIds: sanitizedData.tagIds
+      });
+
       const result = await execute(async () => {
         // Upload new images first if any
         let uploadedImages: Array<{ url: string; alt?: string; caption?: string }> = [];
@@ -259,7 +375,7 @@ export function useBlogDetail(blogId: number) {
         }
 
         // Merge existing and new images
-        const existingImages = data.images?.filter(img => img.id) || [];
+        const existingImages = sanitizedData.images?.filter(img => img.id) || [];
         const newImageMetadata = uploadedImages.map((img, index) => ({
           url: img.url,
           alt: img.alt || '',
@@ -270,9 +386,9 @@ export function useBlogDetail(blogId: number) {
         const finalImages = [...existingImages, ...newImageMetadata];
 
         const finalData = {
-          ...data,
-          images: finalImages,
-          featuredImage: finalImages.find(img => img.isMain)?.url || data.featuredImage
+          ...sanitizedData,
+          images: finalImages.length > 0 ? finalImages : undefined,
+          featuredImage: finalImages.find(img => img.isMain)?.url || sanitizedData.featuredImage
         };
 
         return await blogApi.updateBlog(blogId, finalData, []);
@@ -307,14 +423,14 @@ export function useBlogForm(initialData?: Partial<CreateBlogData>) {
     content: '',
     featuredImage: '',
     images: [],
-    tagIds: [],
-    categoryIds: [],
-    authorId: 0,
-    status: 'DRAFT',
-    seoTitle: '',
-    seoDescription: '',
-    readTime: 0,
-    featured: false,
+    tagIds: sanitizeIds(initialData?.tagIds) || [],
+    categoryIds: sanitizeIds(initialData?.categoryIds) || [],
+    authorId: initialData?.authorId || 0,
+    status: initialData?.status || 'DRAFT',
+    seoTitle: initialData?.seoTitle || '',
+    seoDescription: initialData?.seoDescription || '',
+    readTime: initialData?.readTime || 0,
+    featured: initialData?.featured || false,
     ...initialData
   });
 
@@ -323,6 +439,15 @@ export function useBlogForm(initialData?: Partial<CreateBlogData>) {
   const updateField = useCallback((field: keyof CreateBlogData, value: any) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value };
+      
+      // ✅ FIX: Sanitize IDs when updating categoryIds or tagIds
+      if (field === 'categoryIds' || field === 'tagIds') {
+        updated[field] = sanitizeIds(value);
+        console.log(`[useBlogForm] Sanitized ${field}:`, {
+          original: value,
+          sanitized: updated[field]
+        });
+      }
       
       // Auto-generate slug from title if slug is empty
       if (field === 'title' && !prev.slug) {
@@ -351,7 +476,7 @@ export function useBlogForm(initialData?: Partial<CreateBlogData>) {
   }, []);
 
   const resetForm = useCallback((newData?: Partial<CreateBlogData>) => {
-    setFormData({
+    const defaultData = {
       title: '',
       slug: '',
       excerpt: '',
@@ -361,13 +486,19 @@ export function useBlogForm(initialData?: Partial<CreateBlogData>) {
       tagIds: [],
       categoryIds: [],
       authorId: 0,
-      status: 'DRAFT',
+      status: 'DRAFT' as const,
       seoTitle: '',
       seoDescription: '',
       readTime: 0,
       featured: false,
       ...newData
-    });
+    };
+
+    // ✅ FIX: Sanitize IDs when resetting
+    defaultData.categoryIds = sanitizeIds(defaultData.categoryIds);
+    defaultData.tagIds = sanitizeIds(defaultData.tagIds);
+
+    setFormData(defaultData);
     setErrors({});
   }, []);
 
@@ -388,6 +519,28 @@ export function useBlogForm(initialData?: Partial<CreateBlogData>) {
 
     if (formData.slug && !/^[a-z0-9-]+$/.test(formData.slug)) {
       newErrors.slug = 'Slug can only contain lowercase letters, numbers, and hyphens';
+    }
+
+    // ✅ FIX: Validate that categoryIds and tagIds don't contain invalid values
+    const sanitizedCategoryIds = sanitizeIds(formData.categoryIds);
+    const sanitizedTagIds = sanitizeIds(formData.tagIds);
+
+    if (formData.categoryIds?.length !== sanitizedCategoryIds.length) {
+      console.warn('[useBlogForm] Some category IDs were invalid and removed:', {
+        original: formData.categoryIds,
+        sanitized: sanitizedCategoryIds
+      });
+      // Auto-fix by updating formData
+      formData.categoryIds = sanitizedCategoryIds;
+    }
+
+    if (formData.tagIds?.length !== sanitizedTagIds.length) {
+      console.warn('[useBlogForm] Some tag IDs were invalid and removed:', {
+        original: formData.tagIds,
+        sanitized: sanitizedTagIds
+      });
+      // Auto-fix by updating formData
+      formData.tagIds = sanitizedTagIds;
     }
 
     setErrors(newErrors);
