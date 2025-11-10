@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { adminApi } from '@/lib/api/admin';
 import { useAuthenticatedApi } from '@/hooks/useSessionManager';
+import { Homestay, PaginatedResponse } from '@/types/admin';
 
 // ============================================================================
 // TYPES
@@ -264,24 +265,42 @@ class ValidationHelper {
   }
 }
 
-// Helper functions for dashboard calculations
-export const calculateHomestayStats = (homestays: any[]) => {
+
+
+const calculateHomestayStats = (homestays: Homestay[]) => {
+  console.log('[Dashboard] Calculating stats from homestays:', {
+    total: homestays.length,
+    sample: homestays.slice(0, 2).map(h => ({
+      id: h.id,
+      name: h.name,
+      status: h.status,
+      rooms: h.rooms?.length,
+      rating: h.rating
+    })),
+    allStatuses: homestays.map(h => ({
+      id: h.id,
+      status: h.status,
+      rooms: h.rooms?.length,
+      rating: h.rating
+    }))
+  });
+
   const stats = {
     totalHomestays: homestays.length,
-    pendingHomestays: homestays.filter(h => h.status === 'PENDING').length,
-    approvedHomestays: homestays.filter(h => h.status === 'APPROVED').length,
-    rejectedHomestays: homestays.filter(h => h.status === 'REJECTED').length,
-    totalRooms: homestays.reduce((total, h) => total + (h.rooms?.length || 0), 0),
+    pendingHomestays: homestays.filter(h => h.status?.toUpperCase() === 'PENDING').length,
+    approvedHomestays: homestays.filter(h => h.status?.toUpperCase() === 'APPROVED').length,
+    rejectedHomestays: homestays.filter(h => h.status?.toUpperCase() === 'REJECTED').length,
+    totalRooms: homestays.reduce((total, h) => total + (Array.isArray(h.rooms) ? h.rooms.length : 0), 0),
     averageRating: 0
   };
 
-  // Calculate average rating from homestays that have ratings
-  const homestaysWithRatings = homestays.filter(h => h.rating && h.rating > 0);
+  const homestaysWithRatings = homestays.filter(h => typeof h.rating === 'number' && h.rating > 0);
   if (homestaysWithRatings.length > 0) {
-    const totalRating = homestaysWithRatings.reduce((sum, h) => sum + h.rating, 0);
+    const totalRating = homestaysWithRatings.reduce((sum, h) => sum + Number(h.rating), 0);
     stats.averageRating = Number((totalRating / homestaysWithRatings.length).toFixed(1));
   }
 
+  console.log('[Dashboard] Calculated stats:', stats);
   return stats;
 };
 
@@ -373,9 +392,7 @@ export function useAsyncOperation<T = any>() {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setState(prev => ({ ...prev, loading: false, error: errorMessage }));
       
-      // Handle authentication errors
       await handleApiError(err, async () => {
-        // Retry the operation after token refresh
         const retryResult = await operation();
         setState({ data: retryResult, loading: false, error: null });
         return retryResult;
@@ -553,31 +570,40 @@ export function useDashboardStats() {
 // ============================================================================
 
 export function useHomestays() {
-  const [homestays, setHomestays] = useState<any[]>([]);
+  const [homestays, setHomestays] = useState<Homestay[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const { loading, error, execute, clearError } = useAsyncOperation<any>();
+  const { loading, error, execute, clearError } = useAsyncOperation<PaginatedResponse<Homestay>>();
 
-  const loadHomestays = useCallback(async (params?: any) => {
+  const loadHomestays = useCallback(async (params?: any): Promise<PaginatedResponse<Homestay>> => {
     try {
-      // Filter out empty or undefined values
       const filteredParams = Object.fromEntries(
         Object.entries(params || {}).filter(([_, value]) => value !== '' && value !== undefined)
       );
       
-      const result = await execute(async () => {
+      const result = await execute(async (): Promise<PaginatedResponse<Homestay>> => {
         const response = await adminApi.getHomestays(filteredParams);
-        return response;
+        console.log('[useHomestays] Raw API response:', JSON.stringify(response, null, 2));
+        return response as PaginatedResponse<Homestay>;
       });
       
       if (result) {
+        console.log('[useHomestays] Processed homestays:', {
+          count: result.data?.length || 0,
+          sample: result.data?.slice(0, 2) || [],
+          total: result.total,
+          totalPages: result.totalPages
+        });
         setHomestays(result.data || []);
         setTotalPages(result.totalPages || 1);
         setTotal(result.total || 0);
       }
       return result;
     } catch (error) {
-      console.error('Error loading homestays:', error);
+      console.error('[useHomestays] Error loading homestays:', error);
+      setHomestays([]);
+      setTotalPages(1);
+      setTotal(0);
       throw error;
     }
   }, [execute]);
@@ -585,17 +611,13 @@ export function useHomestays() {
   const createHomestay = useCallback(async (homestayData: any) => {
     try {
       const { cleanData, files } = FileProcessor.extractFilesFromHomestay(homestayData);
-
-      // Validate before sending
       const validationErrors = ValidationHelper.validateHomestay(cleanData);
       if (validationErrors.length > 0) {
         throw new Error(validationErrors.join('; '));
       }
-
       const result = await execute(async () => {
         return await adminApi.createHomestay(cleanData, files);
       });
-      
       return result;
     } catch (error) {
       console.error('Error creating homestay:', error);
@@ -607,14 +629,11 @@ export function useHomestays() {
     try {
       const allFiles: File[] = [];
       const cleanHomestays: any[] = [];
-
       homestays.forEach(homestay => {
         const { cleanData, files } = FileProcessor.extractFilesFromHomestay(homestay);
         cleanHomestays.push(cleanData);
         allFiles.push(...files);
       });
-
-      // Validate all homestays
       const validationErrors = ValidationHelper.validateBulkHomestays(cleanHomestays);
       if (Object.keys(validationErrors).length > 0) {
         const errorMessages = Object.entries(validationErrors).map(
@@ -622,11 +641,9 @@ export function useHomestays() {
         );
         throw new Error(errorMessages.join('; '));
       }
-
       const result = await execute(async () => {
         return await adminApi.createBulkHomestays(cleanHomestays, allFiles);
       });
-      
       return result;
     } catch (error) {
       console.error('Error creating bulk homestays:', error);
@@ -637,11 +654,9 @@ export function useHomestays() {
   const updateHomestay = useCallback(async (id: number, homestayData: any) => {
     try {
       const { cleanData, files } = FileProcessor.extractFilesFromHomestay(homestayData);
-      
       const result = await execute(async () => {
         return await adminApi.updateHomestay(id, cleanData, files);
       });
-      
       return result;
     } catch (error) {
       console.error('Error updating homestay:', error);
@@ -696,6 +711,7 @@ export function useHomestays() {
 
   return {
     homestays,
+    setHomestays, // Added
     totalPages,
     total,
     loading,
@@ -709,7 +725,6 @@ export function useHomestays() {
     clearError
   };
 }
-
 // ============================================================================
 // REST OF THE HOOKS WITH PROPER TYPING
 // ============================================================================

@@ -1,19 +1,25 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+// components/admin/ImprovedHomestayManagement.tsx
+'use client';
+
+import React, { useState, useEffect, useCallback, useMemo, Component, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
   Home, Plus, Eye, Edit, Trash2, Check, X, MapPin, User, Star, Calendar,
   Filter, Download, Upload, RefreshCw, TrendingUp, TrendingDown, Minus
 } from 'lucide-react';
-
+import { debounce } from 'lodash';
 import {
   useHomestays, useAsyncOperation
 } from '@/hooks/useAdminApi';
-
 import {
   LoadingSpinner, Alert, ActionButton, Card, StatusBadge,
   Modal, EmptyState, Input, useToast
 } from '@/components/admin/AdminComponents';
+
+// ============================================================================
+// TYPES
+// ============================================================================
 
 type HomestayStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -23,6 +29,23 @@ interface ApprovalModalData {
   status: HomestayStatus;
   rejectionReason: string;
 }
+
+// ============================================================================
+// ERROR BOUNDARY
+// ============================================================================
+
+class ErrorBoundary extends Component<{ children: ReactNode }> {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught:', error, errorInfo);
+  }
+  render() {
+    return this.props.children;
+  }
+}
+
+// ============================================================================
+// COMPONENTS
+// ============================================================================
 
 const StatCard: React.FC<{
   title: string;
@@ -161,6 +184,11 @@ const ApprovalModal: React.FC<{ isOpen: boolean; onClose: () => void; data: Appr
   );
 };
 
+// ============================================================================
+//doğan
+// MAIN COMPONENT
+// ============================================================================
+
 export default function ImprovedHomestayManagement() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -176,6 +204,20 @@ export default function ImprovedHomestayManagement() {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approvalData, setApprovalData] = useState<ApprovalModalData | null>(null);
 
+  // Debounced search
+  const handleSearchChange = useMemo(
+    () => debounce((value: string) => {
+      console.log('Search changed:', value);
+      setSearch(value);
+      setCurrentPage(1);
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    return () => handleSearchChange.cancel();
+  }, [handleSearchChange]);
+
   const stats = useMemo(() => {
     const pendingCount = homestays.filter((h: any) => h.status === 'PENDING').length;
     const approvedCount = homestays.filter((h: any) => h.status === 'APPROVED').length;
@@ -187,7 +229,7 @@ export default function ImprovedHomestayManagement() {
   const loadData = useCallback(async () => {
     try {
       const params: any = { page: currentPage, limit: 10 };
-      if (search.trim()) params.name = search.trim();        // ← THIS LINE FIXED
+      if (search.trim()) params.name = search.trim();
       if (statusFilter) params.status = statusFilter;
       if (ownerIdFilter.trim()) params.ownerId = ownerIdFilter.trim();
       if (addressFilter.trim()) params.address = addressFilter.trim();
@@ -208,12 +250,6 @@ export default function ImprovedHomestayManagement() {
       loadData();
     }
   }, [status, session?.user?.role, router, currentPage, search, statusFilter, ownerIdFilter, addressFilter]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Search changed:', e.target.value);
-    setSearch(e.target.value);
-    setCurrentPage(1);
-  };
 
   const handleClearFilters = () => {
     setSearch('');
@@ -274,16 +310,16 @@ export default function ImprovedHomestayManagement() {
 
         <Card title="Filters" className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
+            <ErrorBoundary>
               <input
                 type="text"
                 value={search}
-                onChange={handleSearchChange}
-                placeholder="Search by homestay name..."  // ← Updated placeholder
-                autoComplete="off"                        // ← Prevents content_script.js error
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Search by homestay name..."
+                autoComplete="off"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
-            </div>
+            </ErrorBoundary>
             <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }} className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
               <option value="">All Status</option>
               <option value="PENDING">Pending</option>

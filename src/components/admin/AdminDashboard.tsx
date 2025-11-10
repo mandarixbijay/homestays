@@ -1,7 +1,7 @@
 // components/admin/ImprovedAdminDashboard.tsx
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Component, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
@@ -9,11 +9,9 @@ import {
   AlertCircle, Plus, Eye, Edit, Activity, Star, MapPin,
   RefreshCw, Download, Bed
 } from 'lucide-react';
-
-import {
-  useHomestays,
-} from '@/hooks/useAdminApi';
-
+import { debounce } from 'lodash';
+import { useHomestays } from '@/hooks/useAdminApi';
+import { Homestay } from '@/types/admin';
 import {
   LoadingSpinner,
   Alert,
@@ -39,63 +37,86 @@ interface DashboardStats {
 }
 
 // ============================================================================
+// ERROR BOUNDARY
+// ============================================================================
+
+class ErrorBoundary extends Component<{ children: ReactNode }> {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught:', error, errorInfo);
+  }
+  render() {
+    return this.props.children;
+  }
+}
+
+// ============================================================================
 // UTILITIES
 // ============================================================================
 
-const calculateHomestayStats = (homestays: any[]) => {
+const calculateHomestayStats = (homestays: Homestay[]) => {
   console.log('[Dashboard] Calculating stats from homestays:', {
     total: homestays.length,
-    sample: homestays.slice(0, 2),
-    allStatuses: homestays.map(h => ({ id: h.id, status: h.status, rooms: h.rooms?.length }))
+    sample: homestays.slice(0, 2).map(h => ({
+      id: h.id,
+      name: h.name,
+      status: h.status,
+      rooms: h.rooms?.length,
+      rating: h.rating
+    })),
+    allStatuses: homestays.map(h => ({
+      id: h.id,
+      status: h.status,
+      rooms: h.rooms?.length,
+      rating: h.rating
+    }))
   });
 
   const stats = {
     totalHomestays: homestays.length,
-    pendingHomestays: homestays.filter(h => h.status === 'PENDING').length,
-    approvedHomestays: homestays.filter(h => h.status === 'APPROVED').length,
-    rejectedHomestays: homestays.filter(h => h.status === 'REJECTED').length,
-    totalRooms: homestays.reduce((total, h) => total + (h.rooms?.length || 0), 0),
+    pendingHomestays: homestays.filter(h => h.status?.toUpperCase() === 'PENDING').length,
+    approvedHomestays: homestays.filter(h => h.status?.toUpperCase() === 'APPROVED').length,
+    rejectedHomestays: homestays.filter(h => h.status?.toUpperCase() === 'REJECTED').length,
+    totalRooms: homestays.reduce((total, h) => total + (Array.isArray(h.rooms) ? h.rooms.length : 0), 0),
     averageRating: 0
   };
 
-  console.log('[Dashboard] Calculated stats:', stats);
-
-  const homestaysWithRatings = homestays.filter(h => h.rating && h.rating > 0);
+  const homestaysWithRatings = homestays.filter(h => typeof h.rating === 'number' && h.rating > 0);
   if (homestaysWithRatings.length > 0) {
-    const totalRating = homestaysWithRatings.reduce((sum, h) => sum + h.rating, 0);
+    const totalRating = homestaysWithRatings.reduce((sum, h) => sum + Number(h.rating), 0);
     stats.averageRating = Number((totalRating / homestaysWithRatings.length).toFixed(1));
   }
 
+  console.log('[Dashboard] Calculated stats:', stats);
   return stats;
 };
 
-const generateRecentActivity = (homestays: any[]) => {
+const generateRecentActivity = (homestays: Homestay[]) => {
   const activities: any[] = [];
   
-  const sortedHomestays = [...homestays].sort((a, b) => {
-    const dateA = new Date(a.updatedAt || a.createdAt || 0);
-    const dateB = new Date(b.updatedAt || b.createdAt || 0);
-    return dateB.getTime() - dateA.getTime();
-  });
+  const sortedHomestays = [...homestays]
+    .filter(h => h.createdAt || h.updatedAt)
+    .sort((a, b) => {
+      const dateA = new Date(a.updatedAt || a.createdAt || 0);
+      const dateB = new Date(b.updatedAt || b.createdAt || 0);
+      return dateB.getTime() - dateA.getTime();
+    });
 
   sortedHomestays.slice(0, 5).forEach(homestay => {
-    if (homestay.createdAt) {
-      let description = `New homestay "${homestay.name}" was created`;
-      if (homestay.status === 'APPROVED') {
-        description = `Homestay "${homestay.name}" was approved`;
-      } else if (homestay.status === 'REJECTED') {
-        description = `Homestay "${homestay.name}" was rejected`;
-      } else if (homestay.status === 'PENDING') {
-        description = `New homestay "${homestay.name}" submitted for approval`;
-      }
-      
-      activities.push({
-        description,
-        timestamp: homestay.createdAt,
-        type: 'create',
-        homestayId: homestay.id
-      });
+    let description = `New homestay "${homestay.name || 'Unknown'}" was created`;
+    if (homestay.status?.toUpperCase() === 'APPROVED') {
+      description = `Homestay "${homestay.name || 'Unknown'}" was approved`;
+    } else if (homestay.status?.toUpperCase() === 'REJECTED') {
+      description = `Homestay "${homestay.name || 'Unknown'}" was rejected`;
+    } else if (homestay.status?.toUpperCase() === 'PENDING') {
+      description = `New homestay "${homestay.name || 'Unknown'}" submitted for approval`;
     }
+    
+    activities.push({
+      description,
+      timestamp: homestay.updatedAt || homestay.createdAt,
+      type: 'create',
+      homestayId: homestay.id
+    });
   });
 
   return activities
@@ -184,7 +205,7 @@ const QuickActionCard: React.FC<{
 };
 
 const RecentHomestayCard: React.FC<{
-  homestay: any;
+  homestay: Homestay;
   onView: (id: number) => void;
   onEdit: (id: number) => void;
 }> = ({ homestay, onView, onEdit }) => {
@@ -211,16 +232,16 @@ const RecentHomestayCard: React.FC<{
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {homestay.name}
+                {homestay.name || 'Unknown'}
               </h4>
               
               <div className="mt-1 flex items-center text-xs text-gray-500 dark:text-gray-400">
                 <MapPin className="h-3 w-3 mr-1" />
-                <span className="truncate">{homestay.address}</span>
+                <span className="truncate">{homestay.address || 'No address'}</span>
               </div>
               
               <div className="mt-1 flex items-center space-x-4">
-                <StatusBadge status={homestay.status} variant="small" />
+                <StatusBadge status={homestay.status || 'PENDING'} variant="small" />
                 <span className="text-xs text-gray-500 dark:text-gray-400">
                   {homestay.rooms?.length || 0} rooms
                 </span>
@@ -324,6 +345,7 @@ export default function ImprovedAdminDashboard() {
     loading: homestaysLoading, 
     error: homestaysError, 
     loadHomestays,
+    setHomestays, // Added
     clearError 
   } = useHomestays();
 
@@ -340,6 +362,16 @@ export default function ImprovedAdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
+  // Debounced search
+  const handleSearchChange = useMemo(
+    () => debounce((value: string) => setSearchTerm(value), 300),
+    []
+  );
+
+  useEffect(() => {
+    return () => handleSearchChange.cancel();
+  }, [handleSearchChange]);
+
   // Effects
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
@@ -352,7 +384,6 @@ export default function ImprovedAdminDashboard() {
     }
   }, [status, session, router]);
 
-  // ✅ Update stats when homestays data changes
   useEffect(() => {
     if (homestays && homestays.length >= 0) {
       console.log('[Dashboard] Homestays loaded:', homestays.length);
@@ -371,9 +402,25 @@ export default function ImprovedAdminDashboard() {
     try {
       setRefreshing(true);
       console.log('[Dashboard] Loading homestays...');
-      // ✅ Load ALL homestays to get accurate counts
-      await loadHomestays({ limit: 10000, page: 1 });
-      console.log('[Dashboard] Homestays loaded successfully');
+      let allHomestays: Homestay[] = [];
+      let page = 1;
+      let totalPages = 1;
+      const limit = 100; // Match API page size
+
+      while (page <= totalPages) {
+        const result = await loadHomestays({ limit, page });
+        if (result) {
+          allHomestays = [...allHomestays, ...(result.data || [])];
+          totalPages = result.totalPages || 1;
+          console.log(`[Dashboard] Fetched page ${page}/${totalPages}, homestays: ${result.data?.length}`);
+          page++;
+        } else {
+          break;
+        }
+      }
+
+      setHomestays(allHomestays);
+      console.log('[Dashboard] All homestays loaded:', allHomestays.length);
     } catch (error) {
       console.error('[Dashboard] Error loading dashboard data:', error);
       addToast({
@@ -384,7 +431,7 @@ export default function ImprovedAdminDashboard() {
     } finally {
       setRefreshing(false);
     }
-  }, [loadHomestays, addToast]);
+  }, [loadHomestays, addToast, setHomestays]);
 
   // Handlers
   const handleQuickAction = useCallback((action: string) => {
@@ -418,9 +465,9 @@ export default function ImprovedAdminDashboard() {
     });
   }, [loadDashboardData, addToast]);
 
-  const filteredHomestays = homestays.filter((homestay: any) =>
-    homestay.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    homestay.address?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredHomestays = homestays.filter((homestay: Homestay) =>
+    (homestay.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (homestay.address?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   // Early return for loading
@@ -611,13 +658,15 @@ export default function ImprovedAdminDashboard() {
           subtitle={`${filteredHomestays.length} of ${homestays.length} homestays`}
           actions={
             <div className="flex items-center space-x-3">
-              <SearchInput
-                value={searchTerm}
-                onChange={setSearchTerm}
-                placeholder="Search homestays..."
-                className="w-64"
-                onClear={() => setSearchTerm('')}
-              />
+              <ErrorBoundary>
+                <SearchInput
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  placeholder="Search homestays..."
+                  className="w-64"
+                  onClear={() => setSearchTerm('')}
+                />
+              </ErrorBoundary>
               <ActionButton
                 onClick={() => handleQuickAction('homestays')}
                 variant="secondary"
@@ -631,7 +680,7 @@ export default function ImprovedAdminDashboard() {
         >
           {filteredHomestays.length > 0 ? (
             <div className="space-y-4">
-              {filteredHomestays.slice(0, 5).map((homestay: any) => (
+              {filteredHomestays.slice(0, 5).map((homestay: Homestay) => (
                 <RecentHomestayCard
                   key={homestay.id}
                   homestay={homestay}
