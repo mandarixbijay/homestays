@@ -7,53 +7,90 @@ import { format, parseISO } from "date-fns";
 import {
   Calendar, Clock, User, Eye, Share2, Bookmark,
   Facebook, Twitter, Linkedin, Link2, Check,
-  ChevronLeft, Tag
+  ChevronLeft, Tag, Heart, MessageCircle,
+  Coffee, MapPin, ArrowLeft, ArrowRight,
+  Quote, Star, Send, ThumbsUp, Mountain,
+  Camera, Compass, TrendingUp, ChevronRight, X,
+  Mail, Instagram, Youtube, MessageSquare
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { PublicBlog, publicBlogApi } from '@/lib/api/public-blog-api';
+import { PublicBlog, publicBlogApi } from "@/lib/api/public-blog-api";
 import SafeBlogImage from "@/components/blog/SafeBlogImage";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"; // Assuming carousel component
 
 interface BlogDetailClientProps {
   blog: PublicBlog;
 }
 
+// Simple Avatar Component with Dark Teal Theme
+function SimpleAvatar({ name, className = "" }: { name: string; className?: string }) {
+  return (
+    <div className={`rounded-full bg-gradient-to-br from-[#214B3F] to-[#2d6654] text-white flex items-center justify-center font-bold ${className}`}>
+      {name.charAt(0).toUpperCase()}
+    </div>
+  );
+}
+
 export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
   const [relatedBlogs, setRelatedBlogs] = useState<PublicBlog[]>([]);
+  const [trendingBlogs, setTrendingBlogs] = useState<PublicBlog[]>([]);
+  const [trendingLoading, setTrendingLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(Math.floor(Math.random() * 500) + 100);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showImageGallery, setShowImageGallery] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
   const { scrollYProgress } = useScroll({
     target: contentRef,
-    offset: ["start start", "end end"]
+    offset: ["start start", "end end"],
   });
+
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const headerScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
 
   useEffect(() => {
     loadRelatedBlogs();
-    const bookmarks = JSON.parse(localStorage.getItem('blogBookmarks') || '[]');
+    loadTrendingBlogs();
+    const bookmarks = JSON.parse(localStorage.getItem("blogBookmarks") || "[]");
     setBookmarked(bookmarks.includes(blog.id));
+
+    const likedPosts = JSON.parse(localStorage.getItem("likedPosts") || "[]");
+    setLiked(likedPosts.includes(blog.id));
   }, [blog.id]);
 
   const loadRelatedBlogs = async () => {
     try {
       if (blog.categories && blog.categories.length > 0) {
-        const response = await publicBlogApi.getPublishedBlogs({ limit: 3 });
-        const filtered = response.data.filter(b => b.id !== blog.id).slice(0, 3);
-        setRelatedBlogs(filtered);
+        const response = await publicBlogApi.getRelatedBlogs(blog.slug, 4);
+        setRelatedBlogs(response.filter((b) => b.id !== blog.id).slice(0, 4));
       }
     } catch (error) {
-      console.error('Error loading related blogs:', error);
+      console.error("Error loading related blogs:", error);
     }
   };
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const images = blog.images?.map(img => img.url) || [blog.featuredImage || '/images/default-blog.jpg'];
+  const loadTrendingBlogs = async () => {
+    try {
+      setTrendingLoading(true);
+      const response = await publicBlogApi.getFeaturedBlogs(3);
+      setTrendingBlogs(response.filter((b) => b.id !== blog.id).slice(0, 3));
+    } catch (error) {
+      console.error("Error loading trending blogs:", error);
+      setTrendingBlogs([]);
+    } finally {
+      setTrendingLoading(false);
+    }
+  };
+
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const images = blog.images?.map((img) => img.url) || [blog.featuredImage || "/images/default-blog.jpg"];
 
   const handleShare = (platform: string) => {
     const title = encodeURIComponent(blog.title);
@@ -62,61 +99,188 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       twitter: `https://twitter.com/intent/tweet?text=${title}&url=${url}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+      whatsapp: `https://wa.me/?text=${title}%20${url}`,
+      telegram: `https://t.me/share/url?url=${url}&text=${title}`,
+      reddit: `https://reddit.com/submit?url=${url}&title=${title}`,
+      pinterest: `https://pinterest.com/pin/create/button/?url=${url}&description=${title}`,
+      email: `mailto:?subject=${title}&body=${url}`,
     };
 
-    if (platform === 'copy') {
+    if (platform === "copy") {
       navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success('Link copied!');
+      toast.success("Link copied to clipboard!");
       setTimeout(() => setCopied(false), 2000);
     } else if (shareUrls[platform as keyof typeof shareUrls]) {
-      window.open(shareUrls[platform as keyof typeof shareUrls], '_blank', 'width=600,height=400');
+      window.open(shareUrls[platform as keyof typeof shareUrls], "_blank", "width=600,height=400");
     }
   };
 
   const handleBookmark = () => {
-    const bookmarks = JSON.parse(localStorage.getItem('blogBookmarks') || '[]');
+    const bookmarks = JSON.parse(localStorage.getItem("blogBookmarks") || "[]");
     if (bookmarked) {
       const updated = bookmarks.filter((id: number) => id !== blog.id);
-      localStorage.setItem('blogBookmarks', JSON.stringify(updated));
-      toast.success('Removed from bookmarks');
+      localStorage.setItem("blogBookmarks", JSON.stringify(updated));
+      toast.success("Removed from bookmarks");
     } else {
       bookmarks.push(blog.id);
-      localStorage.setItem('blogBookmarks', JSON.stringify(bookmarks));
-      toast.success('Added to bookmarks');
+      localStorage.setItem("blogBookmarks", JSON.stringify(bookmarks));
+      toast.success("Added to bookmarks!");
     }
     setBookmarked(!bookmarked);
   };
 
-  const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  const handleLike = () => {
+    const likedPosts = JSON.parse(localStorage.getItem("likedPosts") || "[]");
+    if (liked) {
+      const updated = likedPosts.filter((id: number) => id !== blog.id);
+      localStorage.setItem("likedPosts", JSON.stringify(updated));
+      setLikes(likes - 1);
+    } else {
+      likedPosts.push(blog.id);
+      localStorage.setItem("likedPosts", JSON.stringify(likedPosts));
+      setLikes(likes + 1);
+    }
+    setLiked(!liked);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-100 font-sans">
+    <div className="min-h-screen bg-white">
       {/* Progress Bar */}
       <motion.div
-        className="fixed top-0 left-0 h-1 bg-gradient-to-r from-blue-600 to-teal-500"
+        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#214B3F] to-[#D1AA5A] z-50"
         style={{ scaleX: scrollYProgress, transformOrigin: "0%" }}
       />
 
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-10 sm:pt-28 sm:pb-14">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Link href="/blogs" className="inline-flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors mb-6">
-            <ChevronLeft className="h-5 w-5" />
-            <span className="text-sm font-medium">Back to Blogs</span>
-          </Link>
+      {/* Enhanced Floating Actions Sidebar - Desktop Only */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.5 }}
+        className="fixed left-8 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-3 z-40"
+      >
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleLike}
+          className={`rounded-full shadow-lg bg-white hover:scale-110 transition-all ${
+            liked ? "text-red-500 border-red-200" : "hover:text-red-500"
+          }`}
+        >
+          <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
+        </Button>
+        <span className="text-xs text-center text-gray-500">{likes}</span>
 
-          <div className="max-w-4xl mx-auto">
-            {/* Categories */}
+        <Separator className="my-1" />
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleBookmark}
+          className={`rounded-full shadow-lg bg-white hover:scale-110 transition-all ${
+            bookmarked ? "text-[#D1AA5A] border-[#D1AA5A]" : "hover:text-[#D1AA5A]"
+          }`}
+        >
+          <Bookmark className={`h-5 w-5 ${bookmarked ? "fill-current" : ""}`} />
+        </Button>
+
+        <Separator className="my-1" />
+
+        {/* Share Buttons */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => handleShare("facebook")}
+          className="rounded-full shadow-lg bg-white hover:scale-110 transition-all hover:text-blue-600"
+        >
+          <Facebook className="h-5 w-5" />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => handleShare("twitter")}
+          className="rounded-full shadow-lg bg-white hover:scale-110 transition-all hover:text-blue-400"
+        >
+          <Twitter className="h-5 w-5" />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => handleShare("linkedin")}
+          className="rounded-full shadow-lg bg-white hover:scale-110 transition-all hover:text-blue-700"
+        >
+          <Linkedin className="h-5 w-5" />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => handleShare("whatsapp")}
+          className="rounded-full shadow-lg bg-white hover:scale-110 transition-all hover:text-green-600"
+        >
+          <MessageSquare className="h-5 w-5" />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => handleShare("copy")}
+          className="rounded-full shadow-lg bg-white hover:scale-110 transition-all hover:text-gray-700"
+        >
+          {copied ? <Check className="h-5 w-5" /> : <Link2 className="h-5 w-5" />}
+        </Button>
+      </motion.div>
+
+      {/* Hero Section with Adjusted Image Position */}
+      <section className="relative min-h-[75vh] flex items-center justify-center overflow-hidden">
+        {/* Background Image with Fixed Cropping */}
+        <motion.div
+          className="absolute inset-0 z-0"
+          style={{
+            opacity: headerOpacity,
+            scale: headerScale,
+          }}
+        >
+          <div className="relative w-full h-full">
+            <SafeBlogImage
+              src={images[0]}
+              alt={blog.title}
+              fill
+              className="object-cover object-[0_20%]" // Adjusted to start 20% from the top
+              priority
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/80"></div>
+        </motion.div>
+
+        {/* Content */}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto"
+          >
+            {/* Back Button */}
+            <Link href="/blogs">
+              <Button
+                variant="ghost"
+                className="mb-8 text-white/90 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Stories
+              </Button>
+            </Link>
+
+            {/* Categories with Gold Accent */}
             {blog.categories && blog.categories.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap justify-center gap-3 mb-6">
                 {blog.categories.map((cat: any) => (
                   <Badge
                     key={cat.id}
-                    variant="secondary"
-                    className="text-xs font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
-                    style={cat.color ? { backgroundColor: cat.color + '20', color: cat.color } : undefined}
+                    className="bg-[#D1AA5A]/20 backdrop-blur-sm text-white border-[#D1AA5A]/50 px-4 py-1.5"
                   >
                     {cat.name}
                   </Badge>
@@ -125,209 +289,477 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
             )}
 
             {/* Title */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4 leading-tight"
-            >
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
               {blog.title}
-            </motion.h1>
+            </h1>
+
+            {/* Excerpt */}
+            <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+              {blog.excerpt}
+            </p>
 
             {/* Meta Info */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 text-sm text-gray-500 mb-6">
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-gray-400" />
-                <span className="font-medium text-gray-700">{blog.author.name}</span>
+            <div className="flex flex-wrap items-center justify-center gap-6 text-white/80">
+              <div className="flex items-center gap-3">
+                <SimpleAvatar name={blog.author.name} className="h-10 w-10 text-sm" />
+                <div className="text-left">
+                  <p className="font-medium text-white">{blog.author.name}</p>
+                  <p className="text-xs text-white/60">Travel Writer</p>
+                </div>
               </div>
-              <Separator orientation="vertical" className="h-6 hidden sm:block" />
+
+              <Separator orientation="vertical" className="h-10 bg-white/20" />
+
               <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-gray-400" />
-                <span>{format(parseISO(blog.publishedAt || new Date().toISOString()), 'MMMM d, yyyy')}</span>
+                <Calendar className="h-5 w-5" />
+                <span>{format(parseISO(blog.publishedAt || new Date().toISOString()), "MMMM d, yyyy")}</span>
               </div>
+
               <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-gray-400" />
+                <Clock className="h-5 w-5" />
                 <span>{blog.readTime || 5} min read</span>
               </div>
+
               <div className="flex items-center gap-2">
-                <Eye className="h-5 w-5 text-gray-400" />
+                <Eye className="h-5 w-5" />
                 <span>{blog.viewCount.toLocaleString()} views</span>
               </div>
             </div>
-
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-8">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBookmark}
-                className={`border-gray-300 hover:border-gray-400 ${bookmarked ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`}
-              >
-                <Bookmark className={`h-4 w-4 mr-2 ${bookmarked ? 'fill-current' : ''}`} />
-                {bookmarked ? 'Bookmarked' : 'Bookmark'}
-              </Button>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleShare('facebook')}
-                  className="border-gray-300 hover:bg-gray-50 text-gray-700"
-                >
-                  <Facebook className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleShare('twitter')}
-                  className="border-gray-300 hover:bg-gray-50 text-gray-700"
-                >
-                  <Twitter className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleShare('linkedin')}
-                  className="border-gray-300 hover:bg-gray-50 text-gray-700"
-                >
-                  <Linkedin className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleShare('copy')}
-                  className="border-gray-300 hover:bg-gray-50 text-gray-700"
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Full-Width Hero (Most Dramatic) */}
-      {(blog.featuredImage || blog.images?.length) && (
-        <section className="relative overflow-hidden">
-          <div className="aspect-[16/9] relative">
-            <div className="absolute inset-0">
-              <SafeBlogImage
-                src={images[currentImageIndex]}
-                alt={blog.title}
-                fill
-                className="object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+      {/* Image Gallery */}
+      {images.length > 1 && (
+        <section className="py-12 bg-gradient-to-b from-gray-50 to-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-3 mb-6">
+              <Camera className="h-5 w-5 text-[#214B3F]" />
+              <h3 className="text-xl font-bold text-gray-900">Gallery</h3>
+              <Badge className="bg-[#D1AA5A]/20 text-[#214B3F] border-[#D1AA5A]">
+                {images.length} photos
+              </Badge>
             </div>
-          </div>
-          {images.length > 1 && (
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2">
-              {images.map((_, index) => (
-                <button
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {images.slice(0, 8).map((image, index) => (
+                <motion.div
                   key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  className={`h-2 w-2 rounded-full transition-all duration-300 ${currentImageIndex === index ? 'bg-white scale-125' : 'bg-white/60'
-                    }`}
-                />
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative aspect-square rounded-xl overflow-hidden cursor-pointer group"
+                  onClick={() => {
+                    setCurrentImageIndex(index);
+                    setShowImageGallery(true);
+                  }}
+                >
+                  <SafeBlogImage src={image} alt={`Gallery ${index + 1}`} fill className="object-cover" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    <Eye className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </motion.div>
               ))}
             </div>
-          )}
+          </div>
         </section>
       )}
 
       {/* Main Content */}
       <section className="py-16" ref={contentRef}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto">
-            <article className="prose prose-lg max-w-none text-gray-800">
-              <div
-                className="prose-headings:font-bold prose-headings:text-gray-900 prose-headings:tracking-normal prose-h1:text-3xl sm:prose-h1:text-4xl prose-h1:mb-6 prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3 prose-p:leading-relaxed prose-p:mb-6 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:my-6 prose-ol:my-6 prose-li:my-2 prose-blockquote:border-l-2 prose-blockquote:border-blue-200 prose-blockquote:pl-4 prose-blockquote:text-gray-600 prose-blockquote:italic prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-img:rounded-lg prose-img:shadow-md"
-                dangerouslySetInnerHTML={{ __html: blog.content }}
-              />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 max-w-7xl mx-auto">
+            {/* Article Content */}
+            <article className="lg:col-span-8">
+              <div className="prose prose-lg max-w-none">
+                <div
+                  className="
+                    prose-headings:font-bold prose-headings:text-gray-900 
+                    prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4
+                    prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
+                    prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
+                    prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6
+                    prose-a:text-[#214B3F] prose-a:no-underline hover:prose-a:underline prose-a:font-medium
+                    prose-strong:text-gray-900
+                    prose-ul:my-6 prose-ul:space-y-2
+                    prose-ol:my-6 prose-ol:space-y-2
+                    prose-li:text-gray-700 prose-li:leading-relaxed
+                    prose-blockquote:border-l-4 prose-blockquote:border-[#D1AA5A] prose-blockquote:pl-6 prose-blockquote:italic
+                    prose-blockquote:text-gray-600 prose-blockquote:my-8
+                    prose-code:text-[#214B3F] prose-code:bg-[#214B3F]/10 prose-code:px-2 prose-code:py-1 prose-code:rounded
+                    prose-pre:bg-gray-900 prose-pre:text-gray-100
+                    prose-img:rounded-xl prose-img:shadow-xl prose-img:my-8
+                    first-letter:text-6xl first-letter:font-bold first-letter:float-left 
+                    first-letter:mr-3 first-letter:mt-1 first-letter:text-[#214B3F]
+                  "
+                  dangerouslySetInnerHTML={{ __html: blog.content }}
+                />
+              </div>
+
+              {/* Tags */}
+              {blog.tags && blog.tags.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="mt-16 pt-8 border-t border-gray-200"
+                >
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Tag className="h-5 w-5 text-[#214B3F]" />
+                    Topics
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {blog.tags.map((tag: any) => (
+                      <Link key={tag.id} href={`/blogs?tag=${tag.slug}`}>
+                        <Badge
+                          variant="outline"
+                          className="cursor-pointer hover:bg-[#214B3F]/10 hover:border-[#214B3F] transition-colors"
+                        >
+                          #{tag.name}
+                        </Badge>
+                      </Link>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Author Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-12"
+              >
+                <Card className="p-8 bg-gradient-to-br from-[#214B3F]/5 to-[#D1AA5A]/5 border-[#214B3F]/20">
+                  <div className="flex items-start gap-6">
+                    <SimpleAvatar name={blog.author.name} className="h-20 w-20 text-2xl flex-shrink-0" />
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{blog.author.name}</h3>
+                      <p className="text-gray-600 mb-4">
+                        Travel writer and adventure enthusiast exploring Nepal's hidden treasures. 
+                        Sharing authentic stories and insider tips from the heart of the Himalayas.
+                      </p>
+                      <div className="flex gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-full border-[#214B3F] text-[#214B3F] hover:bg-[#214B3F] hover:text-white"
+                        >
+                          <User className="h-4 w-4 mr-2" />
+                          Follow
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-full border-[#D1AA5A] text-[#D1AA5A] hover:bg-[#D1AA5A] hover:text-white"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Message
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
             </article>
 
-            {/* Author Info */}
-            <Card className="mt-12 p-6 bg-white shadow-md">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center">
-                  <User className="h-6 w-6 text-blue-600" />
+            {/* Sidebar */}
+            <aside className="lg:col-span-4 space-y-6">
+              {/* Share Actions - Mobile */}
+              <Card className="p-6 lg:hidden">
+                <h3 className="font-bold text-gray-900 mb-4">Share & Save</h3>
+                <div className="grid grid-cols-4 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBookmark}
+                    className={bookmarked ? "text-[#D1AA5A] border-[#D1AA5A]" : ""}
+                  >
+                    <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLike}
+                    className={liked ? "text-red-500 border-red-500" : ""}
+                  >
+                    <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShare("facebook")}
+                  >
+                    <Facebook className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShare("twitter")}
+                  >
+                    <Twitter className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShare("whatsapp")}
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShare("linkedin")}
+                  >
+                    <Linkedin className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShare("reddit")}
+                  >
+                    <Reddit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShare("copy")}
+                  >
+                    {copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
+                  </Button>
                 </div>
-                <div>
-                  <h3 className="font-bold text-lg text-gray-900">{blog.author.name}</h3>
-                  <p className="text-gray-600 text-sm">Travel writer sharing authentic Nepal experiences.</p>
-                </div>
-              </div>
-            </Card>
+                <div className="text-center text-xs text-gray-500 mt-2">{likes} likes</div>
+              </Card>
 
-            {/* Tags */}
-            {blog.tags && blog.tags.length > 0 && (
-              <div className="mt-12">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Tag className="h-5 w-5 text-blue-600" />
-                  Tags
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {blog.tags.map((tag: any) => (
-                    <Badge
-                      key={tag.id}
-                      variant="outline"
-                      className="text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-100"
-                      style={tag.color ? { borderColor: tag.color, color: tag.color } : undefined}
-                    >
-                      {tag.name}
-                    </Badge>
-                  ))}
-                </div>
+              {/* Sticky Newsletter - Fixed Position on Desktop */}
+              <div className="lg:sticky lg:top-24">
+                <Card className="p-6 bg-gradient-to-br from-[#214B3F] to-[#2d6654] text-white">
+                  <Mountain className="h-8 w-8 mb-3 text-[#D1AA5A]" />
+                  <h3 className="font-bold text-lg mb-2">Never Miss a Story</h3>
+                  <p className="text-sm mb-4 opacity-90 text-[#FFFFFF]">
+                    Get travel tips and stories delivered to your inbox
+                  </p>
+                  <input
+                    type="email"
+                    placeholder="Your email"
+                    className="w-full px-4 py-2 rounded-lg bg-white/20 backdrop-blur border border-white/30 
+                      placeholder:text-white/70 text-white mb-3 focus:outline-none focus:ring-2 focus:ring-[#D1AA5A]/50"
+                  />
+                  <Button className="w-full bg-[#D1AA5A] text-[#214B3F] hover:bg-[#D1AA5A]/90 font-bold">
+                    Subscribe
+                  </Button>
+                </Card>
+
+                {/* Popular Posts with Real Data */}
+                <Card className="p-6 mt-6">
+                  <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-[#214B3F]" />
+                    Trending Now
+                  </h3>
+                  <div className="space-y-4">
+                    {trendingLoading ? (
+                      [1, 2, 3].map((i) => (
+                        <div key={i} className="group cursor-pointer">
+                          <div className="relative w-full h-24 mb-3 rounded-lg overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse"></div>
+                          </div>
+                          <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded mb-2"></div>
+                          <div className="h-4 w-1/2 bg-gray-200 animate-pulse rounded"></div>
+                        </div>
+                      ))
+                    ) : trendingBlogs.length === 0 ? (
+                      <p className="text-gray-500 text-sm text-center">No trending stories available</p>
+                    ) : (
+                      trendingBlogs.map((trendingBlog) => (
+                        <Link key={trendingBlog.id} href={`/blogs/${trendingBlog.slug}`}>
+                          <div className="group cursor-pointer">
+                            <div className="relative w-full h-24 mb-3 rounded-lg overflow-hidden">
+                              <SafeBlogImage
+                                src={trendingBlog.images?.[0]?.url || trendingBlog.featuredImage || "/images/default-blog.jpg"}
+                                alt={trendingBlog.title}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            </div>
+                            <h4 className="font-medium text-gray-900 group-hover:text-[#214B3F] transition-colors line-clamp-2 mb-1">
+                              {trendingBlog.title}
+                            </h4>
+                            <div className="flex items-center gap-3 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {trendingBlog.readTime || 5} min read
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Eye className="h-3 w-3" />
+                                {trendingBlog.viewCount.toLocaleString()} views
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </Card>
               </div>
-            )}
+            </aside>
           </div>
         </div>
       </section>
 
       {/* Related Blogs */}
       {relatedBlogs.length > 0 && (
-        <section className="py-16 bg-gray-50">
+        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-10">More Stories to Explore</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {relatedBlogs.map((relatedBlog) => (
-                <RelatedBlogCard key={relatedBlog.id} blog={relatedBlog} />
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Continue Your Journey</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Discover more stories and adventures from our collection of travel experiences
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+              {relatedBlogs.map((relatedBlog, index) => (
+                <motion.div
+                  key={relatedBlog.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <RelatedBlogCard blog={relatedBlog} />
+                </motion.div>
               ))}
+            </div>
+
+            <div className="text-center mt-12">
+              <Link href="/blogs">
+                <Button className="bg-gradient-to-r from-[#214B3F] to-[#2d6654] text-white hover:from-[#214B3F]/90 hover:to-[#2d6654]/90">
+                  Explore All Stories
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
       )}
+
+      {/* Image Gallery Modal */}
+      <AnimatePresence>
+        {showImageGallery && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowImageGallery(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="relative max-w-5xl w-full aspect-video"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <SafeBlogImage
+                src={images[currentImageIndex]}
+                alt={`Gallery ${currentImageIndex + 1}`}
+                fill
+                className="object-contain"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4 text-white hover:bg-white/20"
+                onClick={() => setShowImageGallery(false)}
+              >
+                <X className="h-6 w-6" />
+              </Button>
+              {images.length > 1 && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                    onClick={() => setCurrentImageIndex((currentImageIndex - 1 + images.length) % images.length)}
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                    onClick={() => setCurrentImageIndex((currentImageIndex + 1) % images.length)}
+                  >
+                    <ChevronRight className="h-6 w-6" />
+                  </Button>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-// Related Blog Card Component
+// Enhanced Related Blog Card
 function RelatedBlogCard({ blog }: { blog: PublicBlog }) {
   const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/default-blog.jpg";
-  const randomImage = blog.images && blog.images.length > 1 ? blog.images[Math.floor(Math.random() * blog.images.length)]?.url : null;
 
   return (
     <Link href={`/blogs/${blog.slug}`}>
-      <Card className="group overflow-hidden h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-2">
-        <div className="relative h-48 overflow-hidden">
+      <Card className="group h-full overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-white">
+        <div className="relative h-64 overflow-hidden">
           <SafeBlogImage
-            src={randomImage || mainImage}
+            src={mainImage}
             alt={blog.title}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
-        <CardContent className="p-4">
-          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+            <Clock className="h-3 w-3" />
+            <span>{blog.readTime || 5} min read</span>
+            <span className="text-gray-300">•</span>
+            <Calendar className="h-3 w-3" />
+            <span>{format(parseISO(blog.publishedAt || new Date().toISOString()), "MMM d")}</span>
+          </div>
+
+          <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-[#214B3F] transition-colors mb-2">
             {blog.title}
           </h3>
-          <p className="text-gray-600 text-sm line-clamp-2 mt-2">{blog.excerpt}</p>
-          <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
-            <Clock className="h-4 w-4" />
-            <span>{blog.readTime || 5} min read</span>
+
+          <p className="text-gray-600 text-sm line-clamp-3 mb-4">{blog.excerpt}</p>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SimpleAvatar name={blog.author.name} className="h-6 w-6 text-xs" />
+              <span className="text-xs text-gray-600">{blog.author.name}</span>
+            </div>
+
+            <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-[#214B3F] group-hover:translate-x-1 transition-all" />
           </div>
         </CardContent>
       </Card>
     </Link>
+  );
+}
+
+// Reddit Icon Component
+function Reddit({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11.5c0 .28-.22.5-.5.5-.15 0-.29-.06-.39-.17-.55-.55-1.46-.9-2.61-.9s-2.06.35-2.61.9c-.1.11-.24.17-.39.17-.28 0-.5-.22-.5-.5 0-.15.06-.29.17-.39.74-.74 1.93-1.18 3.33-1.18s2.59.44 3.33 1.18c.11.1.17.24.17.39zM9.5 11c-.83 0-1.5-.67-1.5-1.5S8.67 8 9.5 8s1.5.67 1.5 1.5S10.33 11 9.5 11zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 8 14.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+    </svg>
+  );
+}
+
+// Pinterest Icon Component
+function Pinterest({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2C6.48 2 2 6.48 2 12c0 4.19 2.57 7.77 6.21 9.27-.09-.78-.17-1.97.03-2.82.19-.77 1.21-5.13 1.21-5.13s-.31-.62-.31-1.53c0-1.43.83-2.5 1.86-2.5.88 0 1.3.66 1.3 1.45 0 .88-.56 2.2-.85 3.42-.24 1.02.51 1.86 1.52 1.86 1.82 0 3.22-1.92 3.22-4.69 0-2.45-1.76-4.17-4.28-4.17-2.92 0-4.63 2.19-4.63 4.45 0 .88.34 1.83.76 2.34.08.1.09.19.07.29-.08.33-.25 1.02-.29 1.16-.05.19-.15.23-.34.14-1.28-.6-2.08-2.47-2.08-3.97 0-3.23 2.35-6.19 6.76-6.19 3.55 0 6.31 2.53 6.31 5.91 0 3.53-2.22 6.36-5.31 6.36-1.04 0-2.01-.54-2.34-1.18l-.64 2.42c-.23.88-.85 1.99-1.27 2.66.96.3 1.97.46 3.03.46 5.52 0 10-4.48 10-10S17.52 2 12 2z" />
+    </svg>
   );
 }
