@@ -434,7 +434,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                     <div className="flex-1">
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">{blog.author.name}</h3>
                       <p className="text-gray-600 mb-4">
-                        Travel writer and adventure enthusiast exploring Nepal's hidden treasures. 
+                        Travel writer and adventure enthusiast exploring Nepal&apos;s hidden treasures. 
                         Sharing authentic stories and insider tips from the heart of the Himalayas.
                       </p>
                       <div className="flex gap-3">

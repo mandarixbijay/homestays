@@ -210,7 +210,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
               className="inline-flex items-center gap-2 bg-gradient-to-r from-[#214B3F]/10 to-[#D1AA5A]/10 border border-[#D1AA5A]/30 rounded-full px-4 py-2 mb-6"
             >
               <Sparkles className="h-4 w-4 text-[#D1AA5A]" />
-              <span className="text-sm font-medium text-[#214B3F]">Explore Nepal's Hidden Gems</span>
+              <span className="text-sm font-medium text-[#214B3F]">Explore Nepal&apos;s Hidden Gems</span>
             </motion.div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6">
@@ -223,7 +223,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
 
             <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
               Immerse yourself in authentic experiences, local wisdom, and breathtaking journeys
-              through the heart of Nepal's homestay culture
+              through the heart of Nepal&apos;s homestay culture
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto mb-12">
