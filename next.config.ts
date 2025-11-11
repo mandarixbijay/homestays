@@ -26,8 +26,10 @@ const nextConfig = {
       { protocol: "https", hostname: "*.amazonaws.com", pathname: "/**" }, // AWS S3 wildcard
       { protocol: "https", hostname: "cloudfront.net", pathname: "/**" }, // CloudFront
       { protocol: "https", hostname: "*.cloudfront.net", pathname: "/**" }, // CloudFront wildcard
+      { protocol: "https", hostname: "homestays-s3.s3.eu-north-1.amazonaws.com", pathname: "/**" },
+
     ],
-    
+
     // Increase limits for blog images
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
