@@ -36,7 +36,7 @@ import { optimizeImage } from '@/lib/utils/imageOptimization';
 import SEOScoreCard from './SEOScoreCard';
 import SmartSlugInput from './SmartSlugInput';
 import OptimizedImageUpload from './OptimizedImageUpload';
-import EnhancedRichTextEditor from './EnhancedRichTextEditor';
+import ImprovedRichTextEditor from './ImprovedRichTextEditor';
 ```
 
 ---
@@ -82,8 +82,9 @@ const RichTextEditor: React.FC<{
 
 **Replace with**:
 ```typescript
-// REMOVED: Now using EnhancedRichTextEditor from './EnhancedRichTextEditor'
+// REMOVED: Now using ImprovedRichTextEditor from './ImprovedRichTextEditor'
 // The new editor includes built-in image dialog with alt text and caption support
+// Plus enhanced UI/UX with gradients, animations, and better visual feedback
 ```
 
 ---
@@ -312,7 +313,7 @@ const dataToSave = {
 
 **Replace with**:
 ```typescript
-{/* NEW: Enhanced Content Editor with Alt Text Support */}
+{/* NEW: Improved Content Editor with Enhanced UI/UX and Alt Text Support */}
 <Card className="shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow">
     <div className="p-6">
         <label className="block text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -323,7 +324,7 @@ const dataToSave = {
                 (Click image icon in toolbar to add images with alt text & captions)
             </span>
         </label>
-        <EnhancedRichTextEditor
+        <ImprovedRichTextEditor
             content={formData.content}
             onChange={(content) => handleChange('content', content)}
             onImageUpload={handleImageUpload}
@@ -368,7 +369,7 @@ After making all these changes, you'll have:
 
 ✅ **Smart Slug Input** - Auto-generates from title, validates format, checks availability
 ✅ **Optimized Image Upload** - Auto-compresses images (80%+ savings)
-✅ **Enhanced Rich Text Editor** - Adds images with alt text & captions
+✅ **Improved Rich Text Editor** - Enhanced UI/UX with alt text & captions, compression stats
 ✅ **SEO Score Card** - Real-time SEO analysis and scoring
 ✅ **Auto Reading Time** - Calculated automatically on save
 
