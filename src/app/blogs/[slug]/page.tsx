@@ -28,11 +28,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       };
     }
 
-    const metaDescription = blog.seoDescription || 
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nepalhomestays.com';
+    const metaDescription = blog.seoDescription ||
       (blog.excerpt.length > 160 ? blog.excerpt.substring(0, 157) + "..." : blog.excerpt);
 
     const publishedTime = blog.publishedAt;
     const modifiedTime = blog.publishedAt;
+
+    // Get the main image or fallback
+    const mainImage = blog.images?.find(img => img.isMain) || blog.images?.[0];
+    const imageUrl = mainImage?.url || blog.featuredImage || `${baseUrl}/images/default-blog.jpg`;
+    const imageAlt = mainImage?.alt || blog.title;
 
     return {
       title: blog.seoTitle || `${blog.title} | Nepal Homestays`,
@@ -42,15 +48,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         'Nepal',
         'travel',
         'homestays',
+        'Nepal travel guide',
         ...blog.categories.map(cat => cat.name),
         ...blog.tags.map(tag => tag.name)
       ].join(', '),
-      authors: [{ name: blog.author.name }],
+      authors: [{ name: blog.author.name, url: `${baseUrl}/authors/${blog.author.id}` }],
       creator: blog.author.name,
       publisher: 'Nepal Homestays',
+      applicationName: 'Nepal Homestays',
       robots: {
         index: true,
         follow: true,
+        nocache: false,
         googleBot: {
           index: true,
           follow: true,
@@ -64,27 +73,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description: metaDescription,
         type: 'article',
         locale: 'en_US',
-        url: `https://nepalhomestays.com/blogs/${blog.slug}`,
+        url: `${baseUrl}/blogs/${blog.slug}`,
         siteName: 'Nepal Homestays',
         publishedTime,
         modifiedTime,
         authors: [blog.author.name],
         section: blog.categories[0]?.name || 'Travel',
         tags: blog.tags.map(tag => tag.name),
-        images: blog.images?.map(img => ({
-          url: img.url || blog.featuredImage || '/images/default-blog.jpg',
-          width: 1200,
-          height: 630,
-          alt: blog.title,
-          type: 'image/jpeg',
-        })) || [
+        images: [
           {
-            url: blog.featuredImage || '/images/default-blog.jpg',
+            url: imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`,
             width: 1200,
             height: 630,
-            alt: blog.title,
+            alt: imageAlt,
             type: 'image/jpeg',
-          }
+          },
+          // Additional images from gallery
+          ...(blog.images?.slice(1, 4).map(img => ({
+            url: img.url.startsWith('http') ? img.url : `${baseUrl}${img.url}`,
+            width: 1200,
+            height: 630,
+            alt: img.alt || blog.title,
+            type: 'image/jpeg',
+          })) || [])
         ],
       },
       twitter: {
@@ -93,10 +104,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description: metaDescription,
         creator: '@nepalhomestays',
         site: '@nepalhomestays',
-        images: [blog.featuredImage || '/images/default-blog.jpg'],
+        images: [imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`],
       },
       alternates: {
-        canonical: `/blogs/${blog.slug}`,
+        canonical: `${baseUrl}/blogs/${blog.slug}`,
       },
       other: {
         'article:author': blog.author.name,
@@ -104,6 +115,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         'article:modified_time': modifiedTime,
         'article:section': blog.categories[0]?.name || 'Travel',
         'article:tag': blog.tags.map(tag => tag.name).join(','),
+        'og:locale': 'en_US',
+        'og:site_name': 'Nepal Homestays',
       },
     };
   } catch (error) {
@@ -141,41 +154,120 @@ export default async function BlogDetailPage({ params }: Props) {
 
     console.log(`[BlogDetailPage] Blog loaded successfully:`, blog.title);
 
-    const jsonLd = {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nepalhomestays.com';
+
+    // Enhanced Article Schema with all SEO best practices
+    const articleSchema = {
       '@context': 'https://schema.org',
-      '@type': 'BlogPosting',
+      '@type': 'Article',
+      '@id': `${baseUrl}/blogs/${blog.slug}#article`,
       headline: blog.title,
       description: blog.excerpt,
-      image: blog.images?.map(img => img.url) || [blog.featuredImage || '/images/default-blog.jpg'],
+      image: {
+        '@type': 'ImageObject',
+        url: blog.images?.find(img => img.isMain)?.url || blog.featuredImage || `${baseUrl}/images/default-blog.jpg`,
+        width: 1200,
+        height: 630,
+        caption: blog.images?.find(img => img.isMain)?.caption || blog.title,
+      },
       datePublished: blog.publishedAt,
       dateModified: blog.publishedAt,
       author: {
         '@type': 'Person',
+        '@id': `${baseUrl}/authors/${blog.author.id}#person`,
         name: blog.author.name,
+        url: `${baseUrl}/authors/${blog.author.id}`,
       },
       publisher: {
         '@type': 'Organization',
+        '@id': `${baseUrl}#organization`,
         name: 'Nepal Homestays',
+        url: baseUrl,
         logo: {
           '@type': 'ImageObject',
-          url: 'https://nepalhomestays.com/logo.png',
+          url: `${baseUrl}/logo.png`,
+          width: 600,
+          height: 60,
         },
       },
       mainEntityOfPage: {
         '@type': 'WebPage',
-        '@id': `https://nepalhomestays.com/blogs/${blog.slug}`,
+        '@id': `${baseUrl}/blogs/${blog.slug}`,
       },
-      articleSection: blog.categories[0]?.name || 'Travel',
-      keywords: blog.tags.map(tag => tag.name).join(','),
-      wordCount: blog.content.replace(/<[^>]*>/g, '').split(' ').length,
+      articleSection: blog.categories.map(cat => cat.name),
+      keywords: blog.tags.map(tag => tag.name).join(', '),
+      wordCount: blog.content.replace(/<[^>]*>/g, '').split(/\s+/).filter(w => w).length,
       timeRequired: `PT${blog.readTime || 5}M`,
+      inLanguage: 'en-US',
+      isAccessibleForFree: true,
+      about: {
+        '@type': 'Thing',
+        name: blog.categories[0]?.name || 'Travel in Nepal',
+      },
+    };
+
+    // Breadcrumb Schema for better navigation
+    const breadcrumbSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: baseUrl,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Blog',
+          item: `${baseUrl}/blogs`,
+        },
+        ...(blog.categories[0] ? [{
+          '@type': 'ListItem',
+          position: 3,
+          name: blog.categories[0].name,
+          item: `${baseUrl}/blogs?category=${blog.categories[0].slug}`,
+        }] : []),
+        {
+          '@type': 'ListItem',
+          position: blog.categories[0] ? 4 : 3,
+          name: blog.title,
+          item: `${baseUrl}/blogs/${blog.slug}`,
+        },
+      ],
+    };
+
+    // Organization Schema for brand authority
+    const organizationSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      '@id': `${baseUrl}#organization`,
+      name: 'Nepal Homestays',
+      url: baseUrl,
+      logo: `${baseUrl}/logo.png`,
+      description: 'Authentic homestay experiences in Nepal',
+      sameAs: [
+        'https://facebook.com/nepalhomestays',
+        'https://instagram.com/nepalhomestays',
+        'https://twitter.com/nepalhomestays',
+      ],
     };
 
     return (
       <>
+        {/* Enhanced Structured Data */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         <div className="bg-background min-h-screen font-manrope">
           <Navbar />

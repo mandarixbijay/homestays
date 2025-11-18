@@ -18,10 +18,10 @@ interface SafeBlogImageProps {
   quality?: number;
 }
 
-export default function SafeBlogImage({ 
-  src, 
-  alt, 
-  fill = false, 
+export default function SafeBlogImage({
+  src,
+  alt,
+  fill = false,
   className = "",
   sizes,
   priority = false,
@@ -35,21 +35,21 @@ export default function SafeBlogImage({
   // Helper function to validate image URL
   const isValidImageUrl = (url: string | undefined): boolean => {
     if (!url) return false;
-    
+
     // Allow local images
     if (url.startsWith('/')) return true;
-    
+
     // Block invalid example URLs
     if (url.includes('example.com') && !url.startsWith('https://example.com')) {
       return false;
     }
-    
+
     return true;
   };
 
   // Determine the final image source
-  const finalSrc = imageError || !isValidImageUrl(imageSrc) 
-    ? '/images/default-blog.jpg' 
+  const finalSrc = imageError || !isValidImageUrl(imageSrc)
+    ? '/images/default-blog.jpg'
     : imageSrc || '/images/default-blog.jpg';
 
   const handleImageError = () => {
@@ -59,15 +59,24 @@ export default function SafeBlogImage({
     }
   };
 
+  // SEO-friendly alt text (never empty)
+  const seoAlt = alt && alt.trim().length > 0 ? alt : 'Nepal Homestays - Travel Blog Image';
+
+  // Responsive sizes for better performance
+  const responsiveSizes = sizes || (fill
+    ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+    : undefined);
+
   // Props for the Image component
   const imageProps = {
     src: finalSrc,
-    alt: alt || 'Blog image',
+    alt: seoAlt,
     className,
     onError: handleImageError,
     quality,
     priority,
-    ...(fill ? { fill: true, sizes } : { width: width || 600, height: height || 400 }),
+    loading: priority ? undefined : ('lazy' as const),
+    ...(fill ? { fill: true, sizes: responsiveSizes } : { width: width || 600, height: height || 400 }),
   };
 
   return <Image {...imageProps} />;
