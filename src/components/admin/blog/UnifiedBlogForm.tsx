@@ -28,7 +28,7 @@ import { optimizeImage } from '@/lib/utils/imageOptimization';
 import SEOScoreCard from './SEOScoreCard';
 import SmartSlugInput from './SmartSlugInput';
 import OptimizedImageUpload from './OptimizedImageUpload';
-import EnhancedRichTextEditor from './EnhancedRichTextEditor';
+import ImprovedRichTextEditor from './ImprovedRichTextEditor';
 
 // ============================================================================
 // TYPES
@@ -1599,7 +1599,7 @@ const loadData = async () => {
                                             (Click image icon in toolbar to add images with alt text & captions)
                                         </span>
                                     </label>
-                                    <EnhancedRichTextEditor
+                                    <ImprovedRichTextEditor
                                         content={formData.content}
                                         onChange={(content) => handleChange('content', content)}
                                         onImageUpload={handleImageUpload}
