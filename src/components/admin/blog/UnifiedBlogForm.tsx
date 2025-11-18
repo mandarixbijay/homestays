@@ -28,7 +28,7 @@ import { optimizeImage } from '@/lib/utils/imageOptimization';
 import SEOScoreCard from './SEOScoreCard';
 import SmartSlugInput from './SmartSlugInput';
 import OptimizedImageUpload from './OptimizedImageUpload';
-import QuillEditor from './QuillEditor';
+import SimpleRichTextEditor from './SimpleRichTextEditor';
 
 // ============================================================================
 // TYPES
@@ -1612,7 +1612,7 @@ const loadData = async () => {
                                             </span>
                                         </div>
                                     </div>
-                                    <QuillEditor
+                                    <SimpleRichTextEditor
                                         content={formData.content}
                                         onChange={(content) => handleChange('content', content)}
                                         onImageUpload={handleImageUpload}
