@@ -20,6 +20,16 @@ import {
 import { blogApi, CreateBlogData, UpdateBlogData, Tag, Category, BlogImage, Blog } from '@/lib/api/completeBlogApi';
 import { revalidateBlogPages } from '@/app/actions/revalidate';
 
+// NEW: Import optimization utilities
+import { generateSEOSlug, calculateReadingTime as calculateReadTime } from '@/lib/utils/seoUtils';
+import { optimizeImage } from '@/lib/utils/imageOptimization';
+
+// NEW: Import new components
+import SEOScoreCard from './SEOScoreCard';
+import SmartSlugInput from './SmartSlugInput';
+import OptimizedImageUpload from './OptimizedImageUpload';
+import EnhancedRichTextEditor from './EnhancedRichTextEditor';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -47,18 +57,11 @@ interface FormData {
 // UTILITY FUNCTIONS
 // ============================================================================
 
-const generateSlug = (title: string): string => {
-    return title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-};
+// REMOVED: Now using generateSEOSlug from @/lib/utils/seoUtils
+// This new function removes stop words and limits slug length for better SEO
 
-const calculateReadTime = (content: string): number => {
-    const text = content.replace(/<[^>]*>/g, '');
-    const wordCount = text.trim().split(/\s+/).length;
-    return Math.ceil(wordCount / 200);
-};
+// REMOVED: Now using calculateReadingTime (imported as calculateReadTime) from @/lib/utils/seoUtils
+// The new function provides more accurate reading time calculation
 
 const validateImageFile = (file: File): { valid: boolean; error?: string } => {
     if (!file.type.startsWith('image/')) {
@@ -1200,10 +1203,17 @@ const loadData = async () => {
 };
 
     const handleChange = (field: keyof FormData, value: any) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-        if (field === 'title' && !isEditMode) {
-            setFormData(prev => ({ ...prev, slug: generateSlug(value) }));
-        }
+        setFormData(prev => {
+            const updated = { ...prev, [field]: value };
+
+            // NEW: Auto-generate optimized slug from title if slug is empty
+            if (field === 'title' && !prev.slug) {
+                updated.slug = generateSEOSlug(value);
+            }
+
+            return updated;
+        });
+
         if (errors[field]) {
             setErrors(prev => {
                 const newErrors = { ...prev };
@@ -1215,22 +1225,34 @@ const loadData = async () => {
 
     const handleImageUpload = async (file: File): Promise<string> => {
         try {
-            imageFilesRef.current.push(file);
-            const result = await blogApi.uploadImage(file);
+            // NEW: Optimize image before upload
+            const optimized = await optimizeImage(file, {
+                maxWidth: 1920,
+                maxHeight: 1080,
+                quality: 0.85,
+                format: 'jpeg'
+            });
+
+            console.log(`[Image Upload] Optimized: ${optimized.compressionRatio.toFixed(1)}% savings (${(optimized.originalSize / 1024 / 1024).toFixed(2)}MB → ${(optimized.optimizedSize / 1024 / 1024).toFixed(2)}MB)`);
+
+            // Upload optimized file
+            imageFilesRef.current.push(optimized.file);
+            const result = await blogApi.uploadImage(optimized.file);
             return result.url;
         } catch (error) {
+            console.error('[Image Upload] Failed:', error);
             throw error;
         }
     };
 
     const handleAddCategory = async (name: string): Promise<Category> => {
-        const newCat = await blogApi.createCategory({ name, slug: generateSlug(name) });
+        const newCat = await blogApi.createCategory({ name, slug: generateSEOSlug(name) });
         setCategories(prev => [...prev, newCat]);
         return newCat;
     };
 
     const handleAddTag = async (name: string): Promise<Tag> => {
-        const newTag = await blogApi.createTag({ name, slug: generateSlug(name) });
+        const newTag = await blogApi.createTag({ name, slug: generateSEOSlug(name) });
         setTags(prev => [...prev, newTag]);
         return newTag;
     };
@@ -1255,7 +1277,7 @@ const loadData = async () => {
             
             const dataToSave = {
                 title: formData.title,
-                slug: formData.slug || generateSlug(formData.title),
+                slug: formData.slug || generateSEOSlug(formData.title),
                 excerpt: formData.excerpt,
                 content: formData.content,
                 authorId,
@@ -1265,7 +1287,7 @@ const loadData = async () => {
                 seoTitle: formData.seoTitle || formData.title,
                 seoDescription: formData.seoDescription || formData.excerpt,
                 featured: formData.featured,
-                readTime: calculateReadTime(formData.content),
+                readTime: calculateReadTime(formData.content), // Using optimized function from seoUtils
                 images: formData.images,
             };
 
@@ -1536,27 +1558,21 @@ const loadData = async () => {
                                         />
                                     </div>
                                     <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">🔗 URL Slug</label>
-                                            <button
-                                                type="button"
-                                                onClick={handleCopySlug}
-                                                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium"
-                                            >
-                                                <Copy className="h-3 w-3" />
-                                                Copy URL
-                                            </button>
-                                        </div>
-                                        <Input
+                                        {/* NEW: Smart Slug Input with auto-generation and validation */}
+                                        <SmartSlugInput
+                                            title={formData.title}
                                             value={formData.slug}
-                                            onChange={(e) => handleChange('slug', e.target.value)}
-                                            placeholder="auto-generated-slug"
-                                            className="font-mono text-sm"
+                                            onChange={(slug) => handleChange('slug', slug)}
+                                            checkAvailability={async (slug) => {
+                                                try {
+                                                    const result = await blogApi.checkSlugAvailability(slug);
+                                                    return result.available;
+                                                } catch (error) {
+                                                    console.error('Failed to check slug availability:', error);
+                                                    return true; // Assume available if check fails
+                                                }
+                                            }}
                                         />
-                                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                            <ExternalLink className="h-3 w-3" />
-                                            /blog/{formData.slug || 'your-slug-here'}
-                                        </p>
                                     </div>
                                     <div>
                                         <TextArea
@@ -1579,8 +1595,11 @@ const loadData = async () => {
                                         <FileText className="h-5 w-5 text-blue-500" />
                                         Content
                                         <span className="text-red-500">*</span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                                            (Click image icon in toolbar to add images with alt text & captions)
+                                        </span>
                                     </label>
-                                    <RichTextEditor
+                                    <EnhancedRichTextEditor
                                         content={formData.content}
                                         onChange={(content) => handleChange('content', content)}
                                         onImageUpload={handleImageUpload}
@@ -1591,6 +1610,23 @@ const loadData = async () => {
                                             {errors.content}
                                         </p>
                                     )}
+                                </div>
+                            </Card>
+
+                            {/* NEW: SEO Score Dashboard */}
+                            <Card className="shadow-lg border-2 border-green-200 dark:border-green-700 hover:shadow-xl transition-shadow">
+                                <div className="p-6">
+                                    <SEOScoreCard
+                                        title={formData.title}
+                                        slug={formData.slug}
+                                        excerpt={formData.excerpt}
+                                        content={formData.content}
+                                        seoTitle={formData.seoTitle}
+                                        seoDescription={formData.seoDescription}
+                                        tags={tags.filter(t => formData.tagIds.includes(t.id))}
+                                        categories={categories.filter(c => formData.categoryIds.includes(c.id))}
+                                        images={formData.images}
+                                    />
                                 </div>
                             </Card>
                         </div>
@@ -1639,17 +1675,22 @@ const loadData = async () => {
                                 </div>
                             </Card>
 
-                            {/* Image Gallery */}
+                            {/* NEW: Optimized Image Gallery with auto-compression */}
                             <Card className="shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow">
                                 <div className="p-6">
                                     <div className="flex items-center gap-2 mb-4">
                                         <ImageIcon className="h-5 w-5 text-purple-500" />
-                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Gallery</h3>
+                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Image Gallery</h3>
+                                        <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">
+                                            Auto-optimized on upload
+                                        </span>
                                     </div>
-                                    <PremiumImageGallery
+                                    <OptimizedImageUpload
                                         images={formData.images}
-                                        onChange={(images) => handleChange('images', images)}
-                                        onUpload={handleImageUpload}
+                                        onImagesChange={(images) => handleChange('images', images)}
+                                        onFileUpload={handleImageUpload}
+                                        maxImages={10}
+                                        isFeaturedImage={false}
                                     />
                                 </div>
                             </Card>
