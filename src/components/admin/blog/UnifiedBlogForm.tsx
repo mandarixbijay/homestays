@@ -18,6 +18,7 @@ import {
 } from '@/components/admin/AdminComponents';
 
 import { blogApi, CreateBlogData, UpdateBlogData, Tag, Category, BlogImage, Blog } from '@/lib/api/completeBlogApi';
+import { revalidateBlogPages } from '@/app/actions/revalidate';
 
 // ============================================================================
 // TYPES
@@ -1286,7 +1287,21 @@ const loadData = async () => {
 
             // Clear image files after successful save
             imageFilesRef.current = [];
-            
+
+            // ✅ Revalidate blog pages to update the cache
+            console.log('[handleSave] Revalidating blog cache for slug:', result.slug);
+            try {
+                const revalidationResult = await revalidateBlogPages(result.slug);
+                if (revalidationResult.success) {
+                    console.log('[handleSave] Cache revalidated successfully');
+                } else {
+                    console.warn('[handleSave] Cache revalidation warning:', revalidationResult.message);
+                }
+            } catch (revalError) {
+                console.error('[handleSave] Cache revalidation error:', revalError);
+                // Don't fail the save if revalidation fails
+            }
+
             // Navigate after a short delay
             setTimeout(() => {
                 if (isEditMode) {
