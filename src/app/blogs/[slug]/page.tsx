@@ -7,6 +7,10 @@ import Footer from "@/components/footer/footer";
 import { publicBlogApi, PublicBlog } from '@/lib/api/public-blog-api';
 import BlogDetailClient from './BlogDetailClient';
 
+// Enable Incremental Static Regeneration (ISR)
+// Revalidate every 60 seconds if there's a request
+export const revalidate = 60;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
