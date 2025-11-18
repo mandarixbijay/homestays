@@ -7,10 +7,13 @@ import Footer from "@/components/footer/footer";
 import { publicBlogApi, PublicBlog } from '@/lib/api/public-blog-api';
 import BlogDetailClient from './BlogDetailClient';
 
-// Static generation with on-demand revalidation only
-// This avoids ISR page size limits on Vercel
-// Cache updates are triggered via revalidatePath() in server actions after blog updates
-export const dynamicParams = true; // Allow dynamic generation of new slugs
+// Use dynamic rendering to avoid ISR fallback size limits on Vercel
+// This ensures:
+// - No build-time fallback files (no 19MB limit issues)
+// - Server-Side Rendering (SSR) for every request (still great for SEO)
+// - New blogs are immediately accessible without rebuild
+// - Fresh content on every page load
+export const dynamic = 'force-dynamic';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -128,17 +131,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export async function generateStaticParams() {
-  try {
-    const response = await publicBlogApi.getPublishedBlogs({ limit: 50 });
-    return response.data.map((blog) => ({
-      slug: blog.slug,
-    }));
-  } catch (error) {
-    console.error('Error generating static params:', error);
-    return [];
-  }
-}
+// Note: generateStaticParams is not used with dynamic = 'force-dynamic'
+// All pages are server-rendered on demand
 
 export default async function BlogDetailPage({ params }: Props) {
   try {

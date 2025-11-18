@@ -38,10 +38,19 @@
 - ✅ Always provides meaningful alt text (never empty)
 - ✅ Fallback images for broken URLs
 
-### 6. **Cache Revalidation**
-- ✅ On-demand cache updates when blogs are modified
-- ✅ Ensures search engines always see fresh content
-- ✅ Maintains static generation benefits
+### 6. **Rendering Strategy**
+- ✅ **Dynamic Server-Side Rendering (SSR)** for blog detail pages
+- ✅ Fresh content on every request (no stale cache issues)
+- ✅ SEO-friendly server-rendered HTML
+- ✅ New blogs immediately accessible without rebuild
+- ✅ Bypasses Vercel's ISR fallback size limits (19MB)
+- ⚠️ Note: Uses SSR instead of Static Generation due to large blog content
+
+**Why SSR instead of Static?**
+- Some blog posts exceed Vercel's 19MB ISR fallback limit
+- SSR ensures no build failures while maintaining SEO benefits
+- Search engines still receive fully-rendered HTML
+- Performance impact is minimal for blog content
 
 ---
 
