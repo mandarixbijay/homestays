@@ -289,6 +289,7 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Underline,
