@@ -1566,7 +1566,7 @@ const loadData = async () => {
                                             checkAvailability={async (slug) => {
                                                 try {
                                                     const result = await blogApi.checkSlugAvailability(slug);
-                                                    return result.available;
+                                                    return result;
                                                 } catch (error) {
                                                     console.error('Failed to check slug availability:', error);
                                                     return true; // Assume available if check fails
