@@ -246,10 +246,11 @@ export const QuillEditor: React.FC<QuillEditorProps> = ({
       modules: {
         toolbar: {
           container: [
-            [{ 'header': [1, 2, 3, false] }],
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            [{ 'size': ['small', false, 'large', 'huge'] }],
             ['bold', 'italic', 'underline', 'strike'],
             [{ 'color': [] }, { 'background': [] }],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'indent': '-1'}, { 'indent': '+1' }],
             [{ 'align': [] }],
             ['blockquote', 'code-block'],
             ['link', 'image'],
@@ -260,6 +261,10 @@ export const QuillEditor: React.FC<QuillEditorProps> = ({
               setShowImageDialog(true);
             }
           }
+        },
+        clipboard: {
+          // Don't clean paste - preserve Google Docs formatting
+          matchVisual: false
         }
       }
     });

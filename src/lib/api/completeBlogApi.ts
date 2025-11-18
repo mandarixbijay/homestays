@@ -249,9 +249,10 @@ class BlogApi {
       );
       console.log('[checkSlugAvailability] Result:', response);
       return response.available;
-    } catch (error) {
+    } catch (error: any) {
       console.error('[checkSlugAvailability] Error:', error);
-      // If endpoint doesn't exist, assume available
+      // If endpoint has validation errors or doesn't exist, assume available
+      // Don't throw error to UI
       return true;
     }
   }
