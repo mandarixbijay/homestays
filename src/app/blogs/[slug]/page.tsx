@@ -7,9 +7,10 @@ import Footer from "@/components/footer/footer";
 import { publicBlogApi, PublicBlog } from '@/lib/api/public-blog-api';
 import BlogDetailClient from './BlogDetailClient';
 
-// Enable Incremental Static Regeneration (ISR)
-// Revalidate every 60 seconds if there's a request
-export const revalidate = 60;
+// Static generation with on-demand revalidation only
+// This avoids ISR page size limits on Vercel
+// Cache updates are triggered via revalidatePath() in server actions after blog updates
+export const dynamicParams = true; // Allow dynamic generation of new slugs
 
 interface Props {
   params: Promise<{ slug: string }>;
