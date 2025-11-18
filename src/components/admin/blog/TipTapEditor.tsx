@@ -323,8 +323,20 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
         class: 'prose prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[500px] px-8 py-6',
       },
       handlePaste: (view, event) => {
-        // Handle pasted images
-        const items = event.clipboardData?.items;
+        const clipboardData = event.clipboardData;
+        if (!clipboardData) return false;
+
+        // Check if there's HTML content (from Google Docs, Word, etc.)
+        const hasHtml = clipboardData.types.includes('text/html');
+
+        // If there's HTML content, let TipTap handle it naturally
+        // This preserves formatting from Google Docs
+        if (hasHtml) {
+          return false; // Let TipTap's default paste handler work
+        }
+
+        // Only intercept pure image pastes (screenshots, copied images)
+        const items = clipboardData.items;
         if (items) {
           for (const item of Array.from(items)) {
             if (item.type.startsWith('image/')) {
@@ -337,6 +349,7 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
             }
           }
         }
+
         return false;
       },
     },
