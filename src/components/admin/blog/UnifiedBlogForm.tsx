@@ -28,7 +28,7 @@ import { optimizeImage } from '@/lib/utils/imageOptimization';
 import SEOScoreCard from './SEOScoreCard';
 import SmartSlugInput from './SmartSlugInput';
 import OptimizedImageUpload from './OptimizedImageUpload';
-import TipTapEditor from './TipTapEditor';
+import QuillEditor from './QuillEditor';
 
 // ============================================================================
 // TYPES
@@ -1612,11 +1612,11 @@ const loadData = async () => {
                                             </span>
                                         </div>
                                     </div>
-                                    <TipTapEditor
+                                    <QuillEditor
                                         content={formData.content}
                                         onChange={(content) => handleChange('content', content)}
                                         onImageUpload={handleImageUpload}
-                                        placeholder="Start writing your blog content here... You can paste images directly from Google Docs!"
+                                        placeholder="Start writing your blog content here... Paste from Google Docs works perfectly!"
                                     />
                                     {errors.content && (
                                         <p className="mt-3 text-sm text-red-600 dark:text-red-400 flex items-center gap-2 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
