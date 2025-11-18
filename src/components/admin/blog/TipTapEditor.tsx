@@ -8,8 +8,8 @@ import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
-import TextStyle from '@tiptap/extension-text-style';
-import Color from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Code,
@@ -289,6 +289,7 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Underline,
