@@ -28,7 +28,7 @@ import { optimizeImage } from '@/lib/utils/imageOptimization';
 import SEOScoreCard from './SEOScoreCard';
 import SmartSlugInput from './SmartSlugInput';
 import OptimizedImageUpload from './OptimizedImageUpload';
-import ImprovedRichTextEditor from './ImprovedRichTextEditor';
+import TipTapEditor from './TipTapEditor';
 
 // ============================================================================
 // TYPES
@@ -1458,7 +1458,7 @@ const loadData = async () => {
             </header>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {showPreview ? (
                     /* Preview Mode */
                     <Card className="shadow-2xl border-2 border-gray-200 dark:border-gray-700 animate-in fade-in duration-500">
@@ -1540,12 +1540,12 @@ const loadData = async () => {
                     </Card>
                 ) : (
                     /* Edit Mode */
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Main Content Column */}
-                        <div className="lg:col-span-2 space-y-6">
+                    <div className="space-y-10">
+                        {/* Main Content Section */}
+                        <div className="space-y-8">
                             {/* Title & Slug Card */}
-                            <Card className="shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow">
-                                <div className="p-6 space-y-5">
+                            <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
+                                <div className="p-10 space-y-8">
                                     <div>
                                         <Input
                                             label="📝 Blog Title"
@@ -1589,20 +1589,34 @@ const loadData = async () => {
                             </Card>
 
                             {/* Content Editor Card */}
-                            <Card className="shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow">
-                                <div className="p-6">
-                                    <label className="block text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                                        <FileText className="h-5 w-5 text-blue-500" />
-                                        Content
-                                        <span className="text-red-500">*</span>
-                                        <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
-                                            (Click image icon in toolbar to add images with alt text & captions)
-                                        </span>
-                                    </label>
-                                    <ImprovedRichTextEditor
+                            <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
+                                <div className="p-10">
+                                    <div className="mb-6">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <FileText className="h-6 w-6 text-blue-500" />
+                                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Content</h2>
+                                            <span className="text-red-500 text-xl">*</span>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-3 text-sm">
+                                            <span className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full font-medium flex items-center gap-2">
+                                                <Sparkles className="h-4 w-4" />
+                                                Paste from Google Docs
+                                            </span>
+                                            <span className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-full font-medium flex items-center gap-2">
+                                                <CheckCircle2 className="h-4 w-4" />
+                                                Auto image optimization
+                                            </span>
+                                            <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded-full font-medium flex items-center gap-2">
+                                                <ImageIcon className="h-4 w-4" />
+                                                Alt text for all images
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <TipTapEditor
                                         content={formData.content}
                                         onChange={(content) => handleChange('content', content)}
                                         onImageUpload={handleImageUpload}
+                                        placeholder="Start writing your blog content here... You can paste images directly from Google Docs!"
                                     />
                                     {errors.content && (
                                         <p className="mt-3 text-sm text-red-600 dark:text-red-400 flex items-center gap-2 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
@@ -1613,91 +1627,76 @@ const loadData = async () => {
                                 </div>
                             </Card>
 
-                            {/* NEW: SEO Score Dashboard */}
-                            <Card className="shadow-lg border-2 border-green-200 dark:border-green-700 hover:shadow-xl transition-shadow">
-                                <div className="p-6">
-                                    <SEOScoreCard
-                                        title={formData.title}
-                                        slug={formData.slug}
-                                        excerpt={formData.excerpt}
-                                        content={formData.content}
-                                        seoTitle={formData.seoTitle}
-                                        seoDescription={formData.seoDescription}
-                                        tags={tags.filter(t => formData.tagIds.includes(t.id))}
-                                        categories={categories.filter(c => formData.categoryIds.includes(c.id))}
-                                        images={formData.images}
-                                    />
-                                </div>
-                            </Card>
-                        </div>
-
-                        {/* Sidebar Column */}
-                        <div className="space-y-6">
-                            {/* Publishing Options */}
-                            <Card className="shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
-                                <div className="p-6 space-y-4">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Settings className="h-5 w-5 text-blue-500" />
-                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Publishing</h3>
+                            {/* Publishing Options & Media */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Publishing Card */}
+                                <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
+                                    <div className="p-8">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <Settings className="h-6 w-6 text-blue-500" />
+                                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Publishing</h2>
+                                        </div>
+                                        <div className="space-y-6">
+                                            <Select
+                                                label="Status"
+                                                value={formData.status}
+                                                onChange={(e) => handleChange('status', e.target.value)}
+                                                className="font-semibold text-lg"
+                                            >
+                                                <option value="DRAFT">📝 Draft</option>
+                                                <option value="PUBLISHED">🌍 Published</option>
+                                                <option value="ARCHIVED">📦 Archived</option>
+                                            </Select>
+                                            <label className="flex items-center gap-4 p-5 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl border-2 border-yellow-200 dark:border-yellow-800 cursor-pointer hover:scale-[1.02] transition-transform">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.featured}
+                                                    onChange={(e) => handleChange('featured', e.target.checked)}
+                                                    className="h-6 w-6 rounded"
+                                                />
+                                                <div className="flex items-center gap-3 font-semibold text-yellow-900 dark:text-yellow-100 text-lg">
+                                                    <Star className={`h-6 w-6 ${formData.featured ? 'fill-current text-yellow-500' : ''}`} />
+                                                    Featured Post
+                                                </div>
+                                            </label>
+                                            <div className="grid grid-cols-2 gap-4 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
+                                                <div className="text-center">
+                                                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{wordCount}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">Words</p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{readTime}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">Min Read</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <Select
-                                        label="Status"
-                                        value={formData.status}
-                                        onChange={(e) => handleChange('status', e.target.value)}
-                                        className="font-semibold"
-                                    >
-                                        <option value="DRAFT">📝 Draft</option>
-                                        <option value="PUBLISHED">🌍 Published</option>
-                                        <option value="ARCHIVED">📦 Archived</option>
-                                    </Select>
-                                    <label className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/10 dark:to-orange-900/10 rounded-xl border-2 border-yellow-200 dark:border-yellow-800 cursor-pointer hover:scale-105 transition-transform">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.featured}
-                                            onChange={(e) => handleChange('featured', e.target.checked)}
-                                            className="h-5 w-5 rounded"
+                                </Card>
+
+                                {/* Image Gallery Card */}
+                                <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
+                                    <div className="p-8">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <ImageIcon className="h-6 w-6 text-purple-500" />
+                                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Images</h2>
+                                            <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded-full font-semibold">
+                                                Auto-optimized
+                                            </span>
+                                        </div>
+                                        <OptimizedImageUpload
+                                            images={formData.images}
+                                            onImagesChange={(images) => handleChange('images', images)}
+                                            onFileUpload={handleImageUpload}
+                                            maxImages={10}
+                                            isFeaturedImage={false}
                                         />
-                                        <div className="flex items-center gap-2 font-semibold text-yellow-900 dark:text-yellow-100">
-                                            <Star className={`h-5 w-5 ${formData.featured ? 'fill-current text-yellow-500' : ''}`} />
-                                            Featured Post
-                                        </div>
-                                    </label>
-                                    <div className="grid grid-cols-2 gap-3 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-xl border-2 border-blue-200 dark:border-blue-800">
-                                        <div className="text-center">
-                                            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{wordCount}</p>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Words</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{readTime}</p>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Min Read</p>
-                                        </div>
                                     </div>
-                                </div>
-                            </Card>
-
-                            {/* NEW: Optimized Image Gallery with auto-compression */}
-                            <Card className="shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow">
-                                <div className="p-6">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <ImageIcon className="h-5 w-5 text-purple-500" />
-                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Image Gallery</h3>
-                                        <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">
-                                            Auto-optimized on upload
-                                        </span>
-                                    </div>
-                                    <OptimizedImageUpload
-                                        images={formData.images}
-                                        onImagesChange={(images) => handleChange('images', images)}
-                                        onFileUpload={handleImageUpload}
-                                        maxImages={10}
-                                        isFeaturedImage={false}
-                                    />
-                                </div>
-                            </Card>
+                                </Card>
+                            </div>
 
                             {/* Categories & Tags */}
-                            <Card className="shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow">
-                                <div className="p-6">
+                            <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
+                                <div className="p-10">
                                     <PremiumCategoryTagManager
                                         selectedCategories={formData.categoryIds}
                                         selectedTags={formData.tagIds}
@@ -1711,8 +1710,23 @@ const loadData = async () => {
                                 </div>
                             </Card>
 
+                            {/* SEO Score Dashboard */}
+                            <Card className="shadow-xl border border-green-200 dark:border-green-700 hover:shadow-2xl transition-all bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-900/10 dark:to-emerald-900/10">
+                                <div className="p-10">
+                                    <SEOScoreCard
+                                        title={formData.title}
+                                        slug={formData.slug}
+                                        excerpt={formData.excerpt}
+                                        content={formData.content}
+                                        seoTitle={formData.seoTitle}
+                                        seoDescription={formData.seoDescription}
+                                        tags={tags.filter(t => formData.tagIds.includes(t.id))}
+                                        categories={categories.filter(c => formData.categoryIds.includes(c.id))}
+                                        images={formData.images}
+                                    />
+                                </div>
+                            </Card>
                             {/* SEO Optimizer */}
-
                             <SEOOptimizer
                                 seoTitle={formData.seoTitle}
                                 seoDescription={formData.seoDescription}
