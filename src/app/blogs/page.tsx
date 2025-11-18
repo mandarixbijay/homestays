@@ -4,9 +4,8 @@ import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
 import BlogListClient from './BlogClient';
 
-// Enable Incremental Static Regeneration (ISR)
-// Revalidate every 60 seconds if there's a request
-export const revalidate = 60;
+// Use on-demand revalidation via server actions
+// Cache is updated when blogs are created/updated
 
 export const metadata: Metadata = {
   title: "Travel Blog | Nepal Homestays - Stories, Tips & Guides",
