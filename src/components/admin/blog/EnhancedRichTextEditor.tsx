@@ -151,7 +151,7 @@ const ImageInsertDialog: React.FC<ImageInsertDialogProps> = ({
               required
             />
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Required for SEO and accessibility. Describe what's in the image.
+              Required for SEO and accessibility. Describe what&apos;s in the image.
             </p>
           </div>
 
