@@ -322,20 +322,25 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
       attributes: {
         class: 'prose prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[500px] px-8 py-6',
       },
-      handlePaste: (view, event) => {
+      handlePaste: async (view, event, slice) => {
         const clipboardData = event.clipboardData;
         if (!clipboardData) return false;
 
-        // Check if there's HTML content (from Google Docs, Word, etc.)
-        const hasHtml = clipboardData.types.includes('text/html');
+        // Get HTML content from clipboard
+        const htmlContent = clipboardData.getData('text/html');
 
-        // If there's HTML content, let TipTap handle it naturally
-        // This preserves formatting from Google Docs
-        if (hasHtml) {
-          return false; // Let TipTap's default paste handler work
+        if (htmlContent) {
+          // Let TipTap handle the paste first to preserve formatting
+          // We'll process images after
+          setTimeout(() => {
+            processImagesInEditor();
+          }, 100);
+
+          // Return false to let TipTap's default handler process the HTML
+          return false;
         }
 
-        // Only intercept pure image pastes (screenshots, copied images)
+        // Handle pure image pastes (screenshots, copied images)
         const items = clipboardData.items;
         if (items) {
           for (const item of Array.from(items)) {
@@ -361,6 +366,118 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
     }
   }, [content, editor]);
 
+  // Process images that were pasted from Google Docs
+  const processImagesInEditor = async () => {
+    if (!editor || !onImageUpload) return;
+
+    const editorElement = document.querySelector('.ProseMirror');
+    if (!editorElement) return;
+
+    const images = editorElement.querySelectorAll('img');
+
+    for (const img of Array.from(images)) {
+      const src = img.getAttribute('src');
+
+      // Skip if already processed or is a local upload
+      if (!src || src.startsWith('/') || img.hasAttribute('data-processed')) {
+        continue;
+      }
+
+      // Skip external URLs that aren't Google Docs
+      if (src.startsWith('http') && !src.includes('docs.google') && !src.includes('googleusercontent')) {
+        continue;
+      }
+
+      try {
+        // Mark as being processed
+        img.setAttribute('data-processed', 'true');
+        img.style.opacity = '0.5';
+
+        // Convert image to blob
+        let blob: Blob;
+
+        if (src.startsWith('data:')) {
+          // Base64 image
+          const response = await fetch(src);
+          blob = await response.blob();
+        } else {
+          // External URL - need to fetch via proxy or CORS
+          try {
+            const response = await fetch(src);
+            blob = await response.blob();
+          } catch (error) {
+            console.warn('Failed to fetch external image, trying alternative method:', error);
+            // Fallback: create image element and convert to canvas
+            blob = await urlToBlob(src);
+          }
+        }
+
+        // Convert blob to File
+        const file = new File([blob], 'pasted-image.jpg', { type: blob.type || 'image/jpeg' });
+
+        // Optimize the image
+        const optimized = await optimizeImage(file, {
+          maxWidth: 1920,
+          maxHeight: 1080,
+          quality: 0.85,
+          format: 'jpeg',
+        });
+
+        // Upload the optimized image
+        const uploadedUrl = await onImageUpload(optimized.file);
+
+        // Store original image reference
+        const originalSrc = src;
+        const tempPlaceholder = `__TEMP_IMG_${Date.now()}__`;
+
+        // Replace with placeholder temporarily
+        img.setAttribute('src', tempPlaceholder);
+        img.setAttribute('data-original-src', originalSrc);
+        img.setAttribute('data-uploaded-url', uploadedUrl);
+
+        // Show alt text dialog
+        setPendingImageUrl(uploadedUrl);
+        setShowImageDialog(true);
+
+        // Wait for user to provide alt text
+        // The dialog will handle the final replacement via handleImageInsert
+
+      } catch (error) {
+        console.error('Failed to process pasted image:', error);
+        img.style.opacity = '1';
+        img.removeAttribute('data-processed');
+      }
+    }
+  };
+
+  // Helper function to convert URL to Blob using canvas
+  const urlToBlob = (url: string): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to convert image to blob'));
+          }
+        }, 'image/jpeg', 0.95);
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = url;
+    });
+  };
+
   const handlePastedImage = async (file: File) => {
     if (!onImageUpload) return;
 
@@ -384,6 +501,40 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
   const handleImageInsert = (data: { url: string; alt: string; caption?: string }) => {
     if (!editor) return;
 
+    // Check if there's a temporary placeholder to replace (from Google Docs paste)
+    const editorElement = document.querySelector('.ProseMirror');
+    if (editorElement) {
+      const tempImg = editorElement.querySelector(`img[data-uploaded-url="${data.url}"]`);
+
+      if (tempImg) {
+        // Replace the temporary placeholder with final image
+        const newImgHtml = data.caption
+          ? `<figure><img src="${data.url}" alt="${data.alt}" class="rounded-lg shadow-lg max-w-full h-auto my-4" /><figcaption>${data.caption}</figcaption></figure>`
+          : `<img src="${data.url}" alt="${data.alt}" class="rounded-lg shadow-lg max-w-full h-auto my-4" />`;
+
+        // Get the position and replace using TipTap
+        const tempSrc = tempImg.getAttribute('src');
+        const currentHtml = editor.getHTML();
+        const updatedHtml = currentHtml.replace(
+          new RegExp(`<img[^>]*src="${tempSrc}"[^>]*>`, 'g'),
+          newImgHtml
+        );
+
+        editor.commands.setContent(updatedHtml);
+        tempImg.style.opacity = '1';
+
+        setPendingImageUrl(undefined);
+
+        // Process next image if any
+        setTimeout(() => {
+          processImagesInEditor();
+        }, 100);
+
+        return;
+      }
+    }
+
+    // Regular image insert (from toolbar button or screenshot paste)
     if (data.caption) {
       editor
         .chain()
