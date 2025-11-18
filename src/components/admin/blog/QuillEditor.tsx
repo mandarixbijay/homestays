@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useState, useRef, useEffect } from 'react';
+import Quill from 'quill';
+import 'quill/dist/quill.snow.css';
 import { optimizeImage } from '@/lib/utils/imageOptimization';
 import {
-  X, Upload, Loader2, CheckCircle, AlertCircle, Image as ImageIcon
+  X, Upload, Loader2, CheckCircle, AlertCircle
 } from 'lucide-react';
-
-// Import Quill dynamically to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-import 'react-quill/dist/quill.snow.css';
 
 interface ImageDialogProps {
   isOpen: boolean;
@@ -230,19 +227,76 @@ export const QuillEditor: React.FC<QuillEditorProps> = ({
   onImageUpload,
   placeholder = 'Start writing your amazing content here... Paste from Google Docs works perfectly!'
 }) => {
-  const quillRef = useRef<any>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const quillRef = useRef<Quill | null>(null);
   const [showImageDialog, setShowImageDialog] = useState(false);
-  const [pendingImageUrl, setPendingImageUrl] = useState<string | undefined>();
+  const [mounted, setMounted] = useState(false);
 
-  // Custom image handler
-  const imageHandler = () => {
-    setShowImageDialog(true);
-  };
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !editorRef.current || quillRef.current) return;
+
+    // Initialize Quill
+    const quill = new Quill(editorRef.current, {
+      theme: 'snow',
+      placeholder,
+      modules: {
+        toolbar: {
+          container: [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'align': [] }],
+            ['blockquote', 'code-block'],
+            ['link', 'image'],
+            ['clean']
+          ],
+          handlers: {
+            image: () => {
+              setShowImageDialog(true);
+            }
+          }
+        }
+      }
+    });
+
+    // Set initial content
+    if (content) {
+      quill.clipboard.dangerouslyPasteHTML(content);
+    }
+
+    // Handle text changes
+    quill.on('text-change', () => {
+      onChange(quill.root.innerHTML);
+    });
+
+    quillRef.current = quill;
+
+    return () => {
+      quillRef.current = null;
+    };
+  }, [mounted]);
+
+  // Update content when prop changes (but don't trigger if user is editing)
+  useEffect(() => {
+    if (quillRef.current && content !== quillRef.current.root.innerHTML) {
+      const quill = quillRef.current;
+      const selection = quill.getSelection();
+      quill.clipboard.dangerouslyPasteHTML(content);
+      if (selection) {
+        quill.setSelection(selection);
+      }
+    }
+  }, [content]);
 
   const handleImageInsert = (data: { url: string; alt: string; caption?: string }) => {
-    const quill = quillRef.current?.getEditor();
-    if (!quill) return;
+    if (!quillRef.current) return;
 
+    const quill = quillRef.current;
     const range = quill.getSelection(true);
 
     if (data.caption) {
@@ -254,64 +308,23 @@ export const QuillEditor: React.FC<QuillEditorProps> = ({
       quill.insertEmbed(range.index, 'image', data.url);
     }
 
-    quill.setSelection(range.index + 1);
-    setPendingImageUrl(undefined);
+    quill.setSelection(range.index + 1, 0);
   };
 
-  const modules = useMemo(() => ({
-    toolbar: {
-      container: [
-        [{ 'header': [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'color': [] }, { 'background': [] }],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        [{ 'align': [] }],
-        ['blockquote', 'code-block'],
-        ['link', 'image'],
-        ['clean']
-      ],
-      handlers: {
-        image: imageHandler
-      }
-    },
-    clipboard: {
-      matchVisual: false, // Better Google Docs paste handling
-    }
-  }), []);
-
-  const formats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike',
-    'color', 'background',
-    'list', 'bullet',
-    'align',
-    'blockquote', 'code-block',
-    'link', 'image'
-  ];
+  if (!mounted) {
+    return <div className="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-lg h-96" />;
+  }
 
   return (
     <>
       <div className="quill-wrapper border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden bg-white dark:bg-gray-900 shadow-lg">
-        <ReactQuill
-          ref={quillRef}
-          theme="snow"
-          value={content}
-          onChange={onChange}
-          modules={modules}
-          formats={formats}
-          placeholder={placeholder}
-          className="quill-editor"
-        />
+        <div ref={editorRef} />
       </div>
 
       <ImageDialog
         isOpen={showImageDialog}
-        onClose={() => {
-          setShowImageDialog(false);
-          setPendingImageUrl(undefined);
-        }}
+        onClose={() => setShowImageDialog(false)}
         onInsert={handleImageInsert}
-        imageUrl={pendingImageUrl}
         onUpload={onImageUpload}
       />
 
@@ -327,15 +340,15 @@ export const QuillEditor: React.FC<QuillEditorProps> = ({
         }
 
         .quill-wrapper .ql-toolbar {
-          border: none;
-          border-bottom: 2px solid #e5e7eb;
+          border: none !important;
+          border-bottom: 2px solid #e5e7eb !important;
           background: linear-gradient(to right, #f9fafb, #ffffff);
           padding: 1rem;
         }
 
         .dark .quill-wrapper .ql-toolbar {
           background: linear-gradient(to right, #1f2937, #111827);
-          border-bottom-color: #374151;
+          border-bottom-color: #374151 !important;
         }
 
         .quill-wrapper .ql-toolbar button {
@@ -352,8 +365,8 @@ export const QuillEditor: React.FC<QuillEditorProps> = ({
         }
 
         .quill-wrapper .ql-toolbar button.ql-active {
-          background: #3b82f6;
-          color: white;
+          background: #3b82f6 !important;
+          color: white !important;
           border-radius: 0.5rem;
         }
 
@@ -370,6 +383,18 @@ export const QuillEditor: React.FC<QuillEditorProps> = ({
 
         .dark .quill-wrapper .ql-editor.ql-blank::before {
           color: #6b7280;
+        }
+
+        .dark .quill-wrapper .ql-stroke {
+          stroke: #9ca3af !important;
+        }
+
+        .dark .quill-wrapper .ql-fill {
+          fill: #9ca3af !important;
+        }
+
+        .dark .quill-wrapper .ql-picker-label {
+          color: #9ca3af !important;
         }
       `}</style>
     </>
