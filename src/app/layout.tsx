@@ -1,10 +1,12 @@
 // src/app/layout.tsx
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
+
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
 import "./globals.css";
 import { HomestayProvider } from "@/context/HomestayContext";
 import ClientWrapper from "@/components/ClientWrapper";
-import { ThemeProvider } from "@/components/theme-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
@@ -48,16 +50,9 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${sora.variable} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ClientWrapper>
-            <HomestayProvider>{children}</HomestayProvider>
-          </ClientWrapper>
-        </ThemeProvider>
+        <ClientWrapper>
+          <HomestayProvider>{children}</HomestayProvider>
+        </ClientWrapper>
         <SpeedInsights />
         <Analytics />
       </body>

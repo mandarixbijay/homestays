@@ -6,7 +6,6 @@ import { DollarSign, Globe, LineChart, Briefcase, Store, Users } from "lucide-re
 import Footer from "@/components/footer/footer";
 import Navbar from "@/components/navbar/navbar";
 import { useRouter } from "next/navigation";
-import Head from "next/head";
 import Image from "next/image";
 
 const benefits = [
@@ -66,23 +65,6 @@ const PartnershipPage = () => {
   return (
     <>
       <div className="min-h-screen bg-background font-manrope">
-        <Head>
-          <title>Partnerships | Nepal Homestays</title>
-          <meta
-            name="description"
-            content="Partner with Nepal Homestays to connect travelers with authentic experiences, increase visibility, and support sustainable tourism."
-          />
-          <meta name="keywords" content="Nepal, homestays, partnerships, travel agencies, sustainable tourism" />
-          <meta name="robots" content="index, follow" />
-          <meta property="og:title" content="Partnerships | Nepal Homestays" />
-          <meta
-            property="og:description"
-            content="Join us to create unforgettable journeys and support local communities in Nepal."
-          />
-          <meta property="og:image" content="/images/partnership.avif" />
-          <meta property="og:url" content="https://nepalhomestays.com/partnerships" />
-          <meta property="og:type" content="website" />
-        </Head>
         <Navbar />
 
         {/* Hero Section */}

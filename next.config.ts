@@ -71,8 +71,12 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react'],
   },
 
+  // Skip static generation of error pages to work around Html import issue
+  skipTrailingSlashRedirect: true,
+  skipMiddlewareUrlNormalize: true,
+
   // ✅ Optional: Helps ensure static assets are bundled for production
-  output: 'standalone',
+  // output: 'standalone', // Temporarily disabled to debug Html import issue
 };
 
 export default nextConfig;
