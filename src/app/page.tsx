@@ -23,7 +23,7 @@ export default function Home() {
         <Hero4Wrapper />
       </main>
       <Footer />
-      <BookingTicker />
+      {/* <BookingTicker /> */}
     </div>
   );
 }
