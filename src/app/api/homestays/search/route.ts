@@ -44,6 +44,17 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
+    // Log the response for debugging
+    console.log('Backend API Response Structure:', {
+      hasData: !!data.data,
+      dataLength: data.data?.length || 0,
+      total: data.total,
+      totalPages: data.totalPages,
+      page: data.page,
+      limit: data.limit,
+      keys: Object.keys(data)
+    });
+
     return NextResponse.json(data, {
       headers: {
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
