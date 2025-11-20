@@ -542,9 +542,9 @@ export default function ImprovedAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-green-50/20 to-teal-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Enhanced Header with Welcome Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900">
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] dark:from-[#1a332f] dark:via-[#224240] dark:to-[#2a5350]">
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
@@ -567,7 +567,7 @@ export default function ImprovedAdminDashboard() {
                   <span>Welcome back, {session.user.name}!</span>
                   <Award className="h-6 w-6 text-yellow-300 animate-bounce" />
                 </h1>
-                <p className="text-blue-100 text-sm flex items-center space-x-2">
+                <p className="text-green-100 text-sm flex items-center space-x-2">
                   <Zap className="h-4 w-4" />
                   <span>Manage your homestay empire with ease</span>
                 </p>
@@ -682,7 +682,7 @@ export default function ImprovedAdminDashboard() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
-                <Target className="h-6 w-6 text-blue-600" />
+                <Target className="h-6 w-6 text-[#224240]" />
                 <span>Quick Actions</span>
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -704,7 +704,7 @@ export default function ImprovedAdminDashboard() {
               title="Manage Blogs"
               description="Create and publish blog posts for marketing"
               icon={<PenTool className="h-6 w-6" />}
-              color="bg-gradient-to-br from-purple-100 to-purple-200 text-purple-600 dark:from-purple-900/20 dark:to-purple-800/30 dark:text-purple-400"
+              color="bg-gradient-to-br from-[#224240]/10 to-[#2a5350]/20 text-[#224240] dark:from-[#224240]/20 dark:to-[#2a5350]/30 dark:text-[#2a5350]"
               onClick={() => router.push('/admin/blog')}
               badge="Popular"
             />
@@ -748,7 +748,7 @@ export default function ImprovedAdminDashboard() {
           {/* Blog Management */}
           <div className="lg:col-span-2">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-900 dark:to-pink-900 p-6">
+              <div className="bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] dark:from-[#1a332f] dark:via-[#224240] dark:to-[#2a5350] p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
@@ -756,7 +756,7 @@ export default function ImprovedAdminDashboard() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white">Content Management</h3>
-                      <p className="text-purple-100 text-sm">Manage your blog and marketing content</p>
+                      <p className="text-green-100 text-sm">Manage your blog and marketing content</p>
                     </div>
                   </div>
                   <button
@@ -771,21 +771,21 @@ export default function ImprovedAdminDashboard() {
 
               <div className="p-6 grid grid-cols-2 gap-4">
                 <div
-                  className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+                  className="p-4 bg-gradient-to-br from-[#224240]/5 to-[#224240]/10 dark:from-[#224240]/10 dark:to-[#224240]/20 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-[#224240]/10"
                   onClick={() => router.push('/admin/blog/create')}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-blue-200 dark:bg-blue-800 rounded-lg">
-                      <Plus className="h-5 w-5 text-blue-700 dark:text-blue-300" />
+                    <div className="p-2 bg-[#224240]/20 dark:bg-[#224240]/30 rounded-lg">
+                      <Plus className="h-5 w-5 text-[#224240] dark:text-[#2a5350]" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-blue-600" />
+                    <ChevronRight className="h-4 w-4 text-[#224240]" />
                   </div>
                   <h4 className="font-bold text-gray-900 dark:text-white mb-1">New Blog Post</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Create fresh content</p>
                 </div>
 
                 <div
-                  className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+                  className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-green-200/50 dark:border-green-700/50"
                   onClick={() => router.push('/admin/blog/analytics')}
                 >
                   <div className="flex items-center justify-between mb-3">
@@ -799,28 +799,28 @@ export default function ImprovedAdminDashboard() {
                 </div>
 
                 <div
-                  className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+                  className="p-4 bg-gradient-to-br from-[#224240]/5 to-[#2a5350]/10 dark:from-[#224240]/10 dark:to-[#2a5350]/20 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-[#224240]/10"
                   onClick={() => router.push('/admin/blog/tags')}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-purple-200 dark:bg-purple-800 rounded-lg">
-                      <Tag className="h-5 w-5 text-purple-700 dark:text-purple-300" />
+                    <div className="p-2 bg-[#224240]/20 dark:bg-[#224240]/30 rounded-lg">
+                      <Tag className="h-5 w-5 text-[#224240] dark:text-[#2a5350]" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-purple-600" />
+                    <ChevronRight className="h-4 w-4 text-[#224240]" />
                   </div>
                   <h4 className="font-bold text-gray-900 dark:text-white mb-1">Tags</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Organize content</p>
                 </div>
 
                 <div
-                  className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+                  className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-amber-200/50 dark:border-amber-700/50"
                   onClick={() => router.push('/admin/blog/categories')}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-yellow-200 dark:bg-yellow-800 rounded-lg">
-                      <Folder className="h-5 w-5 text-yellow-700 dark:text-yellow-300" />
+                    <div className="p-2 bg-amber-200 dark:bg-amber-800 rounded-lg">
+                      <Folder className="h-5 w-5 text-amber-700 dark:text-amber-300" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-yellow-600" />
+                    <ChevronRight className="h-4 w-4 text-amber-600" />
                   </div>
                   <h4 className="font-bold text-gray-900 dark:text-white mb-1">Categories</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Group by topics</p>
