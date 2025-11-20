@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
 import Hero from "@/components/landing-page/hero";
+import CheckAvailability from "@/components/landing-page/check-availability";
 
 interface Homestay {
   id: number;
@@ -244,7 +245,7 @@ export default function AllHomestaysPage() {
       <Navbar />
 
       {/* Hero Component from Landing Page */}
-      <Hero />
+      <CheckAvailability />
 
       {/* All Homestays Section */}
       <section className="py-16 bg-gray-50">
