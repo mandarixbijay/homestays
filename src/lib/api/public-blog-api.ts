@@ -1,4 +1,6 @@
-// lib/api/public-blog-api.ts - Fixed version
+// lib/api/public-blog-api.ts - Optimized version with caching
+import { cache } from 'react';
+
 export interface PublicBlog {
   id: number;
   slug: string;
@@ -120,18 +122,21 @@ class PublicBlogApi {
     };
   }
 
-  private async request<T>(endpoint: string): Promise<T> {
+  private async request<T>(endpoint: string, cacheTime: number = 3600): Promise<T> {
     try {
       // Fix URL construction
       const url = `${this.baseUrl}${endpoint}`;
       console.log(`[BlogAPI] Fetching: ${url}`);
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        next: { revalidate: 300 }, // Revalidate every 5 minutes
+        next: {
+          revalidate: cacheTime, // Configurable cache time
+          tags: ['blogs'] // Add tag for on-demand revalidation
+        },
       });
 
       if (!response.ok) {
@@ -199,14 +204,14 @@ class PublicBlogApi {
   // Get featured blogs
   async getFeaturedBlogs(limit: number = 3): Promise<PublicBlog[]> {
     try {
-      const result = await this.request<any>(`/blog/blogs/featured?limit=${limit}`);
-      
+      const result = await this.request<any>(`/blog/blogs/featured?limit=${limit}`, 1800); // Cache for 30 minutes
+
       if (Array.isArray(result)) {
         return result.map(blog => this.transformBlogData(blog));
       } else if (result.data && Array.isArray(result.data)) {
         return result.data.map((blog: any) => this.transformBlogData(blog));
       }
-      
+
       return [];
     } catch (error) {
       console.error('Error fetching featured blogs:', error);
@@ -214,11 +219,11 @@ class PublicBlogApi {
     }
   }
 
-  // Get blog by slug
-  async getBlogBySlug(slug: string): Promise<PublicBlog> {
-    const result = await this.request<any>(`/blog/blogs/${slug}`);
+  // Get blog by slug (with React cache for request deduplication)
+  getBlogBySlug = cache(async (slug: string): Promise<PublicBlog> => {
+    const result = await this.request<any>(`/blog/blogs/${slug}`, 3600); // Cache for 1 hour
     return this.transformBlogData(result);
-  }
+  });
 
   // Search blogs
   async searchBlogs(params: {
@@ -272,14 +277,14 @@ class PublicBlogApi {
   // Get related blogs
   async getRelatedBlogs(slug: string, limit: number = 3): Promise<PublicBlog[]> {
     try {
-      const result = await this.request<any>(`/blog/blogs/${slug}/related?limit=${limit}`);
-      
+      const result = await this.request<any>(`/blog/blogs/${slug}/related?limit=${limit}`, 1800); // Cache for 30 minutes
+
       if (Array.isArray(result)) {
         return result.map(blog => this.transformBlogData(blog));
       } else if (result.data && Array.isArray(result.data)) {
         return result.data.map((blog: any) => this.transformBlogData(blog));
       }
-      
+
       return [];
     } catch (error) {
       console.error('Error fetching related blogs:', error);
@@ -287,27 +292,27 @@ class PublicBlogApi {
     }
   }
 
-  // Get all categories
-  async getCategories() {
+  // Get all categories (with React cache for request deduplication)
+  getCategories = cache(async () => {
     try {
-      const result = await this.request<any>(`/blog/categories`);
+      const result = await this.request<any>(`/blog/categories`, 7200); // Cache for 2 hours
       return Array.isArray(result) ? result : [];
     } catch (error) {
       console.error('Error fetching categories:', error);
       return [];
     }
-  }
+  });
 
-  // Get all tags
-  async getTags() {
+  // Get all tags (with React cache for request deduplication)
+  getTags = cache(async () => {
     try {
-      const result = await this.request<any>(`/blog/tags`);
+      const result = await this.request<any>(`/blog/tags`, 7200); // Cache for 2 hours
       return Array.isArray(result) ? result : [];
     } catch (error) {
       console.error('Error fetching tags:', error);
       return [];
     }
-  }
+  });
 }
 
 export const publicBlogApi = new PublicBlogApi();
