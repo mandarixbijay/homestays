@@ -1,21 +1,37 @@
 // src/app/deals/page.tsx
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
+import React, { useState, useMemo, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Filter } from "lucide-react";
+import { Filter, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { DateGuestLocationPicker } from "@/components/homestay/components/details/date-guest-location-picker";
-import { dealCardsData, DealCardData } from "@/data/deals";
 import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 import DealCard from "@/components/landing-page/landing-page-components/cards/deal-card";
 import { Skeleton } from "@/components/ui/skeleton";
+
+// Helper functions from hero1.tsx
+const getRatingColor = (rating: number | null) => {
+  if (!rating) return "bg-gray-500";
+  if (rating >= 9.5) return "bg-primary";
+  if (rating >= 9.0) return "bg-accent";
+  if (rating >= 8.0) return "bg-warning";
+  return "bg-gray-500";
+};
+
+const getRatingText = (rating: number | null, reviews: number) => {
+  if (!rating) return "No rating";
+  if (rating >= 9.5) return "Exceptional";
+  if (rating >= 9.0) return "Wonderful";
+  if (rating >= 8.0) return "Very Good";
+  return "Good";
+};
 
 const heroVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -76,6 +92,36 @@ function DealsPageContent() {
     : [{ adults: 2, children: 0 }];
 
   const [sortOption, setSortOption] = useState("price-low-high");
+  const [deals, setDeals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const dealsPerPage = 12;
+
+  // Fetch deals from API
+  useEffect(() => {
+    const fetchDeals = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/homestays/last-minute-deals?page=${currentPage}&limit=${dealsPerPage}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch deals");
+        const data = await response.json();
+        setDeals(data.data || []);
+        setTotalPages(data.totalPages || 1);
+        setTotal(data.total || 0);
+      } catch (error) {
+        console.error("Error fetching deals:", error);
+        setDeals([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDeals();
+  }, [currentPage]);
 
   // Compute guest summary
   const guestSummary = useMemo(() => {
@@ -126,23 +172,26 @@ function DealsPageContent() {
 
   // Filter deals based on location
   const filteredDeals = useMemo(() => {
-    return dealCardsData.filter((deal) => {
+    return deals.filter((deal) => {
       if (!location || location === "") {
         return true;
       }
-      return deal.location.toLowerCase() === location.toLowerCase();
+      return deal.homestay?.address?.toLowerCase().includes(location.toLowerCase());
     });
-  }, [location]);
+  }, [location, deals]);
 
   // Sort filtered deals
   const sortedDeals = useMemo(() => {
     return [...filteredDeals].sort((a, b) => {
       if (sortOption === "price-low-high") {
-        return parseFloat(a.totalPrice.replace("$", "")) - parseFloat(b.totalPrice.replace("$", ""));
+        return (a.discountedPrice || 0) - (b.discountedPrice || 0);
       } else if (sortOption === "price-high-low") {
-        return parseFloat(b.totalPrice.replace("$", "")) - parseFloat(a.totalPrice.replace("$", ""));
+        return (b.discountedPrice || 0) - (a.discountedPrice || 0);
       } else if (sortOption === "rating") {
-        return parseFloat(b.rating) - parseFloat(a.rating);
+        return (b.homestay?.rating || 0) - (a.homestay?.rating || 0);
+      } else if (sortOption === "discount") {
+        // Sort by discount amount/percentage
+        return (b.discount || 0) - (a.discount || 0);
       }
       return 0;
     });
@@ -223,14 +272,26 @@ function DealsPageContent() {
       </motion.div>
 
       <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground tracking-tight">
-            Explore Our Deals
-          </h2>
-          <div className="flex items-center gap-3 sm:gap-4 mt-4 sm:mt-0">
-            <p className="text-sm sm:text-base text-muted-foreground font-medium">
-              Showing deals for: <span className="font-semibold">{dateSummary}</span> • {guestSummary}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground tracking-tight">
+              Explore Our Deals
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2">
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading deals...
+                </span>
+              ) : (
+                <>Showing {sortedDeals.length} of {total} deals</>
+              )}
             </p>
+          </div>
+          <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+            <div className="hidden lg:block text-sm text-muted-foreground font-medium">
+              {dateSummary} • {guestSummary}
+            </div>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -242,35 +303,42 @@ function DealsPageContent() {
                   Sort
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-48 p-2">
+              <PopoverContent className="w-56 p-2">
                 <div className="flex flex-col gap-1">
                   <Button
-                    variant={sortOption === "default" ? "default" : "outline"}
+                    variant={sortOption === "default" ? "default" : "ghost"}
                     onClick={() => setSortOption("default")}
                     className="justify-start text-sm"
                   >
                     Default
                   </Button>
                   <Button
-                    variant={sortOption === "price-low-high" ? "default" : "outline"}
+                    variant={sortOption === "price-low-high" ? "default" : "ghost"}
                     onClick={() => setSortOption("price-low-high")}
                     className="justify-start text-sm"
                   >
                     Price: Low to High
                   </Button>
                   <Button
-                    variant={sortOption === "price-high-low" ? "default" : "outline"}
+                    variant={sortOption === "price-high-low" ? "default" : "ghost"}
                     onClick={() => setSortOption("price-high-low")}
                     className="justify-start text-sm"
                   >
                     Price: High to Low
                   </Button>
                   <Button
-                    variant={sortOption === "rating" ? "default" : "outline"}
+                    variant={sortOption === "rating" ? "default" : "ghost"}
                     onClick={() => setSortOption("rating")}
                     className="justify-start text-sm"
                   >
-                    Rating
+                    Highest Rated
+                  </Button>
+                  <Button
+                    variant={sortOption === "discount" ? "default" : "ghost"}
+                    onClick={() => setSortOption("discount")}
+                    className="justify-start text-sm"
+                  >
+                    Biggest Discount
                   </Button>
                 </div>
               </PopoverContent>
@@ -278,69 +346,166 @@ function DealsPageContent() {
           </div>
         </div>
 
-        {filteredDeals.length === 0 ? (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center text-muted-foreground text-lg"
-          >
-            No deals found matching your criteria.
-          </motion.p>
-        ) : (
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="space-y-4">
+                <Skeleton className="h-48 w-full rounded-xl" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-8 w-full" />
+              </div>
+            ))}
+          </div>
+        ) : sortedDeals.length === 0 ? (
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16 px-4"
           >
-            <AnimatePresence>
-              {sortedDeals.map((deal, index) => (
-                <motion.div
-                  key={`${deal.slug}-${index}`}
-                  variants={{
-                    initial: { opacity: 0, y: 20 },
-                    animate: {
-                      opacity: 1,
-                      y: 0,
-                      transition: { duration: 0.5, delay: index * 0.1, ease: "easeOut" },
-                    },
-                    exit: { opacity: 0, y: 20, transition: { duration: 0.3 } },
-                    hover: { scale: 1.03, transition: { duration: 0.3 } },
-                  }}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  whileHover="hover"
-                  className="cursor-pointer"
-                  onClick={() => {
-                    const queryString = buildQueryString();
-                    router.push(
-                      `/homestays/${deal.slug}?imageUrl=${encodeURIComponent(
-                        deal.imageSrc ||
-                        "https://via.placeholder.com/350x208?text=No+Image+Available"
-                      )}${queryString ? `&${queryString}` : ""}`
-                    );
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      const queryString = buildQueryString();
-                      router.push(
-                        `/homestays/${deal.slug}?imageUrl=${encodeURIComponent(
-                          deal.imageSrc ||
-                          "https://via.placeholder.com/350x208?text=No+Image+Available"
-                        )}${queryString ? `&${queryString}` : ""}`
-                      );
-                    }
-                  }}
-                  aria-label={`View details for ${deal.hotelName}`}
-                >
-                  <DealCard {...deal} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-6">
+              <Filter className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">No deals found</h3>
+            <p className="text-muted-foreground text-lg max-w-md mx-auto">
+              {location
+                ? `No deals available in "${location}" right now. Try adjusting your search.`
+                : "No deals available at the moment. Check back soon for amazing offers!"
+              }
+            </p>
           </motion.div>
+        ) : (
+          <>
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <AnimatePresence mode="popLayout">
+                {sortedDeals.map((deal, index) => {
+                  const rating = deal.homestay?.rating || null;
+                  const reviews = deal.homestay?.reviews || 0;
+                  const ratingText = getRatingText(rating, reviews);
+
+                  return (
+                    <motion.div
+                      key={`deal-${deal.id}`}
+                      variants={{
+                        initial: { opacity: 0, y: 20 },
+                        animate: {
+                          opacity: 1,
+                          y: 0,
+                          transition: {
+                            duration: 0.4,
+                            delay: Math.min(index * 0.05, 0.4),
+                            ease: "easeOut"
+                          },
+                        },
+                        exit: { opacity: 0, y: 20, transition: { duration: 0.2 } },
+                      }}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.3 } }}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const queryString = buildQueryString();
+                        // Navigate to homestay detail page
+                        router.push(
+                          `/homestays/${deal.homestay?.id || deal.id}${queryString ? `?${queryString}` : ""}`
+                        );
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          const queryString = buildQueryString();
+                          router.push(
+                            `/homestays/${deal.homestay?.id || deal.id}${queryString ? `?${queryString}` : ""}`
+                          );
+                        }
+                      }}
+                      aria-label={`View details for ${deal.homestay?.name}`}
+                    >
+                      <DealCard
+                        imageSrc={deal.homestay?.imageSrc || "/images/placeholder.jpg"}
+                        location={deal.homestay?.address || "Unknown"}
+                        hotelName={deal.homestay?.name || "Unnamed Homestay"}
+                        rating={rating ? rating.toFixed(1) : "N/A"}
+                        reviews={`${ratingText} (${reviews} reviews)`}
+                        originalPrice={`NPR ${Math.round(deal.originalPrice).toLocaleString()}`}
+                        nightlyPrice={`NPR ${Math.round(deal.discountedPrice).toLocaleString()}`}
+                        totalPrice={`NPR ${Math.round(deal.discountedPrice).toLocaleString()}`}
+                        categoryColor={getRatingColor(rating)}
+                        slug={`deal-${deal.id}`}
+                        features={deal.homestay?.facilities || []}
+                        discount={deal.discountType === 'PERCENTAGE' ? `${deal.discount}% off` : `NPR ${deal.discount} off`}
+                      />
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex items-center justify-center gap-2 mt-12"
+              >
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1 || loading}
+                  className="rounded-full"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+
+                <div className="flex items-center gap-2">
+                  {[...Array(totalPages)].map((_, i) => {
+                    const page = i + 1;
+                    // Show first page, last page, current page, and pages around current
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="icon"
+                          onClick={() => setCurrentPage(page)}
+                          disabled={loading}
+                          className="rounded-full w-10 h-10"
+                        >
+                          {page}
+                        </Button>
+                      );
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return <span key={page} className="px-2 text-muted-foreground">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages || loading}
+                  className="rounded-full"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </motion.div>
+            )}
+          </>
         )}
       </div>
       <Footer />
