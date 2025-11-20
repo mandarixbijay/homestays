@@ -69,37 +69,37 @@ const DealCard: React.FC<DealCardProps> = ({
         )}
       </div>
       <CardContent className="p-4">
-        <p className="text-sm text-text-secondary">{location}</p>
-        <CardTitle className="text-lg font-bold text-text-primary line-clamp-2">
+        <p className="text-sm text-muted-foreground">{location}</p>
+        <CardTitle className="text-lg font-bold text-foreground line-clamp-2">
           {hotelName}
         </CardTitle>
         <div className="flex items-center gap-2 mt-2">
           <Badge className={`${categoryColor} text-white text-xs font-semibold px-2 py-0.5 rounded-sm`}>
             {rating}
           </Badge>
-          <span className="text-sm text-text-secondary">{reviews.split(" ")[0]}</span>
-          <span className="text-xs text-text-secondary">
+          <span className="text-sm text-muted-foreground">{reviews.split(" ")[0]}</span>
+          <span className="text-xs text-muted-foreground">
             ({reviews.split(" ")[1].replace("(", "").replace(")", "")})
           </span>
         </div>
         <div className="mt-2">
-          <h4 className="text-sm font-semibold text-text-primary">Amenities:</h4>
-          <ul className="list-disc pl-4 mt-1 space-y-1 text-xs text-text-secondary">
+          <h4 className="text-sm font-semibold text-foreground">Amenities:</h4>
+          <ul className="list-disc pl-4 mt-1 space-y-1 text-xs text-muted-foreground">
             {features.map((f, i) => (
               <li key={i}>{f}</li>
             ))}
           </ul>
         </div>
         <div className="flex flex-col items-end mt-4">
-          <p className="text-lg font-bold text-text-primary">
+          <p className="text-lg font-bold text-foreground">
             {totalPrice}
             {originalPrice && (
-              <span className="text-sm text-text-secondary line-through ml-2">
+              <span className="text-sm text-muted-foreground line-through ml-2">
                 {originalPrice}
               </span>
             )}
           </p>
-          <p className="text-sm text-text-secondary">{nightlyPrice} / night</p>
+          <p className="text-sm text-muted-foreground">{nightlyPrice} / night</p>
         </div>
       </CardContent>
     </Card>

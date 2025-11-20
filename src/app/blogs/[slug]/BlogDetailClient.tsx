@@ -147,7 +147,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-card">
       {/* Progress Bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#214B3F] to-[#D1AA5A] z-50"
@@ -165,13 +165,13 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
           variant="outline"
           size="icon"
           onClick={handleLike}
-          className={`rounded-full shadow-lg bg-white hover:scale-110 transition-all ${
+          className={`rounded-full shadow-lg bg-card hover:scale-110 transition-all ${
             liked ? "text-red-500 border-red-200" : "hover:text-red-500"
           }`}
         >
           <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
         </Button>
-        <span className="text-xs text-center text-gray-500">{likes}</span>
+        <span className="text-xs text-center text-muted-foreground">{likes}</span>
 
         <Separator className="my-1" />
 
@@ -179,7 +179,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
           variant="outline"
           size="icon"
           onClick={handleBookmark}
-          className={`rounded-full shadow-lg bg-white hover:scale-110 transition-all ${
+          className={`rounded-full shadow-lg bg-card hover:scale-110 transition-all ${
             bookmarked ? "text-[#D1AA5A] border-[#D1AA5A]" : "hover:text-[#D1AA5A]"
           }`}
         >
@@ -193,7 +193,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
           variant="outline"
           size="icon"
           onClick={() => handleShare("facebook")}
-          className="rounded-full shadow-lg bg-white hover:scale-110 transition-all hover:text-blue-600"
+          className="rounded-full shadow-lg bg-card hover:scale-110 transition-all hover:text-blue-600"
         >
           <Facebook className="h-5 w-5" />
         </Button>
@@ -202,7 +202,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
           variant="outline"
           size="icon"
           onClick={() => handleShare("twitter")}
-          className="rounded-full shadow-lg bg-white hover:scale-110 transition-all hover:text-blue-400"
+          className="rounded-full shadow-lg bg-card hover:scale-110 transition-all hover:text-blue-400"
         >
           <Twitter className="h-5 w-5" />
         </Button>
@@ -211,7 +211,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
           variant="outline"
           size="icon"
           onClick={() => handleShare("linkedin")}
-          className="rounded-full shadow-lg bg-white hover:scale-110 transition-all hover:text-blue-700"
+          className="rounded-full shadow-lg bg-card hover:scale-110 transition-all hover:text-blue-700"
         >
           <Linkedin className="h-5 w-5" />
         </Button>
@@ -220,7 +220,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
           variant="outline"
           size="icon"
           onClick={() => handleShare("whatsapp")}
-          className="rounded-full shadow-lg bg-white hover:scale-110 transition-all hover:text-green-600"
+          className="rounded-full shadow-lg bg-card hover:scale-110 transition-all hover:text-green-600"
         >
           <MessageSquare className="h-5 w-5" />
         </Button>
@@ -229,7 +229,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
           variant="outline"
           size="icon"
           onClick={() => handleShare("copy")}
-          className="rounded-full shadow-lg bg-white hover:scale-110 transition-all hover:text-gray-700"
+          className="rounded-full shadow-lg bg-card hover:scale-110 transition-all hover:text-card-foreground"
         >
           {copied ? <Check className="h-5 w-5" /> : <Link2 className="h-5 w-5" />}
         </Button>
@@ -269,7 +269,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
             <Link href="/blogs">
               <Button
                 variant="ghost"
-                className="mb-8 text-white/90 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full"
+                className="mb-8 text-white/90 hover:text-white bg-card/10 hover:bg-card/20 backdrop-blur-sm rounded-full"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Stories
@@ -310,7 +310,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                 </div>
               </div>
 
-              <Separator orientation="vertical" className="h-10 bg-white/20" />
+              <Separator orientation="vertical" className="h-10 bg-card/20" />
 
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
@@ -337,7 +337,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3 mb-6">
               <Camera className="h-5 w-5 text-[#214B3F]" />
-              <h3 className="text-xl font-bold text-gray-900">Gallery</h3>
+              <h3 className="text-xl font-bold text-card-foreground">Gallery</h3>
               <Badge className="bg-[#D1AA5A]/20 text-[#214B3F] border-[#D1AA5A]">
                 {images.length} photos
               </Badge>
@@ -380,20 +380,20 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
               <div className="prose prose-lg max-w-none">
                 <div
                   className="
-                    prose-headings:font-bold prose-headings:text-gray-900 
+                    prose-headings:font-bold prose-headings:text-card-foreground 
                     prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4
                     prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
                     prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
-                    prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6
+                    prose-p:text-card-foreground prose-p:leading-relaxed prose-p:mb-6
                     prose-a:text-[#214B3F] prose-a:no-underline hover:prose-a:underline prose-a:font-medium
-                    prose-strong:text-gray-900
+                    prose-strong:text-card-foreground
                     prose-ul:my-6 prose-ul:space-y-2
                     prose-ol:my-6 prose-ol:space-y-2
-                    prose-li:text-gray-700 prose-li:leading-relaxed
+                    prose-li:text-card-foreground prose-li:leading-relaxed
                     prose-blockquote:border-l-4 prose-blockquote:border-[#D1AA5A] prose-blockquote:pl-6 prose-blockquote:italic
-                    prose-blockquote:text-gray-600 prose-blockquote:my-8
+                    prose-blockquote:text-muted-foreground prose-blockquote:my-8
                     prose-code:text-[#214B3F] prose-code:bg-[#214B3F]/10 prose-code:px-2 prose-code:py-1 prose-code:rounded
-                    prose-pre:bg-gray-900 prose-pre:text-gray-100
+                    prose-pre:bg-gray-900 prose-pre:text-card-foreground
                     prose-img:rounded-xl prose-img:shadow-xl prose-img:my-8
                     first-letter:text-6xl first-letter:font-bold first-letter:float-left 
                     first-letter:mr-3 first-letter:mt-1 first-letter:text-[#214B3F]
@@ -410,7 +410,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                   transition={{ delay: 0.2 }}
                   className="mt-16 pt-8 border-t border-gray-200"
                 >
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-card-foreground mb-4 flex items-center gap-2">
                     <Tag className="h-5 w-5 text-[#214B3F]" />
                     Topics
                   </h3>
@@ -440,8 +440,8 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                   <div className="flex items-start gap-6">
                     <SimpleAvatar name={blog.author.name} className="h-20 w-20 text-2xl flex-shrink-0" />
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{blog.author.name}</h3>
-                      <p className="text-gray-600 mb-4">
+                      <h3 className="text-2xl font-bold text-card-foreground mb-2">{blog.author.name}</h3>
+                      <p className="text-muted-foreground mb-4">
                         Travel writer and adventure enthusiast exploring Nepal&apos;s hidden treasures. 
                         Sharing authentic stories and insider tips from the heart of the Himalayas.
                       </p>
@@ -478,7 +478,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
               {/* Share Actions - Mobile */}
               <Card className="p-6 lg:hidden">
-                <h3 className="font-bold text-gray-900 mb-4">Share & Save</h3>
+                <h3 className="font-bold text-card-foreground mb-4">Share & Save</h3>
                 <div className="grid grid-cols-4 gap-2">
                   <Button
                     variant="outline"
@@ -539,7 +539,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                     {copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
                   </Button>
                 </div>
-                <div className="text-center text-xs text-gray-500 mt-2">{likes} likes</div>
+                <div className="text-center text-xs text-muted-foreground mt-2">{likes} likes</div>
               </Card>
 
               {/* Sticky Newsletter - Fixed Position on Desktop */}
@@ -553,7 +553,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                   <input
                     type="email"
                     placeholder="Your email"
-                    className="w-full px-4 py-2 rounded-lg bg-white/20 backdrop-blur border border-white/30 
+                    className="w-full px-4 py-2 rounded-lg bg-card/20 backdrop-blur border border-white/30 
                       placeholder:text-white/70 text-white mb-3 focus:outline-none focus:ring-2 focus:ring-[#D1AA5A]/50"
                   />
                   <Button className="w-full bg-[#D1AA5A] text-[#214B3F] hover:bg-[#D1AA5A]/90 font-bold">
@@ -563,7 +563,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
                 {/* Popular Posts with Real Data */}
                 <Card className="p-6 mt-6">
-                  <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className="font-bold text-card-foreground mb-4 flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-[#214B3F]" />
                     Trending Now
                   </h3>
@@ -573,7 +573,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                         <TrendingBlogSkeleton key={i} />
                       ))
                     ) : trendingBlogs.length === 0 ? (
-                      <p className="text-gray-500 text-sm text-center">No trending stories available</p>
+                      <p className="text-muted-foreground text-sm text-center">No trending stories available</p>
                     ) : (
                       trendingBlogs.map((trendingBlog) => (
                         <Link key={trendingBlog.id} href={`/blogs/${trendingBlog.slug}`}>
@@ -587,10 +587,10 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </div>
-                            <h4 className="font-medium text-gray-900 group-hover:text-[#214B3F] transition-colors line-clamp-2 mb-1">
+                            <h4 className="font-medium text-card-foreground group-hover:text-[#214B3F] transition-colors line-clamp-2 mb-1">
                               {trendingBlog.title}
                             </h4>
-                            <div className="flex items-center gap-3 text-xs text-gray-500">
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
                                 {trendingBlog.readTime || 5} min read
@@ -617,8 +617,8 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
         <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Continue Your Journey</h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
+              <h2 className="text-4xl font-bold text-card-foreground mb-4">Continue Your Journey</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
                 Discover more stories and adventures from our collection of travel experiences
               </p>
             </div>
@@ -674,7 +674,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-4 right-4 text-white hover:bg-white/20"
+                className="absolute top-4 right-4 text-white hover:bg-card/20"
                 onClick={() => setShowImageGallery(false)}
               >
                 <X className="h-6 w-6" />
@@ -684,7 +684,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-card/20"
                     onClick={() => setCurrentImageIndex((currentImageIndex - 1 + images.length) % images.length)}
                   >
                     <ChevronLeft className="h-6 w-6" />
@@ -692,7 +692,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-card/20"
                     onClick={() => setCurrentImageIndex((currentImageIndex + 1) % images.length)}
                   >
                     <ChevronRight className="h-6 w-6" />
@@ -713,7 +713,7 @@ function RelatedBlogCard({ blog }: { blog: PublicBlog }) {
 
   return (
     <Link href={`/blogs/${blog.slug}`}>
-      <Card className="group h-full overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-white">
+      <Card className="group h-full overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-card">
         <div className="relative h-64 overflow-hidden">
           <SafeBlogImage
             src={mainImage}
@@ -725,27 +725,27 @@ function RelatedBlogCard({ blog }: { blog: PublicBlog }) {
         </div>
 
         <CardContent className="p-6">
-          <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
             <Clock className="h-3 w-3" />
             <span>{blog.readTime || 5} min read</span>
-            <span className="text-gray-300">•</span>
+            <span className="text-muted-foreground/50">•</span>
             <Calendar className="h-3 w-3" />
             <span>{format(parseISO(blog.publishedAt || new Date().toISOString()), "MMM d")}</span>
           </div>
 
-          <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-[#214B3F] transition-colors mb-2">
+          <h3 className="text-lg font-bold text-card-foreground line-clamp-2 group-hover:text-[#214B3F] transition-colors mb-2">
             {blog.title}
           </h3>
 
-          <p className="text-gray-600 text-sm line-clamp-3 mb-4">{blog.excerpt}</p>
+          <p className="text-muted-foreground text-sm line-clamp-3 mb-4">{blog.excerpt}</p>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <SimpleAvatar name={blog.author.name} className="h-6 w-6 text-xs" />
-              <span className="text-xs text-gray-600">{blog.author.name}</span>
+              <span className="text-xs text-muted-foreground">{blog.author.name}</span>
             </div>
 
-            <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-[#214B3F] group-hover:translate-x-1 transition-all" />
+            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-[#214B3F] group-hover:translate-x-1 transition-all" />
           </div>
         </CardContent>
       </Card>

@@ -52,7 +52,7 @@ export default function BookingTicker() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -100, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            className="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 pr-6 flex items-center gap-3 max-w-sm hover:shadow-xl transition-shadow cursor-pointer"
+            className="bg-card rounded-xl shadow-2xl border border-border p-4 pr-6 flex items-center gap-3 max-w-sm hover:shadow-xl transition-shadow cursor-pointer"
           >
             {/* Indicator Dot */}
             <div className="relative">
@@ -72,16 +72,16 @@ export default function BookingTicker() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <User className="w-4 h-4 text-primary" />
-                <span className="font-semibold text-gray-900 text-sm">
+                <span className="font-semibold text-card-foreground text-sm">
                   {booking.name}
                 </span>
-                <span className="text-gray-600 text-sm">just booked</span>
+                <span className="text-muted-foreground text-sm">just booked</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <MapPin className="w-3.5 h-3.5" />
                 <span className="line-clamp-1">{booking.location}</span>
               </div>
-              <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500">
+              <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
                 <span>{booking.timeAgo}</span>
               </div>
@@ -93,7 +93,7 @@ export default function BookingTicker() {
                 e.stopPropagation();
                 setIsVisible(false);
               }}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors"
               aria-label="Close notification"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

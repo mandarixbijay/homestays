@@ -150,7 +150,7 @@ export default function Hero() {
             {/* Search Bar in Card with improved styling */}
             <motion.div
               variants={itemVariants}
-              className="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-200 shadow-lg p-4 sm:p-5 md:p-6 hover:shadow-xl transition-shadow duration-300"
+              className="bg-card/95 backdrop-blur-sm rounded-2xl border border-border shadow-lg p-4 sm:p-5 md:p-6 hover:shadow-xl transition-shadow duration-300"
             >
               <DateGuestLocationPicker
                 onSearch={handleSearch}
@@ -161,7 +161,7 @@ export default function Hero() {
             {/* Trust Indicators with animations */}
             <motion.div
               variants={itemVariants}
-              className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-4 text-xs sm:text-sm text-gray-600"
+              className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-4 text-xs sm:text-sm text-muted-foreground"
             >
               <motion.div
                 className="flex items-center gap-1.5"
@@ -224,7 +224,7 @@ export default function Hero() {
             {/* Promotional Card with improved design */}
             <motion.div
               variants={itemVariants}
-              className="bg-white rounded-2xl mt-6 sm:mt-8 flex overflow-hidden max-w-full sm:max-w-6xl md:max-w-7xl mx-auto min-h-[160px] sm:min-h-[180px] md:min-h-[200px] shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100"
+              className="bg-card rounded-2xl mt-6 sm:mt-8 flex overflow-hidden max-w-full sm:max-w-6xl md:max-w-7xl mx-auto min-h-[160px] sm:min-h-[180px] md:min-h-[200px] shadow-md hover:shadow-lg transition-shadow duration-300 border border-border"
               whileHover={{ y: -4 }}
               transition={{ duration: 0.3 }}
             >
@@ -237,20 +237,20 @@ export default function Hero() {
                   priority
                 />
               </div>
-              <div className="w-[65%] sm:w-[70%] bg-gradient-to-br from-gray-50 to-white p-4 sm:p-5 flex items-center">
+              <div className="w-[65%] sm:w-[70%] bg-gradient-to-br from-muted/30 to-card p-4 sm:p-5 flex items-center">
                 <div className="flex-1">
-                  <h2 className="text-base sm:text-xl md:text-2xl font-bold text-gray-900 mb-1.5">
+                  <h2 className="text-base sm:text-xl md:text-2xl font-bold text-card-foreground mb-1.5">
                     Discover Authentic Homestays
                   </h2>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                     Experience the warmth of Nepalese hospitality in traditional homes.
                   </p>
                 </div>
                 <div className="hidden sm:flex justify-end items-center gap-3 ml-4">
-                  <button className="text-gray-800 px-5 py-2.5 rounded-full text-sm font-semibold bg-accent-light hover:bg-accent-50 transition-all duration-200 hover:scale-105 shadow-sm">
+                  <button className="text-card-foreground px-5 py-2.5 rounded-full text-sm font-semibold bg-accent/20 hover:bg-accent/30 transition-all duration-200 hover:scale-105 shadow-sm">
                     Learn More
                   </button>
-                  <button className="text-gray-500 text-sm font-medium hover:text-gray-700 transition-colors">
+                  <button className="text-muted-foreground text-sm font-medium hover:text-foreground transition-colors">
                     Dismiss
                   </button>
                 </div>
@@ -274,7 +274,7 @@ export default function Hero() {
                   variants={cardVariants}
                   whileHover={{ y: -8, scale: 1.02 }}
                   transition={{ duration: 0.3 }}
-                  className="group bg-accent-light rounded-xl h-[150px] sm:h-[160px] flex overflow-hidden shadow-sm hover:shadow-md border border-accent-50"
+                  className="group bg-accent/10 rounded-xl h-[150px] sm:h-[160px] flex overflow-hidden shadow-sm hover:shadow-md border border-border"
                 >
                   {/* Text and Link Section */}
                   <div className="w-[50%] p-4 sm:p-5 flex flex-col justify-between">
@@ -282,15 +282,15 @@ export default function Hero() {
                       {card.textLines.map((line, index) => (
                         <p
                           key={index}
-                          className="text-xs sm:text-sm text-gray-900 font-semibold leading-snug"
+                          className="text-xs sm:text-sm text-card-foreground font-semibold leading-snug"
                         >
                           {line}
                         </p>
                       ))}
                     </div>
-                    <button className="flex items-center gap-1.5 text-gray-800 text-xs sm:text-sm font-medium hover:gap-2 transition-all group-hover:text-primary">
+                    <button className="flex items-center gap-1.5 text-foreground text-xs sm:text-sm font-medium hover:gap-2 transition-all group-hover:text-primary">
                       Explore Now
-                      <ArrowRightSVG className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 group-hover:text-primary transition-colors" />
+                      <ArrowRightSVG className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </button>
                   </div>
                   {/* Image Section */}

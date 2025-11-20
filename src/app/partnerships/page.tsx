@@ -119,10 +119,10 @@ const PartnershipPage = () => {
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           {/* Why Partner */}
           <section className="mb-16 animate-fade-in">
-            <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
               Why Partner with Us?
             </h2>
-            <p className="text-base sm:text-lg text-text-secondary mb-8 leading-relaxed max-w-3xl">
+            <p className="text-base sm:text-lg text-muted-foreground mb-8 leading-relaxed max-w-3xl">
               Partnering with Nepal Homestays connects you with a global audience, boosts your visibility, and drives revenue growth while supporting sustainable tourism and community development.
             </p>
             <hr className="border-border mb-8" />
@@ -130,7 +130,7 @@ const PartnershipPage = () => {
 
           {/* Benefits */}
           <section className="mb-16 animate-fade-in">
-            <h3 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6">
+            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
               Benefits of Partnership
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -142,10 +142,10 @@ const PartnershipPage = () => {
                   aria-label={benefit.title}
                 >
                   {benefit.icon}
-                  <h4 className="text-lg font-semibold text-text-primary mb-2">
+                  <h4 className="text-lg font-semibold text-foreground mb-2">
                     {benefit.title}
                   </h4>
-                  <p className="text-sm text-text-secondary leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {benefit.desc}
                   </p>
                 </Card>
@@ -155,7 +155,7 @@ const PartnershipPage = () => {
 
           {/* Partnership Models */}
           <section className="mb-16 animate-fade-in">
-            <h3 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6">
+            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
               Partnership Models
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -167,10 +167,10 @@ const PartnershipPage = () => {
                   aria-label={model.title}
                 >
                   {model.icon}
-                  <h4 className="text-lg font-semibold text-text-primary mb-2">
+                  <h4 className="text-lg font-semibold text-foreground mb-2">
                     {model.title}
                   </h4>
-                  <p className="text-sm text-text-secondary leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {model.desc}
                   </p>
                 </Card>
@@ -180,7 +180,7 @@ const PartnershipPage = () => {
 
           {/* Success Stories */}
           <section className="mb-16 animate-fade-in">
-            <h3 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6">
+            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
               Success Stories
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -191,10 +191,10 @@ const PartnershipPage = () => {
                   role="article"
                   aria-label={`Success story by ${story.author}`}
                 >
-                  <p className="text-sm text-text-primary mb-4 italic leading-relaxed">
+                  <p className="text-sm text-foreground mb-4 italic leading-relaxed">
                     {story.quote}
                   </p>
-                  <p className="text-xs font-semibold text-text-secondary mt-auto">
+                  <p className="text-xs font-semibold text-muted-foreground mt-auto">
                     — {story.author}
                   </p>
                 </Card>
@@ -204,10 +204,10 @@ const PartnershipPage = () => {
 
           {/* Get Started */}
           <section className="text-center mb-16 animate-fade-in">
-            <h3 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
+            <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
               Ready to Partner?
             </h3>
-            <p className="text-base sm:text-lg text-text-secondary mb-6 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg text-muted-foreground mb-6 max-w-2xl mx-auto leading-relaxed">
               Collaborate with us to create unforgettable experiences and support Nepal’s local communities. Contact us today to explore partnership opportunities.
             </p>
             <Button

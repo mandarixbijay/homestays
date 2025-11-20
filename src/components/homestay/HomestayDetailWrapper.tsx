@@ -218,7 +218,7 @@ export default function HomestayDetailWrapper({ homestay, slug }: HomestayDetail
   if (!localHomestay) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
-        <p className="text-lg text-text-secondary font-manrope mb-4">Homestay not found</p>
+        <p className="text-lg text-muted-foreground font-manrope mb-4">Homestay not found</p>
         <Button
           onClick={() => window.location.href = "/"}
           className="bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-2 rounded-lg font-manrope"
