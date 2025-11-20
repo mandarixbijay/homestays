@@ -257,7 +257,7 @@ const DealFormModal: React.FC<{
   onSubmit: (data: DealFormData) => Promise<void>;
 }> = ({ isOpen, onClose, deal, onSubmit }) => {
   const [formData, setFormData] = useState<DealFormData>({
-    homestayId: 0,
+    homestayId: 0, // Will be set later when assigning to homestays
     discount: 0,
     discountType: 'PERCENTAGE',
     startDate: '',
@@ -266,11 +266,6 @@ const DealFormModal: React.FC<{
     description: ''
   });
   const { loading, error, execute, clearError } = useAsyncOperation();
-  const { homestays, loadHomestays } = useHomestays();
-
-  useEffect(() => {
-    loadHomestays({ status: 'APPROVED', limit: 100 });
-  }, []);
 
   useEffect(() => {
     if (deal) {
@@ -285,7 +280,7 @@ const DealFormModal: React.FC<{
       });
     } else {
       setFormData({
-        homestayId: 0,
+        homestayId: 0, // Will select homestays in next step
         discount: 0,
         discountType: 'PERCENTAGE',
         startDate: new Date().toISOString().split('T')[0],
@@ -298,7 +293,7 @@ const DealFormModal: React.FC<{
   }, [deal, clearError]);
 
   const handleSubmit = async () => {
-    if (!formData.homestayId || !formData.discount || !formData.startDate || !formData.endDate) {
+    if (!formData.discount || !formData.startDate || !formData.endDate) {
       return;
     }
 
@@ -308,6 +303,16 @@ const DealFormModal: React.FC<{
         startDate: new Date(formData.startDate).toISOString(),
         endDate: new Date(formData.endDate).toISOString()
       };
+
+      // For new deals (without homestay), store template in localStorage
+      if (!deal) {
+        localStorage.setItem('deal_template', JSON.stringify(submitData));
+        onClose();
+        // User will be redirected to select homestays
+        return;
+      }
+
+      // For editing existing deals
       await execute(() => onSubmit(submitData));
       onClose();
     } catch (error: any) {
@@ -318,17 +323,15 @@ const DealFormModal: React.FC<{
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={deal ? 'Edit Deal' : 'Create Last Minute Deal'}
       footer={<><ActionButton onClick={onClose} variant="secondary" disabled={loading}>Cancel</ActionButton>
-      <ActionButton onClick={handleSubmit} variant="primary" loading={loading}>{deal ? 'Update' : 'Create'}</ActionButton></>}>
+      <ActionButton onClick={handleSubmit} variant="primary" loading={loading}>{deal ? 'Update' : 'Continue to Select Homestays'}</ActionButton></>}>
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Homestay *</label>
-          <select value={formData.homestayId} onChange={(e) => setFormData({ ...formData, homestayId: parseInt(e.target.value) })}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            required disabled={!!deal}>
-            <option value="0">Select homestay...</option>
-            {homestays.map((h: any) => (<option key={h.id} value={h.id}>{h.name}</option>))}
-          </select>
-        </div>
+        {!deal && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
+              <strong>Step 1:</strong> Configure your deal details below. In the next step, you'll select which homestays to apply this deal to.
+            </p>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <Input label="Discount Amount *" type="number" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: parseFloat(e.target.value) })}
@@ -380,6 +383,18 @@ export default function LastMinuteDealsManagement() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics'>('overview');
+
+  // Watch for modal close to check if we need to redirect
+  useEffect(() => {
+    if (!showFormModal && !editingDeal) {
+      // Check if deal template was just saved
+      const hasTemplate = localStorage.getItem('deal_template');
+      if (hasTemplate) {
+        // Redirect to homestay selection
+        router.push('/admin/last-minute-deals/select-homestays');
+      }
+    }
+  }, [showFormModal, editingDeal, router]);
 
   const debouncedLoadData = useMemo(() => debounce((params: any) => {
     loadDeals(params).catch(error => { addToast({ type: 'error', title: 'Error', message: 'Failed to load deals' }); });
