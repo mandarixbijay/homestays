@@ -318,10 +318,13 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
       discount,
       roomsLeft: totalRoomsLeft,
       aboutDescription: homestay.aboutDescription,
-      onClick: () =>
+      onClick: () => {
+        // Clean slug by URL encoding to handle special characters
+        const cleanSlug = encodeURIComponent(homestay.slug);
         router.push(
-          `/homestays/${homestay.slug}?imageUrl=${encodeURIComponent(homestay.image)}&checkIn=${searchCheckIn || format(new Date(), "yyyy-MM-dd")}&checkOut=${searchCheckOut || format(new Date(Date.now() + 24 * 60 * 60 * 1000), "yyyy-MM-dd")}&guests=${searchGuests || "2A0C"}&rooms=${searchRooms || "1"}`
-        ),
+          `/homestays/${cleanSlug}?checkIn=${searchCheckIn || format(new Date(), "yyyy-MM-dd")}&checkOut=${searchCheckOut || format(new Date(Date.now() + 24 * 60 * 60 * 1000), "yyyy-MM-dd")}&guests=${searchGuests || "2A0C"}&rooms=${searchRooms || "1"}`
+        );
+      },
     };
   };
 
