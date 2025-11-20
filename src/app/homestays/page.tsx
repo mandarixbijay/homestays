@@ -140,9 +140,24 @@ export default function AllHomestaysPage() {
         const response = await fetch(`/api/homestays/search?${queryParams.toString()}`);
         if (response.ok) {
           const data = await response.json();
-          setAllHomestays(data.data || []);
-          setTotalPages(data.totalPages || 1);
-          setTotal(data.total || 0);
+          console.log('Full API Response:', data);
+
+          // Handle different response structures
+          const homestaysData = data.data || data.homestays || data.items || [];
+          const totalCount = data.total || data.totalCount || data.count || homestaysData.length;
+          const totalPagesCount = data.totalPages || data.pages || Math.ceil(totalCount / homestaysPerPage);
+
+          console.log('Parsed values:', {
+            homestaysCount: homestaysData.length,
+            total: totalCount,
+            totalPages: totalPagesCount,
+            page: data.page || data.currentPage,
+            limit: data.limit || data.perPage
+          });
+
+          setAllHomestays(homestaysData);
+          setTotalPages(totalPagesCount);
+          setTotal(totalCount);
         }
       } catch (error) {
         console.error('Error fetching homestays:', error);
