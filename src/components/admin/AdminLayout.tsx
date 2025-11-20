@@ -287,7 +287,7 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
             </button>
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            © 2024 Homestays Admin
+            © 2025 Homestays Admin
           </div>
         </div>
       </div>
