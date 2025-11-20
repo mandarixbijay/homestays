@@ -204,14 +204,36 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
         {/* Logo */}
         <Link href="/" className="flex items-center" onClick={closeMenu}>
           <div className="p-2">
-            <Image
-              src="/images/logo/logo.png"
-              alt="Homestay Nepal Logo"
-              width={120}
-              height={120}
-              priority
-              className="w-auto h-14 sm:h-16"
-            />
+            {mounted && (
+              <>
+                <Image
+                  src="/images/logo/logo.png"
+                  alt="Homestay Nepal Logo"
+                  width={120}
+                  height={120}
+                  priority
+                  className="w-auto h-14 sm:h-16 dark:hidden"
+                />
+                <Image
+                  src="/images/logo/darkmode_logo.png"
+                  alt="Homestay Nepal Logo"
+                  width={120}
+                  height={120}
+                  priority
+                  className="w-auto h-14 sm:h-16 hidden dark:block"
+                />
+              </>
+            )}
+            {!mounted && (
+              <Image
+                src="/images/logo/logo.png"
+                alt="Homestay Nepal Logo"
+                width={120}
+                height={120}
+                priority
+                className="w-auto h-14 sm:h-16"
+              />
+            )}
           </div>
         </Link>
 
