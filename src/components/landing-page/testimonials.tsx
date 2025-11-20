@@ -66,7 +66,8 @@ const containerVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
+      // use a cubic-bezier numeric array to satisfy the Variants type
+      ease: [0.42, 0, 0.58, 1] as any,
     },
   },
 };
