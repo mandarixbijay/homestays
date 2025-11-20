@@ -126,7 +126,7 @@ export default function HomestayProfilePage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
-  const { addRoom, clearSelectedRooms } = useHomestayStore();
+  const { addRoom: addRoomToStore, clearSelectedRooms } = useHomestayStore();
 
   // Extract ID from slug (format: name-address-id-{id})
   const extractIdFromSlug = (slug: string): number => {
@@ -332,7 +332,7 @@ export default function HomestayProfilePage() {
     const roomGuests = rooms[roomIndex] || rooms[0] || { adults: 2, children: 0 };
 
     // Add the selected room to the store (only properties that exist in SelectedRoom interface)
-    addRoom({
+    addRoomToStore({
       roomId: room.id,
       roomTitle: room.name,
       adults: roomGuests.adults,
