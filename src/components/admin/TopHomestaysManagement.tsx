@@ -343,7 +343,7 @@ const TopHomestayFormModal: React.FC<{
         {!topHomestay && (
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <p className="text-sm text-blue-800 dark:text-blue-300">
-              <strong>Step 1:</strong> Configure your top homestay settings below. In the next step, you'll select which homestays to feature with these settings.
+              <strong>Step 1:</strong> Configure your top homestay settings below. In the next step, you&apos;ll select which homestays to feature with these settings.
             </p>
           </div>
         )}

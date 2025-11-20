@@ -594,8 +594,8 @@ const BlogListItem: React.FC<{
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
-              <Image className="h-8 w-8 text-gray-400" />
-            </div>
+                <Image className="h-8 w-8 text-gray-400" aria-hidden="true" />
+              </div>
           )}
         </div>
 
@@ -858,7 +858,7 @@ const BlogGridItem: React.FC<{
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Image className="h-16 w-16 text-gray-400" />
+            <Image className="h-16 w-16 text-gray-400" aria-hidden="true" />
           </div>
         )}
         

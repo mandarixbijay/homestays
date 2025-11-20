@@ -67,18 +67,17 @@ export default function SafeBlogImage({
     ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
     : undefined);
 
-  // Props for the Image component
-  const imageProps = {
-    src: finalSrc,
-    alt: seoAlt,
-    className,
-    onError: handleImageError,
-    quality,
-    priority,
-    loading: priority ? undefined : ('lazy' as const),
-    ...(fill ? { fill: true, sizes: responsiveSizes } : { width: width || 600, height: height || 400 }),
-  };
-
-  return <Image {...imageProps} />;
+  return (
+    <Image
+      src={finalSrc}
+      alt={seoAlt}
+      className={className}
+      onError={handleImageError}
+      quality={quality}
+      priority={priority}
+      loading={priority ? undefined : ('lazy' as const)}
+      {...(fill ? { fill: true, sizes: responsiveSizes } : { width: width || 600, height: height || 400 })}
+    />
+  );
 }
 

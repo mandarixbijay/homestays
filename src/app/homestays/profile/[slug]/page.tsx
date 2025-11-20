@@ -409,7 +409,7 @@ export default function HomestayProfilePage() {
         <div className="container mx-auto px-4 py-16 flex-1 flex items-center justify-center">
           <div className="text-center max-w-lg">
             <h1 className="text-3xl font-bold mb-4">Homestay not found</h1>
-            <p className="text-muted-foreground mb-4">The homestay you're looking for doesn't exist.</p>
+            <p className="text-muted-foreground mb-4">The homestay you&apos;re looking for doesn&apos;t exist.</p>
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-600 font-mono">Error: {error}</p>

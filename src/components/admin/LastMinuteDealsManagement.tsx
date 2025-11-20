@@ -285,7 +285,7 @@ const DealFormModal: React.FC<{
         {!deal && (
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <p className="text-sm text-blue-800 dark:text-blue-300">
-              <strong>Step 1:</strong> Configure your deal details below. In the next step, you'll select which homestays to apply this deal to.
+              <strong>Step 1:</strong> Configure your deal details below. In the next step, you&apos;ll select which homestays to apply this deal to.
             </p>
           </div>
         )}
