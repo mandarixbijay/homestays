@@ -35,7 +35,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
   const destination = destinations.find(d => d.id === destinationId);
 
   // Homestays data for selection
-  const { homestays, loading: homestaysLoading, loadHomestays } = useHomestays();
+  const { homestays, totalPages, total, loading: homestaysLoading, loadHomestays } = useHomestays();
 
   // UI State
   const [activeTab, setActiveTab] = useState<'overview' | 'homestays' | 'analytics'>('overview');
@@ -58,7 +58,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
   const [showFilters, setShowFilters] = useState(false);
   const [selectedHomestays, setSelectedHomestays] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageLimit] = useState(10);
+  const [pageLimit, setPageLimit] = useState(10);
 
   // Load destination data
   useEffect(() => {
@@ -97,7 +97,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
 
       loadHomestays(params);
     }
-  }, [destination, showAddHomestay, currentPage, statusFilter, searchQuery]);
+  }, [destination, showAddHomestay, currentPage, pageLimit, statusFilter, searchQuery]);
 
   // Filter available homestays (not already associated) - now filtered server-side
   const availableHomestays = useMemo(() => {
@@ -537,7 +537,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
 
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {selectedHomestays.length} selected • {availableHomestays.length} available • Showing {destination?.name} homestays
+                        {selectedHomestays.length} selected • {availableHomestays.length} of {total} available • Showing {destination?.name} homestays
                       </p>
                       {selectedHomestays.length > 0 && (
                         <ActionButton
@@ -734,28 +734,51 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                     )}
 
                     {/* Pagination Controls */}
-                    {totalPages > 1 && (
+                    {total > 0 && (
                       <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Page {currentPage} of {totalPages}
-                        </p>
-                        <div className="flex gap-2">
-                          <ActionButton
-                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                            variant="secondary"
-                            size="sm"
-                            disabled={currentPage === 1}
-                          >
-                            Previous
-                          </ActionButton>
-                          <ActionButton
-                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                            variant="secondary"
-                            size="sm"
-                            disabled={currentPage === totalPages}
-                          >
-                            Next
-                          </ActionButton>
+                        <div className="flex items-center gap-4">
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Showing {((currentPage - 1) * pageLimit) + 1} to {Math.min(currentPage * pageLimit, total)} of {total}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm text-gray-600 dark:text-gray-400">Per page:</label>
+                            <select
+                              value={pageLimit}
+                              onChange={(e) => {
+                                setPageLimit(Number(e.target.value));
+                                setCurrentPage(1); // Reset to first page
+                              }}
+                              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700"
+                            >
+                              <option value={10}>10</option>
+                              <option value={20}>20</option>
+                              <option value={50}>50</option>
+                              <option value={100}>100</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            Page {currentPage} of {totalPages}
+                          </span>
+                          <div className="flex gap-1">
+                            <ActionButton
+                              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                              variant="secondary"
+                              size="sm"
+                              disabled={currentPage === 1}
+                            >
+                              Previous
+                            </ActionButton>
+                            <ActionButton
+                              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                              variant="secondary"
+                              size="sm"
+                              disabled={currentPage === totalPages}
+                            >
+                              Next
+                            </ActionButton>
+                          </div>
                         </div>
                       </div>
                     )}
