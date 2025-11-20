@@ -10,7 +10,9 @@ export default async function HomestayDetail({
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  // Decode the slug to handle URL encoding (e.g., commas, spaces)
+  const slug = decodeURIComponent(rawSlug);
   const queryParams = await searchParams;
   const checkInDate = queryParams.checkIn as string | undefined;
   const checkOutDate = queryParams.checkOut as string | undefined;
