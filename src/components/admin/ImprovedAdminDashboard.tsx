@@ -188,7 +188,7 @@ const StatCard: React.FC<{
           </div>
           {onClick && (
             <ChevronRight className={`h-5 w-5 text-gray-400 transition-all duration-300 ${
-              onClick ? 'group-hover:translate-x-1 group-hover:text-gray-600 dark:group-hover:text-gray-300' : ''
+              typeof onClick === 'function' ? 'group-hover:translate-x-1 group-hover:text-gray-600 dark:group-hover:text-gray-300' : ''
             }`} />
           )}
         </div>
@@ -565,7 +565,7 @@ export default function ImprovedAdminDashboard() {
               <div>
                 <h1 className="text-3xl font-bold text-white mb-1 flex items-center space-x-3">
                   <span>Welcome back, {session.user.name}!</span>
-                  <Award className="h-6 w-6 text-yellow-300 animate-bounce" />
+                  {/* <Award className="h-6 w-6 text-yellow-300 animate-bounce" /> */}
                 </h1>
                 <p className="text-green-100 text-sm flex items-center space-x-2">
                   <Zap className="h-4 w-4" />
