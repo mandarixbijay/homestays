@@ -17,6 +17,7 @@ import {
 import {
   LoadingSpinner, Alert, ActionButton, Card, Modal, EmptyState, Input, useToast
 } from '@/components/admin/AdminComponents';
+import DealCard from '@/components/landing-page/landing-page-components/cards/deal-card';
 
 type ViewMode = 'grid' | 'list' | 'table';
 
@@ -50,6 +51,89 @@ const calculateSavings = (original: number, discounted: number): number => {
 
 const getHomestayImage = (homestay: any) => {
   return homestay?.images?.find((img: any) => img.isMain)?.url || homestay?.images?.[0]?.url;
+};
+
+// Helper function to get rating category color
+const getRatingColor = (rating: number | null) => {
+  if (!rating) return "bg-gray-500";
+  if (rating >= 9.5) return "bg-primary";
+  if (rating >= 9.0) return "bg-accent";
+  if (rating >= 8.0) return "bg-warning";
+  return "bg-gray-500";
+};
+
+// Helper function to format rating text
+const getRatingText = (rating: number | null, reviews: number) => {
+  if (!rating) return "No rating";
+  if (rating >= 9.5) return "Exceptional";
+  if (rating >= 9.0) return "Wonderful";
+  if (rating >= 8.0) return "Very Good";
+  return "Good";
+};
+
+// Helper function to group deals by discount rate
+const groupDealsByDiscount = (deals: any[]) => {
+  const grouped: { [key: string]: any[] } = {};
+  deals.forEach((deal) => {
+    const key = deal.discountType === 'PERCENTAGE'
+      ? `${deal.discount}% Off`
+      : `NPR ${deal.discount} Off`;
+    if (!grouped[key]) {
+      grouped[key] = [];
+    }
+    grouped[key].push(deal);
+  });
+
+  // Sort groups by discount value (highest first)
+  return Object.entries(grouped).sort(([keyA, dealsA], [keyB, dealsB]) => {
+    const valueA = dealsA[0].discount;
+    const valueB = dealsB[0].discount;
+    return valueB - valueA;
+  });
+};
+
+// Helper function to get time remaining for a deal
+const getTimeRemaining = (endDate: string) => {
+  const now = new Date();
+  const end = new Date(endDate);
+  const diff = end.getTime() - now.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+  if (days > 0) return `${days} day${days > 1 ? 's' : ''} left`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} left`;
+  return 'Ending soon';
+};
+
+// Helper function to group deals by time frame
+const groupDealsByTimeFrame = (deals: any[]) => {
+  const now = new Date();
+  const grouped: { [key: string]: any[] } = {
+    'Ending Soon (< 24 hours)': [],
+    'This Week': [],
+    'This Month': [],
+    'Later': []
+  };
+
+  deals.forEach((deal) => {
+    const endDate = new Date(deal.endDate);
+    const diff = endDate.getTime() - now.getTime();
+    const hours = diff / (1000 * 60 * 60);
+    const days = hours / 24;
+
+    if (hours < 24) {
+      grouped['Ending Soon (< 24 hours)'].push(deal);
+    } else if (days <= 7) {
+      grouped['This Week'].push(deal);
+    } else if (days <= 30) {
+      grouped['This Month'].push(deal);
+    } else {
+      grouped['Later'].push(deal);
+    }
+  });
+
+  // Return only non-empty groups
+  return Object.entries(grouped).filter(([_, deals]) => deals.length > 0);
 };
 
 const StatCard: React.FC<{
@@ -879,10 +963,175 @@ export default function LastMinuteDealsManagement() {
               </table>
             </div>
           </div>
+        ) : viewMode === 'grid' ? (
+          <div className="space-y-8">
+            {(() => {
+              // Group by discount rate
+              const groupedByDiscount = groupDealsByDiscount(deals);
+
+              return groupedByDiscount.map(([discountLabel, groupDeals]) => (
+                <div key={discountLabel} className="space-y-4">
+                  <div className="flex items-center justify-between bg-gradient-to-r from-[#224240] to-[#2a5350] rounded-xl px-6 py-4 shadow-md">
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                      <Tag className="h-5 w-5" />
+                      {discountLabel}
+                    </h3>
+                    <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold text-white">
+                      {groupDeals.length} {groupDeals.length === 1 ? 'Deal' : 'Deals'}
+                    </span>
+                  </div>
+
+                  {/* Further group by timeframe within discount group */}
+                  {(() => {
+                    const groupedByTime = groupDealsByTimeFrame(groupDeals);
+                    return groupedByTime.map(([timeLabel, timeDeals]) => (
+                      <div key={timeLabel} className="space-y-3">
+                        <div className="flex items-center gap-2 px-4">
+                          <Clock className="h-4 w-4 text-[#224240]" />
+                          <h4 className="text-md font-semibold text-gray-700 dark:text-gray-300">{timeLabel}</h4>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">({timeDeals.length})</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+                          {timeDeals.map((deal: any) => {
+                            const rating = deal.homestay?.rating || null;
+                            const reviews = deal.homestay?.reviews || 0;
+                            const ratingText = getRatingText(rating, reviews);
+                            const originalPrice = calculateOriginalPrice(deal.homestay);
+                            const discountedPrice = originalPrice ? calculateDiscountedPrice(originalPrice, deal.discount, deal.discountType) : null;
+
+                            return (
+                              <div key={deal.id} className="relative group">
+                                <DealCard
+                                  imageSrc={getHomestayImage(deal.homestay) || "/images/placeholder.jpg"}
+                                  location={deal.homestay?.address || "Unknown"}
+                                  hotelName={deal.homestay?.name || "Unnamed Homestay"}
+                                  rating={rating ? rating.toFixed(1) : "N/A"}
+                                  reviews={`${ratingText} (${reviews} reviews)`}
+                                  originalPrice={originalPrice ? `NPR ${Math.round(originalPrice).toLocaleString()}` : "N/A"}
+                                  nightlyPrice={discountedPrice ? `NPR ${Math.round(discountedPrice).toLocaleString()}` : "N/A"}
+                                  totalPrice={discountedPrice ? `NPR ${Math.round(discountedPrice).toLocaleString()}` : "N/A"}
+                                  categoryColor={getRatingColor(rating)}
+                                  slug={`deal-${deal.id}`}
+                                  features={deal.homestay?.facilities?.slice(0, 3).map((f: any) => f.facility?.name || f.name) || []}
+                                  discount={deal.discountType === 'PERCENTAGE' ? `${deal.discount}% off` : `NPR ${deal.discount} off`}
+                                />
+
+                                {/* Admin actions overlay */}
+                                <div className="absolute top-2 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                    deal.isActive
+                                      ? 'bg-green-500 text-white'
+                                      : 'bg-gray-500 text-white'
+                                  }`}>
+                                    {deal.isActive ? 'Active' : 'Inactive'}
+                                  </span>
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => setEditingDeal(deal)}
+                                      className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-colors"
+                                      title="Edit"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete(deal.id)}
+                                      className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-colors"
+                                      title="Delete"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Time remaining badge */}
+                                <div className="absolute bottom-24 left-2 z-10">
+                                  <span className="px-3 py-1 bg-orange-500 text-white rounded-lg text-xs font-semibold shadow-lg flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {getTimeRemaining(deal.endDate)}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              ));
+            })()}
+          </div>
         ) : (
-          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
+          <div className="space-y-4">
             <AnimatePresence mode="popLayout">
-              {deals.map((d: any) => (<DealCard key={d.id} deal={d} onEdit={setEditingDeal} onDelete={handleDelete} viewMode={viewMode} />))}
+              {deals.map((d: any) => {
+                const rating = d.homestay?.rating || null;
+                const reviews = d.homestay?.reviews || 0;
+                const originalPrice = calculateOriginalPrice(d.homestay);
+                const discountedPrice = originalPrice ? calculateDiscountedPrice(originalPrice, d.discount, d.discountType) : null;
+
+                return (
+                  <motion.div
+                    key={d.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-4"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0 relative">
+                        {getHomestayImage(d.homestay) ? (
+                          <img src={getHomestayImage(d.homestay)} alt={d.homestay?.name} className="w-32 h-32 rounded-xl object-cover" />
+                        ) : (
+                          <div className="w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center">
+                            <Home className="h-12 w-12 text-gray-400" />
+                          </div>
+                        )}
+                        {d.discountType === 'PERCENTAGE' ? (
+                          <span className="absolute top-2 right-2 px-2 py-1 bg-green-600 text-white rounded-full text-xs font-bold">{d.discount}% off</span>
+                        ) : (
+                          <span className="absolute top-2 right-2 px-2 py-1 bg-orange-600 text-white rounded-full text-xs font-bold">NPR {d.discount} off</span>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{d.homestay?.name || 'Unnamed'}</h3>
+                            {d.homestay?.address && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+                                <MapPin className="h-3.5 w-3.5 mr-1" />
+                                {d.homestay.address}
+                              </p>
+                            )}
+                            {rating && (
+                              <div className="flex items-center mt-1">
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                                <span className="text-sm font-semibold text-gray-900 dark:text-white mr-1">{rating.toFixed(1)}</span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">({reviews} reviews)</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex flex-col items-end gap-2">
+                            {originalPrice && discountedPrice && (
+                              <div className="text-right">
+                                <p className="text-sm text-gray-500 line-through">NPR {Math.round(originalPrice).toLocaleString()}</p>
+                                <p className="text-xl font-bold text-green-600">NPR {Math.round(discountedPrice).toLocaleString()}</p>
+                              </div>
+                            )}
+                            <div className="flex gap-2">
+                              <ActionButton onClick={() => setEditingDeal(d)} variant="secondary" size="xs" icon={<Edit className="h-3.5 w-3.5" />}>Edit</ActionButton>
+                              <ActionButton onClick={() => handleDelete(d.id)} variant="danger" size="xs" icon={<Trash2 className="h-3.5 w-3.5" />}>Delete</ActionButton>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         )}
