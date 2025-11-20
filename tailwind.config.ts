@@ -45,6 +45,8 @@ export default {
         accent: {
           DEFAULT: '#D4A017', // New accent color: golden mustard
           foreground: 'hsl(var(--accent-foreground))',
+          light: '#FFF7E6', // Warm cream for feature cards
+          50: '#FFFBF2', // Lighter variant
         },
         discount: {
           DEFAULT: '#A9CBB7',
@@ -85,7 +87,8 @@ export default {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        manrope: ['Manrope', 'sans-serif'],
+        sora: ['Sora', 'sans-serif'],
+        manrope: ['Manrope', 'sans-serif'], // Keep for backwards compatibility
       },
       fontSize: {
         xs: ['0.75rem', { lineHeight: '1rem' }], // 12px
