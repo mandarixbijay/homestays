@@ -117,7 +117,8 @@ function DealsPageContent() {
       .replace(/\s+/g, '-') // Replace spaces with hyphens
       .replace(/-+/g, '-') // Replace multiple hyphens with single
       .trim();
-    return `${slugified}-${id}`; // Append ID for uniqueness and API fetching
+    // Use "id-" prefix before the ID to make extraction more reliable
+    return `${slugified}-id-${id}`;
   };
 
   // Transform availability check response to match last-minute-deals format

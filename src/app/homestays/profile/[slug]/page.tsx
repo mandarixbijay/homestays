@@ -74,11 +74,29 @@ export default function HomestayProfilePage() {
   const router = useRouter();
   const slug = params.slug as string;
 
-  // Extract ID from slug (format: name-address-{id})
-  const homestayId = slug ? parseInt(slug.split('-').pop() || '0') : 0;
+  // Extract ID from slug (format: name-address-id-{id})
+  const extractIdFromSlug = (slug: string): number => {
+    // Look for "id-{number}" pattern at the end of the slug
+    const match = slug.match(/-id-(\d+)$/);
+    if (match && match[1]) {
+      const id = parseInt(match[1]);
+      console.log('Extracting ID from slug:', { slug, match: match[0], id });
+      return id;
+    }
+
+    // Fallback: try to get the last segment if it's a number
+    const parts = slug.split('-');
+    const lastPart = parts[parts.length - 1];
+    const id = parseInt(lastPart);
+    console.log('Fallback extraction from slug:', { slug, lastPart, id });
+    return id || 0;
+  };
+
+  const homestayId = slug ? extractIdFromSlug(slug as string) : 0;
 
   const [homestay, setHomestay] = useState<Homestay | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [checkInDate, setCheckInDate] = useState<Date | undefined>();
   const [checkOutDate, setCheckOutDate] = useState<Date | undefined>();
   const [rooms, setRooms] = useState<Room[]>([{ adults: 2, children: 0 }]);
@@ -92,13 +110,18 @@ export default function HomestayProfilePage() {
   useEffect(() => {
     const fetchHomestay = async () => {
       setLoading(true);
+      setError(null);
       try {
-        console.log(`Fetching homestay with ID: ${homestayId}`);
+        console.log(`Fetching homestay with ID: ${homestayId} from slug: ${slug}`);
 
         const response = await fetch(`/api/homestays/${homestayId}`);
 
+        console.log('API response status:', response.status);
+
         if (!response.ok) {
-          throw new Error('Failed to fetch homestay');
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('API error:', errorData);
+          throw new Error(errorData.error || 'Failed to fetch homestay');
         }
 
         const data = await response.json();
@@ -145,15 +168,20 @@ export default function HomestayProfilePage() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching homestay:", error);
+        setError(error instanceof Error ? error.message : 'Unknown error occurred');
         setHomestay(null);
         setLoading(false);
       }
     };
 
-    if (homestayId) {
+    if (homestayId && homestayId > 0) {
       fetchHomestay();
+    } else {
+      console.error('Invalid homestay ID:', homestayId);
+      setError('Invalid homestay ID');
+      setLoading(false);
     }
-  }, [homestayId]);
+  }, [homestayId, slug]);
 
   // Room management functions
   const addRoom = () => {
@@ -256,9 +284,16 @@ export default function HomestayProfilePage() {
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-16 flex-1 flex items-center justify-center">
-          <div className="text-center">
+          <div className="text-center max-w-lg">
             <h1 className="text-3xl font-bold mb-4">Homestay not found</h1>
-            <p className="text-muted-foreground mb-6">The homestay you're looking for doesn't exist.</p>
+            <p className="text-muted-foreground mb-4">The homestay you're looking for doesn't exist.</p>
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600 font-mono">Error: {error}</p>
+                <p className="text-xs text-gray-600 mt-2">Slug: {slug}</p>
+                <p className="text-xs text-gray-600">Extracted ID: {homestayId}</p>
+              </div>
+            )}
             <Button onClick={() => router.push("/deals")}>Back to Deals</Button>
           </div>
         </div>
