@@ -66,16 +66,16 @@ class PublicBlogApi {
 
   // Helper function to process image URLs
   private processImageUrl(url: string | undefined): string {
-    if (!url) return '/images/default-blog.jpg';
-    
+    if (!url) return '/images/fallback-image.png';
+
     // If it's already a local path, return as-is
     if (url.startsWith('/')) return url;
-    
+
     // Block example.com URLs (from your API mock data)
     if (url.includes('example.com')) {
-      return '/images/default-blog.jpg';
+      return '/images/fallback-image.png';
     }
-    
+
     return url;
   }
 

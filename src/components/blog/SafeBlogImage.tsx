@@ -49,13 +49,13 @@ export default function SafeBlogImage({
 
   // Determine the final image source
   const finalSrc = imageError || !isValidImageUrl(imageSrc)
-    ? '/images/default-blog.jpg'
-    : imageSrc || '/images/default-blog.jpg';
+    ? '/images/fallback-image.png'
+    : imageSrc || '/images/fallback-image.png';
 
   const handleImageError = () => {
     if (!imageError) {
       setImageError(true);
-      setImageSrc('/images/default-blog.jpg');
+      setImageSrc('/images/fallback-image.png');
     }
   };
 
