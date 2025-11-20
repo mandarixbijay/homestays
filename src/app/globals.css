@@ -135,6 +135,19 @@
   to { opacity: 1; }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  animation: shimmer 2s infinite;
+}
+
 .bg-hero3::before {
   content: "";
   position: absolute;
