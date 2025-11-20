@@ -43,6 +43,57 @@ interface HomestayRoom {
   roomsLeft?: number;
 }
 
+interface AvailableRoom {
+  id: number;
+  name: string;
+  maxOccupancy: number;
+  nightlyPrice: number;
+  totalPrice: number;
+  currency: string;
+  imageUrls: string[];
+  rating: number;
+  reviews: number;
+  facilities: string[];
+  bedType: string;
+  refundable: boolean;
+  extrasOptions: any[];
+  roomsLeft: number;
+  originalPrice: number;
+  discountedPrice: number;
+  savings: number;
+}
+
+interface LastMinuteDeal {
+  id: number;
+  discount: number;
+  discountType: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+}
+
+interface AvailabilityResponse {
+  homestay: {
+    id: number;
+    name: string;
+    address: string;
+    description: string;
+    imageSrc: string;
+    rating: number;
+    reviews: number;
+    nightlyPrice: number;
+    totalPrice: number;
+    features: string[];
+    vipAccess: boolean;
+    discount: string;
+  };
+  availableRooms: AvailableRoom[];
+  checkInDate: string;
+  checkOutDate: string;
+  nights: number;
+  activeLastMinuteDeal: LastMinuteDeal | null;
+}
+
 interface Homestay {
   id: number;
   name: string;
@@ -105,6 +156,11 @@ export default function HomestayProfilePage() {
   const [isGuestPopoverOpen, setIsGuestPopoverOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("overview");
   const [isMobileBookingOpen, setIsMobileBookingOpen] = useState(false);
+
+  // Availability states
+  const [availabilityData, setAvailabilityData] = useState<AvailabilityResponse | null>(null);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
   // Fetch homestay data from API
   useEffect(() => {
@@ -212,30 +268,56 @@ export default function HomestayProfilePage() {
   };
 
   // Check availability handler
-  const handleCheckAvailability = () => {
+  const handleCheckAvailability = async () => {
     if (!checkInDate || !checkOutDate) {
       alert("Please select check-in and check-out dates");
       return;
     }
 
-    // Build query params for booking flow
-    const queryParams = new URLSearchParams();
-    queryParams.append("checkIn", format(checkInDate, "yyyy-MM-dd"));
-    queryParams.append("checkOut", format(checkOutDate, "yyyy-MM-dd"));
+    setCheckingAvailability(true);
+    setAvailabilityError(null);
 
-    const guestsParam = rooms
-      .map((room) => `${room.adults}A${room.children}C`)
-      .join(",");
-    queryParams.append("guests", guestsParam);
-    queryParams.append("rooms", rooms.length.toString());
+    try {
+      const requestBody = {
+        checkInDate: format(checkInDate, "yyyy-MM-dd"),
+        checkOutDate: format(checkOutDate, "yyyy-MM-dd"),
+        rooms: rooms.map(room => ({
+          adults: room.adults,
+          ...(room.children > 0 && { children: room.children }),
+        })),
+      };
 
-    // Navigate to booking page with search params
-        // use the slug extracted from the URL since Homestay type does not include a slug property
-        if (slug) {
-          router.push(`/homestays/${slug}?${queryParams.toString()}`);
-        } else {
-          alert("Homestay slug not available. Cannot proceed to booking.");
-        }
+      console.log('Checking availability:', requestBody);
+
+      const response = await fetch(`/api/bookings/check-availability/${homestayId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || 'Failed to check availability');
+      }
+
+      const data: AvailabilityResponse = await response.json();
+      console.log('Availability data:', data);
+
+      setAvailabilityData(data);
+
+      // Scroll to rooms section
+      setTimeout(() => {
+        document.getElementById('available-rooms')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } catch (error) {
+      console.error('Error checking availability:', error);
+      setAvailabilityError(error instanceof Error ? error.message : 'Failed to check availability');
+      alert('Error: ' + (error instanceof Error ? error.message : 'Failed to check availability'));
+    } finally {
+      setCheckingAvailability(false);
+    }
   };
 
   // Guest summary
@@ -554,7 +636,7 @@ export default function HomestayProfilePage() {
                 viewport={{ once: true }}
                 className="bg-white rounded-2xl p-8 shadow-sm"
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Rooms</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Room Information</h2>
                 {homestay.rooms && homestay.rooms.length > 0 ? (
                   <div className="space-y-6">
                     {homestay.rooms.map((room) => (
@@ -629,6 +711,160 @@ export default function HomestayProfilePage() {
                   </div>
                 )}
               </motion.div>
+
+              {/* Available Rooms (After Availability Check) */}
+              {availabilityData && availabilityData.availableRooms.length > 0 && (
+                <motion.div
+                  id="available-rooms"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 shadow-lg border-2 border-blue-200"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Rooms</h2>
+                      <p className="text-sm text-gray-600">
+                        For {format(new Date(availabilityData.checkInDate), "MMM d")} - {format(new Date(availabilityData.checkOutDate), "MMM d, yyyy")} ({availabilityData.nights} {availabilityData.nights === 1 ? 'night' : 'nights'})
+                      </p>
+                    </div>
+                    {availabilityData.activeLastMinuteDeal && (
+                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 text-sm font-semibold">
+                        🎉 {availabilityData.activeLastMinuteDeal.discount}% OFF - {availabilityData.activeLastMinuteDeal.description}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="space-y-6">
+                    {availabilityData.availableRooms.map((room) => (
+                      <motion.div
+                        key={room.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                        className="bg-white border-2 border-blue-100 rounded-xl overflow-hidden hover:shadow-2xl hover:border-blue-300 transition-all"
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Room Image */}
+                          <div className="relative h-48 md:h-full">
+                            <Image
+                              src={room.imageUrls?.[0] || homestay.imageSrc || "/images/fallback-image.png"}
+                              alt={room.name}
+                              fill
+                              className="object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = "/images/fallback-image.png";
+                              }}
+                            />
+                            {room.roomsLeft <= 3 && (
+                              <div className="absolute top-3 right-3">
+                                <Badge className="bg-red-600 text-white font-semibold shadow-lg">
+                                  <AlertCircle className="h-3 w-3 mr-1" />
+                                  Only {room.roomsLeft} left!
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Room Details */}
+                          <div className="md:col-span-2 p-6">
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-1">{room.name}</h3>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="flex items-center gap-1">
+                                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                                    <span className="text-sm font-semibold text-gray-700">{room.rating}</span>
+                                  </div>
+                                  <span className="text-xs text-gray-500">({room.reviews} reviews)</span>
+                                </div>
+                              </div>
+                              {room.refundable && (
+                                <Badge className="bg-green-100 text-green-700 border-green-300">
+                                  <Shield className="h-3 w-3 mr-1" />
+                                  Free Cancellation
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                              <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <Bed className="h-4 w-4" />
+                                <span>{room.bedType}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <Users className="h-4 w-4" />
+                                <span>Max {room.maxOccupancy} guests</span>
+                              </div>
+                            </div>
+
+                            {room.facilities && room.facilities.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                {room.facilities.map((facility, idx) => (
+                                  <Badge key={idx} variant="outline" className="text-xs border-gray-300">
+                                    {facility}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+
+                            <div className="flex items-end justify-between pt-4 border-t border-gray-200">
+                              <div>
+                                {room.savings > 0 && (
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Badge className="bg-green-600 text-white text-xs">
+                                      Save NPR {room.savings.toLocaleString()}
+                                    </Badge>
+                                    <span className="text-sm text-gray-500 line-through">
+                                      NPR {room.originalPrice.toLocaleString()}
+                                    </span>
+                                  </div>
+                                )}
+                                <div className="flex items-baseline gap-2">
+                                  <div className="text-3xl font-bold text-blue-600">
+                                    NPR {room.discountedPrice.toLocaleString()}
+                                  </div>
+                                  <span className="text-sm font-normal text-gray-500">/ night</span>
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Total: NPR {room.totalPrice.toLocaleString()} for {availabilityData.nights} {availabilityData.nights === 1 ? 'night' : 'nights'}
+                                </div>
+                              </div>
+                              <Button
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                                onClick={() => {
+                                  // Navigate to booking page with room selection
+                                  const queryParams = new URLSearchParams();
+                                  queryParams.append("checkIn", format(new Date(availabilityData.checkInDate), "yyyy-MM-dd"));
+                                  queryParams.append("checkOut", format(new Date(availabilityData.checkOutDate), "yyyy-MM-dd"));
+                                  queryParams.append("roomId", room.id.toString());
+                                  const guestsParam = rooms.map((r) => `${r.adults}A${r.children}C`).join(",");
+                                  queryParams.append("guests", guestsParam);
+                                  queryParams.append("rooms", rooms.length.toString());
+                                  router.push(`/booking/${slug}?${queryParams.toString()}`);
+                                }}
+                              >
+                                Book Now
+                                <ChevronRight className="ml-2 h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {availabilityData.availableRooms.length === 0 && (
+                    <div className="text-center py-12">
+                      <AlertCircle className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No rooms available</h3>
+                      <p className="text-gray-600">
+                        Unfortunately, there are no rooms available for your selected dates. Please try different dates.
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
 
               {/* Policies */}
               <motion.div
@@ -867,12 +1103,20 @@ export default function HomestayProfilePage() {
                 <div className="p-6 border-t border-gray-100">
                   <Button
                     onClick={handleCheckAvailability}
-                    disabled={!checkInDate || !checkOutDate}
+                    disabled={!checkInDate || !checkOutDate || checkingAvailability}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
                     size="lg"
                   >
-                    Check Availability
-                    <ChevronRight className="ml-2 h-4 w-4" />
+                    {checkingAvailability ? (
+                      <>
+                        <span className="animate-pulse">Checking Availability...</span>
+                      </>
+                    ) : (
+                      <>
+                        Check Availability
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                   <p className="text-xs text-gray-500 text-center mt-3">
                     View available rooms and book instantly
@@ -1082,12 +1326,18 @@ export default function HomestayProfilePage() {
                 handleCheckAvailability();
                 setIsMobileBookingOpen(false);
               }}
-              disabled={!checkInDate || !checkOutDate}
+              disabled={!checkInDate || !checkOutDate || checkingAvailability}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold"
               size="lg"
             >
-              Check Availability
-              <ChevronRight className="ml-2 h-4 w-4" />
+              {checkingAvailability ? (
+                <span className="animate-pulse">Checking Availability...</span>
+              ) : (
+                <>
+                  Check Availability
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </>
+              )}
             </Button>
           </div>
         </DialogContent>
