@@ -5,9 +5,9 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
-  Zap, Plus, Edit, Trash2, X, Grid, List, RefreshCw,
-  SlidersHorizontal, FileDown, Calendar, Percent, DollarSign,
-  Clock, Tag
+  Zap, Plus, Eye, Edit, Trash2, X, Search, Grid, List, RefreshCw,
+  SlidersHorizontal, FileDown, Calendar, Percent, DollarSign, Home,
+  Clock, Tag, BarChart3, TrendingUp, AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from 'lodash';
@@ -379,6 +379,7 @@ export default function LastMinuteDealsManagement() {
   const [editingDeal, setEditingDeal] = useState<any | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'analytics'>('overview');
 
   const debouncedLoadData = useMemo(() => debounce((params: any) => {
     loadDeals(params).catch(error => { addToast({ type: 'error', title: 'Error', message: 'Failed to load deals' }); });
@@ -449,6 +450,40 @@ export default function LastMinuteDealsManagement() {
     return { total, active: activeCount, expired: expiredCount };
   }, [deals, total]);
 
+  const analyticsData = useMemo(() => {
+    const now = new Date();
+    const percentageDeals = deals.filter(d => d.discountType === 'PERCENTAGE');
+    const flatDeals = deals.filter(d => d.discountType === 'FLAT');
+    const avgDiscount = deals.length > 0
+      ? (deals.reduce((sum, d) => sum + d.discount, 0) / deals.length).toFixed(1)
+      : '0';
+
+    // Top deals by discount value
+    const topDeals = [...deals]
+      .filter(d => d.isActive && new Date(d.endDate) > now)
+      .sort((a, b) => {
+        const aValue = a.discountType === 'PERCENTAGE' ? a.discount : a.discount / 100;
+        const bValue = b.discountType === 'PERCENTAGE' ? b.discount : b.discount / 100;
+        return bValue - aValue;
+      })
+      .slice(0, 5);
+
+    // Upcoming expiring deals (next 7 days)
+    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const expiringSoon = deals.filter(d => {
+      const endDate = new Date(d.endDate);
+      return d.isActive && endDate > now && endDate <= sevenDaysFromNow;
+    }).length;
+
+    return {
+      topDeals,
+      avgDiscount,
+      percentageCount: percentageDeals.length,
+      flatCount: flatDeals.length,
+      expiringSoon
+    };
+  }, [deals]);
+
   if (status === 'loading') return (<div className="min-h-screen flex items-center justify-center"><LoadingSpinner size="lg" text="Loading..." /></div>);
   if (session?.user?.role !== 'ADMIN') return null;
 
@@ -482,6 +517,82 @@ export default function LastMinuteDealsManagement() {
           <StatCard title="Expired Deals" value={stats.expired} color="red" icon={<Clock className="h-6 w-6" />} subtitle="Past deals" />
         </div>
 
+        {/* Tabs */}
+        <div className="mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+            <div className="flex space-x-2">
+              <button onClick={() => setActiveTab('overview')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'overview' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                <div className="flex items-center justify-center space-x-2">
+                  <Zap className="h-4 w-4" />
+                  <span>Overview</span>
+                </div>
+              </button>
+              <button onClick={() => setActiveTab('analytics')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'analytics' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                <div className="flex items-center justify-center space-x-2">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Analytics</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Analytics View */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-6 mb-8">
+            {/* Discount Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <StatCard title="Avg Discount" value={analyticsData.avgDiscount} color="teal" icon={<TrendingUp className="h-6 w-6" />} subtitle="Average discount value" />
+              <StatCard title="Percentage Deals" value={analyticsData.percentageCount} color="yellow" icon={<Percent className="h-6 w-6" />} subtitle="% based discounts" />
+              <StatCard title="Flat Deals" value={analyticsData.flatCount} color="green" icon={<DollarSign className="h-6 w-6" />} subtitle="Fixed amount deals" />
+              <StatCard title="Expiring Soon" value={analyticsData.expiringSoon} color="red" icon={<AlertCircle className="h-6 w-6" />} subtitle="Next 7 days" />
+            </div>
+
+            {/* Top Active Deals */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <Zap className="h-5 w-5 mr-2 text-[#224240]" />
+                Top Active Deals
+              </h3>
+              <div className="space-y-4">
+                {analyticsData.topDeals.map((deal: any, idx: number) => {
+                  const daysRemaining = Math.ceil((new Date(deal.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                  return (
+                    <div key={deal.id} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${idx === 0 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : idx === 1 ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' : idx === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' : 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                            <span className="text-sm font-bold">#{idx + 1}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{deal.homestay?.name || 'Unknown Homestay'}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {daysRemaining} days remaining
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className={`inline-flex items-center px-3 py-1.5 rounded-lg ${deal.discountType === 'PERCENTAGE' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
+                            {deal.discountType === 'PERCENTAGE' ? <Percent className="h-4 w-4 mr-1" /> : <DollarSign className="h-4 w-4 mr-1" />}
+                            <span className="text-lg font-bold">{deal.discount}{deal.discountType === 'PERCENTAGE' ? '%' : ''}</span>
+                          </div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">OFF</p>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">{deal.description || 'No description'}</div>
+                    </div>
+                  );
+                })}
+                {analyticsData.topDeals.length === 0 && (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">No active deals available</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'overview' && (
+          <>
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
@@ -542,6 +653,8 @@ export default function LastMinuteDealsManagement() {
               <ActionButton onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} variant="secondary" size="sm">Next</ActionButton>
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
 

@@ -64,19 +64,30 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [blogMenuOpen, setBlogMenuOpen] = useState(false);
+  const [masterDataMenuOpen, setMasterDataMenuOpen] = useState(false);
 
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Homestays", href: "/admin/homestays", icon: Home },
-    { name: "Master Data", href: "/admin/master-data", icon: Settings },
-    { name: "Destinations", href: "/admin/destinations", icon: MapPin },
-    { name: "Last Minute Deals", href: "/admin/last-minute-deals", icon: Zap },
-    { name: "Top Homestays", href: "/admin/top-homestays", icon: Star },
+    {
+      name: "Master Data",
+      href: "/admin/master-data",
+      icon: Settings,
+      menuKey: "masterData",
+      subMenu: [
+        { name: "Master Data", href: "/admin/master-data", icon: Settings },
+        { isSectionLabel: true, name: "Marketing" },
+        { name: "Destinations", href: "/admin/destinations", icon: MapPin },
+        { name: "Last Minute Deals", href: "/admin/last-minute-deals", icon: Zap },
+        { name: "Top Homestays", href: "/admin/top-homestays", icon: Star },
+      ],
+    },
     { name: "Users", href: "/admin/users", icon: Users },
     {
       name: "Blog",
       href: "/admin/blog",
       icon: FileText,
+      menuKey: "blog",
       subMenu: [
         { name: "All Posts", href: "/admin/blog", icon: FileText },
         { name: "Create Post", href: "/admin/blog/create", icon: PenTool },
@@ -95,18 +106,30 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
   if (isAuthenticated && !isAdmin) return <div>Unauthorized</div>;
   if (!isAuthenticated || hasRefreshError) return <div>Loading...</div>;
 
+  const getMenuOpenState = (menuKey?: string) => {
+    if (menuKey === "blog") return blogMenuOpen;
+    if (menuKey === "masterData") return masterDataMenuOpen;
+    return false;
+  };
+
+  const toggleMenu = (menuKey?: string) => {
+    if (menuKey === "blog") setBlogMenuOpen(!blogMenuOpen);
+    if (menuKey === "masterData") setMasterDataMenuOpen(!masterDataMenuOpen);
+  };
+
   const renderNav = () => (
     <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
       {navigation.map((item) => {
-        const isActive = pathname === item.href || (item.subMenu && pathname.startsWith(item.href));
+        const isActive = pathname === item.href || (item.subMenu && item.subMenu.some((sub: any) => !sub.isSectionLabel && pathname === sub.href));
         const isExactMatch = pathname === item.href;
+        const menuOpen = getMenuOpenState(item.menuKey);
 
         return (
           <div key={item.name}>
             {item.subMenu ? (
               <>
                 <button
-                  onClick={() => setBlogMenuOpen(!blogMenuOpen)}
+                  onClick={() => toggleMenu(item.menuKey)}
                   className={`group flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
                     isActive
                       ? "bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg shadow-[#224240]/20"
@@ -125,12 +148,12 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
                   </span>
                   <ChevronDown
                     className={`h-4 w-4 transform transition-transform duration-200 ${
-                      blogMenuOpen ? "rotate-180" : ""
+                      menuOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
                 <AnimatePresence>
-                  {blogMenuOpen && (
+                  {menuOpen && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
@@ -138,7 +161,16 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
                       transition={{ duration: 0.2 }}
                       className="ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4"
                     >
-                      {item.subMenu.map((sub) => {
+                      {item.subMenu.map((sub: any, idx: number) => {
+                        if (sub.isSectionLabel) {
+                          return (
+                            <div key={`section-${idx}`} className="pt-3 pb-1 px-3">
+                              <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                {sub.name}
+                              </span>
+                            </div>
+                          );
+                        }
                         const isSubActive = pathname === sub.href;
                         return (
                           <Link
