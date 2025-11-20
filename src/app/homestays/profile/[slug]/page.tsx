@@ -130,7 +130,18 @@ export default function HomestayProfilePage() {
         // Handle images - support multiple formats
         let imagesArray: string[] = [];
         if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-          imagesArray = data.images.filter((img: string) => img && img.trim().length > 0);
+          // Filter and map images, handling both string and object formats
+          imagesArray = data.images
+            .map((img: any) => {
+              // If it's a string, return it
+              if (typeof img === 'string') return img;
+              // If it's an object with url/src property, extract it
+              if (typeof img === 'object' && img !== null) {
+                return img.url || img.src || img.imageUrl || null;
+              }
+              return null;
+            })
+            .filter((img: string | null) => img && typeof img === 'string' && img.trim().length > 0);
         } else if (data.imageSrc || data.image) {
           imagesArray = [data.imageSrc || data.image];
         }
