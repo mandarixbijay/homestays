@@ -108,6 +108,18 @@ function DealsPageContent() {
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
   const dealsPerPage = 12;
 
+  // Generate profile slug from homestay name, address, and ID
+  const generateProfileSlug = (name: string, address: string, id: number) => {
+    const combined = `${name}-${address}`;
+    const slugified = combined
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim();
+    return `${slugified}-${id}`; // Append ID for uniqueness and API fetching
+  };
+
   // Transform availability check response to match last-minute-deals format
   const transformAvailabilityDeals = (homestays: any[]) => {
     return homestays.map((homestay) => {
@@ -755,20 +767,44 @@ function DealsPageContent() {
                       whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.3 } }}
                       className="cursor-pointer"
                       onClick={() => {
-                        const queryString = buildQueryString();
-                        // Navigate to homestay detail page
-                        router.push(
-                          `/homestays/${deal.homestay?.id || deal.id}${queryString ? `?${queryString}` : ""}`
-                        );
+                        // Check if search criteria exists
+                        const hasSearchCriteria = searchLocation || (searchDate?.from && searchDate?.to);
+
+                        if (hasSearchCriteria) {
+                          // Navigate to booking flow with search params
+                          const queryString = buildQueryString();
+                          router.push(
+                            `/homestays/${deal.homestay?.slug || deal.slug}${queryString ? `?${queryString}` : ""}`
+                          );
+                        } else {
+                          // Navigate to profile page without search params
+                          const profileSlug = generateProfileSlug(
+                            deal.homestay?.name || "homestay",
+                            deal.homestay?.address || "nepal",
+                            deal.homestay?.id || deal.id
+                          );
+                          router.push(`/homestays/profile/${profileSlug}`);
+                        }
                       }}
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
-                          const queryString = buildQueryString();
-                          router.push(
-                            `/homestays/${deal.homestay?.id || deal.id}${queryString ? `?${queryString}` : ""}`
-                          );
+                          const hasSearchCriteria = searchLocation || (searchDate?.from && searchDate?.to);
+
+                          if (hasSearchCriteria) {
+                            const queryString = buildQueryString();
+                            router.push(
+                              `/homestays/${deal.homestay?.slug || deal.slug}${queryString ? `?${queryString}` : ""}`
+                            );
+                          } else {
+                            const profileSlug = generateProfileSlug(
+                              deal.homestay?.name || "homestay",
+                              deal.homestay?.address || "nepal",
+                              deal.homestay?.id || deal.id
+                            );
+                            router.push(`/homestays/profile/${profileSlug}`);
+                          }
                         }
                       }}
                       aria-label={`View details for ${deal.homestay?.name}`}
