@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import DealCard from "./landing-page-components/cards/deal-card";
 import { useRouter } from "next/navigation";
@@ -80,6 +81,42 @@ export const dealCardsData = [
   },
 ];
 
+// Animation variants
+const sectionVariants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const cardContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const cardItemVariants = {
+  hidden: { opacity: 0, x: -30 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
 export default function Hero1() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -137,9 +174,18 @@ export default function Hero1() {
   }, [handleScroll]);
 
   return (
-   <section className="w-full py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-gradient-to-b from-background to-gray-50/50 overflow-x-hidden">
+   <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }}
+      variants={sectionVariants}
+      className="w-full py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-gradient-to-b from-background to-gray-50/50 overflow-x-hidden"
+    >
       <div className="container mx-auto max-w-7xl">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 text-center sm:text-left">
+        <motion.div
+          variants={sectionVariants}
+          className="flex flex-col sm:flex-row justify-between items-center mb-8 text-center sm:text-left"
+        >
           <div className="mb-4 sm:mb-0">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
               Last-Minute Deals
@@ -148,7 +194,10 @@ export default function Hero1() {
               Deals for: <span className="text-accent">{dateRange}</span>
             </p>
           </div>
-          <div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <Button
               variant="default"
               className="bg-primary text-white px-8 py-3 rounded-lg"
@@ -157,10 +206,15 @@ export default function Hero1() {
             >
               See All Deals
             </Button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        <div>
+        <motion.div
+          variants={cardContainerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
           <div
             ref={scrollContainerRef}
             className="flex gap-6 sm:gap-8 overflow-x-auto scrollbar-hide snap-x snap-mandatory min-h-[300px] touch-pan-x"
@@ -168,8 +222,11 @@ export default function Hero1() {
             aria-label="Last-minute deals carousel"
           >
             {dealCardsData.map((card, index) => (
-              <div
+              <motion.div
                 key={card.slug}
+                variants={cardItemVariants}
+                whileHover={{ y: -8, scale: 1.02 }}
+                transition={{ duration: 0.3 }}
                 className="snap-start w-[240px] sm:w-[260px] flex-shrink-0 cursor-pointer"
                 onClick={() => router.push(`/deals`)}
                 role="button"
@@ -182,10 +239,10 @@ export default function Hero1() {
                 aria-label={`View details for ${card.hotelName}`}
               >
                 <DealCard {...card} />
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         <div className="flex justify-center gap-3 mt-6">
           {dealCardsData.map((_, index) => (
@@ -200,6 +257,6 @@ export default function Hero1() {
           ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

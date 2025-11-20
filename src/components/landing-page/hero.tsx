@@ -4,9 +4,11 @@ import React, { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { format, addDays } from "date-fns";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import SignInCard from "../homestay/components/sign-in-card";
 import { DateGuestLocationPicker } from "@/components/homestay/components/details/date-guest-location-picker";
 import { DateRange } from "react-day-picker";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 // Custom SVG for Arrow Icon
 const ArrowRightSVG = ({ className }: { className?: string }) => (
@@ -32,6 +34,53 @@ interface Room {
   adults: number;
   children: number;
 }
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const cardStagger = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
 
 export default function Hero() {
   const router = useRouter();
@@ -91,43 +140,93 @@ export default function Hero() {
   return (
     <div className="relative w-full min-h-[500px] sm:min-h-[550px] md:min-h-[600px] bg-gradient-to-br from-primary-30/10 via-background to-accent-50">
       <section id="home" className="w-full h-full relative pt-20 sm:pt-24 md:pt-28 pb-12 sm:pb-16">
-        <div className="relative z-30 px-4 sm:px-6 md:px-8">
+        <motion.div
+          className="relative z-30 px-4 sm:px-6 md:px-8"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
           <div className="container mx-auto max-w-full sm:max-w-6xl md:max-w-7xl">
             {/* Search Bar in Card with improved styling */}
-            <div
+            <motion.div
+              variants={itemVariants}
               className="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-200 shadow-lg p-4 sm:p-5 md:p-6 hover:shadow-xl transition-shadow duration-300"
             >
               <DateGuestLocationPicker
                 onSearch={handleSearch}
                 initialDate={defaultDateRange}
               />
-            </div>
+            </motion.div>
 
-            {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-4 text-xs sm:text-sm text-gray-600">
-              <div className="flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+            {/* Trust Indicators with animations */}
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-4 text-xs sm:text-sm text-gray-600"
+            >
+              <motion.div
+                className="flex items-center gap-1.5"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.svg
+                  className="w-4 h-4 text-primary"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  initial={{ rotate: -10, scale: 0 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ delay: 0.5, duration: 0.4, type: "spring" }}
+                >
                   <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-                </svg>
-                <span className="font-medium">1,000+ Verified Homestays</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                </motion.svg>
+                <span className="font-medium">
+                  <AnimatedCounter to={1000} duration={2.5} suffix="+" /> Verified Homestays
+                </span>
+              </motion.div>
+              <motion.div
+                className="flex items-center gap-1.5"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.svg
+                  className="w-4 h-4 text-accent"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  initial={{ rotate: -10, scale: 0 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ delay: 0.6, duration: 0.4, type: "spring" }}
+                >
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                </svg>
-                <span className="font-medium">4.8★ Average Rating</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                </motion.svg>
+                <span className="font-medium">
+                  <AnimatedCounter to={4.8} decimals={1} />★ Average Rating
+                </span>
+              </motion.div>
+              <motion.div
+                className="flex items-center gap-1.5"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.svg
+                  className="w-4 h-4 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.7, duration: 0.4, type: "spring" }}
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                </svg>
+                </motion.svg>
                 <span className="font-medium">Safe & Secure Booking</span>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Promotional Card with improved design */}
-            <div
+            <motion.div
+              variants={itemVariants}
               className="bg-white rounded-2xl mt-6 sm:mt-8 flex overflow-hidden max-w-full sm:max-w-6xl md:max-w-7xl mx-auto min-h-[160px] sm:min-h-[180px] md:min-h-[200px] shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100"
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.3 }}
             >
               <div className="w-[35%] sm:w-[30%] relative">
                 <Image
@@ -156,17 +255,26 @@ export default function Hero() {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Sign In Card */}
             <SignInCard />
 
-            {/* Three Feature Cards - Improved Mobile Responsiveness */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-6 sm:mt-8">
+            {/* Three Feature Cards - Improved Mobile Responsiveness with Stagger */}
+            <motion.div
+              variants={cardStagger}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-6 sm:mt-8"
+            >
               {newCards.map((card) => (
-                <div
+                <motion.div
                   key={card.id}
-                  className="group bg-accent-light rounded-xl h-[150px] sm:h-[160px] flex overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 border border-accent-50"
+                  variants={cardVariants}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  transition={{ duration: 0.3 }}
+                  className="group bg-accent-light rounded-xl h-[150px] sm:h-[160px] flex overflow-hidden shadow-sm hover:shadow-md border border-accent-50"
                 >
                   {/* Text and Link Section */}
                   <div className="w-[50%] p-4 sm:p-5 flex flex-col justify-between">
@@ -195,11 +303,11 @@ export default function Hero() {
                       priority={card.id === 2}
                     />
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </section>
     </div>
   );
