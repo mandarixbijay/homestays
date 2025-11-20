@@ -20,6 +20,10 @@ import {
   Tag,
   Folder,
   BarChart3,
+  FileText,
+  User,
+  ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminAuth, useSessionManager } from "@/hooks/useSessionManager";
@@ -67,12 +71,12 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
     {
       name: "Blog",
       href: "/admin/blog",
-      icon: DockIcon,
+      icon: FileText,
       subMenu: [
-        { name: "Manage Blog", href: "/admin/blog", icon: DockIcon }, // ✅ added
-        { name: "Create Blog", href: "/admin/blog/create", icon: PenTool },
-        { name: "Tags", href: "/admin/blog/tags", icon: Tag },
+        { name: "All Posts", href: "/admin/blog", icon: FileText },
+        { name: "Create Post", href: "/admin/blog/create", icon: PenTool },
         { name: "Categories", href: "/admin/blog/categories", icon: Folder },
+        { name: "Tags", href: "/admin/blog/tags", icon: Tag },
         { name: "Analytics", href: "/admin/blog/analytics", icon: BarChart3 },
       ],
     },
@@ -87,26 +91,37 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
   if (!isAuthenticated || hasRefreshError) return <div>Loading...</div>;
 
   const renderNav = () => (
-    <nav className="flex-1 p-4 space-y-1">
+    <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
       {navigation.map((item) => {
-        const isActive = pathname.startsWith(item.href);
+        const isActive = pathname === item.href || (item.subMenu && pathname.startsWith(item.href));
+        const isExactMatch = pathname === item.href;
+
         return (
           <div key={item.name}>
             {item.subMenu ? (
               <>
                 <button
                   onClick={() => setBlogMenuOpen(!blogMenuOpen)}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition ${isActive
-                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                    }`}
+                  className={`group flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg shadow-[#224240]/20"
+                      : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50"
+                  }`}
                 >
-                  <span className="flex items-center gap-2">
-                    <item.icon className="h-5 w-5" /> {item.name}
+                  <span className="flex items-center gap-3">
+                    <div className={`p-1.5 rounded-lg ${
+                      isActive
+                        ? "bg-white/20"
+                        : "bg-gray-200 dark:bg-gray-700 group-hover:bg-[#224240]/10"
+                    }`}>
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    {item.name}
                   </span>
                   <ChevronDown
-                    className={`h-4 w-4 transform transition ${blogMenuOpen ? "rotate-180" : ""
-                      }`}
+                    className={`h-4 w-4 transform transition-transform duration-200 ${
+                      blogMenuOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
                 <AnimatePresence>
@@ -115,21 +130,29 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="ml-6 mt-1 space-y-1"
+                      transition={{ duration: 0.2 }}
+                      className="ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4"
                     >
-                      {item.subMenu.map((sub) => (
-                        <Link
-                          key={sub.name}
-                          href={sub.href}
-                          className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${pathname === sub.href
-                              ? "bg-blue-50 text-blue-700 dark:bg-blue-800 dark:text-blue-200"
-                              : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                      {item.subMenu.map((sub) => {
+                        const isSubActive = pathname === sub.href;
+                        return (
+                          <Link
+                            key={sub.name}
+                            href={sub.href}
+                            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                              isSubActive
+                                ? "bg-[#224240]/10 text-[#224240] dark:bg-[#224240]/20 dark:text-[#2a5350] border-l-2 border-[#224240] -ml-[2px] pl-[10px]"
+                                : "text-gray-600 hover:bg-gray-100 hover:text-[#224240] dark:text-gray-400 dark:hover:bg-gray-700/50 dark:hover:text-gray-300"
                             }`}
-                        >
-                          <sub.icon className="h-4 w-4" />
-                          {sub.name}
-                        </Link>
-                      ))}
+                          >
+                            <sub.icon className={`h-4 w-4 ${isSubActive ? "" : "opacity-60 group-hover:opacity-100"}`} />
+                            {sub.name}
+                            {isSubActive && (
+                              <ChevronRight className="h-3 w-3 ml-auto" />
+                            )}
+                          </Link>
+                        );
+                      })}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -137,12 +160,23 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
             ) : (
               <Link
                 href={item.href}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${isActive
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                    : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                  }`}
+                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
+                  isExactMatch
+                    ? "bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg shadow-[#224240]/20"
+                    : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50"
+                }`}
               >
-                <item.icon className="h-5 w-5" /> {item.name}
+                <div className={`p-1.5 rounded-lg ${
+                  isExactMatch
+                    ? "bg-white/20"
+                    : "bg-gray-200 dark:bg-gray-700 group-hover:bg-[#224240]/10"
+                }`}>
+                  <item.icon className="h-5 w-5" />
+                </div>
+                {item.name}
+                {isExactMatch && (
+                  <ChevronRight className="h-4 w-4 ml-auto" />
+                )}
               </Link>
             )}
           </div>
@@ -154,78 +188,178 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar (desktop) */}
-      <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 shadow-lg">
-        <div className="h-16 flex items-center px-4 border-b dark:border-gray-700">
-          <LayoutDashboard className="h-6 w-6 text-blue-600" />
-          <span className="ml-2 text-lg font-bold text-gray-900 dark:text-white">
-            Admin Panel
-          </span>
+      <div className="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 shadow-2xl border-r border-gray-200 dark:border-gray-700">
+        {/* Logo Header */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#224240] via-[#2a5350] to-[#224240] p-6">
+          {/* Decorative Background */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+              backgroundSize: '32px 32px'
+            }}></div>
+          </div>
+
+          <div className="relative">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                <Sparkles className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Homestays</h1>
+                <p className="text-xs text-white/70">Admin Portal</p>
+              </div>
+            </div>
+
+            {/* User Profile Card */}
+            <div className="mt-4 p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <User className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-white truncate">
+                    {user?.name || session?.user?.name || 'Admin'}
+                  </p>
+                  <p className="text-xs text-white/60 truncate">
+                    {user?.email || session?.user?.email || 'admin@homestays.com'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Navigation */}
         {renderNav()}
-        <div className="border-t p-4 flex items-center justify-between">
-          <ConnectionStatus />
-          <button
-            onClick={handleSignOut}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
+
+        {/* Footer */}
+        <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50">
+          <div className="flex items-center justify-between mb-3">
+            <ConnectionStatus />
+            <button
+              onClick={handleSignOut}
+              className="group p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+              title="Sign Out"
+            >
+              <LogOut className="h-4 w-4 text-gray-600 group-hover:text-red-600 dark:text-gray-400 dark:group-hover:text-red-400" />
+            </button>
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            © 2024 Homestays Admin
+          </div>
         </div>
       </div>
 
       {/* Sidebar (mobile) */}
       <AnimatePresence>
         {sidebarOpen && (
-          <motion.div
-            initial={{ x: -300 }}
-            animate={{ x: 0 }}
-            exit={{ x: -300 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 shadow-xl lg:hidden flex flex-col"
-          >
-            <div className="flex items-center justify-between h-16 px-4 border-b dark:border-gray-700">
-              <span className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-                <LayoutDashboard className="h-6 w-6 text-blue-600" /> Admin
-              </span>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            {renderNav()}
-            <div className="border-t p-4 flex items-center justify-between">
-              <ConnectionStatus />
-              <button
-                onClick={handleSignOut}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </div>
-          </motion.div>
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+            />
+
+            {/* Sidebar */}
+            <motion.div
+              initial={{ x: -300 }}
+              animate={{ x: 0 }}
+              exit={{ x: -300 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-2xl lg:hidden flex flex-col"
+            >
+              {/* Logo Header */}
+              <div className="relative overflow-hidden bg-gradient-to-br from-[#224240] via-[#2a5350] to-[#224240] p-6">
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                    backgroundSize: '32px 32px'
+                  }}></div>
+                </div>
+
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                        <Sparkles className="h-7 w-7 text-white" />
+                      </div>
+                      <div>
+                        <h1 className="text-xl font-bold text-white">Homestays</h1>
+                        <p className="text-xs text-white/70">Admin Portal</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setSidebarOpen(false)}
+                      className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                    >
+                      <X className="h-5 w-5 text-white" />
+                    </button>
+                  </div>
+
+                  {/* User Profile Card */}
+                  <div className="p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-white/20 rounded-lg">
+                        <User className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-white truncate">
+                          {user?.name || session?.user?.name || 'Admin'}
+                        </p>
+                        <p className="text-xs text-white/60 truncate">
+                          {user?.email || session?.user?.email || 'admin@homestays.com'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation */}
+              {renderNav()}
+
+              {/* Footer */}
+              <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50">
+                <div className="flex items-center justify-between mb-3">
+                  <ConnectionStatus />
+                  <button
+                    onClick={handleSignOut}
+                    className="group p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+                    title="Sign Out"
+                  >
+                    <LogOut className="h-4 w-4 text-gray-600 group-hover:text-red-600 dark:text-gray-400 dark:group-hover:text-red-400" />
+                  </button>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  © 2024 Homestays Admin
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col lg:pl-64">
+      <div className="flex flex-1 flex-col lg:pl-72">
         {/* Mobile top bar */}
-        <div className="lg:hidden sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-white px-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="lg:hidden sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-gradient-to-r from-[#224240] to-[#2a5350] px-4 shadow-lg">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5 text-white" />
           </button>
-          <h1 className="text-sm font-semibold text-gray-900 dark:text-white">
+          <h1 className="text-sm font-bold text-white">
             {title || "Admin Dashboard"}
           </h1>
-          <ConnectionStatus />
+          <div className="w-8"></div>
         </div>
 
         {/* Main content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );
