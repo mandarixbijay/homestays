@@ -433,15 +433,19 @@ export default function HomestayProfilePage() {
   const totalRoomsLeft = homestay.rooms?.reduce((sum, room) => sum + (room.roomsLeft || 0), 0) || 0;
 
   // Get minimum room price if homestay-level price not available
-  const getMinPrice = () => {
-    if (homestay.discountedPrice) return homestay.discountedPrice;
-    if (homestay.originalPrice) return homestay.originalPrice;
-    if (homestay.rooms && homestay.rooms.length > 0) {
-      const prices = homestay.rooms.map(r => r.discountedPrice || r.originalPrice);
-      return Math.min(...prices);
-    }
-    return null;
-  };
+    const getMinPrice = () => {
+      if (homestay.discountedPrice) return homestay.discountedPrice;
+      if (homestay.originalPrice) return homestay.originalPrice;
+      if (homestay.rooms && homestay.rooms.length > 0) {
+        const prices = homestay.rooms
+          .map(r => r.discountedPrice ?? r.originalPrice)
+          .filter((p): p is number => typeof p === "number");
+        if (prices.length > 0) {
+          return Math.min(...prices);
+        }
+      }
+      return null;
+    };
 
   const minPrice = getMinPrice();
 
@@ -468,8 +472,8 @@ export default function HomestayProfilePage() {
         facilities: room.facilities || [],
         bedType: room.bedType || "Standard",
         refundable: true,
-        nightlyPrice: room.discountedPrice || room.originalPrice,
-        totalPrice: (room.discountedPrice || room.originalPrice) * numNights,
+        nightlyPrice: room.discountedPrice ?? room.originalPrice ?? 0,
+        totalPrice: (room.discountedPrice ?? room.originalPrice ?? 0) * numNights,
         originalPrice: room.originalPrice,
         extrasOptions: [],
         roomsLeft: room.roomsLeft || 10,

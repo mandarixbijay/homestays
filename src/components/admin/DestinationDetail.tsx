@@ -104,7 +104,10 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
     const associatedIds = new Set((destination?.homestays || []).map((h: any) => h.id));
     return homestays.filter(h => !associatedIds.has(h.id));
   }, [homestays, destination?.homestays]);
-
+  
+  // Pagination: compute total pages for the available homestays list
+  const totalPages = Math.max(1, Math.ceil((availableHomestays?.length || 0) / pageLimit));
+  
   // Debounced search handler
   const debouncedSearch = useCallback(
     debounce((value: string) => {
