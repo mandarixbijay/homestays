@@ -9,25 +9,30 @@ export async function GET(request: NextRequest) {
     const page = searchParams.get('page') || '1';
     const limit = searchParams.get('limit') || '12';
 
-    const response = await fetch(
-      `${BACKEND_API_URL}/homestays/last-minute-deals?page=${page}&limit=${limit}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        cache: 'no-store', // Disable caching for fresh data
-      }
-    );
+    const backendUrl = `${BACKEND_API_URL}/homestays/last-minute-deals?page=${page}&limit=${limit}`;
+    console.log('Fetching from backend:', backendUrl);
+
+    const response = await fetch(backendUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store', // Disable caching for fresh data
+    });
+
+    console.log('Backend response status:', response.status);
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Backend error response:', errorText);
       return NextResponse.json(
-        { error: 'Failed to fetch deals from backend' },
-        { status: response.status }
+        { error: 'Failed to fetch deals from backend', details: errorText, data: [], total: 0, page: 1, limit: 12, totalPages: 0 },
+        { status: 200 } // Return 200 with empty data instead of error
       );
     }
 
     const data = await response.json();
+    console.log('Backend data received:', JSON.stringify(data).substring(0, 200));
 
     return NextResponse.json(data, {
       headers: {
@@ -38,7 +43,7 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching last-minute deals:', error);
     return NextResponse.json(
       { error: 'Internal server error', data: [], total: 0, page: 1, limit: 12, totalPages: 0 },
-      { status: 500 }
+      { status: 200 } // Return 200 with empty data instead of error
     );
   }
 }
