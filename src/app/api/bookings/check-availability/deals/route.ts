@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
     console.log('Deals found:', data.totalCount || 0);
+    console.log('Sample deal structure:', JSON.stringify(data.homestays?.[0], null, 2));
 
     return NextResponse.json(data, {
       headers: {
