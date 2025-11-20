@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     // Get the main image or fallback
     const mainImage = blog.images?.find(img => img.isMain) || blog.images?.[0];
-    const imageUrl = mainImage?.url || blog.featuredImage || `${baseUrl}/images/default-blog.jpg`;
+    const imageUrl = mainImage?.url || blog.featuredImage || `${baseUrl}/images/fallback-image.png`;
     const imageAlt = mainImage?.alt || blog.title;
 
     return {
@@ -159,7 +159,7 @@ export default async function BlogDetailPage({ params }: Props) {
       description: blog.excerpt,
       image: {
         '@type': 'ImageObject',
-        url: blog.images?.find(img => img.isMain)?.url || blog.featuredImage || `${baseUrl}/images/default-blog.jpg`,
+        url: blog.images?.find(img => img.isMain)?.url || blog.featuredImage || `${baseUrl}/images/fallback-image.png`,
         width: 1200,
         height: 630,
         caption: blog.images?.find(img => img.isMain)?.caption || blog.title,

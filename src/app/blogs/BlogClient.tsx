@@ -701,7 +701,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
 }
 
 function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
-  const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/default-blog.jpg";
+  const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/fallback-image.png";
 
   return (
     <Link href={`/blogs/${blog.slug}`}>
@@ -763,7 +763,7 @@ function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
 }
 
 function BlogCard({ blog }: { blog: PublicBlog }) {
-  const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/default-blog.jpg";
+  const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/fallback-image.png";
 
   return (
     <Link href={`/blogs/${blog.slug}`}>

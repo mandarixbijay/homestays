@@ -92,7 +92,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
   };
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const images = blog.images?.map((img) => img.url) || [blog.featuredImage || "/images/default-blog.jpg"];
+  const images = blog.images?.map((img) => img.url) || [blog.featuredImage || "/images/fallback-image.png"];
 
   const handleShare = (platform: string) => {
     const title = encodeURIComponent(blog.title);
@@ -580,7 +580,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                           <div className="group cursor-pointer">
                             <div className="relative w-full h-24 mb-3 rounded-lg overflow-hidden">
                               <SafeBlogImage
-                                src={trendingBlog.images?.[0]?.url || trendingBlog.featuredImage || "/images/default-blog.jpg"}
+                                src={trendingBlog.images?.[0]?.url || trendingBlog.featuredImage || "/images/fallback-image.png"}
                                 alt={trendingBlog.title}
                                 fill
                                 className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -709,7 +709,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
 // Enhanced Related Blog Card
 function RelatedBlogCard({ blog }: { blog: PublicBlog }) {
-  const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/default-blog.jpg";
+  const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/fallback-image.png";
 
   return (
     <Link href={`/blogs/${blog.slug}`}>
