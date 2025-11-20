@@ -21,6 +21,8 @@ import { PublicBlog, publicBlogApi } from "@/lib/api/public-blog-api";
 import SafeBlogImage from "@/components/blog/SafeBlogImage";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
+import { TrendingBlogSkeleton } from "@/components/blog/BlogSkeletons";
+import { TableOfContents } from "@/components/blog/TableOfContents";
 
 interface BlogDetailClientProps {
   blog: PublicBlog;
@@ -352,7 +354,13 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                     setShowImageGallery(true);
                   }}
                 >
-                  <SafeBlogImage src={image} alt={`Gallery ${index + 1}`} fill className="object-cover" />
+                  <SafeBlogImage
+                    src={image}
+                    alt={`Gallery ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    priority={index < 4}
+                  />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <Eye className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -463,6 +471,11 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
             {/* Sidebar */}
             <aside className="lg:col-span-4 space-y-6">
+              {/* Table of Contents - Desktop Only */}
+              <div className="hidden lg:block">
+                <TableOfContents content={blog.content} />
+              </div>
+
               {/* Share Actions - Mobile */}
               <Card className="p-6 lg:hidden">
                 <h3 className="font-bold text-gray-900 mb-4">Share & Save</h3>
@@ -557,13 +570,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                   <div className="space-y-4">
                     {trendingLoading ? (
                       [1, 2, 3].map((i) => (
-                        <div key={i} className="group cursor-pointer">
-                          <div className="relative w-full h-24 mb-3 rounded-lg overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse"></div>
-                          </div>
-                          <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded mb-2"></div>
-                          <div className="h-4 w-1/2 bg-gray-200 animate-pulse rounded"></div>
-                        </div>
+                        <TrendingBlogSkeleton key={i} />
                       ))
                     ) : trendingBlogs.length === 0 ? (
                       <p className="text-gray-500 text-sm text-center">No trending stories available</p>
