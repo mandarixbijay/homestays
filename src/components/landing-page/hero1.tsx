@@ -82,6 +82,8 @@ export default function Hero1() {
         const response = await fetch('/api/homestays/last-minute-deals?page=1&limit=12');
         if (!response.ok) throw new Error("Failed to fetch deals");
         const data = await response.json();
+        console.log("API Response:", data);
+        console.log("Deals data:", data.data);
         setDeals(data.data || []);
       } catch (error) {
         console.error("Error fetching deals:", error);
