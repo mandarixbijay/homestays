@@ -65,7 +65,7 @@ export default function Hero3() {
           className="rounded-xl bg-cover bg-center flex flex-col justify-end min-h-[600px] sm:min-h-[640px] md:min-h-[680px]"
           style={{
             backgroundImage:
-              "linear-gradient(to top, rgba(8, 65, 45, 0.66), transparent), url(/images/hero/bg_yellow.avif)",
+              "linear-gradient(to top, rgba(8, 65, 45, 0.66), transparent), url(/images/tophomestay.avif)",
           }}
         >
           <div className="px-4 py-6 rounded-t-xl pr-10 pl-10">
