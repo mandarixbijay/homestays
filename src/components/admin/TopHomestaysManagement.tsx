@@ -75,7 +75,7 @@ const StatCard: React.FC<{
 
   return (
     <motion.div whileHover={{ y: -4, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className={\`relative overflow-hidden bg-gradient-to-br \${colorClasses[color]} backdrop-blur-sm border \${borderColorClasses[color]} rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 \${onClick ? 'cursor-pointer' : ''}\`}
+      className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} backdrop-blur-sm border ${borderColorClasses[color]} rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}>
       <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent dark:from-white/5 pointer-events-none"></div>
       <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10 dark:bg-white/5 blur-2xl"></div>
@@ -86,12 +86,12 @@ const StatCard: React.FC<{
             {loading ? (
               <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
             ) : (
-              <p className={\`text-4xl font-bold \${textColorClasses[color]}\`}>{value}</p>
+              <p className={`text-4xl font-bold ${textColorClasses[color]}`}>{value}</p>
             )}
             {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{subtitle}</p>}
           </div>
           {icon && (
-            <div className={\`p-3 rounded-xl \${iconBgClasses[color]} shadow-lg\`}>
+            <div className={`p-3 rounded-xl ${iconBgClasses[color]} shadow-lg`}>
               <div className="text-white">{icon}</div>
             </div>
           )}
@@ -386,7 +386,7 @@ export default function TopHomestaysManagement() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = \`top-homestays-\${new Date().toISOString().split('T')[0]}.csv\`;
+    a.download = `top-homestays-${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -578,18 +578,18 @@ export default function TopHomestaysManagement() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <button onClick={() => setShowFilters(!showFilters)}
-                className={\`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all \${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}\`}>
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>
                 <SlidersHorizontal className="h-4 w-4" /><span>Filters</span>
                 {hasFilters && <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">Active</span>}
               </button>
             </div>
             <div className="flex items-center space-x-2">
-              <button onClick={() => setViewMode('grid')} className={\`p-2 rounded-lg transition-colors \${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}\`}>
+              <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
                 <Grid className="h-5 w-5" /></button>
-              <button onClick={() => setViewMode('list')} className={\`p-2 rounded-lg transition-colors \${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}\`}>
+              <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
                 <List className="h-5 w-5" /></button>
               <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 hover:bg-gray-200 transition-colors">
-                <RefreshCw className={\`h-5 w-5 \${loading ? 'animate-spin' : ''}\`} /></button>
+                <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
             </div>
           </div>
 
@@ -629,7 +629,7 @@ export default function TopHomestaysManagement() {
         ) : (
           <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
             <AnimatePresence mode="popLayout">
-              {topHomestays.map((t: any) => (<TopHomestayCard key={t.id} topHomestay={t} onEdit={setEditingItem} onDelete={handleDelete} viewMode={viewMode} />))}
+              {topHomestays.map((t: any) => (<TopHomestayCard key={t.id} topHomestay={t} onEdit={(item) => { setEditingItem(item); setShowFormModal(true); }} onDelete={handleDelete} viewMode={viewMode} />))}
             </AnimatePresence>
           </div>
         )}

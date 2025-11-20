@@ -15,7 +15,7 @@ import {
   useLastMinuteDeals, useAsyncOperation, useHomestays
 } from '@/hooks/useAdminApi';
 import {
-  LoadingSpinner, Alert, ActionButton, Card, Modal, EmptyState, Input, useToast
+  LoadingSpinner, Alert, ActionButton, Modal, EmptyState, Input, useToast
 } from '@/components/admin/AdminComponents';
 
 type ViewMode = 'grid' | 'list';
@@ -71,7 +71,7 @@ const StatCard: React.FC<{
     <motion.div
       whileHover={{ y: -4, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className={\`relative overflow-hidden bg-gradient-to-br \${colorClasses[color]} backdrop-blur-sm border \${borderColorClasses[color]} rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 \${onClick ? 'cursor-pointer' : ''}\`}
+      className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} backdrop-blur-sm border ${borderColorClasses[color]} rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent dark:from-white/5 pointer-events-none"></div>
@@ -84,12 +84,12 @@ const StatCard: React.FC<{
             {loading ? (
               <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
             ) : (
-              <p className={\`text-4xl font-bold \${textColorClasses[color]}\`}>{value}</p>
+              <p className={`text-4xl font-bold ${textColorClasses[color]}`}>{value}</p>
             )}
             {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{subtitle}</p>}
           </div>
           {icon && (
-            <div className={\`p-3 rounded-xl \${iconBgClasses[color]} shadow-lg\`}>
+            <div className={`p-3 rounded-xl ${iconBgClasses[color]} shadow-lg`}>
               <div className="text-white">{icon}</div>
             </div>
           )}
@@ -154,7 +154,7 @@ const DealCard: React.FC<{
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
             <div className="absolute bottom-4 left-4 right-4">
               <div className="flex items-center space-x-2">
-                <div className={\`px-4 py-2 rounded-xl \${deal.discountType === 'PERCENTAGE' ? 'bg-yellow-500' : 'bg-orange-500'} shadow-lg\`}>
+                <div className={`px-4 py-2 rounded-xl ${deal.discountType === 'PERCENTAGE' ? 'bg-yellow-500' : 'bg-orange-500'} shadow-lg`}>
                   <div className="flex items-center space-x-2">
                     {deal.discountType === 'PERCENTAGE' ? <Percent className="h-5 w-5 text-white" /> : <DollarSign className="h-5 w-5 text-white" />}
                     <span className="text-2xl font-bold text-white">{deal.discount}{deal.discountType === 'PERCENTAGE' ? '%' : ''}</span>
@@ -222,7 +222,7 @@ const DealCard: React.FC<{
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">{deal.homestay?.name || 'Unnamed'}</h3>
-                <div className={\`px-3 py-1 rounded-full text-xs font-bold text-white \${isActive && !isExpired ? 'bg-green-500' : isExpired ? 'bg-gray-500' : 'bg-red-500'}\`}>
+                <div className={`px-3 py-1 rounded-full text-xs font-bold text-white ${isActive && !isExpired ? 'bg-green-500' : isExpired ? 'bg-gray-500' : 'bg-red-500'}`}>
                   {isActive && !isExpired ? 'Active' : isExpired ? 'Expired' : 'Inactive'}
                 </div>
               </div>
@@ -334,7 +334,7 @@ const DealFormModal: React.FC<{
         )}
 
         <div className="grid grid-cols-2 gap-4">
-          <Input label="Discount Amount *" type="number" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: parseFloat(e.target.value) })}
+          <Input label="Discount Amount *" type="number" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value ? parseFloat(e.target.value) : 0 })}
             placeholder="20" min="0" required />
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type *</label>
@@ -440,6 +440,7 @@ export default function LastMinuteDealsManagement() {
     }
   };
 
+
   const handleExport = () => {
     const csvContent = [
       ['ID', 'Homestay', 'Discount', 'Type', 'Start Date', 'End Date', 'Active'].join(','),
@@ -450,7 +451,7 @@ export default function LastMinuteDealsManagement() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = \`deals-\${new Date().toISOString().split('T')[0]}.csv\`;
+    a.download = `deals-${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -611,18 +612,18 @@ export default function LastMinuteDealsManagement() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <button onClick={() => setShowFilters(!showFilters)}
-                className={\`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all \${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}\`}>
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>
                 <SlidersHorizontal className="h-4 w-4" /><span>Filters</span>
                 {activeFilter !== undefined && <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">Active</span>}
               </button>
             </div>
             <div className="flex items-center space-x-2">
-              <button onClick={() => setViewMode('grid')} className={\`p-2 rounded-lg transition-colors \${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}\`}>
+              <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
                 <Grid className="h-5 w-5" /></button>
-              <button onClick={() => setViewMode('list')} className={\`p-2 rounded-lg transition-colors \${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}\`}>
+              <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
                 <List className="h-5 w-5" /></button>
               <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 hover:bg-gray-200 transition-colors">
-                <RefreshCw className={\`h-5 w-5 \${loading ? 'animate-spin' : ''}\`} /></button>
+                <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
             </div>
           </div>
 
