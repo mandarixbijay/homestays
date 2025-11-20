@@ -1,9 +1,70 @@
 // src/app/api/homestays/[slug]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest, { params }: { params: { slug: string } }) {
+const BACKEND_URL = process.env.BACKEND_URL || 'http://13.61.8.56:3001';
+
+// GET handler - Fetch homestay by ID
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
+
+    // Check if slug is numeric (ID) or text (slug)
+    const isNumericId = /^\d+$/.test(slug);
+
+    if (isNumericId) {
+      // Fetch by ID
+      const backendUrl = `${BACKEND_URL}/homestays/${slug}`;
+      console.log('Fetching homestay by ID:', backendUrl);
+
+      const response = await fetch(backendUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': '*/*',
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Backend error response:', errorText);
+        return NextResponse.json(
+          { error: 'Homestay not found' },
+          { status: 404 }
+        );
+      }
+
+      const data = await response.json();
+      console.log('Homestay fetched by ID:', data.name || 'Unknown');
+
+      return NextResponse.json(data, {
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      });
+    } else {
+      // If it's a slug string, return error for GET (use POST for availability check)
+      return NextResponse.json(
+        { error: 'Use POST method for slug-based availability check' },
+        { status: 400 }
+      );
+    }
+  } catch (error) {
+    console.error('Error fetching homestay details:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST handler - Check availability by slug
+export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  try {
+    const { slug } = await params;
     const body = await request.json();
     const apiBaseUrl = process.env.API_BASE_URL;
 
