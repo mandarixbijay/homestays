@@ -4,6 +4,7 @@ import { Sora } from "next/font/google";
 import "./globals.css";
 import { HomestayProvider } from "@/context/HomestayContext";
 import ClientWrapper from "@/components/ClientWrapper";
+import { ThemeProvider } from "@/components/theme-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
@@ -47,9 +48,16 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${sora.variable} antialiased`}>
-        <ClientWrapper>
-          <HomestayProvider>{children}</HomestayProvider>
-        </ClientWrapper>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ClientWrapper>
+            <HomestayProvider>{children}</HomestayProvider>
+          </ClientWrapper>
+        </ThemeProvider>
         <SpeedInsights />
         <Analytics />
       </body>
