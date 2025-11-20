@@ -348,14 +348,27 @@ function DealsPageContent() {
     });
   }, [sortOption, deals]);
 
-  // Build query string for navigation
+  // Build query string for navigation from current search state
   const buildQueryString = () => {
     const queryParams = new URLSearchParams();
-    if (location) queryParams.append("location", location);
-    if (checkIn) queryParams.append("checkIn", checkIn);
-    if (checkOut) queryParams.append("checkOut", checkOut);
-    if (guests) queryParams.append("guests", guests);
-    if (rooms) queryParams.append("rooms", rooms);
+
+    // Add check-in and check-out dates
+    if (searchDate?.from) {
+      queryParams.append("checkIn", format(searchDate.from, "yyyy-MM-dd"));
+    }
+    if (searchDate?.to) {
+      queryParams.append("checkOut", format(searchDate.to, "yyyy-MM-dd"));
+    }
+
+    // Add guests in format: "2A0C,1A2C" (adults+children per room)
+    if (searchRooms && searchRooms.length > 0) {
+      const guestsParam = searchRooms
+        .map((room) => `${room.adults}A${room.children}C`)
+        .join(",");
+      queryParams.append("guests", guestsParam);
+      queryParams.append("rooms", searchRooms.length.toString());
+    }
+
     return queryParams.toString();
   };
 
