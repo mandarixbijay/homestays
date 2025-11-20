@@ -23,6 +23,8 @@ import { cn } from "@/lib/utils";
 import HomestayImageGallery from "@/components/homestay/components/details/image-gallery";
 import AboutProperty from "@/components/homestay/components/details/about-property";
 import Policies from "@/components/homestay/components/details/policies";
+import PaymentOptionsDialog from "@/components/homestay/components/dialogs/payment-options-dialog";
+import { useHomestayStore } from "@/store/homestayStore";
 
 interface Room {
   adults: number;
@@ -124,6 +126,7 @@ export default function HomestayProfilePage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
+  const { addRoom, clearSelectedRooms } = useHomestayStore();
 
   // Extract ID from slug (format: name-address-id-{id})
   const extractIdFromSlug = (slug: string): number => {
@@ -318,6 +321,45 @@ export default function HomestayProfilePage() {
     } finally {
       setCheckingAvailability(false);
     }
+  };
+
+  // Handle booking a specific room
+  const handleBookRoom = (room: AvailableRoom, roomIndex: number) => {
+    // Clear any existing selections
+    clearSelectedRooms();
+
+    // Get the guest assignment for this room (use the first room's guests by default)
+    const roomGuests = rooms[roomIndex] || rooms[0] || { adults: 2, children: 0 };
+
+    // Add the selected room to the store
+    addRoom({
+      roomId: room.id,
+      roomTitle: room.name,
+      adults: roomGuests.adults,
+      children: roomGuests.children,
+      nightlyPrice: room.nightlyPrice,
+      totalPrice: room.totalPrice,
+      sleeps: room.maxOccupancy,
+      imageUrls: room.imageUrls,
+      rating: room.rating,
+      reviews: room.reviews,
+      facilities: room.facilities,
+      bedType: room.bedType,
+      refundable: room.refundable,
+      originalPrice: room.originalPrice,
+      extrasOptions: room.extrasOptions,
+      roomsLeft: room.roomsLeft,
+      sqFt: room.maxOccupancy * 100,
+      cityView: false,
+      freeParking: room.facilities?.includes("Parking") || false,
+      freeWifi: room.facilities?.includes("Wifi") || false,
+    });
+
+    console.log('Room added to booking:', {
+      roomId: room.id,
+      roomTitle: room.name,
+      guests: roomGuests,
+    });
   };
 
   // Guest summary
@@ -830,23 +872,24 @@ export default function HomestayProfilePage() {
                                   Total: NPR {room.totalPrice.toLocaleString()} for {availabilityData.nights} {availabilityData.nights === 1 ? 'night' : 'nights'}
                                 </div>
                               </div>
-                              <Button
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
-                                onClick={() => {
-                                  // Navigate to booking page with room selection
-                                  const queryParams = new URLSearchParams();
-                                  queryParams.append("checkIn", format(new Date(availabilityData.checkInDate), "yyyy-MM-dd"));
-                                  queryParams.append("checkOut", format(new Date(availabilityData.checkOutDate), "yyyy-MM-dd"));
-                                  queryParams.append("roomId", room.id.toString());
-                                  const guestsParam = rooms.map((r) => `${r.adults}A${r.children}C`).join(",");
-                                  queryParams.append("guests", guestsParam);
-                                  queryParams.append("rooms", rooms.length.toString());
-                                  router.push(`/booking/${slug}?${queryParams.toString()}`);
-                                }}
+                              <PaymentOptionsDialog
+                                nightlyPrice={room.nightlyPrice}
+                                totalPrice={room.totalPrice}
+                                checkIn={format(new Date(availabilityData.checkInDate), "yyyy-MM-dd")}
+                                checkOut={format(new Date(availabilityData.checkOutDate), "yyyy-MM-dd")}
+                                guests={rooms.map((r) => `${r.adults}A${r.children}C`).join(",")}
+                                rooms={rooms.length.toString()}
+                                homestayName={homestay.name}
+                                homestayId={homestayId}
                               >
-                                Book Now
-                                <ChevronRight className="ml-2 h-4 w-4" />
-                              </Button>
+                                <Button
+                                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                                  onClick={() => handleBookRoom(room, 0)}
+                                >
+                                  Book Now
+                                  <ChevronRight className="ml-2 h-4 w-4" />
+                                </Button>
+                              </PaymentOptionsDialog>
                             </div>
                           </div>
                         </div>
