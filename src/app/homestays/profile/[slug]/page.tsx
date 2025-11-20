@@ -1,7 +1,7 @@
 // src/app/homestays/profile/[slug]/page.tsx
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, JSX } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -174,11 +174,12 @@ export default function HomestayProfilePage() {
     queryParams.append("rooms", rooms.length.toString());
 
     // Navigate to booking page with search params
-    if (homestay?.slug) {
-      router.push(`/homestays/${homestay.slug}?${queryParams.toString()}`);
-    } else {
-      alert("Homestay slug not available. Cannot proceed to booking.");
-    }
+        // use the slug extracted from the URL since Homestay type does not include a slug property
+        if (slug) {
+          router.push(`/homestays/${slug}?${queryParams.toString()}`);
+        } else {
+          alert("Homestay slug not available. Cannot proceed to booking.");
+        }
   };
 
   // Guest summary
@@ -257,36 +258,41 @@ export default function HomestayProfilePage() {
   const totalRoomsLeft = homestay.rooms?.reduce((sum, room) => sum + (room.roomsLeft || 0), 0) || 0;
 
   // Transform homestay to Hero3Card type for AboutProperty component
-  const homestayForAbout = {
-    ...homestay,
-    price: homestay.discountedPrice ? `NPR ${homestay.discountedPrice}` : "N/A",
-    categoryColor: "bg-primary",
-    slug: slug,
-    city: homestay.address.split(",")[0] || "Nepal",
-    region: homestay.address.split(",")[1] || "Nepal",
-    features: homestay.facilities,
-    vipAccess: homestay.vipAccess || false,
-    rooms: (homestay.rooms || []).map(room => ({
-      imageUrls: room.imageUrls || [homestay.imageSrc],
-      roomTitle: room.name,
-      rating: homestay.rating || 0,
-      reviews: homestay.reviews,
-      facilities: room.facilities || [],
-      bedType: room.bedType || "Standard",
-      refundable: true,
-      nightlyPrice: room.discountedPrice || room.originalPrice,
-      totalPrice: (room.discountedPrice || room.originalPrice) * numNights,
-      originalPrice: room.originalPrice,
-      extrasOptions: [],
-      roomsLeft: room.roomsLeft || 10,
-      sqFt: room.maxOccupancy * 100,
-      sleeps: room.maxOccupancy,
-      cityView: false,
-      freeParking: room.facilities?.includes("Parking") || false,
-      freeWifi: room.facilities?.includes("Wifi") || false,
-      roomId: room.id,
-    })),
-  };
+    const homestayForAbout = {
+      ...homestay,
+      rating: homestay.rating ?? 0,
+      reviews: homestay.reviews ?? 0,
+      image: homestay.image || homestay.imageSrc || "/images/placeholder-homestay.jpg",
+      images: homestay.images || [homestay.image || homestay.imageSrc || "/images/placeholder-homestay.jpg"],
+      aboutDescription: homestay.aboutDescription || homestay.description || "No description available.",
+      price: homestay.discountedPrice ? `NPR ${homestay.discountedPrice}` : "N/A",
+      categoryColor: "bg-primary",
+      slug: slug,
+      city: homestay.address.split(",")[0] || "Nepal",
+      region: homestay.address.split(",")[1] || "Nepal",
+      features: homestay.facilities,
+      vipAccess: homestay.vipAccess || false,
+      rooms: (homestay.rooms || []).map(room => ({
+        imageUrls: room.imageUrls || [homestay.imageSrc],
+        roomTitle: room.name,
+        rating: homestay.rating || 0,
+        reviews: homestay.reviews,
+        facilities: room.facilities || [],
+        bedType: room.bedType || "Standard",
+        refundable: true,
+        nightlyPrice: room.discountedPrice || room.originalPrice,
+        totalPrice: (room.discountedPrice || room.originalPrice) * numNights,
+        originalPrice: room.originalPrice,
+        extrasOptions: [],
+        roomsLeft: room.roomsLeft || 10,
+        sqFt: room.maxOccupancy * 100,
+        sleeps: room.maxOccupancy,
+        cityView: false,
+        freeParking: room.facilities?.includes("Parking") || false,
+        freeWifi: room.facilities?.includes("Wifi") || false,
+        roomId: room.id,
+      })),
+    };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -408,7 +414,7 @@ export default function HomestayProfilePage() {
               onClick={() => document.getElementById('booking-widget')?.scrollIntoView({ behavior: 'smooth' })}
               className="lg:hidden flex items-center gap-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
             >
-              <Calendar as CalendarIcon className="h-4 w-4" />
+              <CalendarIcon className="h-4 w-4" />
               Check Availability
             </Button>
           </div>
