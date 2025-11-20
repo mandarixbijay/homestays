@@ -62,31 +62,45 @@ export default function HomestayProfilePage() {
   const [availabilityResults, setAvailabilityResults] = useState<any>(null);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
-  // Fetch homestay data (placeholder for now - will be replaced with API)
+  // Fetch homestay data from API
   useEffect(() => {
     const fetchHomestay = async () => {
       setLoading(true);
       try {
-        // TODO: Replace with actual API call when available
-        // For now, show a placeholder message
         console.log(`Fetching homestay with ID: ${homestayId}`);
 
-        // Simulated data for now
-        setTimeout(() => {
-          setHomestay({
-            id: homestayId,
-            name: "Loading Homestay Details...",
-            address: "Nepal",
-            rating: null,
-            reviews: 0,
-            imageSrc: "/images/placeholder-homestay.jpg",
-            facilities: ["Wifi", "Parking", "Garden"],
-            aboutDescription: "Homestay details will be loaded once the API is integrated.",
-          });
-          setLoading(false);
-        }, 500);
+        const response = await fetch(`/api/homestays/${homestayId}`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch homestay');
+        }
+
+        const data = await response.json();
+        console.log('Homestay data received:', data);
+
+        // Transform API response to match our Homestay interface
+        setHomestay({
+          id: data.id,
+          name: data.name || "Unnamed Homestay",
+          address: data.address || "Nepal",
+          rating: data.rating,
+          reviews: data.reviews || 0,
+          imageSrc: data.imageSrc || data.image || "/images/placeholder-homestay.jpg",
+          facilities: data.facilities || data.amenities || [],
+          aboutDescription: data.aboutDescription || data.description || "No description available.",
+          phone: data.phone || data.contactNumber,
+          email: data.email || data.contactEmail,
+          checkInTime: data.checkInTime || "2:00 PM",
+          checkOutTime: data.checkOutTime || "11:00 AM",
+          originalPrice: data.originalPrice,
+          discountedPrice: data.discountedPrice,
+          discount: data.discount,
+          discountType: data.discountType,
+        });
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching homestay:", error);
+        setHomestay(null);
         setLoading(false);
       }
     };
@@ -122,25 +136,32 @@ export default function HomestayProfilePage() {
 
     setCheckingAvailability(true);
     try {
-      // TODO: Replace with actual API call when available
-      console.log("Checking availability for homestay:", {
-        homestayId,
+      const payload = {
+        homestayId: homestayId,
         checkInDate: format(checkInDate, "yyyy-MM-dd"),
         checkOutDate: format(checkOutDate, "yyyy-MM-dd"),
-        rooms,
-      });
+        rooms: rooms,
+      };
 
-      // Simulated response
+      console.log("Checking availability for homestay:", payload);
+
+      // TODO: Replace with actual single homestay availability endpoint when available
+      // For now, show a pending message
       setTimeout(() => {
         setAvailabilityResults({
           available: true,
-          message: "API integration pending. This will show real availability once the backend endpoint is ready.",
+          message: "Availability check endpoint will be integrated when backend provides single homestay availability API.",
           rooms: [],
         });
         setCheckingAvailability(false);
       }, 1000);
     } catch (error) {
       console.error("Error checking availability:", error);
+      setAvailabilityResults({
+        available: false,
+        message: "Error checking availability. Please try again.",
+        rooms: [],
+      });
       setCheckingAvailability(false);
     }
   };
@@ -529,7 +550,7 @@ export default function HomestayProfilePage() {
               )}
 
               <p className="text-xs text-muted-foreground text-center mt-4">
-                * API integration pending. Real-time availability will be shown once the backend is ready.
+                * Availability check for specific homestay will be integrated when backend provides the endpoint.
               </p>
             </div>
           </motion.div>

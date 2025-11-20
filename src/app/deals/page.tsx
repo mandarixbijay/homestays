@@ -132,6 +132,7 @@ function DealsPageContent() {
       const firstRoom = homestay.availableRooms?.[0] || homestay.rooms?.[0] || {};
       return {
         id: homestay.id,
+        slug: homestay.slug, // Keep original slug if available
         homestay: {
           id: homestay.id,
           name: homestay.name,
@@ -140,6 +141,7 @@ function DealsPageContent() {
           reviews: homestay.reviews || 0,
           imageSrc: homestay.imageSrc || homestay.image,
           facilities: homestay.facilities || homestay.amenities || [],
+          slug: homestay.slug, // Keep slug in nested object too
         },
         rooms: homestay.availableRooms || homestay.rooms || [],
         originalPrice: firstRoom.originalPrice || homestay.originalPrice,
