@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   LayoutDashboard,
   Home,
@@ -15,7 +16,6 @@ import {
   LogOut,
   Wifi,
   WifiOff,
-  DockIcon,
   PenTool,
   Tag,
   Folder,
@@ -23,7 +23,6 @@ import {
   FileText,
   User,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminAuth, useSessionManager } from "@/hooks/useSessionManager";
@@ -201,8 +200,13 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
 
           <div className="relative">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-                <Sparkles className="h-7 w-7 text-white" />
+              <div className="relative w-12 h-12 bg-white rounded-xl shadow-lg overflow-hidden">
+                <Image
+                  src="/images/logo/logo.png"
+                  alt="Homestays Logo"
+                  fill
+                  className="object-contain p-1"
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white">Homestays</h1>
@@ -283,8 +287,13 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-                        <Sparkles className="h-7 w-7 text-white" />
+                      <div className="relative w-12 h-12 bg-white rounded-xl shadow-lg overflow-hidden">
+                        <Image
+                          src="/images/logo/logo.png"
+                          alt="Homestays Logo"
+                          fill
+                          className="object-contain p-1"
+                        />
                       </div>
                       <div>
                         <h1 className="text-xl font-bold text-white">Homestays</h1>
