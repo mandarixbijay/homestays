@@ -408,7 +408,7 @@ export default function HomestayProfilePage() {
 
           {/* Image Gallery */}
           <div className="mb-12">
-            <HomestayImageGallery images={images} totalPhotos={totalPhotos} />
+            <HomestayImageGallery images={images} totalPhotos={totalPhotos} slug={slug} />
           </div>
         </motion.div>
       </section>
