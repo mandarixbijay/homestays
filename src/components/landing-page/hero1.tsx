@@ -107,33 +107,40 @@ export default function Hero1() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Memoize card width calculation
-  const getCardWidth = useCallback(() => {
-    return scrollContainerRef.current?.children[0]?.clientWidth || 240;
+  // Memoize card width and gap calculation
+  const getCardMetrics = useCallback(() => {
+    const firstChild = scrollContainerRef.current?.children[0];
+    if (!firstChild) {
+      return { cardWidth: 240, gap: 24 };
+    }
+    const cardWidth = firstChild.clientWidth;
+    // Gap is 24px (gap-6) on mobile, 32px (gap-8) on sm and up
+    const gap = window.innerWidth < 640 ? 24 : 32;
+    return { cardWidth, gap };
   }, []);
 
   const scrollToIndex = useCallback(
     (index: number) => {
-      if (scrollContainerRef.current) {
-        const cardWidth = getCardWidth();
+      if (scrollContainerRef.current && deals.length > 0) {
+        const { cardWidth, gap } = getCardMetrics();
         scrollContainerRef.current.scrollTo({
-          left: index * (cardWidth + 24), // Adjusted for gap-6 (24px)
+          left: index * (cardWidth + gap),
           behavior: "smooth",
         });
         setCurrentIndex(index);
       }
     },
-    [getCardWidth]
+    [getCardMetrics, deals.length]
   );
 
   const handleScroll = useCallback(() => {
-    if (scrollContainerRef.current) {
+    if (scrollContainerRef.current && deals.length > 0) {
       const scrollLeft = scrollContainerRef.current.scrollLeft;
-      const cardWidth = getCardWidth();
-      const index = Math.round(scrollLeft / (cardWidth + 24)); // Adjusted for gap-6 (24px)
-      setCurrentIndex(index);
+      const { cardWidth, gap } = getCardMetrics();
+      const index = Math.round(scrollLeft / (cardWidth + gap));
+      setCurrentIndex(Math.min(Math.max(0, index), deals.length - 1));
     }
-  }, [getCardWidth]);
+  }, [getCardMetrics, deals.length]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
