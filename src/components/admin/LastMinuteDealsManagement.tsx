@@ -176,7 +176,7 @@ const DealCard: React.FC<{
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
             <div className="absolute bottom-4 left-4 right-4">
               <div className="flex items-center justify-between">
-                <div className={\`px-4 py-2 rounded-xl \${deal.discountType === 'PERCENTAGE' ? 'bg-yellow-500' : 'bg-orange-500'} shadow-lg\`}>
+                <div className={`px-4 py-2 rounded-xl ${deal.discountType === 'PERCENTAGE' ? 'bg-yellow-500' : 'bg-orange-500'} shadow-lg`}>
                   <div className="flex items-center space-x-2">
                     {deal.discountType === 'PERCENTAGE' ? <Percent className="h-5 w-5 text-white" /> : <DollarSign className="h-5 w-5 text-white" />}
                     <span className="text-2xl font-bold text-white">{deal.discount}{deal.discountType === 'PERCENTAGE' ? '%' : ''}</span>
@@ -710,7 +710,7 @@ export default function LastMinuteDealsManagement() {
                 <Grid className="h-5 w-5" /></button>
               <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
                 <List className="h-5 w-5" /></button>
-              <button onClick={() => setViewMode('table')} className={\`p-2 rounded-lg transition-colors \${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}\`}>
+              <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
                 <Table className="h-5 w-5" /></button>
               <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 hover:bg-gray-200 transition-colors">
                 <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
@@ -845,13 +845,13 @@ export default function LastMinuteDealsManagement() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={\`inline-flex px-3 py-1 rounded-full text-xs font-semibold \${
+                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
                             isActive
                               ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                               : isExpired
                               ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
                               : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                          }\`}>
+                          }`}>
                             {isActive ? 'Active' : isExpired ? 'Expired' : 'Inactive'}
                           </span>
                         </td>

@@ -685,7 +685,7 @@ export default function TopHomestaysManagement() {
                 <Grid className="h-5 w-5" /></button>
               <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
                 <List className="h-5 w-5" /></button>
-              <button onClick={() => setViewMode('table')} className={\`p-2 rounded-lg transition-colors \${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}\`}>
+              <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
                 <Table className="h-5 w-5" /></button>
               <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 hover:bg-gray-200 transition-colors">
                 <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
@@ -827,11 +827,11 @@ export default function TopHomestaysManagement() {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={\`inline-flex px-3 py-1 rounded-full text-xs font-semibold \${
+                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
                             topHomestay.isActive
                               ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                               : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                          }\`}>
+                          }`}>
                             {topHomestay.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </td>

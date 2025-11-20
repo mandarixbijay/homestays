@@ -16,6 +16,17 @@ import {
   LoadingSpinner, Alert, ActionButton, Input, useToast
 } from '@/components/admin/AdminComponents';
 
+// Helper functions
+const getHomestayImage = (homestay: any) => {
+  return homestay?.images?.find((img: any) => img.isMain)?.url || homestay?.images?.[0]?.url;
+};
+
+const calculateOriginalPrice = (homestay: any): number | null => {
+  if (!homestay?.rooms || homestay.rooms.length === 0) return null;
+  const prices = homestay.rooms.map((r: any) => r.price).filter((p: number) => p > 0);
+  return prices.length > 0 ? Math.min(...prices) : null;
+};
+
 interface LastMinuteDealDetailProps {
   dealId: number;
 }
@@ -45,7 +56,7 @@ export default function LastMinuteDealDetail({ dealId }: LastMinuteDealDetailPro
 
   // Homestay search and filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('APPROVED');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [locationFilter, setLocationFilter] = useState<string>('');
   const [showHomestaySelector, setShowHomestaySelector] = useState(false);
 
@@ -72,13 +83,13 @@ export default function LastMinuteDealDetail({ dealId }: LastMinuteDealDetailPro
   const filteredHomestays = useMemo(() => {
     return homestays.filter(h => {
       if (searchQuery && !h.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !h.location?.toLowerCase().includes(searchQuery.toLowerCase())) {
+          !h.address?.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
       if (statusFilter !== 'all' && h.status !== statusFilter) {
         return false;
       }
-      if (locationFilter && !h.location?.toLowerCase().includes(locationFilter.toLowerCase())) {
+      if (locationFilter && !h.address?.toLowerCase().includes(locationFilter.toLowerCase())) {
         return false;
       }
       return true;
@@ -87,20 +98,21 @@ export default function LastMinuteDealDetail({ dealId }: LastMinuteDealDetailPro
 
   const uniqueLocations = useMemo(() => {
     const locations = homestays
-      .map(h => h.location)
+      .map(h => h.address)
       .filter((loc): loc is string => !!loc);
     return Array.from(new Set(locations));
   }, [homestays]);
 
   const selectedHomestay = homestays.find(h => h.id === formData.homestayId);
 
-  const isActive = deal?.isActive && new Date(deal.endDate) > new Date();
-  const isExpired = deal && new Date(deal.endDate) < new Date();
-  const daysRemaining = deal ? Math.ceil((new Date(deal.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0;
+  const isActive = deal?.isActive && deal?.endDate && new Date(deal.endDate) > new Date();
+  const isExpired = deal && deal.endDate && new Date(deal.endDate) < new Date();
+  const daysRemaining = deal?.endDate ? Math.ceil((new Date(deal.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
-  const estimatedSavings = selectedHomestay?.price
+  const selectedHomestayPrice = selectedHomestay ? calculateOriginalPrice(selectedHomestay) : null;
+  const estimatedSavings = selectedHomestayPrice
     ? formData.discountType === 'PERCENTAGE'
-      ? (selectedHomestay.price * formData.discount / 100)
+      ? (selectedHomestayPrice * formData.discount / 100)
       : formData.discount
     : 0;
 
@@ -115,9 +127,9 @@ export default function LastMinuteDealDetail({ dealId }: LastMinuteDealDetailPro
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm('Delete this deal? This action cannot be undone.')) return;
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const handleDelete = async () => {
     try {
       await deleteDeal(dealId);
       addToast({ type: 'success', title: 'Success', message: 'Deal deleted successfully' });
@@ -194,7 +206,7 @@ export default function LastMinuteDealDetail({ dealId }: LastMinuteDealDetailPro
                     Edit
                   </ActionButton>
                   <ActionButton
-                    onClick={handleDelete}
+                    onClick={() => setShowDeleteConfirm(true)}
                     variant="danger"
                     icon={<Trash2 className="h-4 w-4" />}
                   >
@@ -317,8 +329,8 @@ export default function LastMinuteDealDetail({ dealId }: LastMinuteDealDetailPro
 
               {selectedHomestay ? (
                 <div className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  {selectedHomestay.mainImage ? (
-                    <img src={selectedHomestay.mainImage} alt={selectedHomestay.name} className="w-24 h-24 rounded-lg object-cover" />
+                  {getHomestayImage(selectedHomestay) ? (
+                    <img src={getHomestayImage(selectedHomestay)} alt={selectedHomestay.name} className="w-24 h-24 rounded-lg object-cover" />
                   ) : (
                     <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
                       <Home className="h-12 w-12 text-gray-400" />
@@ -326,8 +338,10 @@ export default function LastMinuteDealDetail({ dealId }: LastMinuteDealDetailPro
                   )}
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white">{selectedHomestay.name}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedHomestay.location}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Price: ${selectedHomestay.price}/night</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedHomestay.address}</p>
+                    {selectedHomestayPrice && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Price: ${selectedHomestayPrice}/night</p>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -375,30 +389,36 @@ export default function LastMinuteDealDetail({ dealId }: LastMinuteDealDetailPro
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-                    {filteredHomestays.map(h => (
-                      <div
-                        key={h.id}
-                        onClick={() => setFormData({ ...formData, homestayId: h.id })}
-                        className={`cursor-pointer rounded-lg border-2 transition-all ${
-                          formData.homestayId === h.id
-                            ? 'border-[#224240] bg-[#224240]/5'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        {h.mainImage ? (
-                          <img src={h.mainImage} alt={h.name} className="w-full h-32 object-cover rounded-t-lg" />
-                        ) : (
-                          <div className="w-full h-32 bg-gray-200 rounded-t-lg flex items-center justify-center">
-                            <Home className="h-12 w-12 text-gray-400" />
+                    {filteredHomestays.map(h => {
+                      const homestayPrice = calculateOriginalPrice(h);
+                      const homestayImage = getHomestayImage(h);
+                      return (
+                        <div
+                          key={h.id}
+                          onClick={() => setFormData({ ...formData, homestayId: h.id })}
+                          className={`cursor-pointer rounded-lg border-2 transition-all ${
+                            formData.homestayId === h.id
+                              ? 'border-[#224240] bg-[#224240]/5'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {homestayImage ? (
+                            <img src={homestayImage} alt={h.name} className="w-full h-32 object-cover rounded-t-lg" />
+                          ) : (
+                            <div className="w-full h-32 bg-gray-200 rounded-t-lg flex items-center justify-center">
+                              <Home className="h-12 w-12 text-gray-400" />
+                            </div>
+                          )}
+                          <div className="p-3">
+                            <h4 className="font-medium text-sm text-gray-900 dark:text-white truncate">{h.name}</h4>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{h.address}</p>
+                            {homestayPrice && (
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">${homestayPrice}/night</p>
+                            )}
                           </div>
-                        )}
-                        <div className="p-3">
-                          <h4 className="font-medium text-sm text-gray-900 dark:text-white truncate">{h.name}</h4>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{h.location}</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">${h.price}/night</p>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -530,31 +550,39 @@ export default function LastMinuteDealDetail({ dealId }: LastMinuteDealDetailPro
                   </div>
                 </div>
 
-                <img
-                  src={selectedHomestay.mainImage || '/placeholder.jpg'}
-                  alt={selectedHomestay.name}
-                  className="w-full h-64 object-cover rounded-xl mb-4"
-                />
+                {getHomestayImage(selectedHomestay) ? (
+                  <img
+                    src={getHomestayImage(selectedHomestay)}
+                    alt={selectedHomestay.name}
+                    className="w-full h-64 object-cover rounded-xl mb-4"
+                  />
+                ) : (
+                  <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-xl mb-4 flex items-center justify-center">
+                    <Home className="h-24 w-24 text-gray-400" />
+                  </div>
+                )}
 
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{selectedHomestay.name}</h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4 flex items-center">
                   <MapPin className="h-4 w-4 mr-1" />
-                  {selectedHomestay.location}
+                  {selectedHomestay.address}
                 </p>
 
-                <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg mb-4">
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-through">${selectedHomestay.price}</p>
-                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                      ${(selectedHomestay.price - estimatedSavings).toFixed(0)}
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">per night</p>
+                {selectedHomestayPrice && (
+                  <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg mb-4">
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 line-through">${selectedHomestayPrice}</p>
+                      <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                        ${(selectedHomestayPrice - estimatedSavings).toFixed(0)}
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">per night</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">You Save</p>
+                      <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">${estimatedSavings.toFixed(0)}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">You Save</p>
-                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">${estimatedSavings.toFixed(0)}</p>
-                  </div>
-                </div>
+                )}
 
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
                   <Clock className="h-4 w-4" />
@@ -589,6 +617,37 @@ export default function LastMinuteDealDetail({ dealId }: LastMinuteDealDetailPro
           <Alert key={t.id} type={t.type} title={t.title} message={t.message} className="min-w-80 shadow-lg" />
         ))}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Deal</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Are you sure you want to delete this deal? This action cannot be undone.
+            </p>
+            <div className="flex space-x-3">
+              <ActionButton
+                onClick={() => setShowDeleteConfirm(false)}
+                variant="secondary"
+                className="flex-1"
+              >
+                Cancel
+              </ActionButton>
+              <ActionButton
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  handleDelete();
+                }}
+                variant="danger"
+                className="flex-1"
+              >
+                Delete
+              </ActionButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
