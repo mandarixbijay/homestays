@@ -108,7 +108,7 @@ function DealsPageContent() {
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
   const dealsPerPage = 12;
 
-  // Fetch deals with availability check
+  // Fetch deals with availability check or all deals
   const fetchDeals = async (searchParams?: {
     location?: string;
     checkIn?: string;
@@ -119,39 +119,55 @@ function DealsPageContent() {
     try {
       setLoading(true);
 
-      const payload: any = {
-        page: searchParams?.page || currentPage,
-        limit: dealsPerPage,
-      };
+      // Check if this is a search request with filters
+      const hasFilters = searchParams?.location || searchParams?.checkIn || searchParams?.checkOut;
 
-      // Add location if specified
-      if (searchParams?.location) {
-        payload.location = searchParams.location;
+      if (hasFilters) {
+        // Use availability check endpoint for filtered searches
+        const payload: any = {
+          page: searchParams?.page || currentPage,
+          limit: dealsPerPage,
+        };
+
+        if (searchParams?.location) {
+          payload.location = searchParams.location;
+        }
+
+        if (searchParams?.checkIn && searchParams?.checkOut) {
+          payload.checkIn = searchParams.checkIn;
+          payload.checkOut = searchParams.checkOut;
+        }
+
+        if (searchParams?.rooms && searchParams.rooms.length > 0) {
+          payload.rooms = searchParams.rooms;
+        }
+
+        const response = await fetch('/api/bookings/check-availability/deals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch deals");
+        const data = await response.json();
+
+        setDeals(data.homestays || []);
+        setTotalPages(data.totalPages || 1);
+        setTotal(data.totalCount || 0);
+      } else {
+        // Use GET endpoint for all deals (no filters)
+        const page = searchParams?.page || currentPage;
+        const response = await fetch(`/api/homestays/last-minute-deals?page=${page}&limit=${dealsPerPage}`);
+
+        if (!response.ok) throw new Error("Failed to fetch deals");
+        const data = await response.json();
+
+        // Transform the response to match the expected format
+        setDeals(data.data || []);
+        setTotalPages(data.totalPages || 1);
+        setTotal(data.total || 0);
       }
 
-      // Add dates if specified
-      if (searchParams?.checkIn && searchParams?.checkOut) {
-        payload.checkIn = searchParams.checkIn;
-        payload.checkOut = searchParams.checkOut;
-      }
-
-      // Add rooms if specified
-      if (searchParams?.rooms && searchParams.rooms.length > 0) {
-        payload.rooms = searchParams.rooms;
-      }
-
-      const response = await fetch('/api/bookings/check-availability/deals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error("Failed to fetch deals");
-      const data = await response.json();
-
-      setDeals(data.homestays || []);
-      setTotalPages(data.totalPages || 1);
-      setTotal(data.totalCount || 0);
       setHasSearched(true);
     } catch (error) {
       console.error("Error fetching deals:", error);

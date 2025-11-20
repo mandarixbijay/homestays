@@ -7,9 +7,33 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // Transform field names to match backend API expectations
+    const payload: any = {
+      page: body.page || 1,
+      limit: body.limit || 12,
+    };
+
+    // Add location if provided
+    if (body.location) {
+      payload.location = body.location;
+    }
+
+    // Transform checkIn/checkOut to checkInDate/checkOutDate
+    if (body.checkIn) {
+      payload.checkInDate = body.checkIn;
+    }
+    if (body.checkOut) {
+      payload.checkOutDate = body.checkOut;
+    }
+
+    // Add rooms if provided
+    if (body.rooms && body.rooms.length > 0) {
+      payload.rooms = body.rooms;
+    }
+
     const backendUrl = `${BACKEND_URL}/bookings/check-availability/deals`;
     console.log('Checking deal availability:', backendUrl);
-    console.log('Request payload:', JSON.stringify(body));
+    console.log('Request payload:', JSON.stringify(payload));
 
     const response = await fetch(backendUrl, {
       method: 'POST',
@@ -17,7 +41,7 @@ export async function POST(request: NextRequest) {
         'Accept': '*/*',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
       cache: 'no-store',
     });
 
