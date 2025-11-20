@@ -4,15 +4,19 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Star, MapPin, Users, Wifi, Car, Coffee, Filter, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import {
+  Star, MapPin, Search as SearchIcon, Wifi, Car, Coffee,
+  ChevronLeft, ChevronRight, SlidersHorizontal, X, DollarSign, Users as UsersIcon
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
 import CheckAvailability from "@/components/landing-page/check-availability";
-import Hero3 from "@/components/landing-page/hero3";
 
 interface Homestay {
   id: number;
@@ -62,33 +66,74 @@ export default function AllHomestaysPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [topHomestays, setTopHomestays] = useState<Homestay[]>([]);
   const [allHomestays, setAllHomestays] = useState<Homestay[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingTop, setLoadingTop] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const [sortOption, setSortOption] = useState("price-low-high");
+
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [location, setLocation] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [minRating, setMinRating] = useState("");
+  const [sortBy, setSortBy] = useState("price_low_to_high");
+  const [vipOnly, setVipOnly] = useState(false);
+  const [dealsOnly, setDealsOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   const homestaysPerPage = 12;
 
-  // Fetch all homestays
+  // Fetch top homestays
+  useEffect(() => {
+    const fetchTopHomestays = async () => {
+      setLoadingTop(true);
+      try {
+        const response = await fetch('/api/homestays/top-homestays?limit=6');
+        if (response.ok) {
+          const data = await response.json();
+          setTopHomestays(data.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching top homestays:', error);
+      } finally {
+        setLoadingTop(false);
+      }
+    };
+
+    fetchTopHomestays();
+  }, []);
+
+  // Fetch all homestays with filters
   useEffect(() => {
     const fetchAllHomestays = async () => {
       setLoading(true);
 
       try {
-        // Build query params from URL or use defaults
-        const location = searchParams.get("location");
-        const checkIn = searchParams.get("checkIn");
-        const checkOut = searchParams.get("checkOut");
-
         const queryParams = new URLSearchParams({
           page: page.toString(),
           limit: homestaysPerPage.toString(),
         });
 
+        // Add filters
+        if (searchQuery) queryParams.append("search", searchQuery);
         if (location) queryParams.append("location", location);
+        if (minPrice) queryParams.append("minPrice", minPrice);
+        if (maxPrice) queryParams.append("maxPrice", maxPrice);
+        if (minRating) queryParams.append("minRating", minRating);
+        if (sortBy) queryParams.append("sortBy", sortBy);
+        if (vipOnly) queryParams.append("vipAccess", "true");
+        if (dealsOnly) queryParams.append("hasLastMinuteDeal", "true");
+
+        // Get params from URL (from CheckAvailability search)
+        const urlLocation = searchParams.get("location");
+        const checkIn = searchParams.get("checkIn");
+        const checkOut = searchParams.get("checkOut");
+
+        if (urlLocation && !location) queryParams.append("location", urlLocation);
         if (checkIn) queryParams.append("checkIn", checkIn);
         if (checkOut) queryParams.append("checkOut", checkOut);
 
@@ -107,7 +152,7 @@ export default function AllHomestaysPage() {
     };
 
     fetchAllHomestays();
-  }, [page, searchParams]);
+  }, [page, searchQuery, location, minPrice, maxPrice, minRating, sortBy, vipOnly, dealsOnly, searchParams]);
 
   // Generate profile slug
   const generateProfileSlug = (name: string, address: string, id: number) => {
@@ -121,31 +166,18 @@ export default function AllHomestaysPage() {
     return `${slugified}-id-${id}`;
   };
 
-  // Sort homestays
-  const sortedHomestays = useMemo(() => {
-    return [...allHomestays].sort((a, b) => {
-      if (sortOption === "price-low-high") {
-        return (a.nightlyPrice || 0) - (b.nightlyPrice || 0);
-      } else if (sortOption === "price-high-low") {
-        return (b.nightlyPrice || 0) - (a.nightlyPrice || 0);
-      } else if (sortOption === "rating") {
-        return (b.rating || 0) - (a.rating || 0);
-      } else if (sortOption === "discount") {
-        const getDiscountValue = (homestay: Homestay) => {
-          if (homestay.deal) {
-            if (homestay.deal.discountType === 'PERCENTAGE') {
-              return homestay.deal.discount || 0;
-            } else {
-              return homestay.originalPrice ? ((homestay.deal.discount / homestay.originalPrice) * 100) : 0;
-            }
-          }
-          return 0;
-        };
-        return getDiscountValue(b) - getDiscountValue(a);
-      }
-      return 0;
-    });
-  }, [sortOption, allHomestays]);
+  // Reset filters
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setLocation("");
+    setMinPrice("");
+    setMaxPrice("");
+    setMinRating("");
+    setSortBy("price_low_to_high");
+    setVipOnly(false);
+    setDealsOnly(false);
+    setPage(1);
+  };
 
   const HomestayCard = ({ homestay }: { homestay: Homestay }) => {
     const slug = generateProfileSlug(homestay.name, homestay.address, homestay.id);
@@ -253,17 +285,73 @@ export default function AllHomestaysPage() {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50/50 to-background">
       <Navbar />
 
-      {/* Top Homestays Section */}
-      <Hero3 />
-
       {/* Search/Filter Section */}
       <CheckAvailability />
 
-      {/* Main Homestays Grid Section */}
+      {/* Top Homestays Section */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-foreground mb-2">Top Homestays</h2>
+              <p className="text-muted-foreground">Handpicked favorites for an unforgettable stay</p>
+            </div>
+          </div>
+
+          {loadingTop ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <Card key={idx} className="overflow-hidden rounded-xl border-none shadow-sm">
+                  <Skeleton className="h-48 w-full" />
+                  <CardContent className="p-4 space-y-3">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-16 w-full" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {topHomestays.map((homestay) => (
+                <HomestayCard key={homestay.id} homestay={homestay} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* All Homestays Section */}
       <section className="py-12 bg-background">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Header with Sort and Filter */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          {/* Search Bar */}
+          <div className="mb-8">
+            <div className="relative max-w-2xl mx-auto">
+              <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Input
+                type="text"
+                placeholder="Search by name, location, or description..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+                className="pl-12 pr-12 py-6 text-base rounded-xl border-2 focus:border-primary"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Header with Controls */}
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                 {loading ? "Loading..." : `${total} Homestays Available`}
@@ -271,22 +359,54 @@ export default function AllHomestaysPage() {
               <p className="text-muted-foreground">Discover authentic homestay experiences across Nepal</p>
             </div>
 
-            {/* Sort and Filter Controls */}
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-                <label className="text-sm font-medium text-foreground whitespace-nowrap">Sort by:</label>
+            {/* Controls */}
+            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+              {/* Sort */}
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium whitespace-nowrap">Sort:</Label>
                 <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                  className="px-3 py-2 border border-border rounded-lg bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all flex-1 sm:flex-initial"
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setPage(1);
+                  }}
+                  className="px-3 py-2 border border-border rounded-lg bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  <option value="price-low-high">Price: Low to High</option>
-                  <option value="price-high-low">Price: High to Low</option>
+                  <option value="price_low_to_high">Price: Low to High</option>
+                  <option value="price_high_to_low">Price: High to Low</option>
                   <option value="rating">Highest Rating</option>
                   <option value="discount">Best Discount</option>
                 </select>
               </div>
 
+              {/* Quick Filters */}
+              <Button
+                variant={vipOnly ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setVipOnly(!vipOnly);
+                  setPage(1);
+                }}
+                className="gap-2"
+              >
+                <Star className="h-4 w-4" />
+                VIP Only
+              </Button>
+
+              <Button
+                variant={dealsOnly ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setDealsOnly(!dealsOnly);
+                  setPage(1);
+                }}
+                className="gap-2"
+              >
+                <DollarSign className="h-4 w-4" />
+                Deals Only
+              </Button>
+
+              {/* Advanced Filters Toggle */}
               <Button
                 variant="outline"
                 size="sm"
@@ -294,12 +414,12 @@ export default function AllHomestaysPage() {
                 className="gap-2"
               >
                 <SlidersHorizontal className="h-4 w-4" />
-                Filters
+                {showFilters ? "Hide" : "More"} Filters
               </Button>
             </div>
           </div>
 
-          {/* Filters Panel (Collapsible) */}
+          {/* Advanced Filters Panel */}
           {showFilters && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -307,40 +427,153 @@ export default function AllHomestaysPage() {
               exit={{ opacity: 0, height: 0 }}
               className="mb-8 p-6 bg-card rounded-xl border border-border shadow-sm"
             >
-              <h3 className="text-lg font-semibold text-foreground mb-4">Filter Homestays</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-foreground">Advanced Filters</h3>
+                <Button variant="ghost" size="sm" onClick={handleResetFilters}>
+                  <X className="h-4 w-4 mr-2" />
+                  Reset All
+                </Button>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Location */}
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Price Range</label>
-                  <input type="range" min="0" max="10000" className="w-full" />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>NPR 0</span>
-                    <span>NPR 10,000+</span>
+                  <Label className="text-sm font-medium mb-2 block">Location</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="e.g., Kathmandu"
+                      value={location}
+                      onChange={(e) => {
+                        setLocation(e.target.value);
+                        setPage(1);
+                      }}
+                      className="pl-10"
+                    />
                   </div>
                 </div>
+
+                {/* Min Price */}
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Rating</label>
-                  <select className="w-full px-3 py-2 border border-border rounded-lg bg-card text-sm">
-                    <option>Any Rating</option>
-                    <option>4.5+ Stars</option>
-                    <option>4.0+ Stars</option>
-                    <option>3.5+ Stars</option>
-                  </select>
+                  <Label className="text-sm font-medium mb-2 block">Min Price (NPR)</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={minPrice}
+                      onChange={(e) => {
+                        setMinPrice(e.target.value);
+                        setPage(1);
+                      }}
+                      className="pl-10"
+                    />
+                  </div>
                 </div>
+
+                {/* Max Price */}
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Amenities</label>
-                  <select className="w-full px-3 py-2 border border-border rounded-lg bg-card text-sm">
-                    <option>All Amenities</option>
-                    <option>WiFi</option>
-                    <option>Parking</option>
-                    <option>Breakfast</option>
-                  </select>
+                  <Label className="text-sm font-medium mb-2 block">Max Price (NPR)</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      placeholder="10000"
+                      value={maxPrice}
+                      onChange={(e) => {
+                        setMaxPrice(e.target.value);
+                        setPage(1);
+                      }}
+                      className="pl-10"
+                    />
+                  </div>
                 </div>
-                <div className="flex items-end">
-                  <Button variant="secondary" className="w-full">
-                    Apply Filters
-                  </Button>
+
+                {/* Min Rating */}
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Min Rating</Label>
+                  <select
+                    value={minRating}
+                    onChange={(e) => {
+                      setMinRating(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Any Rating</option>
+                    <option value="4.5">4.5+ Stars</option>
+                    <option value="4.0">4.0+ Stars</option>
+                    <option value="3.5">3.5+ Stars</option>
+                    <option value="3.0">3.0+ Stars</option>
+                  </select>
                 </div>
               </div>
+
+              {/* Active Filters Summary */}
+              {(searchQuery || location || minPrice || maxPrice || minRating || vipOnly || dealsOnly) && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-sm text-muted-foreground mb-2">Active filters:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {searchQuery && (
+                      <Badge variant="secondary" className="gap-1">
+                        Search: {searchQuery}
+                        <button onClick={() => setSearchQuery("")} className="ml-1">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )}
+                    {location && (
+                      <Badge variant="secondary" className="gap-1">
+                        Location: {location}
+                        <button onClick={() => setLocation("")} className="ml-1">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )}
+                    {minPrice && (
+                      <Badge variant="secondary" className="gap-1">
+                        Min: NPR {minPrice}
+                        <button onClick={() => setMinPrice("")} className="ml-1">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )}
+                    {maxPrice && (
+                      <Badge variant="secondary" className="gap-1">
+                        Max: NPR {maxPrice}
+                        <button onClick={() => setMaxPrice("")} className="ml-1">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )}
+                    {minRating && (
+                      <Badge variant="secondary" className="gap-1">
+                        Rating: {minRating}+ stars
+                        <button onClick={() => setMinRating("")} className="ml-1">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )}
+                    {vipOnly && (
+                      <Badge variant="secondary" className="gap-1">
+                        VIP Only
+                        <button onClick={() => setVipOnly(false)} className="ml-1">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )}
+                    {dealsOnly && (
+                      <Badge variant="secondary" className="gap-1">
+                        Deals Only
+                        <button onClick={() => setDealsOnly(false)} className="ml-1">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -360,10 +593,10 @@ export default function AllHomestaysPage() {
                 </Card>
               ))}
             </div>
-          ) : sortedHomestays.length > 0 ? (
+          ) : allHomestays.length > 0 ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {sortedHomestays.map((homestay) => (
+                {allHomestays.map((homestay) => (
                   <HomestayCard key={homestay.id} homestay={homestay} />
                 ))}
               </div>
@@ -381,7 +614,7 @@ export default function AllHomestaysPage() {
                     Previous
                   </Button>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 overflow-x-auto">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum;
                       if (totalPages <= 5) {
@@ -400,7 +633,7 @@ export default function AllHomestaysPage() {
                           onClick={() => setPage(pageNum)}
                           variant={page === pageNum ? "default" : "outline"}
                           size="sm"
-                          className="w-10 h-10"
+                          className="min-w-10 h-10"
                         >
                           {pageNum}
                         </Button>
@@ -433,8 +666,8 @@ export default function AllHomestaysPage() {
                 <p className="text-muted-foreground mb-6">
                   Try adjusting your search criteria or filters to find more results.
                 </p>
-                <Button onClick={() => router.push("/homestays")} variant="default">
-                  Reset Filters
+                <Button onClick={handleResetFilters} variant="default">
+                  Reset All Filters
                 </Button>
               </div>
             </div>
