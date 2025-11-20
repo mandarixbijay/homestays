@@ -34,14 +34,14 @@ interface Room {
 interface HomestayRoom {
   id: number;
   name: string;
-  description: string;
-  originalPrice: number;
-  discountedPrice: number;
+  description?: string;
+  originalPrice?: number;
+  discountedPrice?: number;
   maxOccupancy: number;
-  minOccupancy: number;
-  bedType: string;
-  facilities: string[];
-  imageUrls: string[];
+  minOccupancy?: number;
+  bedType?: string;
+  facilities?: string[];
+  imageUrls?: string[];
   roomsLeft?: number;
 }
 
@@ -688,12 +688,12 @@ export default function HomestayProfilePage() {
                           {/* Room Details */}
                           <div className="md:col-span-2 p-6">
                             <h3 className="text-xl font-bold text-gray-900 mb-2">{room.name}</h3>
-                            <p className="text-gray-600 mb-4">{room.description}</p>
+                            {room.description && <p className="text-gray-600 mb-4">{room.description}</p>}
 
                             <div className="grid grid-cols-2 gap-4 mb-4">
                               <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Bed className="h-4 w-4" />
-                                <span>{room.bedType}</span>
+                                <span>{room.bedType || "Standard"}</span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Users className="h-4 w-4" />
@@ -713,13 +713,13 @@ export default function HomestayProfilePage() {
 
                             <div className="flex items-end justify-between">
                               <div>
-                                {room.originalPrice !== room.discountedPrice && (
+                                {room.originalPrice && room.discountedPrice && room.originalPrice !== room.discountedPrice && (
                                   <div className="text-sm text-gray-500 line-through">
                                     NPR {room.originalPrice.toLocaleString()}
                                   </div>
                                 )}
                                 <div className="text-2xl font-bold text-gray-900">
-                                  NPR {room.discountedPrice.toLocaleString()}
+                                  NPR {(room.discountedPrice || room.originalPrice || 0).toLocaleString()}
                                   <span className="text-sm font-normal text-gray-500"> / night</span>
                                 </div>
                               </div>
