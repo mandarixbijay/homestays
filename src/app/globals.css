@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -70,8 +70,8 @@
     @apply border-border;
   }
   body {
-    font-family: 'Manrope', sans-serif;
-    @apply bg-background text-foreground font-manrope text-sm;
+    font-family: 'Sora', sans-serif;
+    @apply bg-background text-foreground font-sora text-sm;
   }
   h1 {
     @apply text-3xl sm:text-4xl font-bold;
@@ -137,17 +137,6 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
-@layer components {
-  .navbar {
-    @apply bg-white dark:bg-gray-900 fixed top-0 left-0 right-0 z-[100] h-16 shadow-md;
-  }
-  .hero-overlay::before {
-    content: '';
-    @apply absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/40 to-transparent;
-  }
-}
-
 
 .bg-hero3::before {
   content: "";

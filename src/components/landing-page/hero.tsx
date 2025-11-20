@@ -89,13 +89,13 @@ export default function Hero() {
   ];
 
   return (
-    <div className="relative w-full h-[60vh] min-h-[400px] sm:min-h-[500px] md:min-h-[600px] bg-background">
-      <section id="home" className="w-full h-full relative pt-40 sm:pt-40 md:pt-44">
+    <div className="relative w-full min-h-[500px] sm:min-h-[550px] md:min-h-[600px] bg-gradient-to-br from-primary-30/10 via-background to-accent-50">
+      <section id="home" className="w-full h-full relative pt-20 sm:pt-24 md:pt-28 pb-12 sm:pb-16">
         <div className="relative z-30 px-4 sm:px-6 md:px-8">
           <div className="container mx-auto max-w-full sm:max-w-6xl md:max-w-7xl">
-            {/* Search Bar in Card */}
+            {/* Search Bar in Card with improved styling */}
             <div
-              className="bg-white rounded-xl border border-gray-300 p-3 sm:p-4 md:p-5"
+              className="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-200 shadow-lg p-4 sm:p-5 md:p-6 hover:shadow-xl transition-shadow duration-300"
             >
               <DateGuestLocationPicker
                 onSearch={handleSearch}
@@ -103,11 +103,33 @@ export default function Hero() {
               />
             </div>
 
-            {/* New Card with Image, Text, and Buttons */}
+            {/* Trust Indicators */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-4 text-xs sm:text-sm text-gray-600">
+              <div className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                </svg>
+                <span className="font-medium">1,000+ Verified Homestays</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                <span className="font-medium">4.8★ Average Rating</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                <span className="font-medium">Safe & Secure Booking</span>
+              </div>
+            </div>
+
+            {/* Promotional Card with improved design */}
             <div
-              className="bg-white rounded-xl mt-6 sm:mt-8 flex overflow-hidden max-w-full sm:max-w-6xl md:max-w-7xl mx-auto min-h-[150px] sm:min-h-[180px] md:min-h-[200px]"
+              className="bg-white rounded-2xl mt-6 sm:mt-8 flex overflow-hidden max-w-full sm:max-w-6xl md:max-w-7xl mx-auto min-h-[160px] sm:min-h-[180px] md:min-h-[200px] shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100"
             >
-              <div className="w-[30%] relative">
+              <div className="w-[35%] sm:w-[30%] relative">
                 <Image
                   src="/images/hero/hero1.avif"
                   alt="Traditional Nepalese homestay with mountain views"
@@ -116,20 +138,20 @@ export default function Hero() {
                   priority
                 />
               </div>
-              <div className="w-[70%] bg-gray-100 p-4 sm:p-5 flex items-center">
+              <div className="w-[65%] sm:w-[70%] bg-gradient-to-br from-gray-50 to-white p-4 sm:p-5 flex items-center">
                 <div className="flex-1">
-                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
+                  <h2 className="text-base sm:text-xl md:text-2xl font-bold text-gray-900 mb-1.5">
                     Discover Authentic Homestays
                   </h2>
-                  <p className="text-xs sm:text-sm text-gray-600 mt-2">
-                    Experience the warmth of Nepalese hospitality.
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    Experience the warmth of Nepalese hospitality in traditional homes.
                   </p>
                 </div>
-                <div className="flex justify-end items-center space-x-3">
-                  <button className="text-gray-800 px-4 py-2 rounded-full text-sm sm:text-base font-medium bg-yellow-100 hover:bg-yellow-200 transition-colors">
+                <div className="hidden sm:flex justify-end items-center gap-3 ml-4">
+                  <button className="text-gray-800 px-5 py-2.5 rounded-full text-sm font-semibold bg-accent-light hover:bg-accent-50 transition-all duration-200 hover:scale-105 shadow-sm">
                     Learn More
                   </button>
-                  <button className="text-gray-600 text-sm sm:text-base font-medium">
+                  <button className="text-gray-500 text-sm font-medium hover:text-gray-700 transition-colors">
                     Dismiss
                   </button>
                 </div>
@@ -139,39 +161,37 @@ export default function Hero() {
             {/* Sign In Card */}
             <SignInCard />
 
-            {/* Three New Cards on Same Line */}
-            <div className="flex flex-row sm:flex-row gap-4 mt-6 sm:mt-8 overflow-x-auto snap-x snap-mandatory">
+            {/* Three Feature Cards - Improved Mobile Responsiveness */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-6 sm:mt-8">
               {newCards.map((card) => (
                 <div
                   key={card.id}
-                  className="flex-1 bg-[#FFF7E6] rounded-lg h-[140px] flex overflow-hidden snap-start min-w-[300px] sm:min-w-0"
+                  className="group bg-accent-light rounded-xl h-[150px] sm:h-[160px] flex overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 border border-accent-50"
                 >
                   {/* Text and Link Section */}
-                  <div className="w-[50%] p-3 sm:p-4 flex flex-col justify-center">
-                    <div className="space-y-0.5">
+                  <div className="w-[50%] p-4 sm:p-5 flex flex-col justify-between">
+                    <div className="space-y-1">
                       {card.textLines.map((line, index) => (
                         <p
                           key={index}
-                          className="text-xs sm:text-sm text-gray-900 font-bold line-clamp-1"
+                          className="text-xs sm:text-sm text-gray-900 font-semibold leading-snug"
                         >
                           {line}
                         </p>
                       ))}
                     </div>
-                    <div className="mt-2">
-                      <button className="flex items-center gap-1 text-gray-800 text-[10px] sm:text-xs font-medium">
-                        Explore Now
-                        <ArrowRightSVG className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                      </button>
-                    </div>
+                    <button className="flex items-center gap-1.5 text-gray-800 text-xs sm:text-sm font-medium hover:gap-2 transition-all group-hover:text-primary">
+                      Explore Now
+                      <ArrowRightSVG className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 group-hover:text-primary transition-colors" />
+                    </button>
                   </div>
                   {/* Image Section */}
-                  <div className="w-[50%] relative">
+                  <div className="w-[50%] relative overflow-hidden">
                     <Image
                       src={card.image}
                       alt={card.alt}
                       fill
-                      className="object-cover"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                       priority={card.id === 2}
                     />
                   </div>

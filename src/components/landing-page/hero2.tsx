@@ -19,9 +19,9 @@ export default function Hero2() {
   const router = useRouter();
 
   return (
-    <section className="w-full px-4 sm:px-6 bg-white mt-8 sm:mt-12 md:mt-16 overflow-x-hidden">
+    <section className="w-full py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-white overflow-x-hidden">
       <div className="container mx-auto max-w-7xl">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 text-center sm:text-left">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 text-center sm:text-left">
           <div className="mb-4 sm:mb-0">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground tracking-tight">
               Top Destinations

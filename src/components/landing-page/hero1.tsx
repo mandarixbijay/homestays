@@ -137,7 +137,7 @@ export default function Hero1() {
   }, [handleScroll]);
 
   return (
-   <section className="w-full pt-8 sm:pt-10 pb-16 px-6 sm:px-8 bg-background mt-96 sm:mt-32 md:mt-52 overflow-x-hidden">
+   <section className="w-full py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-gradient-to-b from-background to-gray-50/50 overflow-x-hidden">
       <div className="container mx-auto max-w-7xl">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 text-center sm:text-left">
           <div className="mb-4 sm:mb-0">

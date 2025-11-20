@@ -12,7 +12,7 @@ export default function Hero3() {
   const router = useRouter();
 
   return (
-    <section className="w-full px-4 sm:px-6 bg-white mt-8 sm:mt-12 md:mt-16 overflow-x-hidden">
+    <section className="w-full py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-gradient-to-b from-gray-50/50 to-background overflow-x-hidden">
       <div className="container mx-auto max-w-7xl">
         <Card
           className="rounded-xl bg-cover bg-center flex flex-col justify-end min-h-[600px] sm:min-h-[640px] md:min-h-[680px]"
