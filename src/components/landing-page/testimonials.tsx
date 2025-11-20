@@ -180,7 +180,7 @@ export default function Testimonials() {
 
                     {/* Testimonial Text */}
                     <p className="text-lg sm:text-xl md:text-2xl text-card-foreground font-medium leading-relaxed mb-8 max-w-3xl">
-                      "{currentTestimonial.comment}"
+                      &ldquo;{currentTestimonial.comment}&rdquo;
                     </p>
 
                     {/* Guest Info */}
