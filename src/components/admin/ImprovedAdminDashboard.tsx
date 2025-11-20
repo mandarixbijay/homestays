@@ -7,7 +7,9 @@ import { useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Home, Users, Settings, Clock, CheckCircle,
   AlertCircle, Plus, Eye, Edit, Activity, Star, MapPin,
-  RefreshCw, Download, Bed
+  RefreshCw, Download, Bed, FileText, TrendingUp, BarChart3,
+  PenTool, Calendar, Globe, Sparkles, ArrowRight, Zap,
+  Target, Award, ChevronRight, Tag, Folder
 } from 'lucide-react';
 import { debounce } from 'lodash';
 import { useHomestays } from '@/hooks/useAdminApi';
@@ -132,47 +134,87 @@ const StatCard: React.FC<{
   title: string;
   value: number | string;
   icon: React.ReactNode;
-  color: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
+  color: 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'indigo' | 'pink';
   onClick?: () => void;
   loading?: boolean;
-}> = ({ title, value, icon, color
-
-, onClick, loading }) => {
+  trend?: { value: number; isPositive: boolean };
+}> = ({ title, value, icon, color, onClick, loading, trend }) => {
   const colorClasses = {
     blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
     green: 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400',
     yellow: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400',
     red: 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400',
-    purple: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400'
+    purple: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
+    indigo: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400',
+    pink: 'bg-pink-100 text-pink-600 dark:bg-pink-900/20 dark:text-pink-400'
+  };
+
+  const bgGradients = {
+    blue: 'from-blue-50 via-blue-100 to-blue-50 dark:from-blue-900/10 dark:via-blue-800/20 dark:to-blue-900/10',
+    green: 'from-green-50 via-green-100 to-green-50 dark:from-green-900/10 dark:via-green-800/20 dark:to-green-900/10',
+    yellow: 'from-yellow-50 via-yellow-100 to-yellow-50 dark:from-yellow-900/10 dark:via-yellow-800/20 dark:to-yellow-900/10',
+    red: 'from-red-50 via-red-100 to-red-50 dark:from-red-900/10 dark:via-red-800/20 dark:to-red-900/10',
+    purple: 'from-purple-50 via-purple-100 to-purple-50 dark:from-purple-900/10 dark:via-purple-800/20 dark:to-purple-900/10',
+    indigo: 'from-indigo-50 via-indigo-100 to-indigo-50 dark:from-indigo-900/10 dark:via-indigo-800/20 dark:to-indigo-900/10',
+    pink: 'from-pink-50 via-pink-100 to-pink-50 dark:from-pink-900/10 dark:via-pink-800/20 dark:to-pink-900/10'
   };
 
   return (
-    <Card 
-      className={`${onClick ? 'cursor-pointer hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1' : ''}`}
+    <div
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyPress={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
+      className={`group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg transition-all duration-300 ${
+        onClick ? 'cursor-pointer hover:shadow-2xl hover:-translate-y-2 hover:border-opacity-0' : ''
+      }`}
     >
-      <div
-        className="flex items-center justify-between"
-        {...(onClick ? { onClick } : {})}
-        style={onClick ? { cursor: 'pointer' } : undefined}
-        tabIndex={onClick ? 0 : undefined}
-        role={onClick ? 'button' : undefined}
-        onKeyPress={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
-      >
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
-          {loading ? (
-            <div className="mt-1">
-              <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            </div>
-          ) : (
-            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
+      {/* Gradient Background */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${bgGradients[color]} opacity-50 transition-opacity duration-300 ${
+        onClick ? 'group-hover:opacity-75' : ''
+      }`}></div>
+
+      {/* Decorative Circle */}
+      <div className={`absolute -right-8 -top-8 w-32 h-32 rounded-full bg-gradient-to-br ${bgGradients[color]} opacity-20 blur-2xl transition-all duration-300 ${
+        onClick ? 'group-hover:scale-150' : ''
+      }`}></div>
+
+      <div className="relative p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className={`p-4 rounded-xl ${colorClasses[color]} shadow-md transition-transform duration-300 ${
+            onClick ? 'group-hover:scale-110 group-hover:rotate-3' : ''
+          }`}>
+            {icon}
+          </div>
+          {onClick && (
+            <ChevronRight className={`h-5 w-5 text-gray-400 transition-all duration-300 ${
+              onClick ? 'group-hover:translate-x-1 group-hover:text-gray-600 dark:group-hover:text-gray-300' : ''
+            }`} />
           )}
         </div>
-        <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
-          {icon}
+
+        <div>
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            {title}
+          </p>
+          {loading ? (
+            <div className="h-9 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"></div>
+          ) : (
+            <p className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              {value}
+            </p>
+          )}
+          {trend && !loading && (
+            <div className={`flex items-center text-sm font-medium ${
+              trend.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+            }`}>
+              <TrendingUp className={`h-4 w-4 mr-1 ${!trend.isPositive ? 'rotate-180' : ''}`} />
+              <span>{Math.abs(trend.value)}% from last month</span>
+            </div>
+          )}
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
@@ -182,26 +224,40 @@ const QuickActionCard: React.FC<{
   icon: React.ReactNode;
   color: string;
   onClick: () => void;
-}> = ({ title, description, icon, color, onClick }) => {
+  badge?: string;
+}> = ({ title, description, icon, color, onClick, badge }) => {
   return (
     <div
-      className="cursor-pointer hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
       onClick={onClick}
       tabIndex={0}
       role="button"
       onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
     >
-      <Card>
-        <div className="flex items-center space-x-4">
-          <div className={`p-3 rounded-lg ${color}`}>
+      {/* Gradient overlay on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-100 dark:to-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+      <div className="relative p-6">
+        <div className="flex items-start justify-between mb-3">
+          <div className={`p-3 rounded-xl ${color} shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6`}>
             {icon}
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
-          </div>
+          {badge && (
+            <span className="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-full">
+              {badge}
+            </span>
+          )}
+          <ArrowRight className="h-5 w-5 text-gray-400 transition-all duration-300 group-hover:translate-x-1 group-hover:text-gray-600 dark:group-hover:text-gray-300" />
         </div>
-      </Card>
+        <div>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {title}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            {description}
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
@@ -486,33 +542,52 @@ export default function ImprovedAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                <LayoutDashboard className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Enhanced Header with Welcome Banner */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900">
+        {/* Animated Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-white/30 blur-xl rounded-full"></div>
+                <div className="relative p-4 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/30 shadow-2xl">
+                  <Sparkles className="h-8 w-8 text-white animate-pulse" />
+                </div>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Admin Dashboard
+                <h1 className="text-3xl font-bold text-white mb-1 flex items-center space-x-3">
+                  <span>Welcome back, {session.user.name}!</span>
+                  <Award className="h-6 w-6 text-yellow-300 animate-bounce" />
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Welcome back, {session.user.name}
+                <p className="text-blue-100 text-sm flex items-center space-x-2">
+                  <Zap className="h-4 w-4" />
+                  <span>Manage your homestay empire with ease</span>
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <ActionButton
+            <div className="flex items-center space-x-3">
+              <button
                 onClick={handleRefresh}
-                variant="secondary"
-                loading={refreshing}
-                icon={<RefreshCw className="h-4 w-4" />}
+                disabled={refreshing}
+                className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl text-white font-medium transition-all duration-200 hover:scale-105 disabled:opacity-50 flex items-center space-x-2 shadow-lg"
               >
-                Refresh
-              </ActionButton>
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                <span>Refresh</span>
+              </button>
+              <button
+                onClick={() => router.push('/admin/settings')}
+                className="p-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl text-white transition-all duration-200 hover:scale-105 shadow-lg"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
             </div>
           </div>
         </div>
@@ -602,45 +677,156 @@ export default function ImprovedAdminDashboard() {
           />
         </div>
 
-        {/* Quick Actions and Recent Activity */}
+        {/* Quick Actions Grid - Full Width */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
+                <Target className="h-6 w-6 text-blue-600" />
+                <span>Quick Actions</span>
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Jump to the most common administrative tasks
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <QuickActionCard
+              title="Create Homestay"
+              description="Add a new homestay property to your collection"
+              icon={<Plus className="h-6 w-6" />}
+              color="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 dark:from-blue-900/20 dark:to-blue-800/30 dark:text-blue-400"
+              onClick={() => handleQuickAction('create-homestay')}
+            />
+
+            <QuickActionCard
+              title="Manage Blogs"
+              description="Create and publish blog posts for marketing"
+              icon={<PenTool className="h-6 w-6" />}
+              color="bg-gradient-to-br from-purple-100 to-purple-200 text-purple-600 dark:from-purple-900/20 dark:to-purple-800/30 dark:text-purple-400"
+              onClick={() => router.push('/admin/blog')}
+              badge="Popular"
+            />
+
+            <QuickActionCard
+              title="Bulk Create"
+              description="Import multiple homestays at once via CSV"
+              icon={<Home className="h-6 w-6" />}
+              color="bg-gradient-to-br from-green-100 to-green-200 text-green-600 dark:from-green-900/20 dark:to-green-800/30 dark:text-green-400"
+              onClick={() => handleQuickAction('bulk-create')}
+            />
+
+            <QuickActionCard
+              title="Blog Analytics"
+              description="Track performance and engagement metrics"
+              icon={<BarChart3 className="h-6 w-6" />}
+              color="bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-600 dark:from-indigo-900/20 dark:to-indigo-800/30 dark:text-indigo-400"
+              onClick={() => router.push('/admin/blog/analytics')}
+            />
+
+            <QuickActionCard
+              title="Manage Users"
+              description="Control user accounts and permissions"
+              icon={<Users className="h-6 w-6" />}
+              color="bg-gradient-to-br from-pink-100 to-pink-200 text-pink-600 dark:from-pink-900/20 dark:to-pink-800/30 dark:text-pink-400"
+              onClick={() => handleQuickAction('users')}
+            />
+
+            <QuickActionCard
+              title="Master Data"
+              description="Configure facilities, bed types, and currencies"
+              icon={<Settings className="h-6 w-6" />}
+              color="bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-600 dark:from-yellow-900/20 dark:to-yellow-800/30 dark:text-yellow-400"
+              onClick={() => handleQuickAction('master-data')}
+            />
+          </div>
+        </div>
+
+        {/* Content Management Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Quick Actions */}
+          {/* Blog Management */}
           <div className="lg:col-span-2">
-            <Card title="Quick Actions" subtitle="Common administrative tasks">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <QuickActionCard
-                  title="Create Homestay"
-                  description="Add a new homestay property"
-                  icon={<Plus className="h-6 w-6" />}
-                  color="bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
-                  onClick={() => handleQuickAction('create-homestay')}
-                />
-                
-                <QuickActionCard
-                  title="Bulk Create"
-                  description="Add multiple homestays at once"
-                  icon={<Home className="h-6 w-6" />}
-                  color="bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400"
-                  onClick={() => handleQuickAction('bulk-create')}
-                />
-                
-                <QuickActionCard
-                  title="Manage Users"
-                  description="User accounts and permissions"
-                  icon={<Users className="h-6 w-6" />}
-                  color="bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400"
-                  onClick={() => handleQuickAction('users')}
-                />
-                
-                <QuickActionCard
-                  title="Master Data"
-                  description="Facilities, bed types, currencies"
-                  icon={<Settings className="h-6 w-6" />}
-                  color="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400"
-                  onClick={() => handleQuickAction('master-data')}
-                />
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-900 dark:to-pink-900 p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                      <FileText className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Content Management</h3>
+                      <p className="text-purple-100 text-sm">Manage your blog and marketing content</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => router.push('/admin/blog')}
+                    className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-xl text-white font-medium transition-all duration-200 hover:scale-105 flex items-center space-x-2"
+                  >
+                    <span>View All</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </Card>
+
+              <div className="p-6 grid grid-cols-2 gap-4">
+                <div
+                  className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+                  onClick={() => router.push('/admin/blog/create')}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-blue-200 dark:bg-blue-800 rounded-lg">
+                      <Plus className="h-5 w-5 text-blue-700 dark:text-blue-300" />
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-1">New Blog Post</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Create fresh content</p>
+                </div>
+
+                <div
+                  className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+                  onClick={() => router.push('/admin/blog/analytics')}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-green-200 dark:bg-green-800 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-green-700 dark:text-green-300" />
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-green-600" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-1">Analytics</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Track performance</p>
+                </div>
+
+                <div
+                  className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+                  onClick={() => router.push('/admin/blog/tags')}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-purple-200 dark:bg-purple-800 rounded-lg">
+                      <Tag className="h-5 w-5 text-purple-700 dark:text-purple-300" />
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-1">Tags</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Organize content</p>
+                </div>
+
+                <div
+                  className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+                  onClick={() => router.push('/admin/blog/categories')}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-yellow-200 dark:bg-yellow-800 rounded-lg">
+                      <Folder className="h-5 w-5 text-yellow-700 dark:text-yellow-300" />
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-yellow-600" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-1">Categories</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Group by topics</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Recent Activity */}
