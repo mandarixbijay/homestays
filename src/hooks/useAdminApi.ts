@@ -1085,3 +1085,290 @@ export function useFormState<T>(initialState: T) {
     clearErrors,
   };
 }
+
+// ============================================================================
+// DESTINATIONS MANAGEMENT
+// ============================================================================
+
+export function useDestinations() {
+  const [destinations, setDestinations] = useState<any[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const { loading, error, execute, clearError } = useAsyncOperation<any>();
+
+  const loadDestinations = useCallback(async (params?: any) => {
+    try {
+      const filteredParams = Object.fromEntries(
+        Object.entries(params || {}).filter(([_, value]) => value !== '' && value !== undefined)
+      );
+
+      const result = await execute(async () => {
+        const response = await adminApi.getDestinations(filteredParams);
+        return response;
+      });
+
+      if (result) {
+        setDestinations(result.data || []);
+        setTotalPages(result.totalPages || 1);
+        setTotal(result.total || 0);
+      }
+      return result;
+    } catch (error) {
+      console.error('Error loading destinations:', error);
+      setDestinations([]);
+      setTotalPages(1);
+      setTotal(0);
+      throw error;
+    }
+  }, [execute]);
+
+  const createDestination = useCallback(async (data: any) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.createDestination(data);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error creating destination:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const updateDestination = useCallback(async (id: number, data: any) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.updateDestination(id, data);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error updating destination:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const deleteDestination = useCallback(async (id: number) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.deleteDestination(id);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error deleting destination:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const addHomestayToDestination = useCallback(async (homestayId: number, destinationId: number) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.addHomestayToDestination(homestayId, destinationId);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error adding homestay to destination:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const removeHomestayFromDestination = useCallback(async (homestayId: number, destinationId: number) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.removeHomestayFromDestination(homestayId, destinationId);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error removing homestay from destination:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  return {
+    destinations,
+    setDestinations,
+    totalPages,
+    total,
+    loading,
+    error,
+    loadDestinations,
+    createDestination,
+    updateDestination,
+    deleteDestination,
+    addHomestayToDestination,
+    removeHomestayFromDestination,
+    clearError
+  };
+}
+
+// ============================================================================
+// LAST MINUTE DEALS MANAGEMENT
+// ============================================================================
+
+export function useLastMinuteDeals() {
+  const [deals, setDeals] = useState<any[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const { loading, error, execute, clearError } = useAsyncOperation<any>();
+
+  const loadDeals = useCallback(async (params?: any) => {
+    try {
+      const filteredParams = Object.fromEntries(
+        Object.entries(params || {}).filter(([_, value]) => value !== '' && value !== undefined)
+      );
+
+      const result = await execute(async () => {
+        const response = await adminApi.getLastMinuteDeals(filteredParams);
+        return response;
+      });
+
+      if (result) {
+        setDeals(result.data || []);
+        setTotalPages(result.totalPages || 1);
+        setTotal(result.total || 0);
+      }
+      return result;
+    } catch (error) {
+      console.error('Error loading last minute deals:', error);
+      setDeals([]);
+      setTotalPages(1);
+      setTotal(0);
+      throw error;
+    }
+  }, [execute]);
+
+  const createDeal = useCallback(async (data: any) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.createLastMinuteDeal(data);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error creating last minute deal:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const updateDeal = useCallback(async (id: number, data: any) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.updateLastMinuteDeal(id, data);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error updating last minute deal:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const deleteDeal = useCallback(async (id: number) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.deleteLastMinuteDeal(id);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error deleting last minute deal:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  return {
+    deals,
+    setDeals,
+    totalPages,
+    total,
+    loading,
+    error,
+    loadDeals,
+    createDeal,
+    updateDeal,
+    deleteDeal,
+    clearError
+  };
+}
+
+// ============================================================================
+// TOP HOMESTAYS MANAGEMENT
+// ============================================================================
+
+export function useTopHomestays() {
+  const [topHomestays, setTopHomestays] = useState<any[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const { loading, error, execute, clearError } = useAsyncOperation<any>();
+
+  const loadTopHomestays = useCallback(async (params?: any) => {
+    try {
+      const filteredParams = Object.fromEntries(
+        Object.entries(params || {}).filter(([_, value]) => value !== '' && value !== undefined)
+      );
+
+      const result = await execute(async () => {
+        const response = await adminApi.getTopHomestays(filteredParams);
+        return response;
+      });
+
+      if (result) {
+        setTopHomestays(result.data || []);
+        setTotalPages(result.totalPages || 1);
+        setTotal(result.total || 0);
+      }
+      return result;
+    } catch (error) {
+      console.error('Error loading top homestays:', error);
+      setTopHomestays([]);
+      setTotalPages(1);
+      setTotal(0);
+      throw error;
+    }
+  }, [execute]);
+
+  const createTopHomestay = useCallback(async (data: any) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.createTopHomestay(data);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error creating top homestay:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const updateTopHomestay = useCallback(async (id: number, data: any) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.updateTopHomestay(id, data);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error updating top homestay:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  const deleteTopHomestay = useCallback(async (id: number) => {
+    try {
+      const result = await execute(async () => {
+        return await adminApi.deleteTopHomestay(id);
+      });
+      return result;
+    } catch (error) {
+      console.error('Error deleting top homestay:', error);
+      throw error;
+    }
+  }, [execute]);
+
+  return {
+    topHomestays,
+    setTopHomestays,
+    totalPages,
+    total,
+    loading,
+    error,
+    loadTopHomestays,
+    createTopHomestay,
+    updateTopHomestay,
+    deleteTopHomestay,
+    clearError
+  };
+}

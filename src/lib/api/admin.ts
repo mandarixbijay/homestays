@@ -778,6 +778,139 @@ class AdminApiClient {
   async deleteAreaUnit(id: number) {
     return this.request(`/admin/area-units/${id}`, { method: 'DELETE' });
   }
+
+  // ============================================================================
+  // DESTINATIONS MANAGEMENT
+  // ============================================================================
+
+  async getDestinations(params?: any) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return this.request(`/admin/destinations${query}`);
+  }
+
+  async getDestination(id: number) {
+    return this.request<any>(`/admin/destinations/${id}`);
+  }
+
+  async createDestination(data: any) {
+    return this.request('/admin/destinations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateDestination(id: number, data: any) {
+    return this.request(`/admin/destinations/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteDestination(id: number) {
+    return this.request(`/admin/destinations/${id}`, { method: 'DELETE' });
+  }
+
+  async addHomestayToDestination(homestayId: number, destinationId: number) {
+    return this.request('/admin/destinations/add-homestay', {
+      method: 'POST',
+      body: JSON.stringify({ homestayId, destinationId }),
+    });
+  }
+
+  async removeHomestayFromDestination(homestayId: number, destinationId: number) {
+    return this.request(`/admin/destinations/${destinationId}/homestays/${homestayId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // ============================================================================
+  // LAST MINUTE DEALS MANAGEMENT
+  // ============================================================================
+
+  async getLastMinuteDeals(params?: any) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return this.request(`/admin/last-minute-deals${query}`);
+  }
+
+  async getLastMinuteDeal(id: number) {
+    return this.request<any>(`/admin/last-minute-deals/${id}`);
+  }
+
+  async createLastMinuteDeal(data: any) {
+    return this.request('/admin/last-minute-deals', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateLastMinuteDeal(id: number, data: any) {
+    return this.request(`/admin/last-minute-deals/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteLastMinuteDeal(id: number) {
+    return this.request(`/admin/last-minute-deals/${id}`, { method: 'DELETE' });
+  }
+
+  // ============================================================================
+  // TOP HOMESTAYS MANAGEMENT
+  // ============================================================================
+
+  async getTopHomestays(params?: any) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return this.request(`/admin/top-homestays${query}`);
+  }
+
+  async getTopHomestay(id: number) {
+    return this.request<any>(`/admin/top-homestays/${id}`);
+  }
+
+  async createTopHomestay(data: any) {
+    return this.request('/admin/top-homestays', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateTopHomestay(id: number, data: any) {
+    return this.request(`/admin/top-homestays/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteTopHomestay(id: number) {
+    return this.request(`/admin/top-homestays/${id}`, { method: 'DELETE' });
+  }
 }
 
 export const adminApi = new AdminApiClient();
