@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import CategoryCard from "./landing-page-components/cards/category-card";
 import { useRouter } from "next/navigation";
@@ -15,13 +16,57 @@ const categoryCardsData = [
   { imageSrc: "/images/location/bandipur.avif", categoryName: "Bandipur" },
 ];
 
+const sectionVariants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const cardContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
 export default function Hero2() {
   const router = useRouter();
 
   return (
-    <section className="w-full py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-white overflow-x-hidden">
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }}
+      variants={sectionVariants}
+      className="w-full py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-white overflow-x-hidden"
+    >
       <div className="container mx-auto max-w-7xl">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 text-center sm:text-left">
+        <motion.div
+          variants={sectionVariants}
+          className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 text-center sm:text-left"
+        >
           <div className="mb-4 sm:mb-0">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground tracking-tight">
               Top Destinations
@@ -40,16 +85,23 @@ export default function Hero2() {
               Explore All Destinations
             </Button>
           </div> */}
-        </div>
+        </motion.div>
 
-        <div
+        <motion.div
+          variants={cardContainerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
           className="flex gap-6 sm:gap-8 overflow-x-auto scrollbar-hide snap-x snap-mandatory min-h-[300px] sm:min-h-[360px] md:min-h-[400px] touch-pan-x"
           role="region"
           aria-label="Top destinations carousel"
         >
           {categoryCardsData.map((card, index) => (
-            <div
+            <motion.div
               key={index}
+              variants={cardVariants}
+              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ duration: 0.3 }}
               className="snap-start w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0 cursor-pointer"
               onClick={() => router.push(`/search?destination=${card.categoryName.toLowerCase()}`)}
               role="button"
@@ -62,10 +114,10 @@ export default function Hero2() {
               aria-label={`View homestays in ${card.categoryName}`}
             >
               <CategoryCard {...card} />
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 }
