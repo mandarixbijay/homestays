@@ -4,8 +4,9 @@ import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
 import BlogListClient from './BlogClient';
 
-// Use on-demand revalidation via server actions
-// Cache is updated when blogs are created/updated
+// Use ISR for better performance
+// Pages are cached and revalidated in the background
+export const revalidate = 1800; // Revalidate every 30 minutes
 
 export const metadata: Metadata = {
   title: "Travel Blog | Nepal Homestays - Stories, Tips & Guides",

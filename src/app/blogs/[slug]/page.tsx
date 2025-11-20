@@ -7,13 +7,13 @@ import Footer from "@/components/footer/footer";
 import { publicBlogApi, PublicBlog } from '@/lib/api/public-blog-api';
 import BlogDetailClient from './BlogDetailClient';
 
-// Use dynamic rendering to avoid ISR fallback size limits on Vercel
+// Use ISR (Incremental Static Regeneration) for better performance
 // This ensures:
-// - No build-time fallback files (no 19MB limit issues)
-// - Server-Side Rendering (SSR) for every request (still great for SEO)
-// - New blogs are immediately accessible without rebuild
-// - Fresh content on every page load
-export const dynamic = 'force-dynamic';
+// - Pages are cached and served instantly
+// - Background revalidation keeps content fresh
+// - Much faster page loads (no SSR on every request)
+// - Great SEO with fast Time to First Byte (TTFB)
+export const revalidate = 3600; // Revalidate every hour
 
 interface Props {
   params: Promise<{ slug: string }>;
