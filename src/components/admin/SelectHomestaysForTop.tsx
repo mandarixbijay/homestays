@@ -4,7 +4,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ArrowLeft, Search, Home, Star, Crown, Target, Tag, CheckCircle, Award
+  ArrowLeft, Search, Home, Star, Crown, Target, Tag, CheckCircle, Award,
+  Grid, List, ChevronLeft, ChevronRight, Users, MapPin, User
 } from 'lucide-react';
 import {
   useHomestays, useTopHomestays
@@ -12,6 +13,8 @@ import {
 import {
   LoadingSpinner, ActionButton, useToast, Alert
 } from '@/components/admin/AdminComponents';
+
+type ViewMode = 'grid' | 'table';
 
 const CATEGORIES = [
   { value: 'editor_choice', label: "Editor's Choice" },
@@ -24,15 +27,17 @@ const CATEGORIES = [
 export default function SelectHomestaysForTop() {
   const router = useRouter();
   const { toasts, addToast } = useToast();
-  const { homestays, loading: homestaysLoading, loadHomestays } = useHomestays();
+  const { homestays, loading: homestaysLoading, total, totalPages, loadHomestays } = useHomestays();
   const { createTopHomestay } = useTopHomestays();
 
   const [topTemplate, setTopTemplate] = useState<any>(null);
   const [selectedHomestays, setSelectedHomestays] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('APPROVED');
-  const [locationFilter, setLocationFilter] = useState<string>('');
+  const [addressFilter, setAddressFilter] = useState<string>('');
   const [isCreating, setIsCreating] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   useEffect(() => {
     // Load top homestay template from localStorage
@@ -43,33 +48,21 @@ export default function SelectHomestaysForTop() {
       addToast({ type: 'error', title: 'Error', message: 'No configuration found' });
       router.push('/admin/top-homestays');
     }
-
-    // Load homestays
-    loadHomestays({ page: 1, limit: 1000 });
   }, []);
 
-  const filteredHomestays = useMemo(() => {
-    return homestays.filter(h => {
-      if (searchQuery && !h.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !h.location?.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
-      }
-      if (statusFilter !== 'all' && h.status !== statusFilter) {
-        return false;
-      }
-      if (locationFilter && !h.location?.toLowerCase().includes(locationFilter.toLowerCase())) {
-        return false;
-      }
-      return true;
-    });
-  }, [homestays, searchQuery, statusFilter, locationFilter]);
+  useEffect(() => {
+    // Load homestays with filters
+    const params: any = {
+      page: currentPage,
+      limit: 20,
+    };
 
-  const uniqueLocations = useMemo(() => {
-    const locations = homestays
-      .map(h => h.location)
-      .filter((loc): loc is string => !!loc);
-    return Array.from(new Set(locations));
-  }, [homestays]);
+    if (searchQuery) params.name = searchQuery;
+    if (statusFilter && statusFilter !== 'all') params.status = statusFilter;
+    if (addressFilter) params.address = addressFilter;
+
+    loadHomestays(params);
+  }, [currentPage, searchQuery, statusFilter, addressFilter]);
 
   const toggleHomestaySelection = (homestayId: number) => {
     setSelectedHomestays(prev =>
@@ -77,6 +70,14 @@ export default function SelectHomestaysForTop() {
         ? prev.filter(id => id !== homestayId)
         : [...prev, homestayId]
     );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedHomestays.length === homestays.length) {
+      setSelectedHomestays([]);
+    } else {
+      setSelectedHomestays(homestays.map(h => h.id));
+    }
   };
 
   const handleCreateTopHomestays = async () => {
@@ -116,6 +117,16 @@ export default function SelectHomestaysForTop() {
 
   const getCategoryLabel = (value: string) => {
     return CATEGORIES.find(c => c.value === value)?.label || value;
+  };
+
+  const getHomestayImage = (homestay: any) => {
+    return homestay.images?.find((img: any) => img.isMain)?.url || homestay.images?.[0]?.url;
+  };
+
+  const getLowestRoomPrice = (homestay: any) => {
+    if (!homestay.rooms || homestay.rooms.length === 0) return null;
+    const prices = homestay.rooms.map((r: any) => r.price).filter((p: number) => p > 0);
+    return prices.length > 0 ? Math.min(...prices) : null;
   };
 
   if (!topTemplate) {
@@ -217,21 +228,21 @@ export default function SelectHomestaysForTop() {
 
         {/* Search and Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search homestays by name or location..."
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                placeholder="Search by name..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700"
               />
             </div>
 
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
               className="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700"
             >
               <option value="all">All Status</option>
@@ -240,104 +251,318 @@ export default function SelectHomestaysForTop() {
               <option value="REJECTED">Rejected</option>
             </select>
 
-            <select
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
+            <input
+              type="text"
+              value={addressFilter}
+              onChange={(e) => { setAddressFilter(e.target.value); setCurrentPage(1); }}
+              placeholder="Filter by address..."
               className="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700"
-            >
-              <option value="">All Locations</option>
-              {uniqueLocations.map(loc => (
-                <option key={loc} value={loc}>{loc}</option>
-              ))}
-            </select>
+            />
+
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}
+              >
+                <Grid className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}
+              >
+                <List className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              <strong>{selectedHomestays.length}</strong> selected • <strong>{filteredHomestays.length}</strong> available
+              <strong>{selectedHomestays.length}</strong> selected • <strong>{total}</strong> total
             </p>
-            {selectedHomestays.length > 0 && (
-              <button
-                onClick={() => setSelectedHomestays([])}
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              >
-                Clear selection
-              </button>
-            )}
+            <div className="flex items-center space-x-3">
+              {selectedHomestays.length > 0 && (
+                <button
+                  onClick={() => setSelectedHomestays([])}
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                >
+                  Clear selection
+                </button>
+              )}
+              {homestays.length > 0 && (
+                <button
+                  onClick={toggleSelectAll}
+                  className="text-sm text-[#224240] dark:text-[#2a5350] hover:underline font-medium"
+                >
+                  {selectedHomestays.length === homestays.length ? 'Deselect All' : 'Select All on Page'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Homestays Grid */}
+        {/* Homestays Display */}
         {homestaysLoading ? (
           <div className="flex justify-center py-12">
             <LoadingSpinner size="lg" />
           </div>
-        ) : filteredHomestays.length === 0 ? (
+        ) : homestays.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-xl p-12 border border-gray-200 dark:border-gray-700 text-center">
             <Home className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400">No homestays found</p>
           </div>
-        ) : (
+        ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredHomestays.map((homestay: any) => (
-              <div
-                key={homestay.id}
-                onClick={() => toggleHomestaySelection(homestay.id)}
-                className={`relative cursor-pointer rounded-xl border-2 transition-all hover:shadow-lg ${
-                  selectedHomestays.includes(homestay.id)
-                    ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10 shadow-lg'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {selectedHomestays.includes(homestay.id) && (
-                  <div className="absolute top-3 right-3 z-10">
-                    <div className="flex items-center space-x-1">
-                      <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
-                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
+            {homestays.map((homestay: any) => {
+              const image = getHomestayImage(homestay);
+              const lowestPrice = getLowestRoomPrice(homestay);
+              const isSelected = selectedHomestays.includes(homestay.id);
+
+              return (
+                <div
+                  key={homestay.id}
+                  onClick={() => toggleHomestaySelection(homestay.id)}
+                  className={`relative cursor-pointer rounded-xl border-2 transition-all hover:shadow-lg overflow-hidden ${
+                    isSelected
+                      ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10 shadow-lg'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {isSelected && (
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className="flex items-center space-x-1">
+                        <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <Crown className="h-6 w-6 text-yellow-500 fill-yellow-500" />
                       </div>
-                      <Crown className="h-6 w-6 text-yellow-500 fill-yellow-500" />
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {homestay.mainImage ? (
-                  <img
-                    src={homestay.mainImage}
-                    alt={homestay.name}
-                    className="w-full h-48 object-cover rounded-t-xl"
-                  />
-                ) : (
-                  <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-t-xl flex items-center justify-center">
-                    <Home className="h-16 w-16 text-gray-400" />
-                  </div>
-                )}
+                  {image ? (
+                    <img
+                      src={image}
+                      alt={homestay.name}
+                      className="w-full h-48 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <Home className="h-16 w-16 text-gray-400" />
+                    </div>
+                  )}
 
-                <div className="p-4">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-1 truncate">
-                    {homestay.name}
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-2">
-                    {homestay.location || 'No location'}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                      homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                      'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    }`}>
-                      {homestay.status}
-                    </span>
-                    {homestay.price && (
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">
-                        ${homestay.price}/night
+                  <div className="p-4">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1 truncate">
+                      {homestay.name}
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mb-2">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {homestay.address || 'No address'}
+                    </p>
+
+                    {homestay.description && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
+                        {homestay.description}
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between mb-3">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                        homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                        {homestay.status}
                       </span>
+                      {lowestPrice && (
+                        <span className="text-sm font-bold text-[#224240] dark:text-[#2a5350]">
+                          NPR {lowestPrice.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+
+                    {homestay.facilities && homestay.facilities.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {homestay.facilities.slice(0, 3).map((f: any, idx: number) => (
+                          <span key={idx} className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                            {f.facility?.name || f.name}
+                          </span>
+                        ))}
+                        {homestay.facilities.length > 3 && (
+                          <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                            +{homestay.facilities.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                      <span className="flex items-center">
+                        <Users className="h-3 w-3 mr-1" />
+                        {homestay.rooms?.length || 0} room{homestay.rooms?.length !== 1 ? 's' : ''}
+                      </span>
+                      {homestay.rating && (
+                        <span className="flex items-center">
+                          <Star className="h-3 w-3 mr-1 text-yellow-500" />
+                          {homestay.rating} ({homestay.reviews || 0})
+                        </span>
+                      )}
+                    </div>
+
+                    {homestay.owner && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center">
+                        <User className="h-3 w-3 mr-1" />
+                        {homestay.owner.name}
+                      </p>
                     )}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
+          </div>
+        ) : (
+          // Table View
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                  <tr>
+                    <th className="px-4 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={selectedHomestays.length === homestays.length && homestays.length > 0}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4 text-yellow-500 rounded"
+                      />
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Homestay</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Address</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Owner</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rooms</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Price</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Facilities</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {homestays.map((homestay: any) => {
+                    const image = getHomestayImage(homestay);
+                    const lowestPrice = getLowestRoomPrice(homestay);
+                    const isSelected = selectedHomestays.includes(homestay.id);
+
+                    return (
+                      <tr
+                        key={homestay.id}
+                        className={`hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors ${
+                          isSelected ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''
+                        }`}
+                        onClick={() => toggleHomestaySelection(homestay.id)}
+                      >
+                        <td className="px-4 py-3">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              toggleHomestaySelection(homestay.id);
+                            }}
+                            className="w-4 h-4 text-yellow-500 rounded"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center space-x-3">
+                            {image ? (
+                              <img src={image} alt={homestay.name} className="w-12 h-12 rounded-lg object-cover" />
+                            ) : (
+                              <div className="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                <Home className="h-6 w-6 text-gray-400" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{homestay.name}</p>
+                              {homestay.rating && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                                  <Star className="h-3 w-3 mr-1 text-yellow-500" />
+                                  {homestay.rating} ({homestay.reviews || 0} reviews)
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            {homestay.address || '-'}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                          {homestay.owner?.name || '-'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                            homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                            'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                          }`}>
+                            {homestay.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                          {homestay.rooms?.length || 0}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-[#224240] dark:text-[#2a5350]">
+                          {lowestPrice ? `NPR ${lowestPrice.toLocaleString()}` : '-'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap gap-1 max-w-xs">
+                            {homestay.facilities?.slice(0, 2).map((f: any, idx: number) => (
+                              <span key={idx} className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                                {f.facility?.name || f.name}
+                              </span>
+                            ))}
+                            {homestay.facilities && homestay.facilities.length > 2 && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                +{homestay.facilities.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Page {currentPage} of {totalPages}
+            </p>
+            <div className="flex items-center space-x-2">
+              <ActionButton
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                variant="secondary"
+                size="sm"
+                icon={<ChevronLeft className="h-4 w-4" />}
+              >
+                Previous
+              </ActionButton>
+              <ActionButton
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                variant="secondary"
+                size="sm"
+                icon={<ChevronRight className="h-4 w-4" />}
+              >
+                Next
+              </ActionButton>
+            </div>
           </div>
         )}
       </div>
