@@ -23,6 +23,9 @@ import {
   FileText,
   User,
   ChevronRight,
+  MapPin,
+  Zap,
+  Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminAuth, useSessionManager } from "@/hooks/useSessionManager";
@@ -66,6 +69,9 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Homestays", href: "/admin/homestays", icon: Home },
     { name: "Master Data", href: "/admin/master-data", icon: Settings },
+    { name: "Destinations", href: "/admin/destinations", icon: MapPin },
+    { name: "Last Minute Deals", href: "/admin/last-minute-deals", icon: Zap },
+    { name: "Top Homestays", href: "/admin/top-homestays", icon: Star },
     { name: "Users", href: "/admin/users", icon: Users },
     {
       name: "Blog",
