@@ -104,9 +104,9 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
     const associatedIds = new Set((destination?.homestays || []).map((h: any) => h.id));
     return homestays.filter(h => !associatedIds.has(h.id));
   }, [homestays, destination?.homestays]);
-  
+
   // Pagination: compute total pages for the available homestays list
-  const totalPages = Math.max(1, Math.ceil((availableHomestays?.length || 0) / pageLimit));
+  const availablePageCount = Math.max(1, Math.ceil((availableHomestays?.length || 0) / pageLimit));
   
   // Debounced search handler
   const debouncedSearch = useCallback(
@@ -759,7 +759,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-gray-600 dark:text-gray-400">
-                            Page {currentPage} of {totalPages}
+                            Page {currentPage} of {availablePageCount}
                           </span>
                           <div className="flex gap-1">
                             <ActionButton
@@ -771,10 +771,10 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                               Previous
                             </ActionButton>
                             <ActionButton
-                              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                              onClick={() => setCurrentPage(prev => Math.min(availablePageCount, prev + 1))}
                               variant="secondary"
                               size="sm"
-                              disabled={currentPage === totalPages}
+                              disabled={currentPage === availablePageCount}
                             >
                               Next
                             </ActionButton>
