@@ -104,6 +104,21 @@ export default function HomestayProfilePage() {
         const data = await response.json();
         console.log('Homestay data received:', data);
 
+        // Handle images - support multiple formats
+        let imagesArray: string[] = [];
+        if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+          imagesArray = data.images.filter((img: string) => img && img.trim().length > 0);
+        } else if (data.imageSrc || data.image) {
+          imagesArray = [data.imageSrc || data.image];
+        }
+
+        // Fallback if no valid images
+        if (imagesArray.length === 0) {
+          imagesArray = ["/images/fallback-image.png"];
+        }
+
+        console.log('Processed images:', imagesArray);
+
         // Transform API response
         setHomestay({
           id: data.id,
@@ -111,9 +126,9 @@ export default function HomestayProfilePage() {
           address: data.address || "Nepal",
           rating: data.rating,
           reviews: data.reviews || 0,
-          imageSrc: data.imageSrc || data.image || "/images/placeholder-homestay.jpg",
-          image: data.imageSrc || data.image || "/images/placeholder-homestay.jpg",
-          images: data.images || (data.imageSrc ? [data.imageSrc] : ["/images/placeholder-homestay.jpg"]),
+          imageSrc: imagesArray[0],
+          image: imagesArray[0],
+          images: imagesArray,
           facilities: data.facilities || data.amenities || [],
           aboutDescription: data.aboutDescription || data.description || "No description available.",
           phone: data.phone || data.contactNumber,
@@ -252,11 +267,11 @@ export default function HomestayProfilePage() {
     );
   }
 
-  const images = homestay.images && homestay.images.length > 0
-    ? homestay.images
-    : [homestay.imageSrc || "/images/placeholder-homestay.jpg"];
-
+  // Use homestay.images directly since they're already processed
+  const images = homestay.images || ["/images/fallback-image.png"];
   const totalPhotos = images.length;
+
+  console.log('Rendering with images:', images);
   const totalRoomsLeft = homestay.rooms?.reduce((sum, room) => sum + (room.roomsLeft || 0), 0) || 0;
 
   // Get minimum room price if homestay-level price not available
@@ -393,7 +408,7 @@ export default function HomestayProfilePage() {
 
           {/* Image Gallery */}
           <div className="mb-12">
-            <HomestayImageGallery images={images} totalPhotos={totalPhotos} slug={slug} />
+            <HomestayImageGallery images={images} totalPhotos={totalPhotos} />
           </div>
         </motion.div>
       </section>
@@ -502,10 +517,13 @@ export default function HomestayProfilePage() {
                           {/* Room Image */}
                           <div className="relative h-48 md:h-full">
                             <Image
-                              src={room.imageUrls?.[0] || homestay.imageSrc}
+                              src={room.imageUrls?.[0] || homestay.imageSrc || "/images/fallback-image.png"}
                               alt={room.name}
                               fill
                               className="object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = "/images/fallback-image.png";
+                              }}
                             />
                           </div>
 
