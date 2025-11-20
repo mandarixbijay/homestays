@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import {
   Zap, Plus, Eye, Edit, Trash2, X, Search, Grid, List, RefreshCw,
   SlidersHorizontal, FileDown, Calendar, Percent, DollarSign, Home,
-  Clock, Tag, BarChart3, TrendingUp, AlertCircle
+  Clock, Tag, BarChart3, TrendingUp, AlertCircle, Star, MapPin, User, Table
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from 'lodash';
@@ -18,7 +18,7 @@ import {
   LoadingSpinner, Alert, ActionButton, Card, Modal, EmptyState, Input, useToast
 } from '@/components/admin/AdminComponents';
 
-type ViewMode = 'grid' | 'list';
+type ViewMode = 'grid' | 'list' | 'table';
 
 interface DealFormData {
   homestayId: number;
@@ -29,6 +29,28 @@ interface DealFormData {
   isActive: boolean;
   description?: string;
 }
+
+// Helper functions for price calculations
+const calculateOriginalPrice = (homestay: any): number | null => {
+  if (!homestay?.rooms || homestay.rooms.length === 0) return null;
+  const prices = homestay.rooms.map((r: any) => r.price).filter((p: number) => p > 0);
+  return prices.length > 0 ? Math.min(...prices) : null;
+};
+
+const calculateDiscountedPrice = (original: number, discount: number, discountType: string): number => {
+  if (discountType === 'PERCENTAGE') {
+    return original * (1 - discount / 100);
+  }
+  return Math.max(0, original - discount);
+};
+
+const calculateSavings = (original: number, discounted: number): number => {
+  return original - discounted;
+};
+
+const getHomestayImage = (homestay: any) => {
+  return homestay?.images?.find((img: any) => img.isMain)?.url || homestay?.images?.[0]?.url;
+};
 
 const StatCard: React.FC<{
   title: string;
@@ -140,9 +162,9 @@ const DealCard: React.FC<{
         </div>
 
         <div className="relative h-48 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 overflow-hidden">
-          {deal.homestay?.images?.[0]?.url ? (
+          {getHomestayImage(deal.homestay) ? (
             <img
-              src={deal.homestay.images[0].url}
+              src={getHomestayImage(deal.homestay)}
               alt={deal.homestay.name}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
@@ -153,7 +175,7 @@ const DealCard: React.FC<{
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
             <div className="absolute bottom-4 left-4 right-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-between">
                 <div className={\`px-4 py-2 rounded-xl \${deal.discountType === 'PERCENTAGE' ? 'bg-yellow-500' : 'bg-orange-500'} shadow-lg\`}>
                   <div className="flex items-center space-x-2">
                     {deal.discountType === 'PERCENTAGE' ? <Percent className="h-5 w-5 text-white" /> : <DollarSign className="h-5 w-5 text-white" />}
@@ -161,6 +183,17 @@ const DealCard: React.FC<{
                   </div>
                   <p className="text-xs text-white/90 mt-0.5">OFF</p>
                 </div>
+                {(() => {
+                  const originalPrice = calculateOriginalPrice(deal.homestay);
+                  const discountedPrice = originalPrice ? calculateDiscountedPrice(originalPrice, deal.discount, deal.discountType) : null;
+                  const savings = originalPrice && discountedPrice ? calculateSavings(originalPrice, discountedPrice) : null;
+                  return savings ? (
+                    <div className="px-3 py-1 bg-black/50 backdrop-blur-sm rounded-lg">
+                      <p className="text-xs text-white/80">Save</p>
+                      <p className="text-sm font-bold text-white">NPR {Math.round(savings).toLocaleString()}</p>
+                    </div>
+                  ) : null;
+                })()}
               </div>
             </div>
           </div>
@@ -170,8 +203,63 @@ const DealCard: React.FC<{
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-1">
             {deal.homestay?.name || 'Unnamed Homestay'}
           </h3>
+
+          {/* Address and rating */}
+          {deal.homestay?.address && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1 flex items-center">
+              <MapPin className="h-3 w-3 mr-1" />
+              {deal.homestay.address}
+            </p>
+          )}
+          {deal.homestay?.rating && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 flex items-center">
+              <Star className="h-3 w-3 mr-1 text-yellow-500 fill-yellow-500" />
+              {deal.homestay.rating} ({deal.homestay.reviews || 0} reviews)
+            </p>
+          )}
+
+          {/* Price comparison */}
+          {(() => {
+            const originalPrice = calculateOriginalPrice(deal.homestay);
+            const discountedPrice = originalPrice ? calculateDiscountedPrice(originalPrice, deal.discount, deal.discountType) : null;
+            return originalPrice && discountedPrice ? (
+              <div className="mb-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Original Price</p>
+                    <p className="text-sm line-through text-gray-600 dark:text-gray-400">
+                      NPR {originalPrice.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-green-600 dark:text-green-400">Deal Price</p>
+                    <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                      NPR {Math.round(discountedPrice).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null;
+          })()}
+
           {deal.description && (
             <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">{deal.description}</p>
+          )}
+
+          {/* Facilities */}
+          {deal.homestay?.facilities && deal.homestay.facilities.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-3">
+              {deal.homestay.facilities.slice(0, 3).map((f: any, idx: number) => (
+                <span key={idx} className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded">
+                  {f.facility?.name || f.name}
+                </span>
+              ))}
+              {deal.homestay.facilities.length > 3 && (
+                <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                  +{deal.homestay.facilities.length - 3}
+                </span>
+              )}
+            </div>
           )}
           
           <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4 space-x-4">
@@ -621,6 +709,8 @@ export default function LastMinuteDealsManagement() {
                 <Grid className="h-5 w-5" /></button>
               <button onClick={() => setViewMode('list')} className={\`p-2 rounded-lg transition-colors \${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}\`}>
                 <List className="h-5 w-5" /></button>
+              <button onClick={() => setViewMode('table')} className={\`p-2 rounded-lg transition-colors \${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}\`}>
+                <Table className="h-5 w-5" /></button>
               <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 hover:bg-gray-200 transition-colors">
                 <RefreshCw className={\`h-5 w-5 \${loading ? 'animate-spin' : ''}\`} /></button>
             </div>
@@ -651,6 +741,144 @@ export default function LastMinuteDealsManagement() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12">
             <EmptyState icon={<Zap className="h-16 w-16" />} title="No deals found" description="Create your first last minute deal"
               action={{ label: 'Create Deal', onClick: () => setShowFormModal(true), icon: <Plus className="h-4 w-4" />, variant: 'primary' }} /></div>
+        ) : viewMode === 'table' ? (
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Homestay</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Discount</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Original Price</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Deal Price</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Savings</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Period</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {deals.map((deal: any) => {
+                    const originalPrice = calculateOriginalPrice(deal.homestay);
+                    const discountedPrice = originalPrice ? calculateDiscountedPrice(originalPrice, deal.discount, deal.discountType) : null;
+                    const savings = originalPrice && discountedPrice ? calculateSavings(originalPrice, discountedPrice) : null;
+                    const homestayImage = getHomestayImage(deal.homestay);
+                    const isExpired = new Date(deal.endDate) < new Date();
+                    const isActive = deal.isActive && !isExpired;
+
+                    return (
+                      <tr key={deal.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
+                              {homestayImage ? (
+                                <img src={homestayImage} alt={deal.homestay?.name || 'Homestay'} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Home className="h-8 w-8 text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-gray-900 dark:text-white truncate">{deal.homestay?.name || 'N/A'}</p>
+                              {deal.homestay?.address && (
+                                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+                                  <MapPin className="h-3 w-3 mr-1" />
+                                  {deal.homestay.address}
+                                </p>
+                              )}
+                              {deal.homestay?.rating && (
+                                <div className="flex items-center mt-1">
+                                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
+                                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                                    {deal.homestay.rating} ({deal.homestay.reviews || 0})
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center space-x-2">
+                            {deal.discountType === 'PERCENTAGE' ? (
+                              <Percent className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                            ) : (
+                              <DollarSign className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                            )}
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {deal.discountType === 'PERCENTAGE' ? `${deal.discount}%` : `NPR ${deal.discount}`}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {originalPrice ? (
+                            <span className="text-gray-500 dark:text-gray-400 line-through">
+                              NPR {originalPrice.toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 dark:text-gray-500 text-sm">N/A</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {discountedPrice ? (
+                            <span className="font-bold text-green-600 dark:text-green-400">
+                              NPR {Math.round(discountedPrice).toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 dark:text-gray-500 text-sm">N/A</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {savings ? (
+                            <span className="font-semibold text-green-600 dark:text-green-400">
+                              NPR {Math.round(savings).toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 dark:text-gray-500 text-sm">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm">
+                            <p className="text-gray-900 dark:text-white">{new Date(deal.startDate).toLocaleDateString()}</p>
+                            <p className="text-gray-500 dark:text-gray-400">to {new Date(deal.endDate).toLocaleDateString()}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={\`inline-flex px-3 py-1 rounded-full text-xs font-semibold \${
+                            isActive
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                              : isExpired
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                          }\`}>
+                            {isActive ? 'Active' : isExpired ? 'Expired' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end space-x-2">
+                            <button
+                              onClick={() => setEditingDeal(deal)}
+                              className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                              title="Edit"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(deal.id)}
+                              className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         ) : (
           <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
             <AnimatePresence mode="popLayout">

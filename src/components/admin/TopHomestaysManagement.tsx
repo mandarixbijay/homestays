@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import {
   Star, Plus, Eye, Edit, Trash2, X, Search, Grid, List, RefreshCw,
   SlidersHorizontal, FileDown, Award, TrendingUp, Crown, Home, Tag,
-  BarChart3, Target
+  BarChart3, Target, MapPin, User, Table
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from 'lodash';
@@ -18,7 +18,7 @@ import {
   LoadingSpinner, Alert, ActionButton, Card, Modal, EmptyState, Input, useToast
 } from '@/components/admin/AdminComponents';
 
-type ViewMode = 'grid' | 'list';
+type ViewMode = 'grid' | 'list' | 'table';
 
 interface TopHomestayFormData {
   homestayId: number;
@@ -35,6 +35,18 @@ const CATEGORIES = [
   { value: 'best_value', label: 'Best Value' },
   { value: 'trending', label: 'Trending' }
 ];
+
+// Helper functions for homestay data
+const getPriceRange = (homestay: any): { min: number; max: number } | null => {
+  if (!homestay?.rooms || homestay.rooms.length === 0) return null;
+  const prices = homestay.rooms.map((r: any) => r.price).filter((p: number) => p > 0);
+  if (prices.length === 0) return null;
+  return { min: Math.min(...prices), max: Math.max(...prices) };
+};
+
+const getHomestayImage = (homestay: any) => {
+  return homestay?.images?.find((img: any) => img.isMain)?.url || homestay?.images?.[0]?.url;
+};
 
 const StatCard: React.FC<{
   title: string;
@@ -138,7 +150,58 @@ const TopHomestayCard: React.FC<{
 
         <div className="p-5">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-1">{topHomestay.homestay?.name || 'Unnamed'}</h3>
-          
+
+          {topHomestay.homestay?.address && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center mb-2">
+              <MapPin className="h-3.5 w-3.5 mr-1" />
+              {topHomestay.homestay.address}
+            </p>
+          )}
+
+          {topHomestay.homestay?.rating && (
+            <div className="flex items-center mb-3">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+              <span className="text-sm font-semibold text-gray-900 dark:text-white mr-1">
+                {topHomestay.homestay.rating}
+              </span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                ({topHomestay.homestay.reviews || 0} reviews)
+              </span>
+            </div>
+          )}
+
+          {(() => {
+            const priceRange = getPriceRange(topHomestay.homestay);
+            return priceRange ? (
+              <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Price Range</p>
+                <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  {priceRange.min === priceRange.max
+                    ? `NPR ${priceRange.min.toLocaleString()}`
+                    : `NPR ${priceRange.min.toLocaleString()} - ${priceRange.max.toLocaleString()}`}
+                </p>
+              </div>
+            ) : null;
+          })()}
+
+          {topHomestay.homestay?.facilities && topHomestay.homestay.facilities.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Facilities</p>
+              <div className="flex flex-wrap gap-1">
+                {topHomestay.homestay.facilities.slice(0, 3).map((f: any, idx: number) => (
+                  <span key={idx} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                    {f.facility?.name || 'N/A'}
+                  </span>
+                ))}
+                {topHomestay.homestay.facilities.length > 3 && (
+                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded text-xs font-semibold">
+                    +{topHomestay.homestay.facilities.length - 3}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-2 mb-3">
             <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">
               {topHomestay.strategy === 'MANUAL' ? 'Manual' : 'Insight Based'}
@@ -622,6 +685,8 @@ export default function TopHomestaysManagement() {
                 <Grid className="h-5 w-5" /></button>
               <button onClick={() => setViewMode('list')} className={\`p-2 rounded-lg transition-colors \${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}\`}>
                 <List className="h-5 w-5" /></button>
+              <button onClick={() => setViewMode('table')} className={\`p-2 rounded-lg transition-colors \${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}\`}>
+                <Table className="h-5 w-5" /></button>
               <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 hover:bg-gray-200 transition-colors">
                 <RefreshCw className={\`h-5 w-5 \${loading ? 'animate-spin' : ''}\`} /></button>
             </div>
@@ -660,6 +725,141 @@ export default function TopHomestaysManagement() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12">
             <EmptyState icon={<Star className="h-16 w-16" />} title="No top homestays" description={hasFilters ? "No results" : "Add your first top homestay"}
               action={{ label: hasFilters ? 'Clear' : 'Add', onClick: hasFilters ? handleClearFilters : () => setShowFormModal(true), icon: <Plus className="h-4 w-4" />, variant: 'primary' }} /></div>
+        ) : viewMode === 'table' ? (
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Homestay</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Price Range</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Strategy</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Category</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Priority</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {topHomestays.map((topHomestay: any) => {
+                    const priceRange = getPriceRange(topHomestay.homestay);
+                    const homestayImage = getHomestayImage(topHomestay.homestay);
+                    const getCategoryBadge = (category?: string) => {
+                      if (!category) return null;
+                      const cat = CATEGORIES.find(c => c.value === category);
+                      return cat ? cat.label : category;
+                    };
+
+                    return (
+                      <tr key={topHomestay.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center space-x-4">
+                            <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
+                              {homestayImage ? (
+                                <img src={homestayImage} alt={topHomestay.homestay?.name || 'Homestay'} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Home className="h-8 w-8 text-gray-400" />
+                                </div>
+                              )}
+                              <div className="absolute top-1 right-1">
+                                <Crown className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                              </div>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-gray-900 dark:text-white truncate">{topHomestay.homestay?.name || 'N/A'}</p>
+                              {topHomestay.homestay?.address && (
+                                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+                                  <MapPin className="h-3 w-3 mr-1" />
+                                  {topHomestay.homestay.address}
+                                </p>
+                              )}
+                              {topHomestay.homestay?.rating && (
+                                <div className="flex items-center mt-1">
+                                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
+                                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                                    {topHomestay.homestay.rating} ({topHomestay.homestay.reviews || 0})
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {priceRange ? (
+                            <div>
+                              <p className="font-semibold text-gray-900 dark:text-white">
+                                {priceRange.min === priceRange.max
+                                  ? `NPR ${priceRange.min.toLocaleString()}`
+                                  : `NPR ${priceRange.min.toLocaleString()}`}
+                              </p>
+                              {priceRange.min !== priceRange.max && (
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  to NPR {priceRange.max.toLocaleString()}
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 dark:text-gray-500 text-sm">N/A</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                            {topHomestay.strategy === 'MANUAL' ? 'Manual' : 'Insight Based'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {topHomestay.category ? (
+                            <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                              {getCategoryBadge(topHomestay.category)}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 dark:text-gray-500 text-sm">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {topHomestay.priority ? (
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {topHomestay.priority}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 dark:text-gray-500 text-sm">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={\`inline-flex px-3 py-1 rounded-full text-xs font-semibold \${
+                            topHomestay.isActive
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                          }\`}>
+                            {topHomestay.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end space-x-2">
+                            <button
+                              onClick={() => setEditingItem(topHomestay)}
+                              className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                              title="Edit"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(topHomestay.id)}
+                              className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         ) : (
           <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
             <AnimatePresence mode="popLayout">
