@@ -7,9 +7,6 @@ import DealCard from "./landing-page-components/cards/deal-card";
 import { useRouter } from "next/navigation";
 import { format, addDays } from "date-fns";
 
-// API URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://13.61.8.56:3001";
-
 // Helper function to get rating category color
 const getRatingColor = (rating: number | null) => {
   if (!rating) return "bg-gray-500";
@@ -82,7 +79,7 @@ export default function Hero1() {
     const fetchDeals = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/homestays/last-minute-deals?page=1&limit=12`);
+        const response = await fetch('/api/homestays/last-minute-deals?page=1&limit=12');
         if (!response.ok) throw new Error("Failed to fetch deals");
         const data = await response.json();
         setDeals(data.data || []);
