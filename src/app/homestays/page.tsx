@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Star, MapPin, Users, Wifi, Car, Coffee, ChevronRight, ChevronLeft } from "lucide-react";
+import { Star, MapPin, Users, Wifi, Car, Coffee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
+import Hero from "@/components/landing-page/hero";
 
 interface Homestay {
   id: number;
@@ -39,59 +40,48 @@ const amenityIcons: Record<string, React.ReactNode> = {
   "Breakfast": <Coffee className="h-4 w-4" />,
 };
 
+const getRatingColor = (rating: number | null) => {
+  if (!rating) return "bg-gray-500";
+  if (rating >= 9.5) return "bg-primary";
+  if (rating >= 9.0) return "bg-accent";
+  if (rating >= 8.0) return "bg-warning";
+  return "bg-gray-500";
+};
+
+const getRatingText = (rating: number | null, reviews: number) => {
+  if (!rating) return "No rating";
+  if (rating >= 9.5) return "Exceptional";
+  if (rating >= 9.0) return "Wonderful";
+  if (rating >= 8.0) return "Very Good";
+  return "Good";
+};
+
 export default function AllHomestaysPage() {
   const router = useRouter();
-  const [topHomestays, setTopHomestays] = useState<Homestay[]>([]);
   const [allHomestays, setAllHomestays] = useState<Homestay[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
-  // Fetch top homestays
-  useEffect(() => {
-    const fetchTopHomestays = async () => {
-      try {
-        const response = await fetch('/api/homestays/top-homestays?limit=6');
-        if (response.ok) {
-          const data = await response.json();
-          setTopHomestays(data.data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching top homestays:', error);
-      }
-    };
-
-    fetchTopHomestays();
-  }, []);
+  const [total, setTotal] = useState(0);
+  const [sortOption, setSortOption] = useState("price-low-high");
 
   // Fetch all homestays
   useEffect(() => {
     const fetchAllHomestays = async () => {
-      if (page === 1) {
-        setLoading(true);
-      } else {
-        setLoadingMore(true);
-      }
+      setLoading(true);
 
       try {
         const response = await fetch(`/api/homestays/search?page=${page}&limit=12`);
         if (response.ok) {
           const data = await response.json();
-
-          if (page === 1) {
-            setAllHomestays(data.data || []);
-          } else {
-            setAllHomestays(prev => [...prev, ...(data.data || [])]);
-          }
-
+          setAllHomestays(data.data || []);
           setTotalPages(data.totalPages || 1);
+          setTotal(data.total || 0);
         }
       } catch (error) {
         console.error('Error fetching homestays:', error);
       } finally {
         setLoading(false);
-        setLoadingMore(false);
       }
     };
 
@@ -110,6 +100,32 @@ export default function AllHomestaysPage() {
     return `${slugified}-id-${id}`;
   };
 
+  // Sort homestays
+  const sortedHomestays = useMemo(() => {
+    return [...allHomestays].sort((a, b) => {
+      if (sortOption === "price-low-high") {
+        return (a.nightlyPrice || 0) - (b.nightlyPrice || 0);
+      } else if (sortOption === "price-high-low") {
+        return (b.nightlyPrice || 0) - (a.nightlyPrice || 0);
+      } else if (sortOption === "rating") {
+        return (b.rating || 0) - (a.rating || 0);
+      } else if (sortOption === "discount") {
+        const getDiscountValue = (homestay: Homestay) => {
+          if (homestay.deal) {
+            if (homestay.deal.discountType === 'PERCENTAGE') {
+              return homestay.deal.discount || 0;
+            } else {
+              return homestay.originalPrice ? ((homestay.deal.discount / homestay.originalPrice) * 100) : 0;
+            }
+          }
+          return 0;
+        };
+        return getDiscountValue(b) - getDiscountValue(a);
+      }
+      return 0;
+    });
+  }, [sortOption, allHomestays]);
+
   const HomestayCard = ({ homestay }: { homestay: Homestay }) => {
     const slug = generateProfileSlug(homestay.name, homestay.address, homestay.id);
     const displayRating = homestay.rating || 4.5;
@@ -122,11 +138,11 @@ export default function AllHomestaysPage() {
         viewport={{ once: true }}
       >
         <Card
-          className="overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group h-full"
+          className="overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group h-full flex flex-col"
           onClick={() => router.push(`/homestays/profile/${slug}`)}
         >
           {/* Image */}
-          <div className="relative h-56 overflow-hidden">
+          <div className="relative h-56 overflow-hidden flex-shrink-0">
             <Image
               src={homestay.imageSrc}
               alt={homestay.name}
@@ -151,21 +167,22 @@ export default function AllHomestaysPage() {
               )}
             </div>
 
-            {/* Rating */}
-            <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
-              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <span className="text-sm font-semibold">{displayRating.toFixed(1)}</span>
+            {/* Rating Badge */}
+            <div className={`absolute top-3 right-3 px-3 py-1.5 rounded-lg text-white text-sm font-semibold ${getRatingColor(homestay.rating)}`}>
+              <div className="flex items-center gap-1">
+                <span>{displayRating.toFixed(1)}</span>
+              </div>
             </div>
           </div>
 
           {/* Content */}
-          <div className="p-5">
+          <div className="p-5 flex flex-col flex-grow">
             <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">
               {homestay.name}
             </h3>
 
             <div className="flex items-center gap-1 text-gray-600 mb-3">
-              <MapPin className="h-4 w-4" />
+              <MapPin className="h-4 w-4 flex-shrink-0" />
               <span className="text-sm line-clamp-1">{homestay.address}</span>
             </div>
 
@@ -193,25 +210,27 @@ export default function AllHomestaysPage() {
               )}
             </div>
 
-            {/* Pricing */}
-            <div className="flex items-end justify-between pt-4 border-t">
-              <div>
-                {homestay.originalPrice && homestay.originalPrice > homestay.nightlyPrice && (
-                  <p className="text-sm text-gray-500 line-through">
-                    NPR {homestay.originalPrice.toLocaleString()}
-                  </p>
-                )}
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-gray-900">
-                    NPR {homestay.nightlyPrice.toLocaleString()}
-                  </span>
-                  <span className="text-sm text-gray-600">/night</span>
+            {/* Pricing - pushed to bottom */}
+            <div className="mt-auto pt-4 border-t">
+              <div className="flex items-end justify-between">
+                <div>
+                  {homestay.originalPrice && homestay.originalPrice > homestay.nightlyPrice && (
+                    <p className="text-sm text-gray-500 line-through">
+                      NPR {homestay.originalPrice.toLocaleString()}
+                    </p>
+                  )}
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-gray-900">
+                      NPR {homestay.nightlyPrice.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-gray-600">/night</span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-1 text-sm text-gray-600">
-                <Users className="h-4 w-4" />
-                <span>Max {homestay.maxOccupancy}</span>
+                <div className="flex items-center gap-1 text-sm text-gray-600">
+                  <Users className="h-4 w-4" />
+                  <span>Max {homestay.maxOccupancy}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -224,67 +243,39 @@ export default function AllHomestaysPage() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Discover Amazing Homestays
-            </h1>
-            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-              Find your perfect home away from home across Nepal
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Top Homestays Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Top Homestays</h2>
-              <p className="text-gray-600">Handpicked favorites for an unforgettable stay</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {topHomestays.length > 0 ? (
-              topHomestays.map((homestay) => (
-                <HomestayCard key={homestay.id} homestay={homestay} />
-              ))
-            ) : (
-              Array.from({ length: 6 }).map((_, idx) => (
-                <Card key={idx} className="overflow-hidden">
-                  <Skeleton className="h-56 w-full" />
-                  <div className="p-5 space-y-3">
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-8 w-full" />
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
+      {/* Hero Component from Landing Page */}
+      <Hero />
 
       {/* All Homestays Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">All Homestays</h2>
-            <p className="text-gray-600">Explore our complete collection of homestays</p>
+          {/* Header with Sort */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                {loading ? "Loading..." : `${total} Homestays Available`}
+              </h2>
+              <p className="text-gray-600">Find your perfect home away from home</p>
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">Sort by:</label>
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="price-low-high">Price: Low to High</option>
+                <option value="price-high-low">Price: High to Low</option>
+                <option value="rating">Highest Rating</option>
+                <option value="discount">Best Discount</option>
+              </select>
+            </div>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {Array.from({ length: 12 }).map((_, idx) => (
                 <Card key={idx} className="overflow-hidden">
                   <Skeleton className="h-56 w-full" />
@@ -297,43 +288,47 @@ export default function AllHomestaysPage() {
                 </Card>
               ))}
             </div>
-          ) : (
+          ) : sortedHomestays.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {allHomestays.map((homestay) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {sortedHomestays.map((homestay) => (
                   <HomestayCard key={homestay.id} homestay={homestay} />
                 ))}
               </div>
 
-              {/* Load More Button */}
-              {page < totalPages && (
-                <div className="flex justify-center mt-12">
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-12">
                   <Button
-                    onClick={() => setPage(prev => prev + 1)}
-                    disabled={loadingMore}
-                    size="lg"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+                    onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                    disabled={page === 1}
+                    variant="outline"
+                    className="px-6"
                   >
-                    {loadingMore ? (
-                      <>
-                        <span className="animate-spin mr-2">⏳</span>
-                        Loading...
-                      </>
-                    ) : (
-                      <>
-                        Load More Homestays
-                        <ChevronRight className="ml-2 h-5 w-5" />
-                      </>
-                    )}
+                    Previous
+                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">
+                      Page {page} of {totalPages}
+                    </span>
+                  </div>
+
+                  <Button
+                    onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={page === totalPages}
+                    variant="outline"
+                    className="px-6"
+                  >
+                    Next
                   </Button>
                 </div>
               )}
-
-              {/* Pagination Info */}
-              <div className="text-center mt-8 text-gray-600">
-                Showing {allHomestays.length} of {totalPages * 12} homestays
-              </div>
             </>
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-gray-600 text-lg">No homestays found. Please try again later.</p>
+            </div>
           )}
         </div>
       </section>
