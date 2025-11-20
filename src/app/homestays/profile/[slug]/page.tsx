@@ -873,10 +873,7 @@ export default function HomestayProfilePage() {
                                 >
                                   <Button
                                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      handleBookRoom(room, 0);
-                                    }}
+                                    onClick={() => handleBookRoom(room, 0)}
                                   >
                                     Book Now
                                     <ChevronRight className="ml-2 h-4 w-4" />
