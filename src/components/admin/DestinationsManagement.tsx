@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import {
   MapPin, Plus, Eye, Edit, Trash2, X, Search, Grid, List, RefreshCw,
   SlidersHorizontal, FileDown, Star, Home, Link as LinkIcon, Unlink,
-  TrendingUp, Image as ImageIcon
+  TrendingUp, Image as ImageIcon, BarChart3
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from 'lodash';
@@ -408,6 +408,7 @@ export default function DestinationsManagement() {
   const [editingDestination, setEditingDestination] = useState<any | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'analytics'>('overview');
 
   const debouncedLoadData = useMemo(
     () => debounce((params: any) => {
@@ -516,6 +517,29 @@ export default function DestinationsManagement() {
     };
   }, [destinations, total]);
 
+  const analyticsData = useMemo(() => {
+    // Top 5 destinations by homestay count
+    const topByHomestays = [...destinations]
+      .sort((a, b) => (b._count?.homestays || 0) - (a._count?.homestays || 0))
+      .slice(0, 5);
+
+    // Distribution metrics
+    const avgHomestaysPerDestination = destinations.length > 0
+      ? (destinations.reduce((sum, d) => sum + (d._count?.homestays || 0), 0) / destinations.length).toFixed(1)
+      : '0';
+
+    const destinationsWithoutHomestays = destinations.filter(d => (d._count?.homestays || 0) === 0).length;
+
+    return {
+      topByHomestays,
+      avgHomestaysPerDestination,
+      destinationsWithoutHomestays,
+      coverageRate: destinations.length > 0
+        ? (((destinations.length - destinationsWithoutHomestays) / destinations.length) * 100).toFixed(1)
+        : '0'
+    };
+  }, [destinations]);
+
   if (status === 'loading') return (<div className="min-h-screen flex items-center justify-center"><LoadingSpinner size="lg" text="Loading..." /></div>);
   if (session?.user?.role !== 'ADMIN') return null;
 
@@ -597,6 +621,128 @@ export default function DestinationsManagement() {
           />
         </div>
 
+        {/* Tabs */}
+        <div className="mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                  activeTab === 'overview'
+                    ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>Overview</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                  activeTab === 'analytics'
+                    ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Analytics</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Analytics View */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-6 mb-8">
+            {/* Distribution Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <StatCard
+                title="Avg Homestays/Destination"
+                value={analyticsData.avgHomestaysPerDestination}
+                color="teal"
+                icon={<TrendingUp className="h-6 w-6" />}
+                subtitle="Average per destination"
+              />
+              <StatCard
+                title="Coverage Rate"
+                value={`${analyticsData.coverageRate}%`}
+                color="green"
+                icon={<TrendingUp className="h-6 w-6" />}
+                subtitle="Destinations with homestays"
+              />
+              <StatCard
+                title="Empty Destinations"
+                value={analyticsData.destinationsWithoutHomestays}
+                color="yellow"
+                icon={<MapPin className="h-6 w-6" />}
+                subtitle="Needs attention"
+              />
+            </div>
+
+            {/* Top Destinations by Homestay Count */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <Star className="h-5 w-5 mr-2 text-[#224240]" />
+                Top Destinations by Homestay Count
+              </h3>
+              <div className="space-y-4">
+                {analyticsData.topByHomestays.map((dest: any, idx: number) => {
+                  const maxHomestays = analyticsData.topByHomestays[0]?._count?.homestays || 1;
+                  const percentage = ((dest._count?.homestays || 0) / maxHomestays) * 100;
+                  return (
+                    <div key={dest.id} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${
+                            idx === 0 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                            idx === 1 ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' :
+                            idx === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                            'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                          }`}>
+                            <span className="text-sm font-bold">#{idx + 1}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{dest.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {dest.isTopDestination && <span className="text-yellow-600 dark:text-yellow-400">★ Top </span>}
+                              Priority: {dest.priority || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-[#224240] dark:text-[#2a5350]">
+                            {dest._count?.homestays || 0}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">homestays</p>
+                        </div>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percentage}%` }}
+                          transition={{ duration: 0.5, delay: idx * 0.1 }}
+                          className="h-full bg-gradient-to-r from-[#224240] to-[#2a5350] rounded-full"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+                {analyticsData.topByHomestays.length === 0 && (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    No destination data available
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'overview' && (
+          <>
         {/* Filters & Actions Bar */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
@@ -788,6 +934,8 @@ export default function DestinationsManagement() {
               </ActionButton>
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
 
