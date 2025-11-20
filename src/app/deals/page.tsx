@@ -7,14 +7,16 @@ import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Filter, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { DateGuestLocationPicker } from "@/components/homestay/components/details/date-guest-location-picker";
+import { Filter, Loader2, ChevronLeft, ChevronRight, Search as SearchIcon, X, Calendar as CalendarIcon, Users, Plus, Minus } from "lucide-react";
 import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import DealCard from "@/components/landing-page/landing-page-components/cards/deal-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 // Helper functions from hero1.tsx
 const getRatingColor = (rating: number | null) => {
@@ -93,96 +95,167 @@ function DealsPageContent() {
 
   const [sortOption, setSortOption] = useState("price-low-high");
   const [deals, setDeals] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [searchLocation, setSearchLocation] = useState(location || "");
+  const [searchDate, setSearchDate] = useState<DateRange | undefined>(initialDate);
+  const [searchRooms, setSearchRooms] = useState<Room[]>(initialRooms);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [isGuestPopoverOpen, setIsGuestPopoverOpen] = useState(false);
+  const [isCheckInOpen, setIsCheckInOpen] = useState(false);
+  const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
   const dealsPerPage = 12;
 
-  // Fetch deals from API
-  useEffect(() => {
-    const fetchDeals = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `/api/homestays/last-minute-deals?page=${currentPage}&limit=${dealsPerPage}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch deals");
-        const data = await response.json();
-        setDeals(data.data || []);
-        setTotalPages(data.totalPages || 1);
-        setTotal(data.total || 0);
-      } catch (error) {
-        console.error("Error fetching deals:", error);
-        setDeals([]);
-      } finally {
-        setLoading(false);
+  // Fetch deals with availability check
+  const fetchDeals = async (searchParams?: {
+    location?: string;
+    checkIn?: string;
+    checkOut?: string;
+    rooms?: Room[];
+    page?: number;
+  }) => {
+    try {
+      setLoading(true);
+
+      const payload: any = {
+        page: searchParams?.page || currentPage,
+        limit: dealsPerPage,
+      };
+
+      // Add location if specified
+      if (searchParams?.location) {
+        payload.location = searchParams.location;
       }
+
+      // Add dates if specified
+      if (searchParams?.checkIn && searchParams?.checkOut) {
+        payload.checkIn = searchParams.checkIn;
+        payload.checkOut = searchParams.checkOut;
+      }
+
+      // Add rooms if specified
+      if (searchParams?.rooms && searchParams.rooms.length > 0) {
+        payload.rooms = searchParams.rooms;
+      }
+
+      const response = await fetch('/api/bookings/check-availability/deals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch deals");
+      const data = await response.json();
+
+      setDeals(data.homestays || []);
+      setTotalPages(data.totalPages || 1);
+      setTotal(data.totalCount || 0);
+      setHasSearched(true);
+    } catch (error) {
+      console.error("Error fetching deals:", error);
+      setDeals([]);
+      setTotalPages(1);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial load - fetch all deals
+  useEffect(() => {
+    fetchDeals({ page: 1 });
+  }, []);
+
+  // Search handler
+  const handleSearchClick = () => {
+    const searchParams: any = {
+      page: 1, // Reset to page 1 on new search
     };
 
-    fetchDeals();
+    if (searchLocation) {
+      searchParams.location = searchLocation;
+    }
+
+    if (searchDate?.from && searchDate?.to) {
+      searchParams.checkIn = format(searchDate.from, "yyyy-MM-dd");
+      searchParams.checkOut = format(searchDate.to, "yyyy-MM-dd");
+    }
+
+    if (searchRooms && searchRooms.length > 0) {
+      searchParams.rooms = searchRooms;
+    }
+
+    setCurrentPage(1);
+    fetchDeals(searchParams);
+  };
+
+  // Clear search handler
+  const handleClearSearch = () => {
+    setSearchLocation("");
+    setSearchDate(undefined);
+    setSearchRooms([{ adults: 2, children: 0 }]);
+    setCurrentPage(1);
+    fetchDeals({ page: 1 });
+  };
+
+  // Handle pagination
+  useEffect(() => {
+    if (hasSearched && currentPage > 1) {
+      const searchParams: any = { page: currentPage };
+
+      if (searchLocation) searchParams.location = searchLocation;
+      if (searchDate?.from && searchDate?.to) {
+        searchParams.checkIn = format(searchDate.from, "yyyy-MM-dd");
+        searchParams.checkOut = format(searchDate.to, "yyyy-MM-dd");
+      }
+      if (searchRooms) searchParams.rooms = searchRooms;
+
+      fetchDeals(searchParams);
+    }
   }, [currentPage]);
 
   // Compute guest summary
   const guestSummary = useMemo(() => {
-    const totalGuests = initialRooms.reduce((sum, room) => sum + room.adults + room.children, 0);
-    const totalRooms = initialRooms.length;
+    const totalGuests = searchRooms.reduce((sum, room) => sum + room.adults + room.children, 0);
+    const totalRooms = searchRooms.length;
     return `${totalGuests} traveler${totalGuests !== 1 ? "s" : ""}, ${totalRooms} room${totalRooms !== 1 ? "s" : ""}`;
-  }, [initialRooms]);
+  }, [searchRooms]);
 
   // Compute date summary
   const dateSummary = useMemo(() => {
-    if (checkIn && checkOut) {
+    if (searchDate?.from && searchDate?.to) {
       try {
-        return `${format(new Date(checkIn), "MMM d")} - ${format(new Date(checkOut), "MMM d")}`;
+        return `${format(searchDate.from, "MMM d")} - ${format(searchDate.to, "MMM d")}`;
       } catch (error) {
         console.error("Invalid date format:", error);
         return "Any dates";
       }
     }
     return "Any dates";
-  }, [checkIn, checkOut]);
+  }, [searchDate]);
 
-  // Handle search from DateGuestLocationPicker
-  const handleSearch = (searchData: {
-    location: string | null;
-    date: DateRange | undefined;
-    rooms: Room[];
-  }) => {
-    const queryParams = new URLSearchParams();
-    if (searchData.location) {
-      queryParams.append("location", searchData.location);
-    }
-    if (searchData.date?.from) {
-      queryParams.append("checkIn", format(searchData.date.from, "yyyy-MM-dd"));
-    }
-    if (searchData.date?.to) {
-      queryParams.append("checkOut", format(searchData.date.to, "yyyy-MM-dd"));
-    }
-    queryParams.append(
-      "guests",
-      searchData.rooms
-        .map((room) => `${room.adults}A${room.children}C`)
-        .join(",")
-    );
-    queryParams.append("rooms", searchData.rooms.length.toString());
-
-    router.push(`/deals?${queryParams.toString()}`);
+  // Room management functions
+  const addRoom = () => {
+    setSearchRooms([...searchRooms, { adults: 2, children: 0 }]);
   };
 
-  // Filter deals based on location
-  const filteredDeals = useMemo(() => {
-    return deals.filter((deal) => {
-      if (!location || location === "") {
-        return true;
-      }
-      return deal.homestay?.address?.toLowerCase().includes(location.toLowerCase());
-    });
-  }, [location, deals]);
+  const removeRoom = (index: number) => {
+    if (searchRooms.length > 1) {
+      setSearchRooms(searchRooms.filter((_, i) => i !== index));
+    }
+  };
 
-  // Sort filtered deals
+  const updateRoom = (index: number, field: "adults" | "children", value: number) => {
+    const newRooms = [...searchRooms];
+    newRooms[index][field] = Math.max(0, value);
+    setSearchRooms(newRooms);
+  };
+
+  // Sort deals (no filtering needed, backend handles it)
   const sortedDeals = useMemo(() => {
-    return [...filteredDeals].sort((a, b) => {
+    return [...deals].sort((a, b) => {
       if (sortOption === "price-low-high") {
         return (a.discountedPrice || 0) - (b.discountedPrice || 0);
       } else if (sortOption === "price-high-low") {
@@ -190,12 +263,20 @@ function DealsPageContent() {
       } else if (sortOption === "rating") {
         return (b.homestay?.rating || 0) - (a.homestay?.rating || 0);
       } else if (sortOption === "discount") {
-        // Sort by discount amount/percentage
-        return (b.discount || 0) - (a.discount || 0);
+        // Sort by discount value directly
+        const getDiscountValue = (deal: any) => {
+          if (deal.discountType === 'PERCENTAGE') {
+            return deal.discount || 0;
+          } else {
+            // For fixed amount discounts, calculate percentage for comparison
+            return deal.originalPrice ? ((deal.discount / deal.originalPrice) * 100) : 0;
+          }
+        };
+        return getDiscountValue(b) - getDiscountValue(a);
       }
       return 0;
     });
-  }, [sortOption, filteredDeals]);
+  }, [sortOption, deals]);
 
   // Build query string for navigation
   const buildQueryString = () => {
@@ -259,14 +340,222 @@ function DealsPageContent() {
         animate="animate"
         className="container mx-auto -mt-16 sm:-mt-20 md:-mt-24 z-10 px-4 sm:px-6"
       >
-        <div className="w-full max-w-5xl mx-auto bg-card/90 backdrop-blur-md rounded-2xl shadow-md border border-border p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-4">
-          <div className="flex-1 w-full">
-            <DateGuestLocationPicker
-              onSearch={handleSearch}
-              initialLocation={location || ""}
-              initialDate={initialDate}
-              initialRooms={initialRooms}
-            />
+        <div className="w-full max-w-6xl mx-auto bg-card/95 backdrop-blur-md rounded-2xl shadow-xl border border-border p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {/* Location Search */}
+            <div className="lg:col-span-1">
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                Location
+              </label>
+              <LocationAutocomplete
+                value={searchLocation}
+                onChange={setSearchLocation}
+                placeholder="Search location..."
+                className="h-11"
+              />
+            </div>
+
+            {/* Check-in Date */}
+            <div className="lg:col-span-1">
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                Check-in
+              </label>
+              <Popover open={isCheckInOpen} onOpenChange={setIsCheckInOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full h-11 justify-start text-left font-normal",
+                      !searchDate?.from && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {searchDate?.from ? format(searchDate.from, "MMM d, yyyy") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={searchDate?.from}
+                    onSelect={(date) => {
+                      setSearchDate({ from: date, to: searchDate?.to });
+                      setIsCheckInOpen(false);
+                      if (date && !searchDate?.to) {
+                        setTimeout(() => setIsCheckOutOpen(true), 100);
+                      }
+                    }}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Check-out Date */}
+            <div className="lg:col-span-1">
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                Check-out
+              </label>
+              <Popover open={isCheckOutOpen} onOpenChange={setIsCheckOutOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full h-11 justify-start text-left font-normal",
+                      !searchDate?.to && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {searchDate?.to ? format(searchDate.to, "MMM d, yyyy") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={searchDate?.to}
+                    onSelect={(date) => {
+                      setSearchDate({ from: searchDate?.from, to: date });
+                      setIsCheckOutOpen(false);
+                    }}
+                    disabled={(date) => {
+                      const today = new Date(new Date().setHours(0, 0, 0, 0));
+                      if (searchDate?.from) {
+                        return date <= searchDate.from || date < today;
+                      }
+                      return date < today;
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Guests & Rooms */}
+            <div className="lg:col-span-1">
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                Guests
+              </label>
+              <Popover open={isGuestPopoverOpen} onOpenChange={setIsGuestPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full h-11 justify-start text-left font-normal"
+                  >
+                    <Users className="mr-2 h-4 w-4" />
+                    {guestSummary}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4" align="start">
+                  <div className="space-y-4">
+                    {searchRooms.map((room, index) => (
+                      <div key={index} className="border-b pb-4 last:border-b-0">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="font-medium text-sm">Room {index + 1}</h4>
+                          {searchRooms.length > 1 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeRoom(index)}
+                              className="h-8 text-destructive hover:text-destructive"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">Adults</span>
+                            <div className="flex items-center gap-3">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => updateRoom(index, "adults", room.adults - 1)}
+                                disabled={room.adults <= 1}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="w-8 text-center font-medium">{room.adults}</span>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => updateRoom(index, "adults", room.adults + 1)}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">Children</span>
+                            <div className="flex items-center gap-3">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => updateRoom(index, "children", room.children - 1)}
+                                disabled={room.children <= 0}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="w-8 text-center font-medium">{room.children}</span>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => updateRoom(index, "children", room.children + 1)}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={addRoom}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Room
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          {/* Search and Clear Buttons */}
+          <div className="flex gap-3 mt-4">
+            <Button
+              onClick={handleSearchClick}
+              className="flex-1 sm:flex-none sm:min-w-[140px] h-11 bg-primary hover:bg-primary/90"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Searching...
+                </>
+              ) : (
+                <>
+                  <SearchIcon className="mr-2 h-4 w-4" />
+                  Search Deals
+                </>
+              )}
+            </Button>
+            {(searchLocation || searchDate?.from || searchDate?.to) && (
+              <Button
+                variant="outline"
+                onClick={handleClearSearch}
+                className="h-11"
+                disabled={loading}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Clear
+              </Button>
+            )}
           </div>
         </div>
       </motion.div>
@@ -368,8 +657,8 @@ function DealsPageContent() {
             </div>
             <h3 className="text-2xl font-bold text-foreground mb-2">No deals found</h3>
             <p className="text-muted-foreground text-lg max-w-md mx-auto">
-              {location
-                ? `No deals available in "${location}" right now. Try adjusting your search.`
+              {searchLocation || searchDate?.from
+                ? "No deals match your search criteria. Try adjusting your location, dates, or number of guests."
                 : "No deals available at the moment. Check back soon for amazing offers!"
               }
             </p>
