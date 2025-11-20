@@ -35,7 +35,7 @@ async function refreshAccessToken(token: any) {
       ...token,
       accessToken: refreshedTokens.data.accessToken,
       refreshToken: refreshedTokens.data.refreshToken ?? token.refreshToken,
-      tokenExpiry: Date.now() + (55 * 60 * 1000),
+      tokenExpiry: Date.now() + (60 * 60 * 1000),
       error: null,
     };
   } catch (error) {
@@ -138,7 +138,7 @@ export const authOptions: NextAuthOptions = {
             throw new Error(result.message || "Invalid credentials");
           }
 
-          const tokenExpiry = Date.now() + (55 * 60 * 1000);
+          const tokenExpiry = Date.now() + (60 * 60 * 1000);
 
           return {
             id: result.data.user.id.toString(),
@@ -168,7 +168,7 @@ export const authOptions: NextAuthOptions = {
       if (trigger === "update" && session?.accessToken) {
         token.accessToken = session.accessToken;
         token.refreshToken = session.refreshToken || token.refreshToken;
-        token.tokenExpiry = Date.now() + (55 * 60 * 1000);
+        token.tokenExpiry = Date.now() + (60 * 60 * 1000);
         token.error = null;
         return token;
       }
