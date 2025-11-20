@@ -246,13 +246,25 @@ const TopHomestayFormModal: React.FC<{
   }, [topHomestay, clearError]);
 
   const handleSubmit = async () => {
-    if (!formData.homestayId) return;
+    // For editing, homestayId is required
+    if (topHomestay && !formData.homestayId) return;
+
     try {
       const submitData = {
         ...formData,
         category: formData.category || undefined,
         priority: formData.priority || undefined
       };
+
+      // For new top homestays (without homestay), store template in localStorage
+      if (!topHomestay) {
+        localStorage.setItem('top_template', JSON.stringify(submitData));
+        onClose();
+        // User will be redirected to select homestays
+        return;
+      }
+
+      // For editing existing top homestays
       await execute(() => onSubmit(submitData));
       onClose();
     } catch (error: any) {
@@ -261,19 +273,29 @@ const TopHomestayFormModal: React.FC<{
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={topHomestay ? 'Edit Top Homestay' : 'Add Top Homestay'}
+    <Modal isOpen={isOpen} onClose={onClose} title={topHomestay ? 'Edit Top Homestay' : 'Create Top Homestay Configuration'}
       footer={<><ActionButton onClick={onClose} variant="secondary" disabled={loading}>Cancel</ActionButton>
-      <ActionButton onClick={handleSubmit} variant="primary" loading={loading}>{topHomestay ? 'Update' : 'Add'}</ActionButton></>}>
+      <ActionButton onClick={handleSubmit} variant="primary" loading={loading}>{topHomestay ? 'Update' : 'Continue to Select Homestays'}</ActionButton></>}>
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Homestay *</label>
-          <select value={formData.homestayId} onChange={(e) => setFormData({ ...formData, homestayId: parseInt(e.target.value) })}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            required disabled={!!topHomestay}>
-            <option value="0">Select homestay...</option>
-            {homestays.map((h: any) => (<option key={h.id} value={h.id}>{h.name}</option>))}
-          </select>
-        </div>
+        {!topHomestay && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
+              <strong>Step 1:</strong> Configure your top homestay settings below. In the next step, you'll select which homestays to feature with these settings.
+            </p>
+          </div>
+        )}
+
+        {topHomestay && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Homestay *</label>
+            <select value={formData.homestayId} onChange={(e) => setFormData({ ...formData, homestayId: parseInt(e.target.value) })}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              required disabled={!!topHomestay}>
+              <option value="0">Select homestay...</option>
+              {homestays.map((h: any) => (<option key={h.id} value={h.id}>{h.name}</option>))}
+            </select>
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Strategy *</label>
@@ -341,6 +363,18 @@ export default function TopHomestaysManagement() {
     if (status === 'authenticated' && session?.user?.role !== 'ADMIN') { router.push('/'); return; }
     if (status === 'authenticated') loadData();
   }, [status, session?.user?.role, router, loadData]);
+
+  // Watch for modal close to check if we need to redirect
+  useEffect(() => {
+    if (!showFormModal && !editingItem) {
+      // Check if top template was just saved
+      const hasTemplate = localStorage.getItem('top_template');
+      if (hasTemplate) {
+        // Redirect to homestay selection
+        router.push('/admin/top-homestays/select-homestays');
+      }
+    }
+  }, [showFormModal, editingItem, router]);
 
   const handleClearFilters = useCallback(() => {
     setStrategyFilter('');
@@ -445,7 +479,7 @@ export default function TopHomestaysManagement() {
             </div>
             <div className="flex items-center space-x-3">
               <ActionButton onClick={handleExport} variant="secondary" icon={<FileDown className="h-4 w-4" />} disabled={topHomestays.length === 0}>Export</ActionButton>
-              <ActionButton onClick={() => { setEditingItem(null); setShowFormModal(true); }} variant="primary" icon={<Plus className="h-4 w-4" />}>Add Top Homestay</ActionButton>
+              <ActionButton onClick={() => { setEditingItem(null); setShowFormModal(true); }} variant="primary" icon={<Plus className="h-4 w-4" />}>Feature Homestays</ActionButton>
             </div>
           </div>
         </div>
