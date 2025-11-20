@@ -108,6 +108,36 @@ function DealsPageContent() {
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
   const dealsPerPage = 12;
 
+  // Transform availability check response to match last-minute-deals format
+  const transformAvailabilityDeals = (homestays: any[]) => {
+    return homestays.map((homestay) => {
+      // If it already has the nested homestay structure, return as is
+      if (homestay.homestay) {
+        return homestay;
+      }
+
+      // Transform flat structure to nested structure
+      const firstRoom = homestay.availableRooms?.[0] || homestay.rooms?.[0] || {};
+      return {
+        id: homestay.id,
+        homestay: {
+          id: homestay.id,
+          name: homestay.name,
+          address: homestay.address,
+          rating: homestay.rating,
+          reviews: homestay.reviews || 0,
+          imageSrc: homestay.imageSrc || homestay.image,
+          facilities: homestay.facilities || homestay.amenities || [],
+        },
+        rooms: homestay.availableRooms || homestay.rooms || [],
+        originalPrice: firstRoom.originalPrice || homestay.originalPrice,
+        discountedPrice: firstRoom.discountedPrice || homestay.discountedPrice,
+        discount: firstRoom.discount || homestay.discount,
+        discountType: firstRoom.discountType || homestay.discountType || 'PERCENTAGE',
+      };
+    });
+  };
+
   // Fetch deals with availability check or all deals
   const fetchDeals = async (searchParams?: {
     location?: string;
@@ -151,7 +181,17 @@ function DealsPageContent() {
         if (!response.ok) throw new Error("Failed to fetch deals");
         const data = await response.json();
 
-        setDeals(data.homestays || []);
+        console.log('Availability check response:', {
+          totalCount: data.totalCount,
+          homestaysLength: data.homestays?.length,
+          sampleDeal: data.homestays?.[0]
+        });
+
+        // Transform the data to match expected format
+        const transformedDeals = transformAvailabilityDeals(data.homestays || []);
+        console.log('Transformed deal sample:', transformedDeals[0]);
+
+        setDeals(transformedDeals);
         setTotalPages(data.totalPages || 1);
         setTotal(data.totalCount || 0);
       } else {
@@ -734,7 +774,7 @@ function DealsPageContent() {
                       aria-label={`View details for ${deal.homestay?.name}`}
                     >
                       <DealCard
-                        imageSrc={deal.homestay?.imageSrc || "/images/placeholder.jpg"}
+                        imageSrc={deal.homestay?.imageSrc || "/images/placeholder-homestay.jpg"}
                         location={deal.homestay?.address || "Unknown"}
                         hotelName={deal.homestay?.name || "Unnamed Homestay"}
                         rating={rating ? rating.toFixed(1) : "N/A"}
