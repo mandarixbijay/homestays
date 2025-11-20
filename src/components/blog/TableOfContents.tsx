@@ -85,7 +85,7 @@ export function TableOfContents({ content }: TableOfContentsProps) {
     <Card className="p-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-120px)] overflow-auto">
       <div className="flex items-center gap-2 mb-4">
         <List className="h-5 w-5 text-[#214B3F]" />
-        <h3 className="font-bold text-gray-900">Table of Contents</h3>
+        <h3 className="font-bold text-card-foreground">Table of Contents</h3>
       </div>
       <nav>
         <ul className="space-y-2 text-sm">
@@ -105,7 +105,7 @@ export function TableOfContents({ content }: TableOfContentsProps) {
                   ${
                     activeId === heading.id
                       ? "bg-[#214B3F]/10 text-[#214B3F] font-medium"
-                      : "text-gray-600"
+                      : "text-muted-foreground"
                   }
                 `}
               >

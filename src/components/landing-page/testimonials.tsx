@@ -117,7 +117,7 @@ export default function Testimonials() {
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
-      className="w-full py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-gradient-to-b from-gray-50/50 to-background overflow-hidden"
+      className="w-full py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-gradient-to-b from-muted/30 to-background overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -152,7 +152,7 @@ export default function Testimonials() {
                 }}
                 className="w-full"
               >
-                <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 sm:p-12 md:p-16 relative">
+                <div className="bg-card rounded-3xl shadow-lg border border-border p-8 sm:p-12 md:p-16 relative">
                   {/* Quote Icon */}
                   <motion.div
                     initial={{ scale: 0, rotate: -180 }}
@@ -179,8 +179,8 @@ export default function Testimonials() {
                     </div>
 
                     {/* Testimonial Text */}
-                    <p className="text-lg sm:text-xl md:text-2xl text-gray-800 font-medium leading-relaxed mb-8 max-w-3xl">
-                      &ldquo;{currentTestimonial.comment}&rdquo;
+                    <p className="text-lg sm:text-xl md:text-2xl text-card-foreground font-medium leading-relaxed mb-8 max-w-3xl">
+                      "{currentTestimonial.comment}"
                     </p>
 
                     {/* Guest Info */}
@@ -193,7 +193,7 @@ export default function Testimonials() {
                         </div>
                       </div>
                       <div>
-                        <h4 className="text-lg font-bold text-gray-900">
+                        <h4 className="text-lg font-bold text-card-foreground">
                           {currentTestimonial.name}
                         </h4>
                         <p className="text-sm text-muted-foreground">
@@ -202,7 +202,7 @@ export default function Testimonials() {
                         <p className="text-xs text-accent font-medium mt-1">
                           Stayed at {currentTestimonial.homestay}
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {currentTestimonial.date}
                         </p>
                       </div>
@@ -219,10 +219,10 @@ export default function Testimonials() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => paginate(-1)}
-              className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-primary hover:bg-primary/5 flex items-center justify-center transition-colors"
+              className="w-12 h-12 rounded-full bg-card border-2 border-border hover:border-primary hover:bg-primary/5 flex items-center justify-center transition-colors"
               aria-label="Previous testimonial"
             >
-              <ChevronLeft className="w-6 h-6 text-gray-700" />
+              <ChevronLeft className="w-6 h-6 text-card-foreground" />
             </motion.button>
 
             {/* Dots Indicator */}
@@ -237,7 +237,7 @@ export default function Testimonials() {
                   className={`h-2 rounded-full transition-all duration-300 ${
                     index === testimonialIndex
                       ? "w-8 bg-primary"
-                      : "w-2 bg-gray-300 hover:bg-gray-400"
+                      : "w-2 bg-muted hover:bg-muted-foreground/20"
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
@@ -248,10 +248,10 @@ export default function Testimonials() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => paginate(1)}
-              className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 hover:border-primary hover:bg-primary/5 flex items-center justify-center transition-colors"
+              className="w-12 h-12 rounded-full bg-card border-2 border-border hover:border-primary hover:bg-primary/5 flex items-center justify-center transition-colors"
               aria-label="Next testimonial"
             >
-              <ChevronRight className="w-6 h-6 text-gray-700" />
+              <ChevronRight className="w-6 h-6 text-card-foreground" />
             </motion.button>
           </div>
 

@@ -27,11 +27,7 @@ export default {
           foreground: 'hsl(var(--popover-foreground))',
         },
         primary: {
-          DEFAULT: '#1A403D', // Updated to match the first logo's dark teal/green
-          90: '#23524F',    // Slightly lighter shade
-          70: '#2C6A65',    // Medium shade
-          30: '#A0B7B5',    // Lighter tint
-          hover: '#153533', // Darker shade for hover
+          DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
@@ -43,18 +39,12 @@ export default {
           foreground: 'hsl(var(--muted-foreground))',
         },
         accent: {
-          DEFAULT: '#D4A017', // New accent color: golden mustard
+          DEFAULT: 'hsl(var(--accent))',
           foreground: 'hsl(var(--accent-foreground))',
-          light: '#FFF7E6', // Warm cream for feature cards
-          50: '#FFFBF2', // Lighter variant
         },
         discount: {
           DEFAULT: '#A9CBB7',
           foreground: '#1A4A46',
-        },
-        text: {
-          primary: '#2D2D2D',
-          secondary: '#6B7280',
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',

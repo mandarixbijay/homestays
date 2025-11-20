@@ -246,7 +246,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                   <NavigationMenuLink asChild>
                     <Button
                       variant="ghost"
-                      className="text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-primary/10 transition-colors text-sm px-4 py-2 font-medium flex items-center"
+                      className="text-card-foreground hover:text-primary hover:bg-primary/10 transition-colors text-sm px-4 py-2 font-medium flex items-center"
                       onClick={item.action || (() => toPage(item.href))}
                     >
                       {item.icon}
@@ -276,10 +276,10 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-80 bg-white dark:bg-gray-800 z-[150]">
                   <div className="p-3">
-                    <h4 className="font-medium mb-2 text-sm text-gray-900 dark:text-gray-100">
+                    <h4 className="font-medium mb-2 text-sm text-card-foreground">
                       Notifications
                     </h4>
-                    <div className="text-xs text-gray-500 dark:text-gray-300">
+                    <div className="text-xs text-muted-foreground">
                       No new notifications
                     </div>
                   </div>
@@ -338,7 +338,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                     <button
                       key={item.label}
                       onClick={item.action || (() => toPage(item.href))}
-                      className="text-base font-medium text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 py-3 px-4 rounded-lg flex items-center"
+                      className="text-base font-medium text-card-foreground hover:text-primary hover:bg-muted transition-all duration-200 py-3 px-4 rounded-lg flex items-center"
                     >
                       {item.icon}
                       {item.label}
@@ -350,12 +350,12 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
               {/* User Actions - Fixed Bottom */}
               {!hideUserCircle && (
                 <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-3">
-                  <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
+                  <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-all duration-200">
                     <div className="relative">
                       <Bell className="h-5 w-5 text-primary" />
                       <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full"></span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <span className="text-sm font-medium text-card-foreground">
                       Notifications
                     </span>
                   </button>
@@ -383,7 +383,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                   <DrawerClose asChild>
                     <Button
                       variant="ghost"
-                      className="w-full text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-primary transition-all duration-200"
+                      className="w-full text-sm font-medium text-card-foreground hover:text-primary transition-all duration-200"
                     >
                       Close
                     </Button>

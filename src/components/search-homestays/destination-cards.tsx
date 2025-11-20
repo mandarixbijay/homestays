@@ -159,22 +159,22 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
         </div>
         <CardContent className="flex flex-col sm:flex-row p-4 sm:p-6 w-full gap-4 sm:gap-6 min-h-64">
           <div className="flex flex-col w-full sm:w-1/2 space-y-3">
-            <p className="text-sm text-text-secondary">{address}</p>
-            <CardTitle className="text-lg font-bold text-text-primary line-clamp-2 font-manrope">
+            <p className="text-sm text-muted-foreground">{address}</p>
+            <CardTitle className="text-lg font-bold text-foreground line-clamp-2 font-manrope">
               {hotelName}
             </CardTitle>
             <div className="flex items-center gap-2">
               <Badge className={`${categoryColor} text-white text-xs font-semibold px-2 py-0.5 rounded-sm font-manrope`}>
                 {rating}
               </Badge>
-              <span className="text-sm text-text-secondary">{reviews.split(" ")[0]}</span>
-              <span className="text-xs text-text-secondary">
+              <span className="text-sm text-muted-foreground">{reviews.split(" ")[0]}</span>
+              <span className="text-xs text-muted-foreground">
                 ({reviews.split(" ")[1].replace("(", "").replace(")", "")})
               </span>
             </div>
             <div className="mt-2 flex-1">
-              <h4 className="text-sm font-semibold text-text-primary font-manrope">Amenities:</h4>
-              <ul className="list-disc pl-4 mt-1 space-y-1 text-xs text-text-secondary font-manrope">
+              <h4 className="text-sm font-semibold text-foreground font-manrope">Amenities:</h4>
+              <ul className="list-disc pl-4 mt-1 space-y-1 text-xs text-muted-foreground font-manrope">
                 {features.slice(0, 3).map((f, i) => (
                   <li key={i}>{f}</li>
                 ))}
@@ -187,26 +187,26 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
             </div>
             {aboutDescription && aboutDescription !== "No description available" && (
               <div className="mt-2">
-                <h4 className="text-sm font-semibold text-text-primary font-manrope">About:</h4>
-                <p className="text-xs text-text-secondary line-clamp-2 font-manrope">{aboutDescription}</p>
+                <h4 className="text-sm font-semibold text-foreground font-manrope">About:</h4>
+                <p className="text-xs text-muted-foreground line-clamp-2 font-manrope">{aboutDescription}</p>
               </div>
             )}
           </div>
           <div className="flex flex-col justify-between w-full sm:w-1/2">
             <div className="flex flex-col items-end">
-              <p className="text-sm text-text-secondary font-manrope">
+              <p className="text-sm text-muted-foreground font-manrope">
                 {roomsLeft || 0} room{roomsLeft !== 1 ? "s" : ""} available
               </p>
             </div>
             <div className="flex flex-col items-end mt-auto space-y-1">
-              <p className="text-sm text-text-secondary line-through font-manrope">{originalPrice}</p>
-              <p className="text-base font-semibold text-text-primary font-manrope">
+              <p className="text-sm text-muted-foreground line-through font-manrope">{originalPrice}</p>
+              <p className="text-base font-semibold text-foreground font-manrope">
                 {nightlyPrice} x {numNights} night{numNights !== 1 ? "s" : ""}
               </p>
-              <p className="text-lg font-bold text-text-primary font-manrope">
+              <p className="text-lg font-bold text-foreground font-manrope">
                 {totalPrice} total for {numNights} night{numNights !== 1 ? "s" : ""}
               </p>
-              <p className="text-xs text-text-secondary font-manrope">Includes taxes & fees</p>
+              <p className="text-xs text-muted-foreground font-manrope">Includes taxes & fees</p>
             </div>
           </div>
         </CardContent>
@@ -340,14 +340,14 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-xl font-semibold text-text-primary font-manrope">
+        <h2 className="text-xl font-semibold text-foreground font-manrope">
           {sortedHotels.length} Properties Found
         </h2>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="text-base font-medium text-text-secondary font-manrope">Sort by:</span>
+          <span className="text-base font-medium text-muted-foreground font-manrope">Sort by:</span>
           <Select onValueChange={setSortOption} defaultValue={sortOption}>
             <SelectTrigger
-              className="w-full sm:w-48 h-10 rounded-md bg-background border-border text-sm text-text-primary focus:ring-2 focus:ring-accent hover:border-primary font-manrope"
+              className="w-full sm:w-48 h-10 rounded-md bg-background border-border text-sm text-foreground focus:ring-2 focus:ring-accent hover:border-primary font-manrope"
               aria-label="Sort homestays"
             >
               <SelectValue placeholder="Sort by" />
@@ -361,7 +361,7 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
         </div>
       </div>
       {sortedHotels.length === 0 ? (
-        <p className="text-center text-text-secondary text-lg font-manrope">No homestays found matching your criteria.</p>
+        <p className="text-center text-muted-foreground text-lg font-manrope">No homestays found matching your criteria.</p>
       ) : (
         sortedHotels.map((homestay, idx) => (
           <DestinationCard key={idx} {...adaptHomestay(homestay)} />

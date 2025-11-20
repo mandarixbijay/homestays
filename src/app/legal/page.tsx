@@ -35,8 +35,8 @@ const LegalPage = () => {
                     {/* Table of Contents */}
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-12">
                         <div className="flex items-center mb-6">
-                            <FileText className="w-6 h-6 mr-3 text-text-secondary" />
-                            <h2 className="text-2xl font-semibold text-text-primary">Table of Contents</h2>
+                            <FileText className="w-6 h-6 mr-3 text-muted-foreground" />
+                            <h2 className="text-2xl font-semibold text-foreground">Table of Contents</h2>
                         </div>
                         <div className="grid md:grid-cols-2 gap-4">
                             <a 
@@ -45,9 +45,9 @@ const LegalPage = () => {
                             >
                                 <div className="flex items-center">
                                     <Shield className="w-5 h-5 mr-3 text-primary" />
-                                    <span className="font-medium text-text-primary group-hover:text-primary">Privacy Policy</span>
+                                    <span className="font-medium text-foreground group-hover:text-primary">Privacy Policy</span>
                                 </div>
-                                <span className="text-text-secondary text-sm group-hover:text-primary">→</span>
+                                <span className="text-muted-foreground text-sm group-hover:text-primary">→</span>
                             </a>
                             <a 
                                 href="#terms-of-service" 
@@ -55,9 +55,9 @@ const LegalPage = () => {
                             >
                                 <div className="flex items-center">
                                     <Scale className="w-5 h-5 mr-3 text-accent" />
-                                    <span className="font-medium text-text-primary group-hover:text-accent">Terms of Service</span>
+                                    <span className="font-medium text-foreground group-hover:text-accent">Terms of Service</span>
                                 </div>
-                                <span className="text-text-secondary text-sm group-hover:text-accent">→</span>
+                                <span className="text-muted-foreground text-sm group-hover:text-accent">→</span>
                             </a>
                         </div>
                     </div>
@@ -78,24 +78,24 @@ const LegalPage = () => {
                                         <p className="text-primary-70 text-sm">We&apos;re committed to protecting your personal information and being transparent about how we use it.</p>
                                     </div>
                                     
-                                    <h3 className="text-xl font-semibold text-text-primary mb-4">Information We Collect</h3>
-                                    <p className="text-text-secondary leading-relaxed mb-6">
+                                    <h3 className="text-xl font-semibold text-foreground mb-4">Information We Collect</h3>
+                                    <p className="text-muted-foreground leading-relaxed mb-6">
                                         At Nepal Homestays, your privacy is our priority. We collect personal information such as your name, contact details, and payment information when you create an account, book a stay, or communicate with us. We also gather technical data like your IP address and device information to enhance your experience and improve our services.
                                     </p>
 
-                                    <h3 className="text-xl font-semibold text-text-primary mb-4">How We Use Your Information</h3>
-                                    <p className="text-text-secondary leading-relaxed mb-6">
+                                    <h3 className="text-xl font-semibold text-foreground mb-4">How We Use Your Information</h3>
+                                    <p className="text-muted-foreground leading-relaxed mb-6">
                                         Your information is used to process bookings, facilitate payments, provide customer support, and send you important updates or promotional offers. We may share your details with hosts, payment processors, and service providers who help us operate Nepal Homestays, but only as necessary and in accordance with the law.
                                     </p>
 
-                                    <h3 className="text-xl font-semibold text-text-primary mb-4">Data Security & Your Rights</h3>
-                                    <p className="text-text-secondary leading-relaxed mb-6">
+                                    <h3 className="text-xl font-semibold text-foreground mb-4">Data Security & Your Rights</h3>
+                                    <p className="text-muted-foreground leading-relaxed mb-6">
                                         We take reasonable steps to protect your data, but please note that no online system is completely secure. You have the right to access, update, or delete your personal information at any time. We may update this Privacy Policy periodically and will notify you of significant changes.
                                     </p>
 
                                     <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                                        <p className="text-text-primary font-medium">Questions about privacy?</p>
-                                        <p className="text-text-secondary text-sm mt-1">
+                                        <p className="text-foreground font-medium">Questions about privacy?</p>
+                                        <p className="text-muted-foreground text-sm mt-1">
                                             Contact us at <a href="mailto:privacy@nepalhomestays.com" className="text-primary hover:underline">privacy@nepalhomestays.com</a>
                                         </p>
                                     </div>
@@ -120,24 +120,24 @@ const LegalPage = () => {
                                         <p className="text-accent/80 text-sm">By using our platform, you agree to these terms that help ensure a safe and enjoyable experience for everyone.</p>
                                     </div>
                                     
-                                    <h3 className="text-xl font-semibold text-text-primary mb-4">Platform Usage</h3>
-                                    <p className="text-text-secondary leading-relaxed mb-6">
+                                    <h3 className="text-xl font-semibold text-foreground mb-4">Platform Usage</h3>
+                                    <p className="text-muted-foreground leading-relaxed mb-6">
                                         Nepal Homestays connects travelers with homestay hosts in Nepal. You must be at least 18 years old to use our services and are responsible for keeping your account information accurate and secure. You agree to use Nepal Homestays for lawful purposes only. Any fraudulent, harmful, or discriminatory activity is strictly prohibited.
                                     </p>
 
-                                    <h3 className="text-xl font-semibold text-text-primary mb-4">Booking & Payments</h3>
-                                    <p className="text-text-secondary leading-relaxed mb-6">
+                                    <h3 className="text-xl font-semibold text-foreground mb-4">Booking & Payments</h3>
+                                    <p className="text-muted-foreground leading-relaxed mb-6">
                                         When you book a stay, you agree to pay all applicable fees and taxes, and to follow the host&apos;s rules and cancellation policy. Payments are processed securely through our trusted partners. All bookings are subject to host approval and availability.
                                     </p>
 
-                                    <h3 className="text-xl font-semibold text-text-primary mb-4">Responsibilities & Limitations</h3>
-                                    <p className="text-text-secondary leading-relaxed mb-6">
+                                    <h3 className="text-xl font-semibold text-foreground mb-4">Responsibilities & Limitations</h3>
+                                    <p className="text-muted-foreground leading-relaxed mb-6">
                                         Nepal Homestays is not responsible for the conduct of hosts or guests, or for the quality of accommodations. We facilitate connections but do not guarantee specific outcomes. We may update these terms from time to time and will notify you of major changes.
                                     </p>
 
                                     <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                                        <p className="text-text-primary font-medium">Need help or have questions?</p>
-                                        <p className="text-text-secondary text-sm mt-1">
+                                        <p className="text-foreground font-medium">Need help or have questions?</p>
+                                        <p className="text-muted-foreground text-sm mt-1">
                                             Contact us at <a href="mailto:support@nepalhomestays.com" className="text-accent hover:underline">support@nepalhomestays.com</a>
                                         </p>
                                     </div>

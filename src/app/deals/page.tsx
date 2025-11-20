@@ -282,7 +282,7 @@ function DealsPageContent() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center text-text-secondary text-lg"
+            className="text-center text-muted-foreground text-lg"
           >
             No deals found matching your criteria.
           </motion.p>

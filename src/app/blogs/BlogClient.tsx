@@ -278,10 +278,10 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                 Travel Stories
               </span>
               <br />
-              <span className="text-gray-900">That Inspire Adventure</span>
+              <span className="text-card-foreground">That Inspire Adventure</span>
             </h1>
 
-            <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
               Immerse yourself in authentic experiences, local wisdom, and breathtaking journeys
               through the heart of Nepal&apos;s homestay culture
             </p>
@@ -291,14 +291,14 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl p-4 shadow-lg shadow-[#214B3F]/10 border border-[#214B3F]/10"
+                className="bg-card rounded-2xl p-4 shadow-lg shadow-[#214B3F]/10 border border-[#214B3F]/10"
               >
                 <div className="flex flex-col items-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-[#214B3F]/10 to-[#D1AA5A]/10 rounded-xl flex items-center justify-center mb-2">
                     <Book className="h-6 w-6 text-[#214B3F]" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">{total}+</div>
-                  <div className="text-sm text-gray-600">Stories</div>
+                  <div className="text-2xl font-bold text-card-foreground">{total}+</div>
+                  <div className="text-sm text-muted-foreground">Stories</div>
                 </div>
               </motion.div>
 
@@ -306,14 +306,14 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white rounded-2xl p-4 shadow-lg shadow-[#D1AA5A]/10 border border-[#D1AA5A]/10"
+                className="bg-card rounded-2xl p-4 shadow-lg shadow-[#D1AA5A]/10 border border-[#D1AA5A]/10"
               >
                 <div className="flex flex-col items-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-[#D1AA5A]/10 to-[#214B3F]/10 rounded-xl flex items-center justify-center mb-2">
                     <MapPin className="h-6 w-6 text-[#214B3F]" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">50+</div>
-                  <div className="text-sm text-gray-600">Destinations</div>
+                  <div className="text-2xl font-bold text-card-foreground">50+</div>
+                  <div className="text-sm text-muted-foreground">Destinations</div>
                 </div>
               </motion.div>
 
@@ -321,14 +321,14 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white rounded-2xl p-4 shadow-lg shadow-[#214B3F]/10 border border-[#214B3F]/10"
+                className="bg-card rounded-2xl p-4 shadow-lg shadow-[#214B3F]/10 border border-[#214B3F]/10"
               >
                 <div className="flex flex-col items-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-[#214B3F]/10 to-[#D1AA5A]/10 rounded-xl flex items-center justify-center mb-2">
                     <User className="h-6 w-6 text-[#214B3F]" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">100+</div>
-                  <div className="text-sm text-gray-600">Writers</div>
+                  <div className="text-2xl font-bold text-card-foreground">100+</div>
+                  <div className="text-sm text-muted-foreground">Writers</div>
                 </div>
               </motion.div>
 
@@ -336,14 +336,14 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white rounded-2xl p-4 shadow-lg shadow-[#D1AA5A]/10 border border-[#D1AA5A]/10"
+                className="bg-card rounded-2xl p-4 shadow-lg shadow-[#D1AA5A]/10 border border-[#D1AA5A]/10"
               >
                 <div className="flex flex-col items-center">
                   <div className="w-12 h-12 bg-gradient-to-br from-[#D1AA5A]/10 to-[#214B3F]/10 rounded-xl flex items-center justify-center mb-2">
                     <Heart className="h-6 w-6 text-[#214B3F]" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">1M+</div>
-                  <div className="text-sm text-gray-600">Readers</div>
+                  <div className="text-2xl font-bold text-card-foreground">1M+</div>
+                  <div className="text-sm text-muted-foreground">Readers</div>
                 </div>
               </motion.div>
             </div>
@@ -356,10 +356,10 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
             >
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#214B3F] to-[#D1AA5A] rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 p-2">
+                <div className="relative bg-card rounded-2xl shadow-xl border border-gray-100 p-2">
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <Input
                         type="text"
                         placeholder="Search destinations, tips, stories..."
@@ -400,7 +400,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                   onClick={() => handleCategorySelect("")}
                   className={`rounded-full px-6 py-2 transition-all ${!selectedCategory
                       ? 'bg-gradient-to-r from-[#214B3F] to-[#2d6654] text-white shadow-lg'
-                      : 'bg-white hover:bg-gray-50 border-gray-200'
+                      : 'bg-card hover:bg-gray-50 border-gray-200'
                     }`}
                 >
                   All Stories
@@ -414,7 +414,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                       onClick={() => handleCategorySelect(category.slug)}
                       className={`rounded-full px-6 py-2 transition-all ${selectedCategory === category.slug
                           ? 'bg-gradient-to-r from-[#214B3F] to-[#2d6654] text-white shadow-lg'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                          : 'bg-card hover:bg-gray-50 border-gray-200'
                         }`}
                     >
                       <IconComponent className="h-4 w-4 mr-2" />
@@ -453,9 +453,9 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                   <div className="p-2 bg-gradient-to-br from-[#D1AA5A]/20 to-[#214B3F]/20 rounded-xl">
                     <Star className="h-6 w-6 text-[#D1AA5A]" />
                   </div>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Featured Stories</h2>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground">Featured Stories</h2>
                 </div>
-                <p className="text-gray-600 ml-14">Hand-picked adventures and experiences</p>
+                <p className="text-muted-foreground ml-14">Hand-picked adventures and experiences</p>
               </div>
               <Link href="/blogs?featured=true">
                 <Button variant="ghost" className="group">
@@ -513,7 +513,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                       {hasActiveFilters && (
                         <Card className="p-6 bg-gradient-to-br from-[#214B3F]/10 to-[#D1AA5A]/10 border-[#214B3F]/20">
                           <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-gray-900">Active Filters</h3>
+                            <h3 className="font-bold text-card-foreground">Active Filters</h3>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -525,7 +525,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                           </div>
                           <div className="space-y-2">
                             {selectedCategory && (
-                              <Badge className="mr-2 bg-white text-[#214B3F] border-[#214B3F]/30">
+                              <Badge className="mr-2 bg-card text-[#214B3F] border-[#214B3F]/30">
                                 {categories.find(c => c.slug === selectedCategory)?.name}
                                 <X
                                   className="h-3 w-3 ml-2 cursor-pointer"
@@ -534,7 +534,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                               </Badge>
                             )}
                             {selectedTag && (
-                              <Badge className="mr-2 bg-white text-[#D1AA5A] border-[#D1AA5A]/30">
+                              <Badge className="mr-2 bg-card text-[#D1AA5A] border-[#D1AA5A]/30">
                                 {tags.find(t => t.slug === selectedTag)?.name}
                                 <X
                                   className="h-3 w-3 ml-2 cursor-pointer"
@@ -553,14 +553,14 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                         <Input
                           type="email"
                           placeholder="Your email"
-                          className="bg-white/20 border-white/30 placeholder:text-white/60 mb-3"
+                          className="bg-card/20 border-white/30 placeholder:text-white/60 mb-3"
                         />
                         <Button className="w-full bg-[#D1AA5A] text-[#214B3F] hover:bg-[#D1AA5A]/90">
                           Subscribe
                         </Button>
                       </Card>
 
-                      <Card className="p-6 bg-white shadow-lg">
+                      <Card className="p-6 bg-card shadow-lg">
                         <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                           <Tag className="h-5 w-5 text-[#214B3F]" />
                           Popular Topics
@@ -597,18 +597,18 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                         )}
                       </Card>
 
-                      <Card className="p-6 bg-white shadow-lg">
+                      <Card className="p-6 bg-card shadow-lg">
                         <h3 className="font-bold text-lg mb-4">Quick Links</h3>
                         <div className="space-y-3">
-                          <Link href="/about" className="flex items-center gap-2 text-gray-600 hover:text-[#214B3F] transition-colors">
+                          <Link href="/about" className="flex items-center gap-2 text-muted-foreground hover:text-[#214B3F] transition-colors">
                             <ChevronRight className="h-4 w-4" />
                             About Us
                           </Link>
-                          <Link href="/contact" className="flex items-center gap-2 text-gray-600 hover:text-[#214B3F] transition-colors">
+                          <Link href="/contact" className="flex items-center gap-2 text-muted-foreground hover:text-[#214B3F] transition-colors">
                             <ChevronRight className="h-4 w-4" />
                             Contact
                           </Link>
-                          <Link href="/homestays" className="flex items-center gap-2 text-gray-600 hover:text-[#214B3F] transition-colors">
+                          <Link href="/homestays" className="flex items-center gap-2 text-muted-foreground hover:text-[#214B3F] transition-colors">
                             <ChevronRight className="h-4 w-4" />
                             Browse Homestays
                           </Link>
@@ -633,8 +633,8 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                     <div className="w-32 h-32 mx-auto bg-gradient-to-br from-[#214B3F]/10 to-[#D1AA5A]/10 rounded-full flex items-center justify-center">
                       <Search className="h-16 w-16 text-[#214B3F]" />
                     </div>
-                    <h3 className="text-3xl font-bold text-gray-900">No stories found</h3>
-                    <p className="text-gray-600">Try adjusting your search or explore different categories</p>
+                    <h3 className="text-3xl font-bold text-card-foreground">No stories found</h3>
+                    <p className="text-muted-foreground">Try adjusting your search or explore different categories</p>
                     {hasActiveFilters && (
                       <Button
                         onClick={clearFilters}
@@ -649,10 +649,10 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                 <>
                   <div className="flex items-center justify-between mb-8">
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900">
+                      <h2 className="text-2xl font-bold text-card-foreground">
                         {hasActiveFilters ? 'Filtered Results' : 'Latest Stories'}
                       </h2>
-                      <p className="text-gray-600 mt-1">
+                      <p className="text-muted-foreground mt-1">
                         {total} {total === 1 ? 'article' : 'articles'} found
                       </p>
                     </div>
@@ -748,7 +748,7 @@ function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
 
             <div className="flex items-center justify-between pt-4 border-t border-white/20">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-card/20 backdrop-blur rounded-full flex items-center justify-center">
                   <User className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-white font-medium">{blog.author.name}</span>
@@ -767,7 +767,7 @@ function BlogCard({ blog }: { blog: PublicBlog }) {
 
   return (
     <Link href={`/blogs/${blog.slug}`}>
-      <Card className="group h-full overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 bg-white">
+      <Card className="group h-full overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 bg-card">
         <div className="relative h-56 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
           <SafeBlogImage
             src={mainImage}
@@ -787,23 +787,23 @@ function BlogCard({ blog }: { blog: PublicBlog }) {
         </div>
 
         <div className="p-6 space-y-4">
-          <div className="flex items-center gap-3 text-sm text-gray-500">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               <span>{blog.readTime || 5} min</span>
             </div>
-            <span className="text-gray-300">•</span>
+            <span className="text-muted-foreground/50">•</span>
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               <span>{format(parseISO(blog.publishedAt || new Date().toISOString()), 'MMM d, yyyy')}</span>
             </div>
           </div>
 
-          <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-[#214B3F] transition-colors">
+          <h3 className="text-xl font-bold text-card-foreground line-clamp-2 group-hover:text-[#214B3F] transition-colors">
             {blog.title}
           </h3>
 
-          <p className="text-gray-600 line-clamp-3 leading-relaxed">
+          <p className="text-muted-foreground line-clamp-3 leading-relaxed">
             {blog.excerpt}
           </p>
 
@@ -812,10 +812,10 @@ function BlogCard({ blog }: { blog: PublicBlog }) {
               <div className="w-8 h-8 bg-gradient-to-br from-[#214B3F]/10 to-[#D1AA5A]/10 rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-[#214B3F]" />
               </div>
-              <span className="text-sm font-medium text-gray-700">{blog.author.name}</span>
+              <span className="text-sm font-medium text-card-foreground">{blog.author.name}</span>
             </div>
 
-            <div className="flex items-center gap-3 text-gray-400">
+            <div className="flex items-center gap-3 text-muted-foreground">
               <Eye className="h-4 w-4" />
               <span className="text-sm">{blog.viewCount.toLocaleString()}</span>
             </div>
@@ -851,7 +851,7 @@ function Pagination({
   }
 
   return (
-    <div className="flex items-center gap-2 bg-white rounded-full shadow-lg p-2">
+    <div className="flex items-center gap-2 bg-card rounded-full shadow-lg p-2">
       <Button
         variant="ghost"
         size="sm"
@@ -876,7 +876,7 @@ function Pagination({
           >
             1
           </Button>
-          {startPage > 2 && <span className="px-2 text-gray-400">...</span>}
+          {startPage > 2 && <span className="px-2 text-muted-foreground">...</span>}
         </>
       )}
 
@@ -897,7 +897,7 @@ function Pagination({
 
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="px-2 text-gray-400">...</span>}
+          {endPage < totalPages - 1 && <span className="px-2 text-muted-foreground">...</span>}
           <Button
             variant={totalPages === currentPage ? "default" : "ghost"}
             size="sm"
