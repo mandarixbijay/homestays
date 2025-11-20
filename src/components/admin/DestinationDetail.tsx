@@ -485,8 +485,8 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
 
                   {/* Search and Filters */}
                   <div className="space-y-4 mb-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="relative">
+                    <div className="flex items-center gap-4">
+                      <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <input
                           type="text"
@@ -509,6 +509,30 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                         <option value="PENDING">Pending</option>
                         <option value="REJECTED">Rejected</option>
                       </select>
+
+                      {/* View Mode Toggle */}
+                      <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                        <button
+                          onClick={() => setViewMode('grid')}
+                          className={`px-3 py-2 text-sm ${
+                            viewMode === 'grid'
+                              ? 'bg-[#224240] text-white'
+                              : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <Grid className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setViewMode('list')}
+                          className={`px-3 py-2 text-sm ${
+                            viewMode === 'list'
+                              ? 'bg-[#224240] text-white'
+                              : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <List className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -528,20 +552,21 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                     </div>
                   </div>
 
-                  {/* Available Homestays Grid */}
+                  {/* Available Homestays */}
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto">
-                      {homestaysLoading ? (
-                        <div className="col-span-full flex justify-center py-12">
-                          <LoadingSpinner />
-                        </div>
-                      ) : availableHomestays.length === 0 ? (
-                        <div className="col-span-full text-center py-12">
-                          <Home className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-600 dark:text-gray-400">No homestays available for {destination?.name}</p>
-                        </div>
-                      ) : (
-                        availableHomestays.map((homestay: any) => (
+                    {homestaysLoading ? (
+                      <div className="flex justify-center py-12">
+                        <LoadingSpinner />
+                      </div>
+                    ) : availableHomestays.length === 0 ? (
+                      <div className="text-center py-12">
+                        <Home className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400">No homestays available for {destination?.name}</p>
+                      </div>
+                    ) : viewMode === 'grid' ? (
+                      /* Grid View - Compact Cards */
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto">
+                        {availableHomestays.map((homestay: any) => (
                           <div
                             key={homestay.id}
                             onClick={() => toggleHomestaySelection(homestay.id)}
@@ -552,40 +577,33 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                             }`}
                           >
                             {selectedHomestays.includes(homestay.id) && (
-                              <div className="absolute top-2 right-2 z-10 w-6 h-6 bg-[#224240] rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <div className="absolute top-2 right-2 z-10 w-5 h-5 bg-[#224240] rounded-full flex items-center justify-center">
+                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                               </div>
                             )}
 
-                            {/* Homestay Image */}
+                            {/* Compact Image */}
                             {homestay.images?.[0]?.url ? (
                               <img
                                 src={homestay.images[0].url}
                                 alt={homestay.name}
-                                className="w-full h-40 object-cover"
+                                className="w-full h-24 object-cover"
                               />
                             ) : (
-                              <div className="w-full h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-                                <Home className="h-12 w-12 text-gray-400" />
+                              <div className="w-full h-24 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+                                <Home className="h-8 w-8 text-gray-400" />
                               </div>
                             )}
 
-                            {/* Homestay Details */}
-                            <div className="p-4 space-y-3">
-                              {/* Title and Status */}
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <h4 className="font-semibold text-sm text-gray-900 dark:text-white line-clamp-1">
-                                    {homestay.name}
-                                  </h4>
-                                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 flex items-center">
-                                    <MapPin className="h-3 w-3 mr-1" />
-                                    {homestay.address}
-                                  </p>
-                                </div>
-                                <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ml-2 ${
+                            {/* Compact Details */}
+                            <div className="p-2 space-y-1.5">
+                              <div className="flex items-start justify-between gap-2">
+                                <h4 className="font-medium text-xs text-gray-900 dark:text-white line-clamp-1 flex-1">
+                                  {homestay.name}
+                                </h4>
+                                <span className={`text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap ${
                                   homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                                   homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
                                   'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
@@ -594,57 +612,126 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                                 </span>
                               </div>
 
-                              {/* Owner Info */}
                               {homestay.owner && (
-                                <div className="flex items-center text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 rounded p-2">
-                                  <Users className="h-3 w-3 mr-1.5" />
-                                  <span className="font-medium">{homestay.owner.name}</span>
-                                  <span className="mx-1">•</span>
-                                  <span className="truncate">{homestay.owner.email}</span>
-                                </div>
-                              )}
-
-                              {/* Description */}
-                              {homestay.description && (
-                                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
-                                  {homestay.description}
+                                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                  {homestay.owner.name}
                                 </p>
                               )}
 
-                              {/* Facilities */}
-                              {homestay.facilities && homestay.facilities.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
-                                  {homestay.facilities.slice(0, 3).map((f: any, idx: number) => (
-                                    <span key={idx} className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded">
-                                      {f.facility?.name || f.name}
-                                    </span>
-                                  ))}
-                                  {homestay.facilities.length > 3 && (
-                                    <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
-                                      +{homestay.facilities.length - 3} more
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* Rooms and Price */}
-                              {homestay.rooms && homestay.rooms.length > 0 && (
-                                <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
-                                  <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                                    <Building className="h-3 w-3 mr-1" />
-                                    <span>{homestay.rooms.length} room{homestay.rooms.length !== 1 ? 's' : ''}</span>
-                                  </div>
-                                  <div className="text-sm font-semibold text-[#224240] dark:text-[#2a5350]">
-                                    {homestay.rooms[0]?.currency || 'NPR'} {Math.min(...homestay.rooms.map((r: any) => r.price || 0))}
-                                    {homestay.rooms.length > 1 && '+'}
-                                  </div>
-                                </div>
-                              )}
+                              <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-200 dark:border-gray-700">
+                                <span className="text-gray-600 dark:text-gray-400">
+                                  {homestay.rooms?.length || 0} rooms
+                                </span>
+                                <span className="font-semibold text-[#224240] dark:text-[#2a5350]">
+                                  {homestay.rooms?.[0]?.currency || 'NPR'} {homestay.rooms?.length > 0 ? Math.min(...homestay.rooms.map((r: any) => r.price || 0)) : 0}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        ))
-                      )}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      /* Table View */
+                      <div className="max-h-[600px] overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <table className="w-full">
+                          <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
+                            <tr>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Select</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Homestay</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Owner</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Facilities</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Rooms</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Price</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                            {availableHomestays.map((homestay: any) => (
+                              <tr
+                                key={homestay.id}
+                                className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer ${
+                                  selectedHomestays.includes(homestay.id) ? 'bg-[#224240]/5' : ''
+                                }`}
+                                onClick={() => toggleHomestaySelection(homestay.id)}
+                              >
+                                <td className="px-3 py-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedHomestays.includes(homestay.id)}
+                                    onChange={() => {}}
+                                    className="w-4 h-4 text-[#224240] border-gray-300 rounded"
+                                  />
+                                </td>
+                                <td className="px-3 py-2">
+                                  <div className="flex items-center gap-2">
+                                    {homestay.images?.[0]?.url ? (
+                                      <img
+                                        src={homestay.images[0].url}
+                                        alt={homestay.name}
+                                        className="w-12 h-12 rounded object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                                        <Home className="h-5 w-5 text-gray-400" />
+                                      </div>
+                                    )}
+                                    <div>
+                                      <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">
+                                        {homestay.name}
+                                      </p>
+                                      <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
+                                        {homestay.address}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-3 py-2">
+                                  {homestay.owner && (
+                                    <div>
+                                      <p className="text-xs font-medium text-gray-900 dark:text-white">
+                                        {homestay.owner.name}
+                                      </p>
+                                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-[150px]">
+                                        {homestay.owner.email}
+                                      </p>
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="px-3 py-2">
+                                  <div className="flex flex-wrap gap-1">
+                                    {homestay.facilities?.slice(0, 2).map((f: any, idx: number) => (
+                                      <span key={idx} className="text-xs px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded">
+                                        {f.facility?.name || f.name}
+                                      </span>
+                                    ))}
+                                    {homestay.facilities && homestay.facilities.length > 2 && (
+                                      <span className="text-xs text-gray-600 dark:text-gray-400">
+                                        +{homestay.facilities.length - 2}
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-3 py-2 text-xs text-gray-900 dark:text-white">
+                                  {homestay.rooms?.length || 0}
+                                </td>
+                                <td className="px-3 py-2 text-xs font-semibold text-[#224240] dark:text-[#2a5350]">
+                                  {homestay.rooms?.[0]?.currency || 'NPR'} {homestay.rooms?.length > 0 ? Math.min(...homestay.rooms.map((r: any) => r.price || 0)) : 0}
+                                </td>
+                                <td className="px-3 py-2">
+                                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                    homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                    homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                    'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                  }`}>
+                                    {homestay.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
 
                     {/* Pagination Controls */}
                     {totalPages > 1 && (
