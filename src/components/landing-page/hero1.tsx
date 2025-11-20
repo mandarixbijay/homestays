@@ -7,79 +7,26 @@ import DealCard from "./landing-page-components/cards/deal-card";
 import { useRouter } from "next/navigation";
 import { format, addDays } from "date-fns";
 
-// Import dealCardsData from a shared source to avoid duplication
-import { dealCardsData as sharedDealCardsData } from "@/data/deals";
+// API URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://13.61.8.56:3001";
 
-// Deal card data
-export const dealCardsData = [
-  {
-    imageSrc: "/images/deal/sitapaila_homestay.webp",
-    location: "Kathmandu",
-    hotelName: "Sitapaila Homestay",
-    rating: "9.6",
-    reviews: "Exceptional (25 reviews)",
-    originalPrice: "$26",
-    nightlyPrice: "$18",
-    totalPrice: "$18",
-    categoryColor: "bg-primary",
-    slug: "sitapaila-homestay",
-    features: ["Free WiFi", "Breakfast included", "Parking"],
-  },
-  {
-    imageSrc: "/images/deal/Dorje_Homestay.jpg",
-    location: "Kathmandu",
-    hotelName: "Dorje Homestay",
-    rating: "9.0",
-    reviews: "Wonderful (239 reviews)",
-    originalPrice: "$28",
-    nightlyPrice: "$22",
-    totalPrice: "$22",
-    categoryColor: "bg-accent",
-    slug: "dorje-homestay",
-    features: ["Free WiFi", "Family rooms", "Airport shuttle"],
-  },
-  {
-    imageSrc: "/images/deal/tibetan_homestay.jpg",
-    location: "Pokhara",
-    hotelName: "Tibetan Homestay",
-    rating: "9.0",
-    reviews: "Wonderful (2,253 reviews)",
-    originalPrice: "$25",
-    nightlyPrice: "$18",
-    totalPrice: "$18",
-    vipAccess: false,
-    categoryColor: "bg-discount",
-    slug: "tibetan-homestay",
-    features: ["Mountain view", "Breakfast included", "Pet friendly"],
-  },
-  {
-    imageSrc: "/images/deal/satkhauluwa_homestay.jpg",
-    location: "Thori",
-    hotelName: "Satkhaluwa Homestay",
-    rating: "9.6",
-    reviews: "Exceptional (41 reviews)",
-    originalPrice: "$28",
-    nightlyPrice: "$22.9",
-    totalPrice: "$22.9",
-    discount: "18% off",
-    categoryColor: "bg-warning",
-    slug: "satkhaluwa-homestay",
-    features: ["Free WiFi", "Breakfast included", "Garden"],
-  },
-  {
-    imageSrc: "/images/deal/corridor_homestays.jpg",
-    location: "Bardiya",
-    hotelName: "Corridor Homestays",
-    rating: "9.0",
-    reviews: "Wonderful (239 reviews)",
-    originalPrice: "$25",
-    nightlyPrice: "$17",
-    totalPrice: "$17",
-    categoryColor: "bg-primary",
-    slug: "corridor-homestays",
-    features: ["Free parking", "Family rooms", "Breakfast included"],
-  },
-];
+// Helper function to get rating category color
+const getRatingColor = (rating: number | null) => {
+  if (!rating) return "bg-gray-500";
+  if (rating >= 9.5) return "bg-primary";
+  if (rating >= 9.0) return "bg-accent";
+  if (rating >= 8.0) return "bg-warning";
+  return "bg-gray-500";
+};
+
+// Helper function to format rating text
+const getRatingText = (rating: number | null, reviews: number) => {
+  if (!rating) return "No rating";
+  if (rating >= 9.5) return "Exceptional";
+  if (rating >= 9.0) return "Wonderful";
+  if (rating >= 8.0) return "Very Good";
+  return "Good";
+};
 
 // Animation variants
 const sectionVariants = {
@@ -121,12 +68,34 @@ export default function Hero1() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [deals, setDeals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   // Get current date and next day for dynamic date range
   const currentDate = new Date();
   const nextDate = addDays(currentDate, 1);
   const dateRange = `${format(currentDate, "MMM d")} - ${format(nextDate, "MMM d")}`;
+
+  // Fetch deals from API
+  useEffect(() => {
+    const fetchDeals = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_URL}/homestays/last-minute-deals?page=1&limit=12`);
+        if (!response.ok) throw new Error("Failed to fetch deals");
+        const data = await response.json();
+        setDeals(data.data || []);
+      } catch (error) {
+        console.error("Error fetching deals:", error);
+        setDeals([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDeals();
+  }, []);
 
   // Set isMobile based on window width on client side
   useEffect(() => {
@@ -215,47 +184,78 @@ export default function Hero1() {
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
         >
-          <div
-            ref={scrollContainerRef}
-            className="flex gap-6 sm:gap-8 overflow-x-auto scrollbar-hide snap-x snap-mandatory min-h-[300px] touch-pan-x"
-            role="region"
-            aria-label="Last-minute deals carousel"
-          >
-            {dealCardsData.map((card, index) => (
-              <motion.div
-                key={card.slug}
-                variants={cardItemVariants}
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-                className="snap-start w-[240px] sm:w-[260px] flex-shrink-0 cursor-pointer"
-                onClick={() => router.push(`/deals`)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    router.push(`/deals`);
-                  }
-                }}
-                aria-label={`View details for ${card.hotelName}`}
-              >
-                <DealCard {...card} />
-              </motion.div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center min-h-[300px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : deals.length === 0 ? (
+            <div className="flex justify-center items-center min-h-[300px]">
+              <p className="text-muted-foreground">No deals available at the moment.</p>
+            </div>
+          ) : (
+            <div
+              ref={scrollContainerRef}
+              className="flex gap-6 sm:gap-8 overflow-x-auto scrollbar-hide snap-x snap-mandatory min-h-[300px] touch-pan-x"
+              role="region"
+              aria-label="Last-minute deals carousel"
+            >
+              {deals.map((deal, index) => {
+                const rating = deal.homestay?.rating || null;
+                const reviews = deal.homestay?.reviews || 0;
+                const ratingText = getRatingText(rating, reviews);
+
+                return (
+                  <motion.div
+                    key={deal.id}
+                    variants={cardItemVariants}
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    transition={{ duration: 0.3 }}
+                    className="snap-start w-[240px] sm:w-[260px] flex-shrink-0 cursor-pointer"
+                    onClick={() => router.push(`/deals`)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        router.push(`/deals`);
+                      }
+                    }}
+                    aria-label={`View details for ${deal.homestay?.name}`}
+                  >
+                    <DealCard
+                      imageSrc={deal.homestay?.imageSrc || "/images/placeholder.jpg"}
+                      location={deal.homestay?.address || "Unknown"}
+                      hotelName={deal.homestay?.name || "Unnamed Homestay"}
+                      rating={rating ? rating.toFixed(1) : "N/A"}
+                      reviews={`${ratingText} (${reviews} reviews)`}
+                      originalPrice={`NPR ${Math.round(deal.originalPrice).toLocaleString()}`}
+                      nightlyPrice={`NPR ${Math.round(deal.discountedPrice).toLocaleString()}`}
+                      totalPrice={`NPR ${Math.round(deal.discountedPrice).toLocaleString()}`}
+                      categoryColor={getRatingColor(rating)}
+                      slug={`deal-${deal.id}`}
+                      features={deal.homestay?.facilities || []}
+                      discount={deal.discountType === 'PERCENTAGE' ? `${deal.discount}% off` : `NPR ${deal.discount} off`}
+                    />
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </motion.div>
 
-        <div className="flex justify-center gap-3 mt-6">
-          {dealCardsData.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => scrollToIndex(index)}
-              aria-label={`Go to deal ${index + 1}`}
-              className={`h-4 w-4 rounded-full ${
-                currentIndex === index ? "bg-primary w-8 scale-125" : "bg-gray-300"
-              }`}
-            />
-          ))}
-        </div>
+        {!loading && deals.length > 0 && (
+          <div className="flex justify-center gap-3 mt-6">
+            {deals.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => scrollToIndex(index)}
+                aria-label={`Go to deal ${index + 1}`}
+                className={`h-4 w-4 rounded-full ${
+                  currentIndex === index ? "bg-primary w-8 scale-125" : "bg-gray-300"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </motion.section>
   );
