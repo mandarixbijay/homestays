@@ -30,14 +30,14 @@ const getCategoryColor = (categoryName: string): string => {
 
 const BlogCardSkeleton = memo(() => (
   <div className="snap-center w-72 sm:w-80 flex-shrink-0">
-    <Card className="bg-gray-50 rounded-xl h-96 animate-pulse border-0 shadow-sm">
-      <div className="w-full h-48 bg-gray-200 rounded-t-xl" />
+    <Card className="bg-card rounded-xl h-96 animate-pulse shadow-sm">
+      <div className="w-full h-48 bg-muted rounded-t-xl" />
       <div className="p-4 space-y-3">
-        <div className="h-4 bg-gray-200 rounded-md w-3/4" />
-        <div className="h-3 bg-gray-200 rounded-md w-1/2" />
+        <div className="h-4 bg-muted rounded-md w-3/4" />
+        <div className="h-3 bg-muted rounded-md w-1/2" />
         <div className="space-y-2">
-          <div className="h-3 bg-gray-200 rounded-md w-full" />
-          <div className="h-3 bg-gray-200 rounded-md w-5/6" />
+          <div className="h-3 bg-muted rounded-md w-full" />
+          <div className="h-3 bg-muted rounded-md w-5/6" />
         </div>
       </div>
     </Card>
@@ -91,10 +91,10 @@ const BlogCard = memo(({
       tabIndex={0}
       aria-label={`Read blog post: ${post.title}`}
     >
-      <Card className="bg-white rounded-xl h-96 shadow-sm hover:shadow-lg transition-all duration-200 border-0 overflow-hidden">
+      <Card className="bg-card rounded-xl h-96 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
         <div className="relative w-full h-48 overflow-hidden">
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+            <div className="absolute inset-0 bg-muted animate-pulse" />
           )}
           <Image
             src={imageError ? FALLBACK_IMAGE : imageSrc}
@@ -121,13 +121,13 @@ const BlogCard = memo(({
           </Badge>
         </div>
         <div className="p-4 h-48 flex flex-col">
-          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-green-600 transition-colors">
+          <h3 className="text-lg font-semibold text-card-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors">
             {post.title}
           </h3>
-          <p className="text-xs text-gray-500 mb-3 font-medium">
+          <p className="text-xs text-muted-foreground mb-3 font-medium">
             By {post.author.name} • {format(parseISO(post.publishedAt), "MMM d, yyyy")}
           </p>
-          <p className="text-sm text-gray-600 line-clamp-3 flex-1 leading-relaxed">
+          <p className="text-sm text-muted-foreground line-clamp-3 flex-1 leading-relaxed">
             {post.excerpt}
           </p>
         </div>
@@ -207,9 +207,9 @@ export default function Hero4() {
     : FALLBACK_IMAGE;
 
   return (
-    <section className="w-full px-4 sm:px-6 bg-white mt-10 pb-10" aria-labelledby="blog-section-title">
+    <section className="w-full px-4 sm:px-6 bg-background mt-10 pb-10" aria-labelledby="blog-section-title">
       <div className="mx-auto max-w-7xl">
-        <Card className="rounded-xl bg-cover bg-center min-h-[520px] sm:min-h-[600px] overflow-hidden relative shadow-lg">
+        <Card className="rounded-xl bg-cover bg-center min-h-[520px] sm:min-h-[600px] overflow-hidden relative shadow-lg border-0">
           {/* Background with better gradient */}
           <div
             className="absolute inset-0 bg-cover bg-center"
