@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   MapPin, Star, Users, Calendar as CalendarIcon, Plus, Minus, X, Search, Phone, Mail,
   Clock, Check, Shield, AlertCircle, Bed, Wifi, Car, Coffee, Home, ChevronRight
@@ -85,6 +86,7 @@ export default function HomestayProfilePage() {
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
   const [isGuestPopoverOpen, setIsGuestPopoverOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("overview");
+  const [isMobileBookingOpen, setIsMobileBookingOpen] = useState(false);
 
   // Fetch homestay data from API
   useEffect(() => {
@@ -257,6 +259,19 @@ export default function HomestayProfilePage() {
   const totalPhotos = images.length;
   const totalRoomsLeft = homestay.rooms?.reduce((sum, room) => sum + (room.roomsLeft || 0), 0) || 0;
 
+  // Get minimum room price if homestay-level price not available
+  const getMinPrice = () => {
+    if (homestay.discountedPrice) return homestay.discountedPrice;
+    if (homestay.originalPrice) return homestay.originalPrice;
+    if (homestay.rooms && homestay.rooms.length > 0) {
+      const prices = homestay.rooms.map(r => r.discountedPrice || r.originalPrice);
+      return Math.min(...prices);
+    }
+    return null;
+  };
+
+  const minPrice = getMinPrice();
+
   // Transform homestay to Hero3Card type for AboutProperty component
     const homestayForAbout = {
       ...homestay,
@@ -353,9 +368,9 @@ export default function HomestayProfilePage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-gray-50 rounded-2xl">
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900">
-                  NPR {homestay.discountedPrice?.toLocaleString() || homestay.originalPrice?.toLocaleString() || "N/A"}
+                  {minPrice ? `NPR ${minPrice.toLocaleString()}` : "Contact for price"}
                 </div>
-                <div className="text-sm text-gray-500">per night</div>
+                <div className="text-sm text-gray-500">starting from</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900">{homestay.rooms?.length || 0}</div>
@@ -411,7 +426,7 @@ export default function HomestayProfilePage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => document.getElementById('booking-widget')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => setIsMobileBookingOpen(true)}
               className="lg:hidden flex items-center gap-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
             >
               <CalendarIcon className="h-4 w-4" />
@@ -808,14 +823,211 @@ export default function HomestayProfilePage() {
       {/* Mobile Check Availability Bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50 shadow-lg">
         <Button
-          onClick={handleCheckAvailability}
-          disabled={!checkInDate || !checkOutDate}
+          onClick={() => setIsMobileBookingOpen(true)}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold"
         >
+          <CalendarIcon className="mr-2 h-5 w-5" />
           Check Availability
-          <ChevronRight className="ml-2 h-5 w-5" />
         </Button>
       </div>
+
+      {/* Mobile Booking Dialog */}
+      <Dialog open={isMobileBookingOpen} onOpenChange={setIsMobileBookingOpen}>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="p-6 pb-4 border-b">
+            <DialogTitle className="text-xl">Check Availability</DialogTitle>
+          </DialogHeader>
+
+          <div className="p-6 space-y-4">
+            {/* Check-in */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Check-in
+              </label>
+              <Popover open={isCheckInOpen} onOpenChange={setIsCheckInOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !checkInDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {checkInDate ? format(checkInDate, "MMM d, yyyy") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={checkInDate}
+                    onSelect={(date) => {
+                      setCheckInDate(date);
+                      setIsCheckInOpen(false);
+                      if (date && !checkOutDate) {
+                        setTimeout(() => setIsCheckOutOpen(true), 100);
+                      }
+                    }}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Check-out */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Check-out
+              </label>
+              <Popover open={isCheckOutOpen} onOpenChange={setIsCheckOutOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !checkOutDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {checkOutDate ? format(checkOutDate, "MMM d, yyyy") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={checkOutDate}
+                    onSelect={(date) => {
+                      setCheckOutDate(date);
+                      setIsCheckOutOpen(false);
+                    }}
+                    disabled={(date) => {
+                      const today = new Date(new Date().setHours(0, 0, 0, 0));
+                      if (checkInDate) {
+                        return date <= checkInDate || date < today;
+                      }
+                      return date < today;
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Guests & Rooms */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Guests
+              </label>
+              <Popover open={isGuestPopoverOpen} onOpenChange={setIsGuestPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <Users className="mr-2 h-4 w-4" />
+                    {guestSummary}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-4" align="start">
+                  <div className="space-y-4">
+                    {rooms.map((room, index) => (
+                      <div key={index} className="border-b pb-4 last:border-b-0">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="font-medium text-sm">Room {index + 1}</h4>
+                          {rooms.length > 1 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeRoom(index)}
+                              className="h-8 text-destructive hover:text-destructive"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">Adults</span>
+                            <div className="flex items-center gap-3">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => updateRoom(index, "adults", room.adults - 1)}
+                                disabled={room.adults <= 1}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="w-8 text-center font-medium">{room.adults}</span>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => updateRoom(index, "adults", room.adults + 1)}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">Children</span>
+                            <div className="flex items-center gap-3">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => updateRoom(index, "children", room.children - 1)}
+                                disabled={room.children <= 0}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="w-8 text-center font-medium">{room.children}</span>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => updateRoom(index, "children", room.children + 1)}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <Button variant="outline" className="w-full" onClick={addRoom}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Room
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Summary */}
+            {checkInDate && checkOutDate && (
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>{numNights} night{numNights !== 1 ? 's' : ''}</span>
+                  <span>{rooms.length} room{rooms.length !== 1 ? 's' : ''}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Check Availability Button */}
+            <Button
+              onClick={() => {
+                handleCheckAvailability();
+                setIsMobileBookingOpen(false);
+              }}
+              disabled={!checkInDate || !checkOutDate}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold"
+              size="lg"
+            >
+              Check Availability
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
