@@ -43,10 +43,10 @@ function BlogContent({ content }: { content: string }) {
     // Process HTML to wrap images in centered containers
     let processed = content;
 
-    // Match img tags and wrap them in centered divs
+    // Match img tags and wrap them in centered divs with reduced margin
     processed = processed.replace(
       /<img([^>]+)>/gi,
-      '<div style="display:flex;justify-content:center;margin:2rem auto;max-width:100%;"><img$1 style="max-width:85%;height:auto;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);border:1px solid rgba(209,170,90,0.2);padding:8px;background:white;"/></div>'
+      '<div style="display:flex;justify-content:center;margin:1rem auto;max-width:100%;"><img$1 style="max-width:85%;height:auto;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);border:1px solid rgba(209,170,90,0.2);padding:8px;background:white;"/></div>'
     );
 
     return processed;
@@ -56,19 +56,19 @@ function BlogContent({ content }: { content: string }) {
     <div
       className="blog-content prose prose-base sm:prose-lg max-w-none
         prose-headings:font-bold prose-headings:text-card-foreground prose-headings:break-words
-        prose-h1:text-2xl sm:prose-h1:text-3xl lg:prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4
-        prose-h2:text-xl sm:prose-h2:text-2xl lg:prose-h2:text-3xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
-        prose-h3:text-lg sm:prose-h3:text-xl lg:prose-h3:text-2xl prose-h3:mt-6 prose-h3:mb-3
-        prose-p:text-card-foreground prose-p:leading-relaxed prose-p:mb-4 prose-p:text-base sm:prose-p:text-lg prose-p:break-words
+        prose-h1:text-2xl sm:prose-h1:text-3xl lg:prose-h1:text-4xl prose-h1:mt-6 prose-h1:mb-3
+        prose-h2:text-xl sm:prose-h2:text-2xl lg:prose-h2:text-3xl prose-h2:mt-6 prose-h2:mb-3 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
+        prose-h3:text-lg sm:prose-h3:text-xl lg:prose-h3:text-2xl prose-h3:mt-4 prose-h3:mb-2
+        prose-p:text-card-foreground prose-p:leading-relaxed prose-p:mb-3 prose-p:text-base sm:prose-p:text-lg prose-p:break-words
         prose-a:text-[#214B3F] prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-a:break-words
         prose-strong:text-card-foreground prose-strong:break-words
-        prose-ul:my-4 prose-ul:space-y-2 prose-ul:pl-6
-        prose-ol:my-4 prose-ol:space-y-2 prose-ol:pl-6
+        prose-ul:my-3 prose-ul:space-y-1 prose-ul:pl-6
+        prose-ol:my-3 prose-ol:space-y-1 prose-ol:pl-6
         prose-li:text-card-foreground prose-li:leading-relaxed prose-li:text-base prose-li:break-words
         prose-blockquote:border-l-4 prose-blockquote:border-[#D1AA5A] prose-blockquote:pl-6 prose-blockquote:italic
-        prose-blockquote:text-muted-foreground prose-blockquote:my-6 prose-blockquote:bg-[#214B3F]/5 prose-blockquote:py-3 prose-blockquote:rounded-r
+        prose-blockquote:text-muted-foreground prose-blockquote:my-4 prose-blockquote:bg-[#214B3F]/5 prose-blockquote:py-3 prose-blockquote:rounded-r
         prose-code:text-[#214B3F] prose-code:bg-[#214B3F]/10 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
-        prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:overflow-x-auto prose-pre:rounded-lg prose-pre:my-6 prose-pre:p-4
+        prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:overflow-x-auto prose-pre:rounded-lg prose-pre:my-4 prose-pre:p-4
       "
       dangerouslySetInnerHTML={{ __html: processedContent }}
     />
@@ -363,24 +363,22 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
         </div>
       </section>
 
-      {/* Image Gallery */}
+      {/* Image Gallery - Lazy Loaded */}
       {images.length > 1 && (
-        <section className="py-12 bg-gradient-to-b from-gray-50 to-white">
+        <section className="py-8 sm:py-12 bg-gradient-to-b from-gray-50 to-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-            <div className="flex items-center justify-center gap-3 mb-8">
+            <div className="flex items-center justify-center gap-3 mb-6">
               <Camera className="h-5 w-5 text-[#214B3F]" />
-              <h3 className="text-xl font-bold text-card-foreground">Gallery</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-card-foreground">Gallery</h3>
               <Badge className="bg-[#D1AA5A]/20 text-[#214B3F] border-[#D1AA5A]">
                 {images.length} photos
               </Badge>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 max-w-6xl mx-auto">
               {images.slice(0, 8).map((image, index) => (
-                <motion.div
+                <div
                   key={index}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="relative aspect-square rounded-xl overflow-hidden cursor-pointer group"
+                  className="relative aspect-square rounded-xl overflow-hidden cursor-pointer group hover:scale-105 transition-transform"
                   onClick={() => {
                     setCurrentImageIndex(index);
                     setShowImageGallery(true);
@@ -391,12 +389,12 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                     alt={`Gallery ${index + 1}`}
                     fill
                     className="object-cover"
-                    priority={index < 4}
+                    loading={index < 4 ? "eager" : "lazy"}
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -426,12 +424,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
               {/* Tags */}
               {blog.tags && blog.tags.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-200 max-w-4xl mx-auto"
-                >
+                <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200 max-w-4xl mx-auto">
                   <h3 className="text-lg sm:text-xl font-bold text-card-foreground mb-4 flex items-center gap-2">
                     <Tag className="h-4 w-4 sm:h-5 sm:w-5 text-[#214B3F]" />
                     Topics
@@ -448,16 +441,11 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                       </Link>
                     ))}
                   </div>
-                </motion.div>
+                </div>
               )}
 
               {/* Author Card */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="mt-8 sm:mt-12 max-w-4xl mx-auto"
-              >
+              <div className="mt-6 sm:mt-8 max-w-4xl mx-auto">
                 <Card className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-[#214B3F]/5 to-[#D1AA5A]/5 border-[#214B3F]/20">
                   <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                     <SimpleAvatar name={blog.author.name} className="h-16 w-16 sm:h-20 sm:w-20 text-xl sm:text-2xl flex-shrink-0" />
@@ -488,7 +476,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                     </div>
                   </div>
                 </Card>
-              </motion.div>
+              </div>
             </article>
 
             {/* Sidebar */}
@@ -634,28 +622,22 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
         </div>
       </section>
 
-      {/* Related Blogs */}
+      {/* Related Blogs - Lazy Loaded */}
       {relatedBlogs.length > 0 && (
-        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white overflow-x-hidden">
+        <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-50 to-white overflow-x-hidden">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-card-foreground mb-3 sm:mb-4 break-words px-2">Continue Your Journey</h2>
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-card-foreground mb-2 sm:mb-3 break-words px-2">Continue Your Journey</h2>
               <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto break-words px-4">
                 Discover more stories and adventures from our collection of travel experiences
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {relatedBlogs.map((relatedBlog, index) => (
-                <motion.div
-                  key={relatedBlog.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="w-full min-w-0"
-                >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {relatedBlogs.map((relatedBlog) => (
+                <div key={relatedBlog.id} className="w-full min-w-0">
                   <RelatedBlogCard blog={relatedBlog} />
-                </motion.div>
+                </div>
               ))}
             </div>
 
