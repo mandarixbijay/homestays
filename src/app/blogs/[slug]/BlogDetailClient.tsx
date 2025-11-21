@@ -147,7 +147,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-card">
+    <div className="min-h-screen bg-card overflow-x-hidden">
       {/* Progress Bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#214B3F] to-[#D1AA5A] z-50"
@@ -291,12 +291,12 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
             )}
 
             {/* Title */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2 break-words max-w-full">
               {blog.title}
             </h1>
 
             {/* Excerpt */}
-            <p className="text-base sm:text-lg lg:text-xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
+            <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto px-4 break-words">
               {blog.excerpt}
             </p>
 
@@ -373,32 +373,42 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
       )}
 
       {/* Main Content */}
-      <section className="py-16" ref={contentRef}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 max-w-7xl mx-auto">
+      <section className="py-8 sm:py-12 lg:py-16 overflow-x-hidden" ref={contentRef}>
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
             {/* Article Content */}
-            <article className="lg:col-span-8 w-full">
-              <div className="prose prose-lg max-w-none mx-auto">
+            <article className="lg:col-span-8 w-full min-w-0">
+              <div className="w-full max-w-4xl mx-auto">
                 <div
                   className="
-                    prose-headings:font-bold prose-headings:text-card-foreground
-                    prose-h1:text-3xl sm:prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4
-                    prose-h2:text-2xl sm:prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
-                    prose-h3:text-xl sm:prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
-                    prose-p:text-card-foreground prose-p:leading-relaxed prose-p:mb-6 prose-p:text-base
-                    prose-a:text-[#214B3F] prose-a:no-underline hover:prose-a:underline prose-a:font-medium
-                    prose-strong:text-card-foreground
-                    prose-ul:my-6 prose-ul:space-y-2
-                    prose-ol:my-6 prose-ol:space-y-2
-                    prose-li:text-card-foreground prose-li:leading-relaxed
-                    prose-blockquote:border-l-4 prose-blockquote:border-[#D1AA5A] prose-blockquote:pl-6 prose-blockquote:italic
-                    prose-blockquote:text-muted-foreground prose-blockquote:my-8
-                    prose-code:text-[#214B3F] prose-code:bg-[#214B3F]/10 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
-                    prose-pre:bg-gray-900 prose-pre:text-card-foreground
-                    prose-img:rounded-xl prose-img:shadow-xl prose-img:my-8 prose-img:mx-auto prose-img:max-w-full prose-img:h-auto prose-img:w-auto
-                    first-letter:text-5xl sm:first-letter:text-6xl first-letter:font-bold first-letter:float-left
-                    first-letter:mr-3 first-letter:mt-1 first-letter:text-[#214B3F]
-                    [&_img]:mx-auto [&_img]:block [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl
+                    prose prose-base sm:prose-lg max-w-none
+                    overflow-hidden
+                    [&_*]:max-w-full
+                    [&_*]:break-words
+                    prose-headings:font-bold prose-headings:text-card-foreground prose-headings:break-words
+                    prose-h1:text-2xl sm:prose-h1:text-3xl lg:prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4
+                    prose-h2:text-xl sm:prose-h2:text-2xl lg:prose-h2:text-3xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
+                    prose-h3:text-lg sm:prose-h3:text-xl lg:prose-h3:text-2xl prose-h3:mt-6 prose-h3:mb-3
+                    prose-p:text-card-foreground prose-p:leading-relaxed prose-p:mb-4 prose-p:text-sm sm:prose-p:text-base prose-p:break-words
+                    prose-a:text-[#214B3F] prose-a:no-underline hover:prose-a:underline prose-a:font-medium prose-a:break-words
+                    prose-strong:text-card-foreground prose-strong:break-words
+                    prose-ul:my-4 prose-ul:space-y-2 prose-ul:pl-4 sm:prose-ul:pl-6
+                    prose-ol:my-4 prose-ol:space-y-2 prose-ol:pl-4 sm:prose-ol:pl-6
+                    prose-li:text-card-foreground prose-li:leading-relaxed prose-li:text-sm sm:prose-li:text-base prose-li:break-words
+                    prose-blockquote:border-l-4 prose-blockquote:border-[#D1AA5A] prose-blockquote:pl-4 sm:prose-blockquote:pl-6 prose-blockquote:italic
+                    prose-blockquote:text-muted-foreground prose-blockquote:my-6 prose-blockquote:break-words
+                    prose-code:text-[#214B3F] prose-code:bg-[#214B3F]/10 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-xs sm:prose-code:text-sm
+                    prose-code:break-all
+                    prose-pre:bg-gray-900 prose-pre:text-card-foreground prose-pre:overflow-x-auto prose-pre:max-w-full
+                    prose-img:rounded-lg sm:prose-img:rounded-xl prose-img:shadow-lg sm:prose-img:shadow-xl
+                    prose-img:my-6 prose-img:mx-auto prose-img:max-w-full prose-img:h-auto prose-img:w-auto
+                    prose-img:block
+                    first-letter:text-4xl sm:first-letter:text-5xl lg:first-letter:text-6xl first-letter:font-bold first-letter:float-left
+                    first-letter:mr-2 sm:first-letter:mr-3 first-letter:mt-1 first-letter:text-[#214B3F]
+                    [&_img]:!mx-auto [&_img]:!block [&_img]:!max-w-full [&_img]:!w-auto [&_img]:!h-auto
+                    [&_img]:rounded-lg sm:[&_img]:rounded-xl [&_img]:my-6
+                    [&_figure]:mx-auto [&_figure]:max-w-full [&_figure]:my-6
+                    [&_table]:max-w-full [&_table]:overflow-x-auto [&_table]:block
                   "
                   dangerouslySetInnerHTML={{ __html: blog.content }}
                 />
@@ -410,10 +420,10 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="mt-16 pt-8 border-t border-gray-200"
+                  className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-200 max-w-4xl mx-auto"
                 >
-                  <h3 className="text-xl font-bold text-card-foreground mb-4 flex items-center gap-2">
-                    <Tag className="h-5 w-5 text-[#214B3F]" />
+                  <h3 className="text-lg sm:text-xl font-bold text-card-foreground mb-4 flex items-center gap-2">
+                    <Tag className="h-4 w-4 sm:h-5 sm:w-5 text-[#214B3F]" />
                     Topics
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -421,7 +431,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                       <Link key={tag.id} href={`/blogs?tag=${tag.slug}`}>
                         <Badge
                           variant="outline"
-                          className="cursor-pointer hover:bg-[#214B3F]/10 hover:border-[#214B3F] transition-colors"
+                          className="cursor-pointer hover:bg-[#214B3F]/10 hover:border-[#214B3F] transition-colors text-xs sm:text-sm"
                         >
                           #{tag.name}
                         </Badge>
@@ -436,32 +446,32 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="mt-12"
+                className="mt-8 sm:mt-12 max-w-4xl mx-auto"
               >
-                <Card className="p-8 bg-gradient-to-br from-[#214B3F]/5 to-[#D1AA5A]/5 border-[#214B3F]/20">
-                  <div className="flex items-start gap-6">
-                    <SimpleAvatar name={blog.author.name} className="h-20 w-20 text-2xl flex-shrink-0" />
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-card-foreground mb-2">{blog.author.name}</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Travel writer and adventure enthusiast exploring Nepal&apos;s hidden treasures. 
+                <Card className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-[#214B3F]/5 to-[#D1AA5A]/5 border-[#214B3F]/20">
+                  <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+                    <SimpleAvatar name={blog.author.name} className="h-16 w-16 sm:h-20 sm:w-20 text-xl sm:text-2xl flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl sm:text-2xl font-bold text-card-foreground mb-2 break-words">{blog.author.name}</h3>
+                      <p className="text-sm sm:text-base text-muted-foreground mb-4 break-words">
+                        Travel writer and adventure enthusiast exploring Nepal&apos;s hidden treasures.
                         Sharing authentic stories and insider tips from the heart of the Himalayas.
                       </p>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="rounded-full border-[#214B3F] text-[#214B3F] hover:bg-[#214B3F] hover:text-white"
+                          className="rounded-full border-[#214B3F] text-[#214B3F] hover:bg-[#214B3F] hover:text-white text-xs sm:text-sm"
                         >
-                          <User className="h-4 w-4 mr-2" />
+                          <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                           Follow
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="rounded-full border-[#D1AA5A] text-[#D1AA5A] hover:bg-[#D1AA5A] hover:text-white"
+                          className="rounded-full border-[#D1AA5A] text-[#D1AA5A] hover:bg-[#D1AA5A] hover:text-white text-xs sm:text-sm"
                         >
-                          <MessageCircle className="h-4 w-4 mr-2" />
+                          <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                           Message
                         </Button>
                       </div>
@@ -472,7 +482,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
             </article>
 
             {/* Sidebar */}
-            <aside className="lg:col-span-4 space-y-6">
+            <aside className="lg:col-span-4 w-full min-w-0 space-y-6">
               {/* Table of Contents - Desktop Only */}
               <div className="hidden lg:block">
                 <TableOfContents content={blog.content} />
@@ -616,33 +626,34 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
       {/* Related Blogs */}
       {relatedBlogs.length > 0 && (
-        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-card-foreground mb-4">Continue Your Journey</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
+        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white overflow-x-hidden">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-card-foreground mb-3 sm:mb-4 break-words px-2">Continue Your Journey</h2>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto break-words px-4">
                 Discover more stories and adventures from our collection of travel experiences
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
               {relatedBlogs.map((relatedBlog, index) => (
                 <motion.div
                   key={relatedBlog.id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
+                  className="w-full min-w-0"
                 >
                   <RelatedBlogCard blog={relatedBlog} />
                 </motion.div>
               ))}
             </div>
 
-            <div className="text-center mt-12">
+            <div className="text-center mt-8 sm:mt-12">
               <Link href="/blogs">
-                <Button className="bg-gradient-to-r from-[#214B3F] to-[#2d6654] text-white hover:from-[#214B3F]/90 hover:to-[#2d6654]/90">
+                <Button className="bg-gradient-to-r from-[#214B3F] to-[#2d6654] text-white hover:from-[#214B3F]/90 hover:to-[#2d6654]/90 text-sm sm:text-base">
                   Explore All Stories
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                  <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-2" />
                 </Button>
               </Link>
             </div>
@@ -714,9 +725,9 @@ function RelatedBlogCard({ blog }: { blog: PublicBlog }) {
   const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/fallback-image.png";
 
   return (
-    <Link href={`/blogs/${blog.slug}`}>
+    <Link href={`/blogs/${blog.slug}`} className="block w-full">
       <Card className="group h-full overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-card">
-        <div className="relative h-64 overflow-hidden">
+        <div className="relative h-48 sm:h-56 lg:h-64 overflow-hidden">
           <SafeBlogImage
             src={mainImage}
             alt={blog.title}
@@ -726,28 +737,28 @@ function RelatedBlogCard({ blog }: { blog: PublicBlog }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
 
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-            <Clock className="h-3 w-3" />
-            <span>{blog.readTime || 5} min read</span>
+        <CardContent className="p-4 sm:p-5 lg:p-6">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground mb-2 sm:mb-3">
+            <Clock className="h-3 w-3 flex-shrink-0" />
+            <span className="truncate">{blog.readTime || 5} min</span>
             <span className="text-muted-foreground/50">•</span>
-            <Calendar className="h-3 w-3" />
-            <span>{format(parseISO(blog.publishedAt || new Date().toISOString()), "MMM d")}</span>
+            <Calendar className="h-3 w-3 flex-shrink-0" />
+            <span className="truncate">{format(parseISO(blog.publishedAt || new Date().toISOString()), "MMM d")}</span>
           </div>
 
-          <h3 className="text-lg font-bold text-card-foreground line-clamp-2 group-hover:text-[#214B3F] transition-colors mb-2">
+          <h3 className="text-base sm:text-lg font-bold text-card-foreground line-clamp-2 group-hover:text-[#214B3F] transition-colors mb-2 break-words">
             {blog.title}
           </h3>
 
-          <p className="text-muted-foreground text-sm line-clamp-3 mb-4">{blog.excerpt}</p>
+          <p className="text-muted-foreground text-xs sm:text-sm line-clamp-3 mb-3 sm:mb-4 break-words">{blog.excerpt}</p>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <SimpleAvatar name={blog.author.name} className="h-6 w-6 text-xs" />
-              <span className="text-xs text-muted-foreground">{blog.author.name}</span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <SimpleAvatar name={blog.author.name} className="h-5 w-5 sm:h-6 sm:w-6 text-xs flex-shrink-0" />
+              <span className="text-xs text-muted-foreground truncate">{blog.author.name}</span>
             </div>
 
-            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-[#214B3F] group-hover:translate-x-1 transition-all" />
+            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-[#214B3F] group-hover:translate-x-1 transition-all flex-shrink-0" />
           </div>
         </CardContent>
       </Card>
