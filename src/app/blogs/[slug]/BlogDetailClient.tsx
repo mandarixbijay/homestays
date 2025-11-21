@@ -236,7 +236,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
       </motion.div>
 
       {/* Hero Section with Adjusted Image Position */}
-      <section className="relative min-h-[75vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[60vh] sm:min-h-[70vh] lg:min-h-[75vh] flex items-center justify-center overflow-hidden">
         {/* Background Image with Fixed Cropping */}
         <motion.div
           className="absolute inset-0 z-0"
@@ -250,7 +250,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
               src={images[0]}
               alt={blog.title}
               fill
-              className="object-cover object-[0_20%]" // Adjusted to start 20% from the top
+              className="object-cover object-center"
               priority
             />
           </div>
@@ -258,7 +258,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
         </motion.div>
 
         {/* Content */}
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center py-12 sm:py-16 lg:py-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -291,40 +291,41 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
             )}
 
             {/* Title */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2">
               {blog.title}
             </h1>
 
             {/* Excerpt */}
-            <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg lg:text-xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
               {blog.excerpt}
             </p>
 
             {/* Meta Info */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-white/80">
-              <div className="flex items-center gap-3">
-                <SimpleAvatar name={blog.author.name} className="h-10 w-10 text-sm" />
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 lg:gap-6 text-sm sm:text-base text-white/80 px-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <SimpleAvatar name={blog.author.name} className="h-8 w-8 sm:h-10 sm:w-10 text-xs sm:text-sm" />
                 <div className="text-left">
-                  <p className="font-medium text-white">{blog.author.name}</p>
+                  <p className="font-medium text-white text-sm sm:text-base">{blog.author.name}</p>
                   <p className="text-xs text-white/60">Travel Writer</p>
                 </div>
               </div>
 
-              <Separator orientation="vertical" className="h-10 bg-card/20" />
+              <Separator orientation="vertical" className="h-8 sm:h-10 bg-card/20 hidden sm:block" />
 
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                <span>{format(parseISO(blog.publishedAt || new Date().toISOString()), "MMMM d, yyyy")}</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">{format(parseISO(blog.publishedAt || new Date().toISOString()), "MMMM d, yyyy")}</span>
+                <span className="sm:hidden">{format(parseISO(blog.publishedAt || new Date().toISOString()), "MMM d, yyyy")}</span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                <span>{blog.readTime || 5} min read</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span>{blog.readTime || 5} min</span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                <span>{blog.viewCount.toLocaleString()} views</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span>{blog.viewCount.toLocaleString()}</span>
               </div>
             </div>
           </motion.div>
@@ -334,15 +335,15 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
       {/* Image Gallery */}
       {images.length > 1 && (
         <section className="py-12 bg-gradient-to-b from-gray-50 to-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3 mb-6">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+            <div className="flex items-center justify-center gap-3 mb-8">
               <Camera className="h-5 w-5 text-[#214B3F]" />
               <h3 className="text-xl font-bold text-card-foreground">Gallery</h3>
               <Badge className="bg-[#D1AA5A]/20 text-[#214B3F] border-[#D1AA5A]">
                 {images.length} photos
               </Badge>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 max-w-6xl mx-auto">
               {images.slice(0, 8).map((image, index) => (
                 <motion.div
                   key={index}
@@ -362,7 +363,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                     priority={index < 4}
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <Eye className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </motion.div>
               ))}
@@ -374,17 +375,17 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
       {/* Main Content */}
       <section className="py-16" ref={contentRef}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 max-w-7xl mx-auto">
             {/* Article Content */}
-            <article className="lg:col-span-8">
-              <div className="prose prose-lg max-w-none">
+            <article className="lg:col-span-8 w-full">
+              <div className="prose prose-lg max-w-none mx-auto">
                 <div
                   className="
-                    prose-headings:font-bold prose-headings:text-card-foreground 
-                    prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4
-                    prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
-                    prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
-                    prose-p:text-card-foreground prose-p:leading-relaxed prose-p:mb-6
+                    prose-headings:font-bold prose-headings:text-card-foreground
+                    prose-h1:text-3xl sm:prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4
+                    prose-h2:text-2xl sm:prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
+                    prose-h3:text-xl sm:prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
+                    prose-p:text-card-foreground prose-p:leading-relaxed prose-p:mb-6 prose-p:text-base
                     prose-a:text-[#214B3F] prose-a:no-underline hover:prose-a:underline prose-a:font-medium
                     prose-strong:text-card-foreground
                     prose-ul:my-6 prose-ul:space-y-2
@@ -392,11 +393,12 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                     prose-li:text-card-foreground prose-li:leading-relaxed
                     prose-blockquote:border-l-4 prose-blockquote:border-[#D1AA5A] prose-blockquote:pl-6 prose-blockquote:italic
                     prose-blockquote:text-muted-foreground prose-blockquote:my-8
-                    prose-code:text-[#214B3F] prose-code:bg-[#214B3F]/10 prose-code:px-2 prose-code:py-1 prose-code:rounded
+                    prose-code:text-[#214B3F] prose-code:bg-[#214B3F]/10 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
                     prose-pre:bg-gray-900 prose-pre:text-card-foreground
-                    prose-img:rounded-xl prose-img:shadow-xl prose-img:my-8
-                    first-letter:text-6xl first-letter:font-bold first-letter:float-left 
+                    prose-img:rounded-xl prose-img:shadow-xl prose-img:my-8 prose-img:mx-auto prose-img:max-w-full prose-img:h-auto prose-img:w-auto
+                    first-letter:text-5xl sm:first-letter:text-6xl first-letter:font-bold first-letter:float-left
                     first-letter:mr-3 first-letter:mt-1 first-letter:text-[#214B3F]
+                    [&_img]:mx-auto [&_img]:block [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-xl
                   "
                   dangerouslySetInnerHTML={{ __html: blog.content }}
                 />
