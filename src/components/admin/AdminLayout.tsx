@@ -26,6 +26,7 @@ import {
   MapPin,
   Zap,
   Star,
+  QrCode,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminAuth, useSessionManager } from "@/hooks/useSessionManager";
@@ -65,6 +66,7 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [blogMenuOpen, setBlogMenuOpen] = useState(false);
   const [masterDataMenuOpen, setMasterDataMenuOpen] = useState(false);
+  const [campaignMenuOpen, setCampaignMenuOpen] = useState(false);
 
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -83,6 +85,17 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
       ],
     },
     { name: "Users", href: "/admin/users", icon: Users },
+    {
+      name: "Campaigns",
+      href: "/admin/campaigns",
+      icon: QrCode,
+      menuKey: "campaign",
+      subMenu: [
+        { name: "All Campaigns", href: "/admin/campaigns", icon: QrCode },
+        { name: "Create Campaign", href: "/admin/campaigns/create", icon: PenTool },
+        { name: "Reviews", href: "/admin/campaigns/reviews", icon: Star },
+      ],
+    },
     {
       name: "Blog",
       href: "/admin/blog",
@@ -109,12 +122,14 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
   const getMenuOpenState = (menuKey?: string) => {
     if (menuKey === "blog") return blogMenuOpen;
     if (menuKey === "masterData") return masterDataMenuOpen;
+    if (menuKey === "campaign") return campaignMenuOpen;
     return false;
   };
 
   const toggleMenu = (menuKey?: string) => {
     if (menuKey === "blog") setBlogMenuOpen(!blogMenuOpen);
     if (menuKey === "masterData") setMasterDataMenuOpen(!masterDataMenuOpen);
+    if (menuKey === "campaign") setCampaignMenuOpen(!campaignMenuOpen);
   };
 
   const renderNav = () => (
