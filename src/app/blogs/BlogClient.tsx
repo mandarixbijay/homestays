@@ -445,7 +445,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
 
       {/* Featured Blogs */}
       {featuredBlogs.length > 0 && (
-        <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
+        <section className="py-12 sm:py-16 bg-gradient-to-br from-gray-50 to-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-12">
               <div>
@@ -465,16 +465,11 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredBlogs.map((blog, index) => (
-                <motion.div
-                  key={blog.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredBlogs.map((blog) => (
+                <div key={blog.id}>
                   <FeaturedBlogCard blog={blog} />
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -482,7 +477,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
       )}
 
       {/* Main Content Area */}
-      <section className="py-20">
+      <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-12">
             {/* Sidebar */}
@@ -668,16 +663,11 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {blogs.map((blog, index) => (
-                      <motion.div
-                        key={blog.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <BlogCard blog={blog} />
-                      </motion.div>
+                      <div key={blog.id}>
+                        <BlogCard blog={blog} index={index} />
+                      </div>
                     ))}
                   </div>
 
@@ -762,7 +752,7 @@ function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
   );
 }
 
-function BlogCard({ blog }: { blog: PublicBlog }) {
+function BlogCard({ blog, index }: { blog: PublicBlog; index: number }) {
   const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/fallback-image.png";
 
   return (
@@ -774,6 +764,7 @@ function BlogCard({ blog }: { blog: PublicBlog }) {
             alt={blog.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
+            loading={index < 6 ? "eager" : "lazy"}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
