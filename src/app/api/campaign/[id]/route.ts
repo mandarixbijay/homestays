@@ -9,10 +9,10 @@ const API_BASE_URL = process.env.API_BASE_URL || 'http://13.61.8.56:3001';
 // GET /api/campaign/:id - Get campaign by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const response = await fetch(`${API_BASE_URL}/campaign/${id}`, {
       method: 'GET',
@@ -43,10 +43,10 @@ export async function GET(
 // PUT /api/campaign/:id - Update campaign (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     console.log(`[campaign/${id}] PUT request body:`, body);
 
@@ -109,10 +109,10 @@ export async function PUT(
 // DELETE /api/campaign/:id - Delete campaign (Admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const authHeader = request.headers.get('Authorization');
     if (!authHeader) {
