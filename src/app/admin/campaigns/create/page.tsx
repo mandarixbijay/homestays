@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,8 +54,7 @@ export default function CreateCampaignPage() {
   };
 
   return (
-    <AdminLayout title="Create Campaign">
-      <div className="max-w-3xl space-y-6">
+    <div className="p-6 max-w-3xl space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
@@ -224,6 +222,6 @@ export default function CreateCampaignPage() {
           </Card>
         </form>
       </div>
-    </AdminLayout>
+    </div>
   );
 }

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,17 +124,14 @@ export default function QRCodesPage() {
 
   if (loading || !campaign) {
     return (
-      <AdminLayout title="Generate QR Codes">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      </AdminLayout>
+      <div className="p-6 flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
   return (
-    <AdminLayout title="Generate QR Codes">
-      <div className="max-w-5xl space-y-6">
+    <div className="p-6 max-w-5xl space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
@@ -306,6 +302,6 @@ export default function QRCodesPage() {
           </Card>
         )}
       </div>
-    </AdminLayout>
+    </div>
   );
 }

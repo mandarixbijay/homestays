@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -62,26 +61,24 @@ export default function CampaignDetailsPage() {
 
   if (loading) {
     return (
-      <AdminLayout title="Campaign Details">
-        <div className="space-y-6">
-          <Skeleton className="h-12 w-1/2" />
-          <div className="grid gap-6 md:grid-cols-4">
-            {[1, 2, 3, 4].map((i) => (
-              <Card key={i}>
-                <CardContent className="pt-6">
-                  <Skeleton className="h-20 w-full" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      <div className="p-6 space-y-6">
+        <Skeleton className="h-12 w-1/2" />
+        <div className="grid gap-6 md:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="pt-6">
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
   if (!campaign) {
     return (
-      <AdminLayout title="Campaign Not Found">
+      <div className="p-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <h3 className="text-lg font-semibold mb-2">Campaign Not Found</h3>
@@ -93,7 +90,7 @@ export default function CampaignDetailsPage() {
             </Button>
           </CardContent>
         </Card>
-      </AdminLayout>
+      </div>
     );
   }
 
@@ -125,8 +122,7 @@ export default function CampaignDetailsPage() {
   ];
 
   return (
-    <AdminLayout title={campaign.name}>
-      <div className="space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -391,6 +387,6 @@ export default function CampaignDetailsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminLayout>
+    </div>
   );
 }
