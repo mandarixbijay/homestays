@@ -386,7 +386,6 @@ export default function CampaignDetailsPage() {
             )}
           </TabsContent>
         </Tabs>
-      </div>
     </div>
   );
 }

@@ -251,7 +251,6 @@ export default function CampaignsPage() {
             </Button>
           </div>
         )}
-      </div>
     </div>
   );
 }

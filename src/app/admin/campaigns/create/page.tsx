@@ -221,7 +221,6 @@ export default function CreateCampaignPage() {
             </CardContent>
           </Card>
         </form>
-      </div>
     </div>
   );
 }
