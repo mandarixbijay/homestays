@@ -28,6 +28,7 @@ import {
 } from "@/lib/api/campaign";
 import type { Campaign, QRCodeData } from "@/types/campaign";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 export default function QRCodesPage() {
   const router = useRouter();
