@@ -9,10 +9,10 @@ const API_BASE_URL = process.env.API_BASE_URL || 'http://13.61.8.56:3001';
 // GET /api/campaign/:id/homestays - Get campaign homestays
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const { searchParams } = new URL(request.url);
 
     const queryParams = {
