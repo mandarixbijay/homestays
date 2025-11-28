@@ -123,6 +123,29 @@ export const generateBulkQRCodes = async (data: GenerateBulkQRCodesRequest): Pro
   return response.data;
 };
 
+/**
+ * Get all QR codes for a campaign
+ * @requires Admin authentication
+ */
+export const getCampaignQRCodes = async (campaignId: number, page: number = 1, limit: number = 50): Promise<any> => {
+  const response = await apiClient.get(
+    `/campaign/${campaignId}/qr-codes`,
+    { params: { page, limit } }
+  );
+  return response.data;
+};
+
+/**
+ * Delete a QR code
+ * @requires Admin authentication
+ */
+export const deleteQRCode = async (qrCodeId: number): Promise<{ message: string }> => {
+  const response = await apiClient.delete<{ message: string }>(
+    `/campaign/qr-codes/${qrCodeId}`
+  );
+  return response.data;
+};
+
 // ==================== HOMESTAY REGISTRATION (FIELD STAFF) ====================
 
 /**
