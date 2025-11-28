@@ -12,6 +12,7 @@ import { Home, MapPin, Phone, Mail, User, Loader2, CheckCircle2 } from "lucide-r
 import { registerHomestay } from "@/lib/api/campaign";
 import { toast } from "sonner";
 import type { TrackQRScanResponse } from "@/types/campaign";
+import { Badge } from "../ui/badge";
 
 interface HomestayRegistrationFormProps {
   qrCode: string;

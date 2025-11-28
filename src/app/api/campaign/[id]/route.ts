@@ -45,8 +45,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  let id: string | undefined;
   try {
-    const { id } = await params;
+    id = (await params).id;
     const body = await request.json();
     console.log(`[campaign/${id}] PUT request body:`, body);
 
@@ -80,7 +81,7 @@ export async function PUT(
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error(`[campaign/${params.id}] PUT error:`, error);
+    console.error(`[campaign/${id ?? 'unknown'}] PUT error:`, error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -106,13 +107,13 @@ export async function PUT(
   }
 }
 
-// DELETE /api/campaign/:id - Delete campaign (Admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  let id: string | undefined;
   try {
-    const { id } = await params;
+    id = (await params).id;
 
     const authHeader = request.headers.get('Authorization');
     if (!authHeader) {
@@ -138,7 +139,7 @@ export async function DELETE(
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error(`[campaign/${params.id}] DELETE error:`, error);
+    console.error(`[campaign/${id ?? 'unknown'}] DELETE error:`, error);
     return NextResponse.json(
       {
         status: 'error',
@@ -148,3 +149,4 @@ export async function DELETE(
     );
   }
 }
+

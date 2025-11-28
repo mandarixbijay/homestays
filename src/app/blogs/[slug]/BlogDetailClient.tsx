@@ -389,7 +389,6 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                     alt={`Gallery ${index + 1}`}
                     fill
                     className="object-cover"
-                    loading={index < 4 ? "eager" : "lazy"}
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />

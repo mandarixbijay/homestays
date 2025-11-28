@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         'Authorization': authHeader,
         // Forward IP and user-agent for spam prevention
-        'X-Forwarded-For': request.headers.get('x-forwarded-for') || request.ip || 'unknown',
+        'X-Forwarded-For': request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
         'User-Agent': request.headers.get('user-agent') || '',
       },
       body: JSON.stringify(validatedBody),

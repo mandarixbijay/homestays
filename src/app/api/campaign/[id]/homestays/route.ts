@@ -11,8 +11,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  let id = '';
   try {
-    const { id } = await params;
+    id = (await params).id;
     const { searchParams } = new URL(request.url);
 
     const queryParams = {
@@ -54,7 +55,7 @@ export async function GET(
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error(`[campaign/${params.id}/homestays] GET error:`, error);
+    console.error(`[campaign/${id || 'unknown'}/homestays] GET error:`, error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
