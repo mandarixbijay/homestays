@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,8 +61,7 @@ export default function CampaignsPage() {
   );
 
   return (
-    <AdminLayout title="Campaign Management">
-      <div className="space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -254,6 +252,6 @@ export default function CampaignsPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </div>
   );
 }
