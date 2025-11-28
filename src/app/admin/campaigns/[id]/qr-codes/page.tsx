@@ -301,7 +301,6 @@ export default function QRCodesPage() {
             </CardContent>
           </Card>
         )}
-      </div>
     </div>
   );
 }
