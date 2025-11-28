@@ -1,4 +1,4 @@
-// src/app/api/campaign/[campaignId]/homestays/route.ts
+// src/app/api/campaign/[id]/homestays/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getCampaignHomestaysQuerySchema } from '@/lib/validations/campaign';
@@ -6,13 +6,13 @@ import { z } from 'zod';
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://13.61.8.56:3001';
 
-// GET /api/campaign/:campaignId/homestays - Get campaign homestays
+// GET /api/campaign/:id/homestays - Get campaign homestays
 export async function GET(
   request: NextRequest,
-  { params }: { params: { campaignId: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { campaignId } = params;
+    const { id } = params;
     const { searchParams } = new URL(request.url);
 
     const queryParams = {
@@ -37,7 +37,7 @@ export async function GET(
     }
 
     const response = await fetch(
-      `${API_BASE_URL}/campaign/${campaignId}/homestays?${query.toString()}`,
+      `${API_BASE_URL}/campaign/${id}/homestays?${query.toString()}`,
       {
         method: 'GET',
         headers: {
@@ -54,7 +54,7 @@ export async function GET(
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error(`[campaign/${params.campaignId}/homestays] GET error:`, error);
+    console.error(`[campaign/${params.id}/homestays] GET error:`, error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

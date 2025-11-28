@@ -1,11 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  api: {
-    bodyParser: {
-      sizeLimit: '20mb',
-    },
-  },
-
   // 🖼️ Fix: Disable optimization temporarily to prevent 402 errors
   images: {
     unoptimized: true,
