@@ -15,10 +15,14 @@ import {
   AlertCircle,
   CheckCircle2,
   Loader2,
+  Trash2,
+  ExternalLink,
 } from "lucide-react";
 import {
   getCampaignById,
   generateBulkQRCodes,
+  getCampaignQRCodes,
+  deleteQRCode,
   downloadQRCodeImage,
   downloadAllQRCodes,
 } from "@/lib/api/campaign";
@@ -34,13 +38,16 @@ export default function QRCodesPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [deleting, setDeleting] = useState<number | null>(null);
   const [count, setCount] = useState(100);
-  const [qrCodes, setQrCodes] = useState<QRCodeData[]>([]);
+  const [qrCodes, setQrCodes] = useState<any[]>([]);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [downloadProgress, setDownloadProgress] = useState(0);
 
   useEffect(() => {
     fetchCampaign();
-  }, [campaignId]);
+    fetchQRCodes();
+  }, [campaignId, pagination.page]);
 
   const fetchCampaign = async () => {
     try {
@@ -53,6 +60,21 @@ export default function QRCodesPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchQRCodes = async () => {
+    try {
+      const data = await getCampaignQRCodes(campaignId, pagination.page, 50);
+      setQrCodes(data.qrCodes || []);
+      setPagination({
+        page: data.pagination.page,
+        totalPages: data.pagination.totalPages,
+        total: data.pagination.total,
+      });
+    } catch (error: any) {
+      console.error("Failed to fetch QR codes:", error);
+      // Don't show error toast if it's the first time loading (might not exist yet)
     }
   };
 
@@ -71,16 +93,39 @@ export default function QRCodesPage() {
         count,
       });
 
-      setQrCodes(result.qrCodes);
       toast.success(`Generated ${result.count} QR codes successfully`, {
-        description: "You can now download the QR code images",
+        description: "Refreshing QR codes list...",
       });
+
+      // Refresh the QR codes list
+      await fetchQRCodes();
     } catch (error: any) {
       toast.error("Failed to generate QR codes", {
         description: error.response?.data?.message || error.message,
       });
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleDelete = async (qrCodeId: number, qrCode: string) => {
+    if (!confirm(`Are you sure you want to delete QR code ${qrCode.substring(0, 8)}...?\n\nThis action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setDeleting(qrCodeId);
+      await deleteQRCode(qrCodeId);
+      toast.success("QR code deleted successfully");
+
+      // Refresh the list
+      await fetchQRCodes();
+    } catch (error: any) {
+      toast.error("Failed to delete QR code", {
+        description: error.response?.data?.message || error.message,
+      });
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -254,36 +299,126 @@ export default function QRCodesPage() {
               </Alert>
 
               {/* QR Code Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto">
                 {qrCodes.map((qr, index) => (
-                  <Card key={qr.id} className="overflow-hidden">
+                  <Card key={qr.id} className={`overflow-hidden ${qr.homestayId ? 'border-green-200 bg-green-50/50' : ''}`}>
                     <CardContent className="p-4">
-                      <div className="aspect-square bg-white rounded-lg mb-2 overflow-hidden">
+                      {/* Status Badge */}
+                      <div className="mb-2">
+                        {qr.homestayId ? (
+                          <Badge variant="default" className="text-xs">
+                            Assigned
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">
+                            Unassigned
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* QR Code Image */}
+                      <div className="aspect-square bg-white rounded-lg mb-2 overflow-hidden border">
                         <img
                           src={qr.qrCodeUrl}
                           alt={`QR Code ${index + 1}`}
                           className="w-full h-full object-contain"
                         />
                       </div>
+
+                      {/* QR Code Info */}
                       <div className="space-y-2">
-                        <p className="text-xs text-muted-foreground text-center font-mono truncate">
-                          {qr.qrCode}
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => handleDownloadSingle(qr, index)}
-                          disabled={downloading}
-                        >
-                          <Download className="h-3 w-3 mr-1" />
-                          Download
-                        </Button>
+                        <div className="text-xs space-y-1">
+                          <p className="text-muted-foreground font-mono truncate" title={qr.qrCode}>
+                            {qr.qrCode.substring(0, 12)}...
+                          </p>
+                          {qr.homestay && (
+                            <p className="font-medium truncate text-green-700" title={qr.homestay.name}>
+                              {qr.homestay.name}
+                            </p>
+                          )}
+                          {qr.scannedCount > 0 && (
+                            <p className="text-muted-foreground">
+                              Scans: {qr.scannedCount}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleDownloadSingle(qr, index)}
+                            disabled={downloading}
+                            title="Download QR code"
+                          >
+                            <Download className="h-3 w-3" />
+                          </Button>
+
+                          {qr.reviewUrl && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(qr.reviewUrl, '_blank')}
+                              title="Open review page"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                          )}
+
+                          {!qr.homestayId && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(qr.id, qr.qrCode)}
+                              disabled={deleting === qr.id}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              title="Delete QR code"
+                            >
+                              {deleting === qr.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-3 w-3" />
+                              )}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
+
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between pt-4 border-t">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {qrCodes.length} of {pagination.total} QR codes
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                      disabled={pagination.page === 1}
+                    >
+                      Previous
+                    </Button>
+                    <div className="flex items-center px-3 text-sm">
+                      Page {pagination.page} of {pagination.totalPages}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.totalPages, prev.page + 1) }))}
+                      disabled={pagination.page === pagination.totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {/* Next Steps */}
               <Alert>
