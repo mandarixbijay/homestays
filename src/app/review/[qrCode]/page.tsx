@@ -301,61 +301,88 @@ export default function ReviewPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
-        {/* Homestay Info Card */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              {scanData.homestay.images && scanData.homestay.images.length > 0 && (
-                <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                  <Image
-                    src={scanData.homestay.images[0].url}
-                    alt={scanData.homestay.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              )}
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold mb-1">{scanData.homestay.name}</h2>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                  <MapPin className="h-4 w-4" />
-                  {scanData.homestay.address}
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < Math.floor(scanData.homestay.rating)
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    ))}
+        {/* Homestay Info Card - only show if homestay is registered */}
+        {scanData.homestay && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                {scanData.homestay.images && scanData.homestay.images.length > 0 && (
+                  <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                    <Image
+                      src={scanData.homestay.images[0].url}
+                      alt={scanData.homestay.name}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    ({scanData.homestay.reviews} reviews)
-                  </span>
+                )}
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold mb-1">{scanData.homestay.name}</h2>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                    <MapPin className="h-4 w-4" />
+                    {scanData.homestay.address}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${
+                            i < Math.floor(scanData.homestay.rating)
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      ({scanData.homestay.reviews} reviews)
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Campaign Info */}
-        {scanData.campaign.discountPercentage && (
-          <Alert>
-            <Gift className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Special Offer!</strong> Submit your review and get{" "}
-              <strong>{scanData.campaign.discountPercentage}%</strong> off your next booking!
-            </AlertDescription>
-          </Alert>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Verify Contact */}
-        {currentStep === "verify" && (
+        {/* Show error if QR code not assigned to homestay for non-admin users */}
+        {!scanData.homestay && (
+          <Card>
+            <CardContent className="pt-6">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>QR Code Not Assigned</strong>
+                  <p className="mt-2">
+                    This QR code hasn't been assigned to a homestay yet. Only admin or field staff can register homestays.
+                  </p>
+                </AlertDescription>
+              </Alert>
+              <div className="mt-4">
+                <Button onClick={() => router.push("/")} className="w-full">
+                  Back to Home
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Only show review flow if homestay is registered */}
+        {scanData.homestay && (
+          <>
+            {/* Campaign Info */}
+            {scanData.campaign.discountPercentage && (
+              <Alert>
+                <Gift className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Special Offer!</strong> Submit your review and get{" "}
+                  <strong>{scanData.campaign.discountPercentage}%</strong> off your next booking!
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Verify Contact */}
+            {currentStep === "verify" && (
           <Card>
             <CardHeader>
               <CardTitle>Verify Your Contact</CardTitle>
@@ -700,6 +727,8 @@ export default function ReviewPage() {
               </div>
             </CardContent>
           </Card>
+        )}
+          </>
         )}
       </div>
     </div>
