@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // 🖼️ Fix: Disable optimization temporarily to prevent 402 errors
@@ -48,15 +50,13 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value: `
-              default-src 'self';
-              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.segment.com https://www.googletagmanager.com;
-              connect-src 'self' https://cdn.segment.com https://www.google-analytics.com;
-              img-src 'self' data: https:;
-              "img-src 'self' data: https://s3-np1.datahub.com.np; " +
-              "script-src 'self' 'unsafe-inline' https://www.google-analytics.com; " +
-              style-src 'self' 'unsafe-inline';
-              font-src 'self';
-            `.replace(/\s{2,}/g, " ").trim(),
+                default-src 'self';
+                script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.segment.com https://www.googletagmanager.com;
+                connect-src 'self' https://cdn.segment.com https://www.google-analytics.com;
+                img-src 'self' data: https: https://s3-np1.datahub.com.np;
+                style-src 'self' 'unsafe-inline';
+                font-src 'self';
+              `.replace(/\s{2,}/g, " ").trim(),
           },
         ],
       },
