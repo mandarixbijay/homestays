@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ArrowLeft,
   QrCode,
@@ -39,15 +41,24 @@ export default function QRCodesPage() {
   const [generating, setGenerating] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [count, setCount] = useState(100);
   const [qrCodes, setQrCodes] = useState<any[]>([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [downloadProgress, setDownloadProgress] = useState(0);
+  const [selectedQRCodes, setSelectedQRCodes] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     fetchCampaign();
     fetchQRCodes();
   }, [campaignId, pagination.page]);
+
+  // Reset selection when QR codes change or page changes
+  useEffect(() => {
+    setSelectedQRCodes(new Set());
+    setSelectAll(false);
+  }, [qrCodes]);
 
   const fetchCampaign = async () => {
     try {
@@ -126,6 +137,63 @@ export default function QRCodesPage() {
       });
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectAll(checked);
+    if (checked) {
+      // Only select unassigned QR codes
+      const unassignedIds = qrCodes
+        .filter(qr => !qr.homestayId)
+        .map(qr => qr.id);
+      setSelectedQRCodes(new Set(unassignedIds));
+    } else {
+      setSelectedQRCodes(new Set());
+    }
+  };
+
+  const handleSelectQRCode = (qrCodeId: number, checked: boolean) => {
+    const newSelected = new Set(selectedQRCodes);
+    if (checked) {
+      newSelected.add(qrCodeId);
+    } else {
+      newSelected.delete(qrCodeId);
+    }
+    setSelectedQRCodes(newSelected);
+
+    // Update select all state
+    const unassignedCount = qrCodes.filter(qr => !qr.homestayId).length;
+    setSelectAll(newSelected.size === unassignedCount && unassignedCount > 0);
+  };
+
+  const handleBulkDelete = async () => {
+    const count = selectedQRCodes.size;
+    if (count === 0) return;
+
+    if (!confirm(`Are you sure you want to delete ${count} QR code${count > 1 ? 's' : ''}?\n\nThis action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setBulkDeleting(true);
+
+      // Delete all selected QR codes
+      const deletePromises = Array.from(selectedQRCodes).map(id => deleteQRCode(id));
+      await Promise.all(deletePromises);
+
+      toast.success(`${count} QR code${count > 1 ? 's' : ''} deleted successfully`);
+
+      // Clear selection and refresh list
+      setSelectedQRCodes(new Set());
+      setSelectAll(false);
+      await fetchQRCodes();
+    } catch (error: any) {
+      toast.error("Failed to delete some QR codes", {
+        description: error.response?.data?.message || error.message,
+      });
+    } finally {
+      setBulkDeleting(false);
     }
   };
 
@@ -258,24 +326,62 @@ export default function QRCodesPage() {
                     Download individual QR codes or all at once
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={handleDownloadAll}
-                  disabled={downloading}
-                  variant="default"
-                >
-                  {downloading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Downloading...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="mr-2 h-4 w-4" />
-                      Download All
-                    </>
-                  )}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={handleDownloadAll}
+                    disabled={downloading}
+                    variant="default"
+                  >
+                    {downloading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Downloading...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download All
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
+
+              {/* Bulk Actions */}
+              {qrCodes.some(qr => !qr.homestayId) && (
+                <div className="flex items-center gap-4 mt-4 pt-4 border-t">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="select-all"
+                      checked={selectAll}
+                      onCheckedChange={handleSelectAll}
+                    />
+                    <Label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                      Select All Unassigned ({qrCodes.filter(qr => !qr.homestayId).length})
+                    </Label>
+                  </div>
+                  {selectedQRCodes.size > 0 && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleBulkDelete}
+                      disabled={bulkDeleting}
+                    >
+                      {bulkDeleting ? (
+                        <>
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="mr-2 h-3 w-3" />
+                          Delete Selected ({selectedQRCodes.size})
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Download Progress */}
@@ -301,18 +407,26 @@ export default function QRCodesPage() {
               {/* QR Code Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto">
                 {qrCodes.map((qr, index) => (
-                  <Card key={qr.id} className={`overflow-hidden ${qr.homestayId ? 'border-green-200 bg-green-50/50' : ''}`}>
+                  <Card key={qr.id} className={`overflow-hidden ${qr.homestayId ? 'border-green-200 bg-green-50/50' : ''} ${selectedQRCodes.has(qr.id) ? 'ring-2 ring-primary' : ''}`}>
                     <CardContent className="p-4">
-                      {/* Status Badge */}
-                      <div className="mb-2">
-                        {qr.homestayId ? (
-                          <Badge variant="default" className="text-xs">
-                            Assigned
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">
-                            Unassigned
-                          </Badge>
+                      {/* Status Badge and Checkbox */}
+                      <div className="mb-2 flex items-center justify-between">
+                        <div>
+                          {qr.homestayId ? (
+                            <Badge variant="default" className="text-xs">
+                              Assigned
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs">
+                              Unassigned
+                            </Badge>
+                          )}
+                        </div>
+                        {!qr.homestayId && (
+                          <Checkbox
+                            checked={selectedQRCodes.has(qr.id)}
+                            onCheckedChange={(checked) => handleSelectQRCode(qr.id, checked as boolean)}
+                          />
                         )}
                       </div>
 
