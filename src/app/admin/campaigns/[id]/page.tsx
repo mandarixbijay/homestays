@@ -83,7 +83,7 @@ export default function CampaignDetailsPage() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <h3 className="text-lg font-semibold mb-2">Campaign Not Found</h3>
             <p className="text-muted-foreground mb-4">
-              The campaign you're looking for doesn't exist
+              The campaign you&apos;re looking for doesn&apos;t exist
             </p>
             <Button onClick={() => router.push("/admin/campaigns")}>
               Back to Campaigns
