@@ -1,6 +1,7 @@
 // src/lib/api/campaign.ts
 
 import axios from 'axios';
+import { getSession } from 'next-auth/react';
 import type {
   Campaign,
   CampaignHomestay,
@@ -38,6 +39,29 @@ import type {
 
 const API_BASE_URL = '/api';
 
+// Create axios instance with interceptors for authentication
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+// Add request interceptor to include auth token
+apiClient.interceptors.request.use(
+  async (config) => {
+    // Get session from NextAuth
+    const session = await getSession();
+
+    // Add auth token if available
+    if (session?.user?.accessToken) {
+      config.headers.Authorization = `Bearer ${session.user.accessToken}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // ==================== CAMPAIGN MANAGEMENT (ADMIN) ====================
 
 /**
@@ -45,7 +69,7 @@ const API_BASE_URL = '/api';
  * @requires Admin authentication
  */
 export const createCampaign = async (data: CreateCampaignRequest): Promise<Campaign> => {
-  const response = await axios.post<Campaign>(`${API_BASE_URL}/campaign`, data);
+  const response = await apiClient.post<Campaign>(`/campaign`, data);
   return response.data;
 };
 
@@ -54,7 +78,7 @@ export const createCampaign = async (data: CreateCampaignRequest): Promise<Campa
  * @public
  */
 export const getCampaigns = async (params?: GetCampaignsQuery): Promise<PaginatedResponse<Campaign>> => {
-  const response = await axios.get<PaginatedResponse<Campaign>>(`${API_BASE_URL}/campaign`, { params });
+  const response = await apiClient.get<PaginatedResponse<Campaign>>(`/campaign`, { params });
   return response.data;
 };
 
@@ -63,7 +87,7 @@ export const getCampaigns = async (params?: GetCampaignsQuery): Promise<Paginate
  * @public
  */
 export const getCampaignById = async (id: number): Promise<Campaign> => {
-  const response = await axios.get<Campaign>(`${API_BASE_URL}/campaign/${id}`);
+  const response = await apiClient.get<Campaign>(`/campaign/${id}`);
   return response.data;
 };
 
@@ -72,7 +96,7 @@ export const getCampaignById = async (id: number): Promise<Campaign> => {
  * @requires Admin authentication
  */
 export const updateCampaign = async (id: number, data: UpdateCampaignRequest): Promise<Campaign> => {
-  const response = await axios.put<Campaign>(`${API_BASE_URL}/campaign/${id}`, data);
+  const response = await apiClient.put<Campaign>(`/campaign/${id}`, data);
   return response.data;
 };
 
@@ -81,7 +105,7 @@ export const updateCampaign = async (id: number, data: UpdateCampaignRequest): P
  * @requires Admin authentication
  */
 export const deleteCampaign = async (id: number): Promise<{ message: string }> => {
-  const response = await axios.delete<{ message: string }>(`${API_BASE_URL}/campaign/${id}`);
+  const response = await apiClient.delete<{ message: string }>(`/campaign/${id}`);
   return response.data;
 };
 
@@ -92,8 +116,8 @@ export const deleteCampaign = async (id: number): Promise<{ message: string }> =
  * @requires Admin authentication
  */
 export const generateBulkQRCodes = async (data: GenerateBulkQRCodesRequest): Promise<GenerateBulkQRCodesResponse> => {
-  const response = await axios.post<GenerateBulkQRCodesResponse>(
-    `${API_BASE_URL}/campaign/qr-codes/generate`,
+  const response = await apiClient.post<GenerateBulkQRCodesResponse>(
+    `/campaign/qr-codes/generate`,
     data
   );
   return response.data;
@@ -106,8 +130,8 @@ export const generateBulkQRCodes = async (data: GenerateBulkQRCodesRequest): Pro
  * @requires Field Staff authentication
  */
 export const registerHomestay = async (data: RegisterHomestayRequest): Promise<RegisterHomestayResponse> => {
-  const response = await axios.post<RegisterHomestayResponse>(
-    `${API_BASE_URL}/campaign/homestay/register`,
+  const response = await apiClient.post<RegisterHomestayResponse>(
+    `/campaign/homestay/register`,
     data
   );
   return response.data;
@@ -118,8 +142,8 @@ export const registerHomestay = async (data: RegisterHomestayRequest): Promise<R
  * @requires Field Staff authentication
  */
 export const bulkRegisterHomestays = async (data: BulkRegisterHomestayRequest): Promise<BulkRegisterResponse> => {
-  const response = await axios.post<BulkRegisterResponse>(
-    `${API_BASE_URL}/campaign/homestay/bulk-register`,
+  const response = await apiClient.post<BulkRegisterResponse>(
+    `/campaign/homestay/bulk-register`,
     data
   );
   return response.data;
@@ -133,8 +157,8 @@ export const getCampaignHomestays = async (
   campaignId: number,
   params?: GetCampaignHomestaysQuery
 ): Promise<PaginatedResponse<CampaignHomestay>> => {
-  const response = await axios.get<PaginatedResponse<CampaignHomestay>>(
-    `${API_BASE_URL}/campaign/${campaignId}/homestays`,
+  const response = await apiClient.get<PaginatedResponse<CampaignHomestay>>(
+    `/campaign/${campaignId}/homestays`,
     { params }
   );
   return response.data;
@@ -145,7 +169,7 @@ export const getCampaignHomestays = async (
  * @public
  */
 export const getHomestayByQRCode = async (qrCode: string): Promise<CampaignHomestay> => {
-  const response = await axios.get<CampaignHomestay>(`${API_BASE_URL}/campaign/qr/${qrCode}`);
+  const response = await apiClient.get<CampaignHomestay>(`/campaign/qr/${qrCode}`);
   return response.data;
 };
 
@@ -156,7 +180,7 @@ export const getHomestayByQRCode = async (qrCode: string): Promise<CampaignHomes
  * @public
  */
 export const trackQRScan = async (data: TrackQRScanRequest): Promise<TrackQRScanResponse> => {
-  const response = await axios.post<TrackQRScanResponse>(`${API_BASE_URL}/campaign/scan`, data);
+  const response = await apiClient.post<TrackQRScanResponse>(`/campaign/scan`, data);
   return response.data;
 };
 
@@ -165,8 +189,8 @@ export const trackQRScan = async (data: TrackQRScanRequest): Promise<TrackQRScan
  * @public
  */
 export const verifyUserForReview = async (data: VerifyUserRequest): Promise<VerifyUserResponse> => {
-  const response = await axios.post<VerifyUserResponse>(
-    `${API_BASE_URL}/campaign/review/verify-user`,
+  const response = await apiClient.post<VerifyUserResponse>(
+    `/campaign/review/verify-user`,
     data
   );
   return response.data;
@@ -177,8 +201,8 @@ export const verifyUserForReview = async (data: VerifyUserRequest): Promise<Veri
  * @public
  */
 export const verifyOTPForReview = async (data: VerifyOTPRequest): Promise<VerifyOTPResponse> => {
-  const response = await axios.post<VerifyOTPResponse>(
-    `${API_BASE_URL}/campaign/review/verify-otp`,
+  const response = await apiClient.post<VerifyOTPResponse>(
+    `/campaign/review/verify-otp`,
     data
   );
   return response.data;
@@ -189,8 +213,8 @@ export const verifyOTPForReview = async (data: VerifyOTPRequest): Promise<Verify
  * @public
  */
 export const completeRegistration = async (data: CompleteRegistrationRequest): Promise<CompleteRegistrationResponse> => {
-  const response = await axios.post<CompleteRegistrationResponse>(
-    `${API_BASE_URL}/campaign/review/complete-registration`,
+  const response = await apiClient.post<CompleteRegistrationResponse>(
+    `/campaign/review/complete-registration`,
     data
   );
   return response.data;
@@ -206,8 +230,8 @@ export const uploadReviewImages = async (files: File[]): Promise<UploadImagesRes
     formData.append('images', file);
   });
 
-  const response = await axios.post<UploadImagesResponse>(
-    `${API_BASE_URL}/campaign/review/upload-images`,
+  const response = await apiClient.post<UploadImagesResponse>(
+    `/campaign/review/upload-images`,
     formData,
     {
       headers: {
@@ -223,8 +247,8 @@ export const uploadReviewImages = async (files: File[]): Promise<UploadImagesRes
  * @requires Authentication
  */
 export const submitReview = async (data: SubmitReviewRequest): Promise<SubmitReviewResponse> => {
-  const response = await axios.post<SubmitReviewResponse>(
-    `${API_BASE_URL}/campaign/review/submit`,
+  const response = await apiClient.post<SubmitReviewResponse>(
+    `/campaign/review/submit`,
     data
   );
   return response.data;
@@ -238,8 +262,8 @@ export const submitReview = async (data: SubmitReviewRequest): Promise<SubmitRev
  * @requires Admin authentication for moderation
  */
 export const getCampaignReviews = async (params?: GetReviewsQuery): Promise<PaginatedResponse<CampaignReview>> => {
-  const response = await axios.get<PaginatedResponse<CampaignReview>>(
-    `${API_BASE_URL}/campaign/reviews/all`,
+  const response = await apiClient.get<PaginatedResponse<CampaignReview>>(
+    `/campaign/reviews/all`,
     { params }
   );
   return response.data;
@@ -250,8 +274,8 @@ export const getCampaignReviews = async (params?: GetReviewsQuery): Promise<Pagi
  * @requires Admin authentication
  */
 export const verifyReview = async (reviewId: number, data: VerifyReviewRequest): Promise<CampaignReview> => {
-  const response = await axios.put<CampaignReview>(
-    `${API_BASE_URL}/campaign/reviews/${reviewId}/verify`,
+  const response = await apiClient.put<CampaignReview>(
+    `/campaign/reviews/${reviewId}/verify`,
     data
   );
   return response.data;
@@ -264,8 +288,8 @@ export const verifyReview = async (reviewId: number, data: VerifyReviewRequest):
  * @requires Host authentication
  */
 export const respondToReview = async (reviewId: number, data: RespondToReviewRequest): Promise<CampaignReview> => {
-  const response = await axios.put<CampaignReview>(
-    `${API_BASE_URL}/campaign/reviews/${reviewId}/respond`,
+  const response = await apiClient.put<CampaignReview>(
+    `/campaign/reviews/${reviewId}/respond`,
     data
   );
   return response.data;
@@ -278,8 +302,8 @@ export const respondToReview = async (reviewId: number, data: RespondToReviewReq
  * @requires Authentication
  */
 export const getMyDiscounts = async (params?: GetDiscountsQuery): Promise<CampaignDiscount[]> => {
-  const response = await axios.get<CampaignDiscount[]>(
-    `${API_BASE_URL}/campaign/discounts/my`,
+  const response = await apiClient.get<CampaignDiscount[]>(
+    `/campaign/discounts/my`,
     { params }
   );
   return response.data;
@@ -290,8 +314,8 @@ export const getMyDiscounts = async (params?: GetDiscountsQuery): Promise<Campai
  * @requires Authentication
  */
 export const validateDiscountCode = async (data: ValidateDiscountRequest): Promise<ValidateDiscountResponse> => {
-  const response = await axios.post<ValidateDiscountResponse>(
-    `${API_BASE_URL}/campaign/discounts/validate`,
+  const response = await apiClient.post<ValidateDiscountResponse>(
+    `/campaign/discounts/validate`,
     data
   );
   return response.data;
