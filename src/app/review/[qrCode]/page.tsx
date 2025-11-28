@@ -354,7 +354,7 @@ export default function ReviewPage() {
                 <AlertDescription>
                   <strong>QR Code Not Assigned</strong>
                   <p className="mt-2">
-                    This QR code hasn't been assigned to a homestay yet. Only admin or field staff can register homestays.
+                    This QR code hasn&apos;t been assigned to a homestay yet. Only admin or field staff can register homestays.
                   </p>
                 </AlertDescription>
               </Alert>
@@ -387,7 +387,7 @@ export default function ReviewPage() {
             <CardHeader>
               <CardTitle>Verify Your Contact</CardTitle>
               <CardDescription>
-                We'll send you an OTP to verify your identity
+                We&apos;ll send you an OTP to verify your identity
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
