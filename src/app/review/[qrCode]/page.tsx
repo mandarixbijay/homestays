@@ -35,15 +35,18 @@ import {
 import type { TrackQRScanResponse } from "@/types/campaign";
 import { toast } from "sonner";
 import Image from "next/image";
+import { HomestayRegistrationForm } from "@/components/campaign/HomestayRegistrationForm";
 
 type Step = "scan" | "verify" | "otp" | "register" | "review" | "success";
+type UserFlow = "registration" | "review" | "loading";
 
 export default function ReviewPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const qrCode = params.qrCode as string;
 
+  const [userFlow, setUserFlow] = useState<UserFlow>("loading");
   const [currentStep, setCurrentStep] = useState<Step>("scan");
   const [loading, setLoading] = useState(true);
   const [scanData, setScanData] = useState<TrackQRScanResponse | null>(null);
@@ -71,15 +74,31 @@ export default function ReviewPage() {
   const [discountCode, setDiscountCode] = useState<any>(null);
 
   useEffect(() => {
-    handleQRScan();
-  }, [qrCode]);
+    if (status !== "loading") {
+      handleQRScan();
+    }
+  }, [qrCode, status]);
 
   const handleQRScan = async () => {
     try {
       setLoading(true);
       const data = await trackQRScan({ qrCode });
       setScanData(data);
-      setCurrentStep(session ? "review" : "verify");
+
+      // Determine user flow based on authentication and role
+      const userRole = (session?.user as any)?.role;
+
+      // Check if homestay is already registered to this QR code
+      const isHomestayRegistered = data.homestay && data.homestay.id;
+
+      if (session && (userRole === "ADMIN" || userRole === "FIELD_STAFF") && !isHomestayRegistered) {
+        // Admin/Field Staff + QR not linked to homestay → Registration Flow
+        setUserFlow("registration");
+      } else {
+        // Guest or QR already linked → Review Flow
+        setUserFlow("review");
+        setCurrentStep(session ? "review" : "verify");
+      }
     } catch (error: any) {
       toast.error("Invalid QR Code", {
         description: error.response?.data?.message || "This QR code is not valid or has expired",
@@ -265,6 +284,20 @@ export default function ReviewPage() {
     return null;
   }
 
+  // Show homestay registration form for admin/field staff
+  if (userFlow === "registration") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+        <HomestayRegistrationForm
+          qrCode={qrCode}
+          scanData={scanData}
+          assignedBy={(session?.user as any)?.name || "Field Staff"}
+        />
+      </div>
+    );
+  }
+
+  // Show review submission flow for guests or already-registered homestays
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
