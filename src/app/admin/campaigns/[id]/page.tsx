@@ -505,7 +505,7 @@ export default function CampaignDetailsPage() {
                                 <p className="text-xs text-muted-foreground mb-1">Reviews</p>
                                 <p className="text-lg font-semibold">{homestay.reviewCount}</p>
                               </div>
-                              {homestay.homestay?.rating !== undefined && (
+                              {homestay.homestay?.rating != null && (
                                 <div>
                                   <p className="text-xs text-muted-foreground mb-1">Rating</p>
                                   <div className="flex items-center gap-1">
