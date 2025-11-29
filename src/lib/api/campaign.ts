@@ -351,18 +351,41 @@ export const validateDiscountCode = async (data: ValidateDiscountRequest): Promi
  * Helper function to download QR code images from S3 URLs
  */
 export const downloadQRCodeImage = async (url: string, filename: string): Promise<void> => {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  const objectUrl = URL.createObjectURL(blob);
+  try {
+    const response = await fetch(url, {
+      mode: 'cors',
+      credentials: 'omit',
+    });
 
-  const link = document.createElement('a');
-  link.href = objectUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+    }
 
-  URL.revokeObjectURL(objectUrl);
+    const blob = await response.blob();
+
+    // Check if blob is valid
+    if (blob.size === 0) {
+      throw new Error('Downloaded file is empty');
+    }
+
+    const objectUrl = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up after a short delay to ensure download starts
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+    }, 100);
+  } catch (error) {
+    console.error('Download failed:', error);
+    throw new Error(`Failed to download ${filename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 };
 
 /**
