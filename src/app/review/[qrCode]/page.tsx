@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -151,10 +151,14 @@ export default function ReviewPage() {
         code: otp,
       });
 
-      toast.success("Verified successfully");
-      // User needs to login with password
-      setCurrentStep("review");
-      // In real implementation, you'd redirect to login or handle authentication
+      toast.success("Verified successfully. Please log in to continue.");
+
+      // Redirect to login - user needs to login with their password
+      // Store the QR code in session storage so we can redirect back after login
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('reviewQRCode', qrCode);
+        router.push(`/login?callbackUrl=/review/${qrCode}`);
+      }
     } catch (error: any) {
       toast.error("Invalid OTP", {
         description: error.response?.data?.message || "Please check your code and try again",
@@ -176,11 +180,25 @@ export default function ReviewPage() {
         password,
       });
 
-      toast.success("Registration successful", {
-        description: "You can now submit your review",
+      toast.success("Registration successful. Logging you in...");
+
+      // Automatically log the user in with their new credentials
+      const result = await signIn("credentials", {
+        email: contactType === 'email' ? contact : '',
+        mobileNumber: contactType === 'phone' ? contact : '',
+        password,
+        redirect: false,
       });
-      // In real implementation, you'd handle login here
-      setCurrentStep("review");
+
+      if (result?.error) {
+        toast.error("Login failed", {
+          description: "Please try logging in manually",
+        });
+        router.push(`/login?callbackUrl=/review/${qrCode}`);
+      } else {
+        toast.success("Logged in successfully!");
+        setCurrentStep("review");
+      }
     } catch (error: any) {
       toast.error("Registration failed", {
         description: error.response?.data?.message || error.message,
