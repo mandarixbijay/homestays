@@ -550,7 +550,8 @@ const BlogListItem: React.FC<{
   onToggleStatus: (id: number, status: string) => void;
 }> = ({ blog, isSelected, onSelect, onView, onEdit, onDelete, onDuplicate, onToggleStatus }) => {
   const [showActions, setShowActions] = useState(false);
-  const mainImage = blog.images?.find((img: any) => img.isMain) || blog.images?.[0];
+  // Support both featuredImage (thumbnails API) and images array (full blog)
+  const mainImageUrl = blog.featuredImage || blog.images?.find((img: any) => img.isMain)?.url || blog.images?.[0]?.url;
 
   const getNextStatus = (currentStatus: string) => {
     switch (currentStatus) {
@@ -573,76 +574,80 @@ const BlogListItem: React.FC<{
     <div className={`group relative bg-white dark:bg-gray-800 border-2 rounded-xl transition-all duration-200 hover:shadow-lg ${
       isSelected ? 'border-blue-500 dark:border-blue-600 shadow-md' : 'border-gray-200 dark:border-gray-700'
     }`}>
-      <div className="flex items-center p-4 space-x-4">
+      <div className="flex items-center p-3 sm:p-4 space-x-2 sm:space-x-4">
         {/* Checkbox */}
         <div className="flex-shrink-0">
           <input
             type="checkbox"
             checked={isSelected}
             onChange={() => onSelect(blog.id)}
-            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 cursor-pointer"
+            className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 cursor-pointer"
           />
         </div>
 
         {/* Image */}
-        <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden">
-          {mainImage ? (
+        <div className="hidden sm:block flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600">
+          {mainImageUrl ? (
             <img
-              src={mainImage.url}
-              alt={mainImage.alt || blog.title}
+              src={mainImageUrl}
+              alt={blog.title}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                target.nextElementSibling?.classList.remove('hidden');
+              }}
             />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
-                <Image className="h-8 w-8 text-gray-400" aria-hidden="true" />
-              </div>
-          )}
+          ) : null}
+          <div className={`w-full h-full flex items-center justify-center ${mainImageUrl ? 'hidden' : ''}`}>
+            <Image className="h-8 w-8 text-gray-400" aria-hidden="true" />
+          </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0 pr-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 sm:truncate mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {blog.title}
               </h3>
-              
-              <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+
+              <p className="hidden sm:block text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
                 {blog.excerpt || 'No excerpt available'}
               </p>
-              
-              <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500 dark:text-gray-400">
                 <div className="flex items-center space-x-1">
-                  <Users className="h-3 w-3" />
-                  <span>{blog.author?.name || 'Unknown'}</span>
+                  <Users className="h-3 w-3 flex-shrink-0" />
+                  <span className="truncate max-w-[100px]">{blog.author?.name || 'Unknown'}</span>
                 </div>
-                
-                <div className="flex items-center space-x-1">
-                  <Calendar className="h-3 w-3" />
+
+                <div className="hidden sm:flex items-center space-x-1">
+                  <Calendar className="h-3 w-3 flex-shrink-0" />
                   <span>{formatDate(blog.publishedAt || blog.updatedAt || blog.createdAt)}</span>
                 </div>
-                
+
                 <div className="flex items-center space-x-1">
-                  <Eye className="h-3 w-3" />
-                  <span>{(blog.viewCount || 0).toLocaleString()} views</span>
+                  <Eye className="h-3 w-3 flex-shrink-0" />
+                  <span>{(blog.viewCount || 0).toLocaleString()}</span>
                 </div>
-                
+
                 {blog.readTime && (
                   <div className="flex items-center space-x-1">
-                    <Clock className="h-3 w-3" />
-                    <span>{blog.readTime} min</span>
+                    <Clock className="h-3 w-3 flex-shrink-0" />
+                    <span>{blog.readTime}m</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Badges */}
-            <div className="flex flex-col items-end space-y-2">
+            {/* Badges & Actions */}
+            <div className="flex flex-col items-end space-y-1 sm:space-y-2 flex-shrink-0">
               <StatusBadge status={blog.status} />
               {blog.featured && (
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
-                  <Star className="h-3 w-3 mr-1 fill-current" />
-                  Featured
+                <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
+                  <Star className="h-3 w-3 sm:mr-1 fill-current" />
+                  <span className="hidden sm:inline">Featured</span>
                 </span>
               )}
             </div>
@@ -653,9 +658,9 @@ const BlogListItem: React.FC<{
         <div className="flex-shrink-0 relative">
           <button
             onClick={() => setShowActions(!showActions)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <MoreVertical className="h-5 w-5 text-gray-500" />
+            <MoreVertical className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
           </button>
 
           {/* Actions Dropdown */}
@@ -755,7 +760,8 @@ const BlogGridItem: React.FC<{
   onToggleStatus: (id: number, status: string) => void;
 }> = ({ blog, isSelected, onSelect, onView, onEdit, onDelete, onDuplicate, onToggleStatus }) => {
   const [showActions, setShowActions] = useState(false);
-  const mainImage = blog.images?.find((img: any) => img.isMain) || blog.images?.[0];
+  // Support both featuredImage (thumbnails API) and images array (full blog)
+  const mainImageUrl = blog.featuredImage || blog.images?.find((img: any) => img.isMain)?.url || blog.images?.[0]?.url;
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -846,21 +852,25 @@ const BlogGridItem: React.FC<{
       </div>
 
       {/* Image */}
-      <div 
-        className="relative h-48 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 cursor-pointer"
+      <div
+        className="relative h-40 sm:h-48 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 cursor-pointer overflow-hidden"
         onClick={() => onView(blog.id)}
       >
-        {mainImage ? (
+        {mainImageUrl ? (
           <img
-            src={mainImage.url}
-            alt={mainImage.alt || blog.title}
-            className="w-full h-full object-cover"
+            src={mainImageUrl}
+            alt={blog.title}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              target.nextElementSibling?.classList.remove('hidden');
+            }}
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Image className="h-16 w-16 text-gray-400" aria-hidden="true" />
-          </div>
-        )}
+        ) : null}
+        <div className={`absolute inset-0 flex items-center justify-center ${mainImageUrl ? 'hidden' : ''}`}>
+          <Image className="h-16 w-16 text-gray-400" aria-hidden="true" />
+        </div>
         
         {/* Overlay badges */}
         <div className="absolute bottom-3 left-3 flex items-center space-x-2">
@@ -875,43 +885,41 @@ const BlogGridItem: React.FC<{
       </div>
 
       {/* Content */}
-      <div className="p-5">
-        <h3 
-          className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+      <div className="p-4 sm:p-5">
+        <h3
+          className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           onClick={() => onView(blog.id)}
         >
           {blog.title}
         </h3>
-        
-        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4">
+
+        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 sm:line-clamp-3 mb-3 sm:mb-4">
           {blog.excerpt || 'No excerpt available'}
         </p>
 
         {/* Meta Info */}
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3 sm:mb-4">
           <div className="flex items-center space-x-1">
-            <Users className="h-3 w-3" />
+            <Users className="h-3 w-3 flex-shrink-0" />
             <span className="truncate max-w-[100px]">{blog.author?.name || 'Unknown'}</span>
           </div>
-          
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-1">
-              <Eye className="h-3 w-3" />
-              <span>{(blog.viewCount || 0).toLocaleString()}</span>
-            </div>
-            
-            {blog.readTime && (
-              <div className="flex items-center space-x-1">
-                <Clock className="h-3 w-3" />
-                <span>{blog.readTime}m</span>
-              </div>
-            )}
+
+          <div className="flex items-center space-x-1">
+            <Eye className="h-3 w-3 flex-shrink-0" />
+            <span>{(blog.viewCount || 0).toLocaleString()}</span>
           </div>
+
+          {blog.readTime && (
+            <div className="flex items-center space-x-1">
+              <Clock className="h-3 w-3 flex-shrink-0" />
+              <span>{blog.readTime}m</span>
+            </div>
+          )}
         </div>
 
         {/* Date */}
         <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-          <Calendar className="h-3 w-3 mr-1" />
+          <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
           <span>{formatDate(blog.publishedAt || blog.updatedAt || blog.createdAt)}</span>
         </div>
       </div>
