@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { publicBlogApi, PublicBlog } from '@/lib/api/public-blog-api';
+import { BlogThumbnail } from '@/types/blogs';
 import SafeBlogImage from "@/components/blog/SafeBlogImage";
 import { BlogCardSkeleton, FeaturedBlogSkeleton } from "@/components/blog/BlogSkeletons";
 import { motion, AnimatePresence } from "framer-motion";
@@ -59,8 +60,8 @@ const categoryIcons: { [key: string]: any } = {
 
 export default function BlogListClient({ searchParams }: BlogClientProps) {
   const router = useRouter();
-  const [blogs, setBlogs] = useState<PublicBlog[]>([]);
-  const [featuredBlogs, setFeaturedBlogs] = useState<PublicBlog[]>([]);
+  const [blogs, setBlogs] = useState<BlogThumbnail[]>([]);
+  const [featuredBlogs, setFeaturedBlogs] = useState<BlogThumbnail[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
@@ -692,8 +693,9 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
   );
 }
 
-function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
-  const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/fallback-image.png";
+function FeaturedBlogCard({ blog }: { blog: BlogThumbnail }) {
+  // For thumbnails, use featuredImage directly (no images array)
+  const mainImage = blog.featuredImage || "/images/fallback-image.png";
 
   return (
     <Link href={`/blogs/${blog.slug}`}>
@@ -754,8 +756,9 @@ function FeaturedBlogCard({ blog }: { blog: PublicBlog }) {
   );
 }
 
-function BlogCard({ blog, index }: { blog: PublicBlog; index: number }) {
-  const mainImage = blog.images?.[0]?.url || blog.featuredImage || "/images/fallback-image.png";
+function BlogCard({ blog, index }: { blog: BlogThumbnail; index: number }) {
+  // For thumbnails, use featuredImage directly (no images array)
+  const mainImage = blog.featuredImage || "/images/fallback-image.png";
 
   return (
     <Link href={`/blogs/${blog.slug}`}>

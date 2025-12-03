@@ -12,6 +12,16 @@ export interface BlogThumbnail {
   author: {
     name: string;
   };
+  categories?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+  }>;
+  tags?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+  }>;
 }
 
 // Full blog interface for detail pages
