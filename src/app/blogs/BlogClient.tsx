@@ -769,7 +769,6 @@ function BlogCard({ blog, index }: { blog: BlogThumbnail; index: number }) {
             alt={blog.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
-            loading="lazy"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
