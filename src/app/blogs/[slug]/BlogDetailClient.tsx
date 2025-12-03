@@ -37,17 +37,21 @@ function SimpleAvatar({ name, className = "" }: { name: string; className?: stri
   );
 }
 
-// Component to render blog content with properly centered and framed images
+// Component to render blog content with properly styled images
 function BlogContent({ content }: { content: string }) {
   const processedContent = useMemo(() => {
     // Process HTML to wrap images in centered containers
     let processed = content;
 
-    // Match img tags and wrap them in centered divs with reduced margin
+    // Match img tags and wrap them in centered divs with proper spacing
     processed = processed.replace(
       /<img([^>]+)>/gi,
-      '<div style="display:flex;justify-content:center;margin:1rem auto;max-width:100%;"><img$1 style="max-width:85%;height:auto;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);border:1px solid rgba(209,170,90,0.2);padding:8px;background:white;"/></div>'
+      '<div class="blog-image-wrapper" style="display:flex;justify-content:center;margin:0.75rem auto;max-width:100%;clear:both;"><img$1 style="max-width:min(100%, 900px);height:auto;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);border:1px solid rgba(209,170,90,0.15);background:white;display:block;"/></div>'
     );
+
+    // Remove any double spacing or extra line breaks around images
+    processed = processed.replace(/<\/p>\s*<div class="blog-image-wrapper"/g, '</p><div class="blog-image-wrapper"');
+    processed = processed.replace(/<\/div>\s*<p>/g, '</div><p>');
 
     return processed;
   }, [content]);
@@ -55,20 +59,27 @@ function BlogContent({ content }: { content: string }) {
   return (
     <div
       className="blog-content prose prose-base sm:prose-lg max-w-none
-        prose-headings:font-bold prose-headings:text-card-foreground prose-headings:break-words
-        prose-h1:text-2xl sm:prose-h1:text-3xl lg:prose-h1:text-4xl prose-h1:mt-6 prose-h1:mb-3
-        prose-h2:text-xl sm:prose-h2:text-2xl lg:prose-h2:text-3xl prose-h2:mt-6 prose-h2:mb-3 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
-        prose-h3:text-lg sm:prose-h3:text-xl lg:prose-h3:text-2xl prose-h3:mt-4 prose-h3:mb-2
-        prose-p:text-card-foreground prose-p:leading-relaxed prose-p:mb-3 prose-p:text-base sm:prose-p:text-lg prose-p:break-words
-        prose-a:text-[#214B3F] prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-a:break-words
-        prose-strong:text-card-foreground prose-strong:break-words
-        prose-ul:my-3 prose-ul:space-y-1 prose-ul:pl-6
-        prose-ol:my-3 prose-ol:space-y-1 prose-ol:pl-6
+        prose-headings:font-bold prose-headings:text-card-foreground prose-headings:break-words prose-headings:scroll-mt-20
+        prose-h1:text-2xl sm:prose-h1:text-3xl lg:prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4
+        prose-h2:text-xl sm:prose-h2:text-2xl lg:prose-h2:text-3xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
+        prose-h3:text-lg sm:prose-h3:text-xl lg:prose-h3:text-2xl prose-h3:mt-6 prose-h3:mb-3
+        prose-p:text-card-foreground prose-p:leading-relaxed prose-p:mb-4 prose-p:text-base sm:prose-p:text-lg prose-p:break-words
+        prose-a:text-[#214B3F] prose-a:font-medium prose-a:no-underline prose-a:underline-offset-4 hover:prose-a:underline hover:prose-a:text-[#2d6654]
+        prose-strong:text-card-foreground prose-strong:font-semibold prose-strong:break-words
+        prose-em:italic prose-em:text-gray-700
+        prose-ul:my-4 prose-ul:space-y-2 prose-ul:pl-6 prose-ul:list-disc
+        prose-ol:my-4 prose-ol:space-y-2 prose-ol:pl-6 prose-ol:list-decimal
         prose-li:text-card-foreground prose-li:leading-relaxed prose-li:text-base prose-li:break-words
+        prose-li:marker:text-[#214B3F]
         prose-blockquote:border-l-4 prose-blockquote:border-[#D1AA5A] prose-blockquote:pl-6 prose-blockquote:italic
-        prose-blockquote:text-muted-foreground prose-blockquote:my-4 prose-blockquote:bg-[#214B3F]/5 prose-blockquote:py-3 prose-blockquote:rounded-r
-        prose-code:text-[#214B3F] prose-code:bg-[#214B3F]/10 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
-        prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:overflow-x-auto prose-pre:rounded-lg prose-pre:my-4 prose-pre:p-4
+        prose-blockquote:text-muted-foreground prose-blockquote:my-6 prose-blockquote:bg-[#214B3F]/5 prose-blockquote:py-4 prose-blockquote:rounded-r
+        prose-code:text-[#214B3F] prose-code:bg-[#214B3F]/10 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:font-mono
+        prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:overflow-x-auto prose-pre:rounded-lg prose-pre:my-6 prose-pre:p-4 prose-pre:shadow-lg
+        prose-hr:my-8 prose-hr:border-gray-200
+        prose-table:my-6 prose-table:border-collapse
+        prose-th:bg-gray-50 prose-th:p-3 prose-th:text-left prose-th:font-semibold
+        prose-td:p-3 prose-td:border prose-td:border-gray-200
+        [&_.blog-image-wrapper]:my-6
       "
       dangerouslySetInnerHTML={{ __html: processedContent }}
     />
