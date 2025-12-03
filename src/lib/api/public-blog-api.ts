@@ -233,8 +233,18 @@ class PublicBlogApi {
             viewCount: blog.viewCount,
             featured: blog.featured,
             author: {
-              name: blog.author.name,
+              name: blog.author?.name || 'Unknown',
             },
+            categories: blog.categories?.map((cat: any) => ({
+              id: cat.id,
+              name: cat.name,
+              slug: cat.slug,
+            })) || [],
+            tags: blog.tags?.map((tag: any) => ({
+              id: tag.id,
+              name: tag.name,
+              slug: tag.slug,
+            })) || [],
           })),
           total: result.total,
           page: result.page,
@@ -262,15 +272,42 @@ class PublicBlogApi {
     }
   }
 
-  // Get featured blogs
-  async getFeaturedBlogs(limit: number = 3): Promise<PublicBlog[]> {
+  // Get featured blogs (returns thumbnails for better performance)
+  async getFeaturedBlogs(limit: number = 3): Promise<any[]> {
     try {
       const result = await this.request<any>(`/blog/blogs/featured?limit=${limit}`, 1800); // Cache for 30 minutes
 
       if (Array.isArray(result)) {
-        return result.map(blog => this.transformBlogData(blog));
+        // Transform to thumbnail format for consistency
+        return result.map((blog: any) => ({
+          id: blog.id,
+          title: blog.title,
+          slug: blog.slug,
+          excerpt: blog.excerpt,
+          featuredImage: this.processImageUrl(blog.featuredImage || blog.images?.[0]?.url),
+          publishedAt: blog.publishedAt,
+          readTime: blog.readTime,
+          viewCount: blog.viewCount,
+          featured: blog.featured,
+          author: {
+            name: blog.author?.name || 'Unknown',
+          },
+        }));
       } else if (result.data && Array.isArray(result.data)) {
-        return result.data.map((blog: any) => this.transformBlogData(blog));
+        return result.data.map((blog: any) => ({
+          id: blog.id,
+          title: blog.title,
+          slug: blog.slug,
+          excerpt: blog.excerpt,
+          featuredImage: this.processImageUrl(blog.featuredImage || blog.images?.[0]?.url),
+          publishedAt: blog.publishedAt,
+          readTime: blog.readTime,
+          viewCount: blog.viewCount,
+          featured: blog.featured,
+          author: {
+            name: blog.author?.name || 'Unknown',
+          },
+        }));
       }
 
       return [];
