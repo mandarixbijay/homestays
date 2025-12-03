@@ -389,6 +389,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                     alt={`Gallery ${index + 1}`}
                     fill
                     className="object-cover"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -593,6 +594,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                                 alt={trendingBlog.title}
                                 fill
                                 className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                loading="lazy"
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </div>
@@ -724,6 +726,8 @@ function RelatedBlogCard({ blog }: { blog: PublicBlog }) {
             alt={blog.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
