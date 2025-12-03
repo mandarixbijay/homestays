@@ -122,19 +122,19 @@ export default function HostBookingsPage() {
               <FilterButton
                 label="Pending"
                 active={statusFilter === "PENDING"}
-                onClick={() => handleStatusChange("PENDING")}
+                onClick={() => handleStatusChange("PENDING" as BookingStatus)}
                 color="yellow"
               />
               <FilterButton
                 label="Confirmed"
                 active={statusFilter === "CONFIRMED"}
-                onClick={() => handleStatusChange("CONFIRMED")}
+                onClick={() => handleStatusChange("CONFIRMED" as BookingStatus)}
                 color="green"
               />
               <FilterButton
                 label="Cancelled"
                 active={statusFilter === "CANCELLED"}
-                onClick={() => handleStatusChange("CANCELLED")}
+                onClick={() => handleStatusChange("CANCELLED" as BookingStatus)}
                 color="red"
               />
             </div>
