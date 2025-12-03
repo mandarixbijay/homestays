@@ -56,7 +56,18 @@ Comprehensive API client with methods for all backend endpoints:
 - `getCurrencies()` - Get available currencies
 - `getAreaUnits()` - Get available area units
 
-### 3. Dashboard Pages
+### 3. Dashboard Layout
+**File:** `src/app/host/new-dashboard/layout.tsx`
+
+Features:
+- ✅ Responsive sidebar navigation
+- ✅ Mobile-friendly with hamburger menu
+- ✅ Active route highlighting
+- ✅ Quick access to all dashboard sections
+- ✅ Link to old dashboard
+- ✅ Nepal Homestays branding
+
+### 4. Dashboard Pages
 
 #### Main Dashboard
 **File:** `src/app/host/new-dashboard/page.tsx`
@@ -70,7 +81,7 @@ Features:
 - ✅ Responsive design with Tailwind CSS
 - ✅ Real-time data loading with error handling
 
-#### Bookings Page
+#### Bookings List Page
 **File:** `src/app/host/new-dashboard/bookings/page.tsx`
 
 Features:
@@ -83,6 +94,71 @@ Features:
 - ✅ Amount and payment status
 - ✅ Responsive table design
 - ✅ Previous/Next pagination
+
+#### Booking Details Page
+**File:** `src/app/host/new-dashboard/bookings/[id]/page.tsx`
+
+Features:
+- ✅ Complete booking information
+- ✅ Guest contact details (email, phone)
+- ✅ Property and room details
+- ✅ Stay duration and dates
+- ✅ Payment history with transaction IDs
+- ✅ Price summary with remaining balance
+- ✅ Booking timeline (created, updated)
+- ✅ Confirm pending bookings
+- ✅ Cancel booking with reason (modal)
+- ✅ Auto-refund on cancellation
+- ✅ Cancellation restrictions display
+- ✅ Status-based action buttons
+
+#### Reviews Management Page
+**File:** `src/app/host/new-dashboard/reviews/page.tsx`
+
+Features:
+- ✅ Paginated reviews list
+- ✅ Filter by minimum rating (All, 5+, 4+, 3+)
+- ✅ Star rating display
+- ✅ Guest names and stay dates
+- ✅ Review comments
+- ✅ Property and room information
+- ✅ Respond to reviews inline
+- ✅ Response text validation (min 10 chars)
+- ✅ Guest notification on response
+- ✅ Stay period information
+
+#### Homestays List Page
+**File:** `src/app/host/new-dashboard/homestays/page.tsx`
+
+Features:
+- ✅ Grid view of all properties
+- ✅ Property images (main image display)
+- ✅ Status badges (Approved, Pending, Rejected)
+- ✅ Property address with map pin icon
+- ✅ Room count and review count
+- ✅ Star ratings display
+- ✅ Created date
+- ✅ View details button
+- ✅ Quick edit link
+- ✅ Add new property button
+- ✅ Empty state for no properties
+
+#### Refunds View Page
+**File:** `src/app/host/new-dashboard/refunds/page.tsx`
+
+Features:
+- ✅ Paginated refunds table
+- ✅ Refund ID and booking reference
+- ✅ Property name display
+- ✅ Amount and currency
+- ✅ Refund reason (guest/host initiated)
+- ✅ Admin notes display
+- ✅ Status with color-coded badges
+- ✅ Status icons (pending, approved, processed, rejected)
+- ✅ Processed by admin name
+- ✅ Created and updated dates
+- ✅ Link to original booking
+- ✅ Information about refund process
 
 ## 🎨 Design Features
 
@@ -199,47 +275,41 @@ All API calls automatically include JWT authentication using `next-auth`:
 - Handles authentication errors
 - Shows appropriate error messages to users
 
-## 🎯 Next Steps
+## 🎯 Implementation Status
 
-### Additional Pages to Create
+### ✅ Completed Pages
 
-1. **Booking Details Page** (`/host/new-dashboard/bookings/[id]/page.tsx`)
-   - Full booking information
-   - Guest contact details
-   - Payment history
-   - Cancel booking with reason
-   - Update booking status
+1. **✅ Main Dashboard** - Overview with stats and recent activity
+2. **✅ Bookings List** - Paginated list with filters
+3. **✅ Booking Details** - Full details with cancel/confirm actions
+4. **✅ Reviews Management** - View and respond to reviews
+5. **✅ Homestays List** - Grid view of all properties
+6. **✅ Refunds View** - Track all refund requests
+7. **✅ Navigation Layout** - Sidebar with responsive mobile menu
 
-2. **Reviews Management** (`/host/new-dashboard/reviews/page.tsx`)
-   - List all reviews with filters
-   - Rating distribution
-   - Respond to reviews
-   - Filter by homestay and rating
+### 🔜 Optional Enhancements (Can Be Added Later)
 
-3. **Homestays Management** (`/host/new-dashboard/homestays/page.tsx`)
-   - List all homestays
-   - Edit homestay details
-   - Add/remove facilities
-   - Upload images
-   - View performance metrics
-
-4. **Homestay Details** (`/host/new-dashboard/homestays/[id]/page.tsx`)
-   - Full homestay information
+1. **Homestay Details Page** (`/host/new-dashboard/homestays/[id]/page.tsx`)
+   - Full homestay information with analytics
    - Edit form with validation
-   - Room management
-   - Reviews for this homestay
-   - Booking history
+   - Room management interface
+   - Reviews for this specific homestay
+   - Booking history and calendar
+   - Revenue analytics
 
-5. **Rooms Management** (`/host/new-dashboard/rooms/page.tsx`)
+2. **Rooms Management** (`/host/new-dashboard/rooms/page.tsx`)
    - List all rooms across properties
    - Quick edit capabilities
-   - Add new room
-   - Delete room
+   - Add new room with image upload
+   - Delete room with confirmation
+   - Room availability calendar
 
-6. **Refunds View** (`/host/new-dashboard/refunds/page.tsx`)
-   - List all refunds
-   - Status tracking
-   - Booking reference
+3. **Analytics Dashboard**
+   - Revenue charts and trends
+   - Occupancy rate graphs
+   - Booking conversion rates
+   - Guest demographics
+   - Peak seasons analysis
 
 ## 🛠️ Technical Implementation
 
