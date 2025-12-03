@@ -248,7 +248,6 @@ class PublicBlogApi {
           })),
           total: result.total,
           page: result.page,
-          limit: result.limit,
           totalPages: result.totalPages,
         };
       }
@@ -257,7 +256,6 @@ class PublicBlogApi {
         data: [],
         total: 0,
         page: 1,
-        limit: 12,
         totalPages: 1,
       };
     } catch (error) {
@@ -266,7 +264,6 @@ class PublicBlogApi {
         data: [],
         total: 0,
         page: 1,
-        limit: 12,
         totalPages: 1,
       };
     }
