@@ -234,11 +234,32 @@ class BlogApi {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to upload image');
+      const errorText = await response.text();
+      console.error('[uploadImageToS3] Upload failed:', errorText);
+      throw new Error(`Failed to upload image: ${response.status} - ${errorText}`);
     }
 
-    const result = await response.json();
-    return result.url;
+    const responseText = await response.text();
+    console.log('[uploadImageToS3] Response:', responseText);
+
+    // Try to parse as JSON first
+    try {
+      const result = JSON.parse(responseText);
+      // Check if it has a url property
+      if (result.url) {
+        return result.url;
+      }
+      // If the parsed result is a string, return it
+      if (typeof result === 'string') {
+        return result;
+      }
+      // Otherwise return the whole result
+      return result;
+    } catch (e) {
+      // If it's not JSON, it might be a plain URL string
+      console.log('[uploadImageToS3] Response is not JSON, treating as plain URL');
+      return responseText;
+    }
   }
 
   async checkSlugAvailability(slug: string): Promise<boolean> {
