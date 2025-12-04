@@ -109,7 +109,7 @@ export default function HostReviewsPage() {
               <p className="text-gray-600 mt-1">Manage guest reviews and feedback</p>
             </div>
             <Link
-              href="/host/new-dashboard"
+              href="/host/dashboard"
               className="text-sm text-[#214B3F] hover:underline flex items-center gap-1"
             >
               <ChevronLeft className="h-4 w-4" /> Back to Dashboard
