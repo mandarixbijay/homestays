@@ -678,13 +678,26 @@ async updateBlog(id: number, blogData: UpdateBlogData, imageFiles: File[] = []):
   }
 
   async uploadImage(file: File): Promise<{ url: string; alt?: string; caption?: string }> {
-    // Create temporary blob URL for preview
-    const blobUrl = URL.createObjectURL(file);
+    try {
+      console.log('[uploadImage] Uploading directly to S3:', file.name);
 
-    // Store the file with its blob URL for later upload
-    this.fileMap.set(blobUrl, file);
+      // Upload directly to S3 (bypasses backend Sharp optimization)
+      const url = await this.uploadImageToS3(file);
 
-    return { url: blobUrl, alt: '', caption: '' };
+      console.log('[uploadImage] Upload successful:', url);
+
+      return { url, alt: '', caption: '' };
+    } catch (error) {
+      console.error('[uploadImage] S3 upload failed, using blob URL as fallback:', error);
+
+      // Fallback: Create temporary blob URL for preview
+      const blobUrl = URL.createObjectURL(file);
+
+      // Store the file with its blob URL for later upload when saving
+      this.fileMap.set(blobUrl, file);
+
+      return { url: blobUrl, alt: '', caption: '' };
+    }
   }
 
   async uploadMultipleImages(files: File[]): Promise<Array<{ url: string; alt?: string; caption?: string }>> {
