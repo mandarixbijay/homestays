@@ -82,7 +82,7 @@ export default function EditRoomPage() {
           hostDashboardApi.getCurrencies(),
           hostDashboardApi.getAreaUnits(),
         ]);
-      setRoom(roomData);
+      setRoom(roomData as unknown as HostRoom);
       setBedTypes(bedTypesData);
       setCurrencies(currenciesData);
       setAreaUnits(areaUnitsData);

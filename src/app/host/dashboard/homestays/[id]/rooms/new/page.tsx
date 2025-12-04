@@ -142,7 +142,7 @@ export default function NewRoomPage() {
       await hostDashboardApi.createRoom(
         homestayId,
         createDto,
-        images.length > 0 ? images : undefined
+        images.length > 0 ? images : []
       );
 
       toast({

@@ -419,15 +419,13 @@ class HostDashboardApiClient {
     // Add all fields
     formData.append('name', dto.name);
     if (dto.description) formData.append('description', dto.description);
-    if (dto.totalArea) formData.append('totalArea', String(dto.totalArea));
-    formData.append('areaUnit', dto.areaUnit);
-    formData.append('maxOccupancy', String(dto.maxOccupancy));
-    formData.append('minOccupancy', String(dto.minOccupancy));
-    formData.append('price', JSON.stringify(dto.price));
-    formData.append('includeBreakfast', String(dto.includeBreakfast));
-    formData.append('beds', JSON.stringify(dto.beds));
-    formData.append('facilityIds', JSON.stringify(dto.facilityIds));
-    formData.append('images', JSON.stringify(dto.images));
+    if (dto.size !== undefined) formData.append('size', String(dto.size));
+    formData.append('areaUnitId', String(dto.areaUnitId));
+    formData.append('capacity', String(dto.capacity));
+    formData.append('pricePerNight', String(dto.pricePerNight));
+    formData.append('bedTypeId', String(dto.bedTypeId));
+    formData.append('currencyId', String(dto.currencyId));
+    formData.append('isAvailable', String(dto.isAvailable));
 
     // Add image files
     files.forEach((file) => {
@@ -465,15 +463,13 @@ class HostDashboardApiClient {
     // Add fields that are provided
     if (dto.name) formData.append('name', dto.name);
     if (dto.description) formData.append('description', dto.description);
-    if (dto.totalArea !== undefined) formData.append('totalArea', String(dto.totalArea));
-    if (dto.areaUnit) formData.append('areaUnit', dto.areaUnit);
-    if (dto.maxOccupancy !== undefined) formData.append('maxOccupancy', String(dto.maxOccupancy));
-    if (dto.minOccupancy !== undefined) formData.append('minOccupancy', String(dto.minOccupancy));
-    if (dto.price) formData.append('price', JSON.stringify(dto.price));
-    if (dto.includeBreakfast !== undefined) formData.append('includeBreakfast', String(dto.includeBreakfast));
-    if (dto.beds) formData.append('beds', JSON.stringify(dto.beds));
-    if (dto.facilityIds) formData.append('facilityIds', JSON.stringify(dto.facilityIds));
-    if (dto.images) formData.append('images', JSON.stringify(dto.images));
+    if (dto.size !== undefined) formData.append('size', String(dto.size));
+    if (dto.areaUnitId !== undefined) formData.append('areaUnitId', String(dto.areaUnitId));
+    if (dto.capacity !== undefined) formData.append('capacity', String(dto.capacity));
+    if (dto.pricePerNight !== undefined) formData.append('pricePerNight', String(dto.pricePerNight));
+    if (dto.bedTypeId !== undefined) formData.append('bedTypeId', String(dto.bedTypeId));
+    if (dto.currencyId !== undefined) formData.append('currencyId', String(dto.currencyId));
+    if (dto.isAvailable !== undefined) formData.append('isAvailable', String(dto.isAvailable));
 
     // Add image files
     if (files) {
