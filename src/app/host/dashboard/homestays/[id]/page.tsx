@@ -30,7 +30,7 @@ export default function HomestayDetailsPage() {
   const homestayId = parseInt(params.id as string);
 
   const [homestay, setHomestay] = useState<HostHomestayDetails | null>(null);
-  const [rooms, setRooms] = useState<HostRoom[]>([]);
+  const [rooms, setRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
