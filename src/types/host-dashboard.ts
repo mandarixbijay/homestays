@@ -252,9 +252,9 @@ export interface HostHomestayDetails {
   reviews: number;
   discount: number | null;
   vipAccess: boolean;
-  images: any[];
-  facilities: any[];
-  rooms: any[];
+  images: string[];
+  facilities: Facility[];
+  rooms: HostRoom[];
   createdAt: Date | string;
   updatedAt: Date | string;
 }
@@ -273,6 +273,26 @@ export interface HostHomestayListItem {
 
 // ============ Room Management Types ============
 
+export interface HostRoom {
+  id: number;
+  homestayId: number;
+  name: string;
+  description: string | null;
+  pricePerNight: number;
+  currency: string;
+  capacity: number;
+  size: number | null;
+  areaUnit: string | null;
+  bedType: string | null;
+  bedTypeId: number | null;
+  currencyId: number | null;
+  areaUnitId: number | null;
+  isAvailable: boolean;
+  images: string[];
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
 export interface RoomBed {
   bedTypeId: number;
   quantity: number;
@@ -286,29 +306,25 @@ export interface RoomPrice {
 export interface CreateRoomDto {
   name: string;
   description?: string;
-  totalArea?: number;
-  areaUnit: string;
-  maxOccupancy: number;
-  minOccupancy: number;
-  price: RoomPrice;
-  includeBreakfast: boolean;
-  beds: RoomBed[];
-  facilityIds: number[];
-  images: ImageMetadata[];
+  pricePerNight: number;
+  capacity: number;
+  size?: number;
+  bedTypeId: number;
+  currencyId: number;
+  areaUnitId: number;
+  isAvailable: boolean;
 }
 
 export interface UpdateRoomDto {
   name?: string;
   description?: string;
-  totalArea?: number;
-  areaUnit?: string;
-  maxOccupancy?: number;
-  minOccupancy?: number;
-  price?: RoomPrice;
-  includeBreakfast?: boolean;
-  beds?: RoomBed[];
-  facilityIds?: number[];
-  images?: ImageMetadata[];
+  pricePerNight?: number;
+  capacity?: number;
+  size?: number;
+  bedTypeId?: number;
+  currencyId?: number;
+  areaUnitId?: number;
+  isAvailable?: boolean;
 }
 
 export interface RoomDetails {
@@ -348,12 +364,14 @@ export interface BedType {
 }
 
 export interface Currency {
+  id: number;
   code: string;
   name: string;
   symbol: string;
 }
 
 export interface AreaUnit {
+  id: number;
   name: string;
   abbreviation: string;
 }
