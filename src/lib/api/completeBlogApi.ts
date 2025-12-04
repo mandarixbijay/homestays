@@ -426,12 +426,22 @@ async updateBlog(id: number, blogData: UpdateBlogData, imageFiles: File[] = []):
     });
 
     console.log('[updateBlog] FormData contents:');
+    let fileCount = 0;
     for (const [key, value] of formData.entries()) {
       if (value instanceof File) {
+        fileCount++;
         console.log(`  ${key}: [File] ${(value as File).name}`);
       } else {
         console.log(`  ${key}:`, value);
       }
+    }
+
+    console.log(`[updateBlog] Total files to upload: ${fileCount}`);
+
+    // ⚠️ IMPORTANT: If fileCount is 0 and all images have URLs,
+    // the backend should NOT try to optimize anything
+    if (fileCount === 0) {
+      console.log('[updateBlog] ✅ No files to upload - all images already have URLs');
     }
 
     const session = await getSession();
@@ -603,12 +613,22 @@ async updateBlog(id: number, blogData: UpdateBlogData, imageFiles: File[] = []):
       });
 
       console.log('[createBlog] FormData contents:');
+      let fileCount = 0;
       for (const [key, value] of formData.entries()) {
         if (value instanceof File) {
+          fileCount++;
           console.log(`  ${key}: [File] ${value.name}`);
         } else {
           console.log(`  ${key}:`, value);
         }
+      }
+
+      console.log(`[createBlog] Total files to upload: ${fileCount}`);
+
+      // ⚠️ IMPORTANT: If fileCount is 0 and all images have URLs,
+      // the backend should NOT try to optimize anything
+      if (fileCount === 0) {
+        console.log('[createBlog] ✅ No files to upload - all images already have URLs');
       }
 
       const session = await getSession();
