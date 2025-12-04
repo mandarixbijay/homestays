@@ -59,15 +59,15 @@ export default function EditRoomPage() {
   useEffect(() => {
     if (room) {
       setFormData({
-        name: room.name,
+        name: room.name || "",
         description: room.description || "",
-        pricePerNight: room.pricePerNight.toString(),
-        capacity: room.capacity.toString(),
+        pricePerNight: room.pricePerNight?.toString() || "",
+        capacity: room.capacity?.toString() || "1",
         size: room.size?.toString() || "",
         bedTypeId: room.bedTypeId?.toString() || "",
         currencyId: room.currencyId?.toString() || "",
         areaUnitId: room.areaUnitId?.toString() || "",
-        isAvailable: room.isAvailable,
+        isAvailable: room.isAvailable ?? true,
       });
     }
   }, [room]);
