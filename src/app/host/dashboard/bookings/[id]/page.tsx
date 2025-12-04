@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { hostDashboardApi } from "@/lib/api/host-dashboard-api";
-import type { HostBookingDetails, BookingStatus } from "@/types/host-dashboard";
+import type { HostBookingDetails } from "@/types/host-dashboard";
 import { useToast } from "@/hooks/use-toast";
 import {
   Calendar,
