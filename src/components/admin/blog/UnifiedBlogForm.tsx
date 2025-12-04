@@ -1458,7 +1458,7 @@ const loadData = async () => {
             </header>
 
             {/* Main Content */}
-            <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {showPreview ? (
                     /* Preview Mode */
                     <Card className="shadow-2xl border-2 border-gray-200 dark:border-gray-700 animate-in fade-in duration-500">
@@ -1539,10 +1539,10 @@ const loadData = async () => {
                         </div>
                     </Card>
                 ) : (
-                    /* Edit Mode */
-                    <div className="space-y-10">
-                        {/* Main Content Section */}
-                        <div className="space-y-8">
+                    /* Edit Mode - Two Column Layout with Sticky Sidebar */
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        {/* Main Content Column (Left) */}
+                        <div className="lg:col-span-8 space-y-6">
                             {/* Title & Slug Card */}
                             <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
                                 <div className="p-10 space-y-8">
@@ -1626,47 +1626,49 @@ const loadData = async () => {
                                     )}
                                 </div>
                             </Card>
+                        </div>
 
-                            {/* Publishing Options & Media */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Sticky Sidebar (Right) */}
+                        <div className="lg:col-span-4 space-y-6">
+                            <div className="lg:sticky lg:top-24 space-y-6">
                                 {/* Publishing Card */}
-                                <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
-                                    <div className="p-8">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <Settings className="h-6 w-6 text-blue-500" />
-                                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Publishing</h2>
+                                <Card className="shadow-lg border border-gray-200 dark:border-gray-700">
+                                    <div className="p-6">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <Settings className="h-5 w-5 text-blue-500" />
+                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Publishing</h3>
                                         </div>
-                                        <div className="space-y-6">
+                                        <div className="space-y-4">
                                             <Select
                                                 label="Status"
                                                 value={formData.status}
                                                 onChange={(e) => handleChange('status', e.target.value)}
-                                                className="font-semibold text-lg"
+                                                className="font-medium"
                                             >
                                                 <option value="DRAFT">📝 Draft</option>
                                                 <option value="PUBLISHED">🌍 Published</option>
                                                 <option value="ARCHIVED">📦 Archived</option>
                                             </Select>
-                                            <label className="flex items-center gap-4 p-5 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl border-2 border-yellow-200 dark:border-yellow-800 cursor-pointer hover:scale-[1.02] transition-transform">
+                                            <label className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 cursor-pointer hover:border-yellow-300 transition-colors">
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.featured}
                                                     onChange={(e) => handleChange('featured', e.target.checked)}
-                                                    className="h-6 w-6 rounded"
+                                                    className="h-5 w-5 rounded"
                                                 />
-                                                <div className="flex items-center gap-3 font-semibold text-yellow-900 dark:text-yellow-100 text-lg">
-                                                    <Star className={`h-6 w-6 ${formData.featured ? 'fill-current text-yellow-500' : ''}`} />
-                                                    Featured Post
+                                                <div className="flex items-center gap-2 font-medium text-yellow-900 dark:text-yellow-100">
+                                                    <Star className={`h-5 w-5 ${formData.featured ? 'fill-current text-yellow-500' : ''}`} />
+                                                    Featured
                                                 </div>
                                             </label>
-                                            <div className="grid grid-cols-2 gap-4 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
+                                            <div className="grid grid-cols-2 gap-3 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                                                 <div className="text-center">
-                                                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{wordCount}</p>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">Words</p>
+                                                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{wordCount}</p>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">Words</p>
                                                 </div>
                                                 <div className="text-center">
-                                                    <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{readTime}</p>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">Min Read</p>
+                                                    <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{readTime}</p>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">Min Read</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -1674,12 +1676,14 @@ const loadData = async () => {
                                 </Card>
 
                                 {/* Image Gallery Card */}
-                                <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
-                                    <div className="p-8">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <ImageIcon className="h-6 w-6 text-purple-500" />
-                                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Images</h2>
-                                            <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded-full font-semibold">
+                                <Card className="shadow-lg border border-gray-200 dark:border-gray-700">
+                                    <div className="p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-2">
+                                                <ImageIcon className="h-5 w-5 text-purple-500" />
+                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Images</h3>
+                                            </div>
+                                            <span className="text-[10px] text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full font-semibold">
                                                 Auto-optimized
                                             </span>
                                         </div>
@@ -1692,48 +1696,48 @@ const loadData = async () => {
                                         />
                                     </div>
                                 </Card>
+
+                                {/* Categories & Tags */}
+                                <Card className="shadow-lg border border-gray-200 dark:border-gray-700">
+                                    <div className="p-6">
+                                        <PremiumCategoryTagManager
+                                            selectedCategories={formData.categoryIds}
+                                            selectedTags={formData.tagIds}
+                                            availableCategories={categories}
+                                            availableTags={tags}
+                                            onCategoriesChange={(ids) => handleChange('categoryIds', ids)}
+                                            onTagsChange={(ids) => handleChange('tagIds', ids)}
+                                            onAddCategory={handleAddCategory}
+                                            onAddTag={handleAddTag}
+                                        />
+                                    </div>
+                                </Card>
+
+                                {/* SEO Score Dashboard */}
+                                <Card className="shadow-lg border border-green-200 dark:border-green-700 bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-900/10 dark:to-emerald-900/10">
+                                    <div className="p-6">
+                                        <SEOScoreCard
+                                            title={formData.title}
+                                            slug={formData.slug}
+                                            excerpt={formData.excerpt}
+                                            content={formData.content}
+                                            seoTitle={formData.seoTitle}
+                                            seoDescription={formData.seoDescription}
+                                            tags={tags.filter(t => formData.tagIds.includes(t.id))}
+                                            categories={categories.filter(c => formData.categoryIds.includes(c.id))}
+                                            images={formData.images}
+                                        />
+                                    </div>
+                                </Card>
+
+                                {/* SEO Optimizer */}
+                                <SEOOptimizer
+                                    seoTitle={formData.seoTitle}
+                                    seoDescription={formData.seoDescription}
+                                    onSeoTitleChange={(value) => handleChange('seoTitle', value)}
+                                    onSeoDescriptionChange={(value) => handleChange('seoDescription', value)}
+                                />
                             </div>
-
-                            {/* Categories & Tags */}
-                            <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
-                                <div className="p-10">
-                                    <PremiumCategoryTagManager
-                                        selectedCategories={formData.categoryIds}
-                                        selectedTags={formData.tagIds}
-                                        availableCategories={categories}
-                                        availableTags={tags}
-                                        onCategoriesChange={(ids) => handleChange('categoryIds', ids)}
-                                        onTagsChange={(ids) => handleChange('tagIds', ids)}
-                                        onAddCategory={handleAddCategory}
-                                        onAddTag={handleAddTag}
-                                    />
-                                </div>
-                            </Card>
-
-                            {/* SEO Score Dashboard */}
-                            <Card className="shadow-xl border border-green-200 dark:border-green-700 hover:shadow-2xl transition-all bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-900/10 dark:to-emerald-900/10">
-                                <div className="p-10">
-                                    <SEOScoreCard
-                                        title={formData.title}
-                                        slug={formData.slug}
-                                        excerpt={formData.excerpt}
-                                        content={formData.content}
-                                        seoTitle={formData.seoTitle}
-                                        seoDescription={formData.seoDescription}
-                                        tags={tags.filter(t => formData.tagIds.includes(t.id))}
-                                        categories={categories.filter(c => formData.categoryIds.includes(c.id))}
-                                        images={formData.images}
-                                    />
-                                </div>
-                            </Card>
-                            {/* SEO Optimizer */}
-                            <SEOOptimizer
-                                seoTitle={formData.seoTitle}
-                                seoDescription={formData.seoDescription}
-                                onSeoTitleChange={(value) => handleChange('seoTitle', value)}
-                                onSeoDescriptionChange={(value) => handleChange('seoDescription', value)}
-                            />
-
                         </div>
                     </div>
                 )}
