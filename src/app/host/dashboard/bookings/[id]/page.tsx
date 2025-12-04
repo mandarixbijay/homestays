@@ -50,7 +50,7 @@ export default function BookingDetailsPage() {
         description: error.message || "Failed to load booking details",
         variant: "destructive",
       });
-      router.push("/host/new-dashboard/bookings");
+      router.push("/host/dashboard/bookings");
     } finally {
       setLoading(false);
     }
@@ -124,7 +124,7 @@ export default function BookingDetailsPage() {
         {/* Header */}
         <div className="mb-8">
           <Link
-            href="/host/new-dashboard/bookings"
+            href="/host/dashboard/bookings"
             className="inline-flex items-center text-sm text-[#214B3F] hover:underline mb-4"
           >
             <ChevronLeft className="h-4 w-4" /> Back to Bookings
@@ -269,7 +269,7 @@ export default function BookingDetailsPage() {
                   <div>
                     <p className="text-sm text-gray-500">Homestay</p>
                     <Link
-                      href={`/host/new-dashboard/homestays/${booking.homestayId}`}
+                      href={`/host/dashboard/homestays/${booking.homestayId}`}
                       className="font-medium text-[#214B3F] hover:underline"
                     >
                       {booking.homestayName}

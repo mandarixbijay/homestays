@@ -69,7 +69,7 @@ export default function HostHomestaysPage() {
             </div>
             <div className="flex items-center gap-3">
               <Link
-                href="/host/new-dashboard"
+                href="/host/dashboard"
                 className="text-sm text-[#214B3F] hover:underline flex items-center gap-1"
               >
                 <ChevronLeft className="h-4 w-4" /> Back to Dashboard
@@ -173,7 +173,7 @@ export default function HostHomestaysPage() {
                   {/* Actions */}
                   <div className="flex gap-2">
                     <Link
-                      href={`/host/new-dashboard/homestays/${homestay.id}`}
+                      href={`/host/dashboard/homestays/${homestay.id}`}
                       className="flex-1 px-3 py-2 text-sm bg-[#214B3F] text-white rounded-lg hover:bg-[#1a3d32] transition-colors flex items-center justify-center gap-2"
                     >
                       <Eye className="h-4 w-4" />

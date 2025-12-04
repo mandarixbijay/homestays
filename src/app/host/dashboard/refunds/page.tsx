@@ -97,7 +97,7 @@ export default function HostRefundsPage() {
               </p>
             </div>
             <Link
-              href="/host/new-dashboard"
+              href="/host/dashboard"
               className="text-sm text-[#214B3F] hover:underline flex items-center gap-1"
             >
               <ChevronLeft className="h-4 w-4" /> Back to Dashboard
@@ -149,7 +149,7 @@ export default function HostRefundsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Link
-                            href={`/host/new-dashboard/bookings/${refund.bookingId}`}
+                            href={`/host/dashboard/bookings/${refund.bookingId}`}
                             className="text-sm text-[#214B3F] hover:underline"
                           >
                             #{refund.bookingId}
