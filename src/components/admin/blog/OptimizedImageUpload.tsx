@@ -63,7 +63,7 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
 
         setUploadProgress(`Optimizing ${file.name}...`);
 
-        // Optimize image
+        // Optimize image on client side
         const optimizationResult = await optimizeImage(file, {
           maxWidth: 1920,
           maxHeight: 1080,
@@ -84,23 +84,37 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
 
         setUploadProgress(`Uploading ${file.name}...`);
 
-        // Upload to server
-        const url = await onFileUpload(optimizationResult.file);
+        try {
+          // Upload to server (will get blob URL immediately for preview)
+          const url = await onFileUpload(optimizationResult.file);
 
-        // Create image data with suggested alt text
-        newImages.push({
-          url,
-          alt: suggestAltText(file.name),
-          caption: '',
-          isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
-        });
+          // Create image data with suggested alt text
+          newImages.push({
+            url,
+            alt: suggestAltText(file.name),
+            caption: '',
+            isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
+          });
+        } catch (uploadError) {
+          console.error('Upload error:', uploadError);
+          // Even if upload fails, create preview with blob URL for user to see
+          const blobUrl = URL.createObjectURL(optimizationResult.file);
+          newImages.push({
+            url: blobUrl,
+            alt: suggestAltText(file.name),
+            caption: '',
+            isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
+          });
+          setError(`Note: ${file.name} will upload when you save (backend image optimization pending)`);
+        }
       }
 
       // Update images
       onImagesChange([...images, ...newImages]);
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload image');
+      console.error('Image processing error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to process image');
     } finally {
       setIsUploading(false);
       setUploadProgress('');
