@@ -35,6 +35,12 @@ export default function HostDashboardLayout({
       current: pathname === "/host/dashboard",
     },
     {
+      name: "Analytics",
+      href: "/host/dashboard/analytics",
+      icon: BarChart3,
+      current: pathname === "/host/dashboard/analytics",
+    },
+    {
       name: "Bookings",
       href: "/host/dashboard/bookings",
       icon: Calendar,
@@ -51,12 +57,6 @@ export default function HostDashboardLayout({
       href: "/host/dashboard/homestays",
       icon: Home,
       current: pathname?.startsWith("/host/dashboard/homestays"),
-    },
-    {
-      name: "Analytics",
-      href: "/host/dashboard/analytics",
-      icon: BarChart3,
-      current: pathname === "/host/dashboard/analytics",
     },
     {
       name: "Refunds",

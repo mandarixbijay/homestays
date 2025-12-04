@@ -244,7 +244,7 @@ export default function HomestayDetailsPage() {
                             <div>
                               <p className="text-gray-500">Price</p>
                               <p className="font-medium text-gray-900">
-                                {room.currency} {room.pricePerNight.toLocaleString()}
+                                {room.currency} {room.pricePerNight?.toLocaleString() || 0}
                                 <span className="text-gray-500">/night</span>
                               </p>
                             </div>
@@ -252,7 +252,7 @@ export default function HomestayDetailsPage() {
                               <p className="text-gray-500">Capacity</p>
                               <p className="font-medium text-gray-900 flex items-center gap-1">
                                 <Users className="h-4 w-4" />
-                                {room.capacity} guests
+                                {room.capacity || 0} guests
                               </p>
                             </div>
                             <div>
@@ -264,7 +264,7 @@ export default function HomestayDetailsPage() {
                             <div>
                               <p className="text-gray-500">Size</p>
                               <p className="font-medium text-gray-900">
-                                {room.size} {room.areaUnit}
+                                {room.size ? `${room.size} ${room.areaUnit || ''}` : 'N/A'}
                               </p>
                             </div>
                           </div>
