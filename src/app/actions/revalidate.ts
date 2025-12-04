@@ -45,7 +45,8 @@ export async function revalidateAllBlogs() {
 
     // Revalidate all blog routes
     revalidatePath('/blogs', 'layout');
-    revalidateTag('blogs');
+    // revalidateTag expects a profile (string or CacheLifeConfig) as the first argument and the tag as the second
+    revalidateTag('default', 'blogs');
 
     console.log('[revalidateAllBlogs] Full revalidation complete');
 
