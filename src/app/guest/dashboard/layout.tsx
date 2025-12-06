@@ -110,7 +110,7 @@ export default function GuestDashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted/30">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -121,28 +121,28 @@ export default function GuestDashboardLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#214B3F] transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-sm transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo and close button */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-white/10">
+          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-white">
-                Nepal<span className="text-amber-400">Homestays</span>
+              <span className="text-xl font-bold text-gray-900">
+                Nepal<span className="text-[#214B3F]">Homestays</span>
               </span>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-white hover:text-gray-300 transition-colors"
+              className="lg:hidden text-gray-600 hover:text-gray-900 transition-colors"
             >
               <X className="h-6 w-6" />
             </button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
@@ -150,10 +150,10 @@ export default function GuestDashboardLayout({
                   key={item.name}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
                     item.current
-                      ? "bg-white/10 text-white"
-                      : "text-white/70 hover:bg-white/5 hover:text-white"
+                      ? "bg-[#214B3F]/10 text-[#214B3F] shadow-sm"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                   }`}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
@@ -164,23 +164,23 @@ export default function GuestDashboardLayout({
           </nav>
 
           {/* User section */}
-          <div className="p-4 border-t border-white/10">
+          <div className="p-4 border-t border-gray-200 bg-gray-50/50">
             <div className="flex items-center gap-3 px-4 py-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-white" />
+              <div className="w-10 h-10 rounded-full bg-[#214B3F]/10 flex items-center justify-center">
+                <User className="h-5 w-5 text-[#214B3F]" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
+                <p className="text-sm font-medium text-gray-900 truncate">
                   {session?.user?.name || "Guest"}
                 </p>
-                <p className="text-xs text-white/70 truncate">
+                <p className="text-xs text-gray-600 truncate">
                   {session?.user?.email || ""}
                 </p>
               </div>
             </div>
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200/70 hover:text-gray-900 transition-colors"
             >
               <LogOut className="h-5 w-5" />
               Sign Out
@@ -191,7 +191,7 @@ export default function GuestDashboardLayout({
 
       {/* Mobile menu button */}
       <div className="fixed top-0 left-0 right-0 z-30 lg:hidden">
-        <div className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
           <button
             onClick={() => setSidebarOpen(true)}
             className="text-gray-700 hover:text-gray-900 transition-colors"
