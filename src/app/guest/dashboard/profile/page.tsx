@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
   User,
   Mail,
   Phone,
-  Calendar,
   MapPin,
   Edit,
   Shield,
@@ -33,6 +33,7 @@ interface UserProfile {
 export default function ProfilePage() {
   const { data: session, status, update } = useSession();
   const { toast } = useToast();
+  const router = useRouter();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,10 +43,7 @@ export default function ProfilePage() {
   // Form states
   const [formData, setFormData] = useState({
     name: "",
-    mobileNumber: "",
   });
-
-  const [showPasswordChange, setShowPasswordChange] = useState(false);
 
   useEffect(() => {
     if (status === "loading") {
@@ -67,7 +65,6 @@ export default function ProfilePage() {
       setProfile(userData);
       setFormData({
         name: userData.name || "",
-        mobileNumber: userData.mobileNumber || "",
       });
       setLoading(false);
     }
@@ -77,21 +74,12 @@ export default function ProfilePage() {
     try {
       setSaving(true);
 
-      // In a real implementation, you would call your backend API here
-      // For now, we'll just update the session
       if (section === "basic") {
         await update({ name: formData.name });
 
         toast({
           title: "Success",
           description: "Profile updated successfully",
-        });
-      } else if (section === "contact") {
-        // Update mobile number logic would go here
-        toast({
-          title: "Info",
-          description: "Contact information update requires backend API",
-          variant: "default",
         });
       }
 
@@ -107,13 +95,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleChangePassword = async () => {
-    toast({
-      title: "Info",
-      description: "Password change requires backend API integration",
-      variant: "default",
-    });
-    setShowPasswordChange(false);
+  const handleChangePassword = () => {
+    // Redirect to forgot password page to use existing flow
+    router.push("/forgot-password");
   };
 
   const formatDate = (dateString?: string) => {
@@ -311,33 +295,6 @@ export default function ProfilePage() {
                   <h3 className="text-lg font-semibold text-gray-900">
                     Contact Information
                   </h3>
-                  {editingSection !== "contact" ? (
-                    <button
-                      onClick={() => setEditingSection("contact")}
-                      className="text-sm text-[#214B3F] hover:text-[#214B3F]/80 font-medium flex items-center gap-1 transition-colors"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleUpdateProfile("contact")}
-                        disabled={saving}
-                        className="text-sm text-[#214B3F] hover:text-[#214B3F]/80 font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
-                      >
-                        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setEditingSection(null)}
-                        className="text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-1 transition-colors"
-                      >
-                        <X className="h-4 w-4" />
-                        Cancel
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
               <div className="p-6">
@@ -347,28 +304,21 @@ export default function ProfilePage() {
                       <Phone className="h-4 w-4" />
                       Primary Phone
                     </label>
-                    {editingSection === "contact" ? (
-                      <input
-                        type="tel"
-                        value={formData.mobileNumber}
-                        onChange={(e) => setFormData({ ...formData, mobileNumber: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#214B3F] focus:border-transparent"
-                        placeholder="+977-9841234567"
-                      />
-                    ) : (
-                      <p className="text-gray-900 font-medium">
-                        {profile?.mobileNumber || "Not provided"}
-                      </p>
-                    )}
+                    <p className="text-gray-900 font-medium">
+                      {profile?.mobileNumber || "Not provided"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Contact support to change your phone number
+                    </p>
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
                       <Phone className="h-4 w-4" />
                       Alternative Phone
                     </label>
-                    <p className="text-gray-900 font-medium">Not provided</p>
+                    <p className="text-gray-900 font-medium">Not available</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Update from settings
+                      Feature coming soon
                     </p>
                   </div>
                   <div className="sm:col-span-2">
@@ -376,9 +326,9 @@ export default function ProfilePage() {
                       <MapPin className="h-4 w-4" />
                       Address
                     </label>
-                    <p className="text-gray-900 font-medium">Not provided</p>
+                    <p className="text-gray-900 font-medium">Not available</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Update from settings
+                      Feature coming soon
                     </p>
                   </div>
                   <div className="sm:col-span-2">
@@ -386,9 +336,9 @@ export default function ProfilePage() {
                       <User className="h-4 w-4" />
                       Emergency Contact
                     </label>
-                    <p className="text-gray-900 font-medium">Not provided</p>
+                    <p className="text-gray-900 font-medium">Not available</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Update from settings
+                      Feature coming soon
                     </p>
                   </div>
                 </div>
@@ -403,34 +353,22 @@ export default function ProfilePage() {
                 </h3>
               </div>
               <div className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50/70 rounded-lg border border-gray-200">
-                    <div>
-                      <p className="font-medium text-gray-900 flex items-center gap-2">
-                        <Lock className="h-4 w-4" />
-                        Password
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Keep your account secure with a strong password
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setShowPasswordChange(!showPasswordChange)}
-                      className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition-colors"
-                    >
-                      {showPasswordChange ? 'Cancel' : 'Change Password'}
-                    </button>
+                <div className="flex items-center justify-between p-4 bg-gray-50/70 rounded-lg border border-gray-200">
+                  <div>
+                    <p className="font-medium text-gray-900 flex items-center gap-2">
+                      <Lock className="h-4 w-4" />
+                      Password
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Keep your account secure with a strong password
+                    </p>
                   </div>
-
-                  {showPasswordChange && (
-                    <div className="p-4 bg-gray-50/70 rounded-lg border border-gray-200">
-                      <p className="text-sm text-muted-foreground text-center py-4">
-                        Password change functionality requires backend API integration.
-                        <br />
-                        Please contact support to update your password.
-                      </p>
-                    </div>
-                  )}
+                  <button
+                    onClick={handleChangePassword}
+                    className="px-4 py-2 text-sm bg-[#214B3F] text-white rounded-lg hover:bg-[#214B3F]/90 transition-colors"
+                  >
+                    Change Password
+                  </button>
                 </div>
               </div>
             </div>
