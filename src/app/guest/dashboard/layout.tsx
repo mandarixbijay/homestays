@@ -129,9 +129,11 @@ export default function GuestDashboardLayout({
           {/* Logo and close button */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-xl font-bold text-gray-900">
-                Nepal<span className="text-[#214B3F]">Homestays</span>
-              </span>
+              <img
+                src="/images/logo/logo.png"
+                alt="Nepal Homestays"
+                className="h-10 w-auto object-contain"
+              />
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
