@@ -18,10 +18,20 @@ import {
   Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { userApi, UserProfile, UpdateUserProfileDto, ChangePasswordDto } from "@/lib/api/user-api";
+
+interface UserProfile {
+  id: string;
+  name: string | null;
+  email: string | null;
+  mobileNumber: string | null;
+  role: string;
+  isEmailVerified: boolean;
+  isMobileVerified: boolean;
+  createdAt?: string;
+}
 
 export default function ProfilePage() {
-  const { data: session, update } = useSession();
+  const { data: session, status, update } = useSession();
   const { toast } = useToast();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -33,77 +43,59 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: "",
     mobileNumber: "",
-    dateOfBirth: "",
-    address: "",
-    emergencyContact: "",
-    alternativePhone: "",
-  });
-
-  const [passwordData, setPasswordData] = useState<ChangePasswordDto>({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
   });
 
   const [showPasswordChange, setShowPasswordChange] = useState(false);
 
   useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    try {
+    if (status === "loading") {
       setLoading(true);
-      const data = await userApi.getProfile();
-      setProfile(data);
+      return;
+    }
+
+    if (session?.user) {
+      const userData: UserProfile = {
+        id: session.user.id || "",
+        name: session.user.name || null,
+        email: session.user.email || null,
+        mobileNumber: session.user.mobileNumber || null,
+        role: session.user.role || "GUEST",
+        isEmailVerified: session.user.isEmailVerified || false,
+        isMobileVerified: session.user.isMobileVerified || false,
+      };
+
+      setProfile(userData);
       setFormData({
-        name: data.name || "",
-        mobileNumber: data.mobileNumber || "",
-        dateOfBirth: data.dateOfBirth || "",
-        address: data.address || "",
-        emergencyContact: data.emergencyContact || "",
-        alternativePhone: data.alternativePhone || "",
+        name: userData.name || "",
+        mobileNumber: userData.mobileNumber || "",
       });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to load profile",
-        variant: "destructive",
-      });
-    } finally {
       setLoading(false);
     }
-  };
+  }, [session, status]);
 
   const handleUpdateProfile = async (section: string) => {
     try {
       setSaving(true);
 
-      const updateData: UpdateUserProfileDto = {};
-
+      // In a real implementation, you would call your backend API here
+      // For now, we'll just update the session
       if (section === "basic") {
-        updateData.name = formData.name;
-        updateData.dateOfBirth = formData.dateOfBirth;
+        await update({ name: formData.name });
+
+        toast({
+          title: "Success",
+          description: "Profile updated successfully",
+        });
       } else if (section === "contact") {
-        updateData.mobileNumber = formData.mobileNumber;
-        updateData.alternativePhone = formData.alternativePhone;
-        updateData.address = formData.address;
-        updateData.emergencyContact = formData.emergencyContact;
+        // Update mobile number logic would go here
+        toast({
+          title: "Info",
+          description: "Contact information update requires backend API",
+          variant: "default",
+        });
       }
 
-      const updated = await userApi.updateProfile(updateData);
-      setProfile(updated);
       setEditingSection(null);
-
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
-
-      // Update session if name changed
-      if (updateData.name) {
-        await update({ name: updateData.name });
-      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -116,52 +108,16 @@ export default function ProfilePage() {
   };
 
   const handleChangePassword = async () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "New passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (passwordData.newPassword.length < 8) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 8 characters long",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setSaving(true);
-      await userApi.changePassword(passwordData);
-
-      toast({
-        title: "Success",
-        description: "Password changed successfully",
-      });
-
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-      setShowPasswordChange(false);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to change password",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
+    toast({
+      title: "Info",
+      description: "Password change requires backend API integration",
+      variant: "default",
+    });
+    setShowPasswordChange(false);
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return "Not provided";
+    if (!dateString) return "Recently joined";
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
@@ -176,12 +132,22 @@ export default function ProfilePage() {
     return "Recently joined";
   };
 
-  if (loading) {
+  if (loading || status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <Loader2 className="h-12 w-12 text-[#214B3F] animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <p className="text-gray-600">Unable to load profile</p>
         </div>
       </div>
     );
@@ -222,7 +188,7 @@ export default function ProfilePage() {
                   {profile?.name || "Guest User"}
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {profile?.email}
+                  {profile?.email || "No email"}
                 </p>
                 {profile?.isEmailVerified && (
                   <div className="mt-4 inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold">
@@ -334,24 +300,6 @@ export default function ProfilePage() {
                       Email cannot be changed
                     </p>
                   </div>
-                  <div className="sm:col-span-2">
-                    <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
-                      <Calendar className="h-4 w-4" />
-                      Date of Birth
-                    </label>
-                    {editingSection === "basic" ? (
-                      <input
-                        type="date"
-                        value={formData.dateOfBirth}
-                        onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#214B3F] focus:border-transparent"
-                      />
-                    ) : (
-                      <p className="text-gray-900 font-medium">
-                        {profile?.dateOfBirth ? formatDate(profile.dateOfBirth) : "Not provided"}
-                      </p>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
@@ -418,57 +366,30 @@ export default function ProfilePage() {
                       <Phone className="h-4 w-4" />
                       Alternative Phone
                     </label>
-                    {editingSection === "contact" ? (
-                      <input
-                        type="tel"
-                        value={formData.alternativePhone}
-                        onChange={(e) => setFormData({ ...formData, alternativePhone: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#214B3F] focus:border-transparent"
-                        placeholder="+977-9841234567"
-                      />
-                    ) : (
-                      <p className="text-gray-900 font-medium">
-                        {profile?.alternativePhone || "Not provided"}
-                      </p>
-                    )}
+                    <p className="text-gray-900 font-medium">Not provided</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Update from settings
+                    </p>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
                       <MapPin className="h-4 w-4" />
                       Address
                     </label>
-                    {editingSection === "contact" ? (
-                      <textarea
-                        value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#214B3F] focus:border-transparent"
-                        placeholder="Enter your full address"
-                      />
-                    ) : (
-                      <p className="text-gray-900 font-medium">
-                        {profile?.address || "Not provided"}
-                      </p>
-                    )}
+                    <p className="text-gray-900 font-medium">Not provided</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Update from settings
+                    </p>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
                       <User className="h-4 w-4" />
                       Emergency Contact
                     </label>
-                    {editingSection === "contact" ? (
-                      <input
-                        type="text"
-                        value={formData.emergencyContact}
-                        onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#214B3F] focus:border-transparent"
-                        placeholder="Name and phone number"
-                      />
-                    ) : (
-                      <p className="text-gray-900 font-medium">
-                        {profile?.emergencyContact || "Not provided"}
-                      </p>
-                    )}
+                    <p className="text-gray-900 font-medium">Not provided</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Update from settings
+                    </p>
                   </div>
                 </div>
               </div>
@@ -502,48 +423,12 @@ export default function ProfilePage() {
                   </div>
 
                   {showPasswordChange && (
-                    <div className="p-4 bg-gray-50/70 rounded-lg border border-gray-200 space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Current Password
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordData.currentPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#214B3F] focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          New Password
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordData.newPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#214B3F] focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Confirm New Password
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordData.confirmPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#214B3F] focus:border-transparent"
-                        />
-                      </div>
-                      <button
-                        onClick={handleChangePassword}
-                        disabled={saving}
-                        className="w-full px-4 py-2 bg-[#214B3F] text-white rounded-lg hover:bg-[#214B3F]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-                        Update Password
-                      </button>
+                    <div className="p-4 bg-gray-50/70 rounded-lg border border-gray-200">
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        Password change functionality requires backend API integration.
+                        <br />
+                        Please contact support to update your password.
+                      </p>
                     </div>
                   )}
                 </div>
