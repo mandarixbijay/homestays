@@ -1,21 +1,23 @@
-"use client"
-import React, { useState } from "react";
-import { Mail, Phone, User, LogOut, ChevronRight, BadgeCheck, FileText, Plane, Gift } from "lucide-react";
-import Navbar from "@/components/navbar/navbar";
-import Footer from "@/components/footer/footer";
-import Sidebar from "../../components/client-dashboard/Sidebar";
-import MainContent from "../../components/client-dashboard/MainContent";
+"use client";
 
-export default function Account() {
-  const [selected, setSelected] = useState("profile");
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
+export default function AccountRedirect() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to new guest dashboard
+    router.replace("/guest/dashboard");
+  }, [router]);
+
   return (
-    <>
-      <Navbar />
-      <div className="flex flex-col md:flex-row min-h-screen bg-muted/50 p-2 md:p-6 gap-4 md:gap-8 mt-20">
-        <Sidebar selected={selected} setSelected={setSelected} />
-        <MainContent selected={selected} />
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="text-center">
+        <Loader2 className="h-12 w-12 text-[#214B3F] animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">Redirecting to dashboard...</p>
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }
