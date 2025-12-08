@@ -1,5 +1,7 @@
 // Public Community API
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.61.8.56:3001';
+const API_BASE_URL = typeof window !== 'undefined'
+  ? (process.env.NEXT_PUBLIC_API_URL || 'http://13.61.8.56:3001')
+  : 'http://13.61.8.56:3001';
 
 interface CommunityMeal {
   id: number;
@@ -141,22 +143,29 @@ class CommunityAPI {
    */
   async getCommunities(): Promise<Community[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/communities`, {
+      const url = `${this.baseUrl}/communities`;
+      console.log('[CommunityAPI] Fetching communities from:', url);
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'accept': 'application/json',
         },
+        cache: 'no-store',
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[CommunityAPI] Error response:', errorText);
         throw new Error(`Failed to fetch communities: ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log('[CommunityAPI] Fetched communities:', data?.length || 0);
       return data;
     } catch (error) {
-      console.error('Error fetching communities:', error);
+      console.error('[CommunityAPI] Error fetching communities:', error);
       throw error;
     }
   }
@@ -166,22 +175,29 @@ class CommunityAPI {
    */
   async getCommunity(id: number): Promise<Community> {
     try {
-      const response = await fetch(`${this.baseUrl}/communities/${id}`, {
+      const url = `${this.baseUrl}/communities/${id}`;
+      console.log('[CommunityAPI] Fetching community from:', url);
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'accept': 'application/json',
         },
+        cache: 'no-store',
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[CommunityAPI] Error response:', errorText);
         throw new Error(`Failed to fetch community: ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log('[CommunityAPI] Fetched community:', data?.name || id);
       return data;
     } catch (error) {
-      console.error(`Error fetching community ${id}:`, error);
+      console.error(`[CommunityAPI] Error fetching community ${id}:`, error);
       throw error;
     }
   }
@@ -191,22 +207,29 @@ class CommunityAPI {
    */
   async getHomestay(id: number): Promise<Homestay> {
     try {
-      const response = await fetch(`${this.baseUrl}/homestays/${id}`, {
+      const url = `${this.baseUrl}/homestays/${id}`;
+      console.log('[CommunityAPI] Fetching homestay from:', url);
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'accept': 'application/json',
         },
+        cache: 'no-store',
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[CommunityAPI] Error response:', errorText);
         throw new Error(`Failed to fetch homestay: ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log('[CommunityAPI] Fetched homestay:', data?.name || id);
       return data;
     } catch (error) {
-      console.error(`Error fetching homestay ${id}:`, error);
+      console.error(`[CommunityAPI] Error fetching homestay ${id}:`, error);
       throw error;
     }
   }

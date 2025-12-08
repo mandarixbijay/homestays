@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Navbar from '@/components/navbar/navbar';
+import Footer from '@/components/footer/footer';
 
 export default function CommunityHomestaysPage() {
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -78,8 +80,10 @@ export default function CommunityHomestaysPage() {
   ).filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Section */}
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-20">
+        {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-[#224240] to-[#2a5350] text-white">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
@@ -199,7 +203,9 @@ export default function CommunityHomestaysPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }
 
