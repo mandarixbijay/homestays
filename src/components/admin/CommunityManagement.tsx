@@ -119,8 +119,9 @@ export default function CommunityManagement() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      // Only pass isActive parameter if it's explicitly set (not undefined)
       const [communitiesData, managersData, homestaysData] = await Promise.all([
-        adminApi.getCommunities(filterActive !== undefined ? { isActive: filterActive } : {}),
+        adminApi.getCommunities(filterActive !== undefined ? { isActive: filterActive } : undefined),
         adminApi.getCommunityManagers({ isActive: true }),
         adminApi.getHomestays({ status: 'APPROVED' }),
       ]);
