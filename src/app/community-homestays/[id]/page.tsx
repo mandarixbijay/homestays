@@ -25,6 +25,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import Navbar from '@/components/navbar/navbar';
+import Footer from '@/components/footer/footer';
 
 export default function CommunityDetailPage() {
   const params = useParams();
@@ -115,36 +117,46 @@ export default function CommunityDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 text-[#224240] animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading community details...</p>
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center pt-20">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 text-[#224240] animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Loading community details...</p>
+          </div>
         </div>
-      </div>
+        <Footer />
+      </>
     );
   }
 
   if (!community) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Home className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-700 mb-2">Community Not Found</h2>
-          <p className="text-gray-600 mb-6">The community you're looking for doesn't exist.</p>
-          <Link
-            href="/community-homestays"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#224240] text-white rounded-lg hover:bg-[#2a5350] transition-colors"
-          >
-            <ChevronLeft className="h-5 w-5" />
-            Back to Communities
-          </Link>
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center pt-20">
+          <div className="text-center">
+            <Home className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-700 mb-2">Community Not Found</h2>
+            <p className="text-gray-600 mb-6">The community you're looking for doesn't exist.</p>
+            <Link
+              href="/community-homestays"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#224240] text-white rounded-lg hover:bg-[#2a5350] transition-colors"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              Back to Communities
+            </Link>
+          </div>
         </div>
-      </div>
+        <Footer />
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gray-50 pt-20">
       {/* Back Button */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -444,7 +456,9 @@ export default function CommunityDetailPage() {
           </section>
         )}
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }
 
