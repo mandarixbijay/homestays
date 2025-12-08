@@ -97,6 +97,9 @@ export default function CommunityManagement() {
   const [showHomestayModal, setShowHomestayModal] = useState(false);
   const [selectedCommunityForHomestays, setSelectedCommunityForHomestays] = useState<number | null>(null);
   const [selectedHomestays, setSelectedHomestays] = useState<number[]>([]);
+  const [homestaySearchTerm, setHomestaySearchTerm] = useState('');
+  const [homestayCurrentPage, setHomestayCurrentPage] = useState(1);
+  const [homestayLocationFilter, setHomestayLocationFilter] = useState('');
 
   const [formData, setFormData] = useState<CommunityFormData>({
     name: '',
@@ -235,6 +238,9 @@ export default function CommunityManagement() {
     if (community) {
       setSelectedCommunityForHomestays(communityId);
       setSelectedHomestays(community.homestays.map((h) => h.id));
+      setHomestaySearchTerm('');
+      setHomestayCurrentPage(1);
+      setHomestayLocationFilter('');
       setShowHomestayModal(true);
     }
   };
@@ -1012,65 +1018,289 @@ export default function CommunityManagement() {
         )}
       </AnimatePresence>
 
-      {/* Homestay Selection Modal */}
+      {/* Enhanced Homestay Selection Modal */}
       <AnimatePresence>
-        {showHomestayModal && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowHomestayModal(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            >
-              <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900">Manage Homestays</h2>
-                  <button
-                    onClick={() => setShowHomestayModal(false)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <X className="h-5 w-5 text-gray-500" />
-                  </button>
-                </div>
+        {showHomestayModal && (() => {
+          const ITEMS_PER_PAGE = 10;
 
-                <div className="p-6">
-                  <p className="text-sm text-gray-600 mb-4">
-                    Select the homestays that should be part of this community
-                  </p>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {homestays.map((homestay) => (
-                      <label
-                        key={homestay.id}
-                        className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedHomestays.includes(homestay.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedHomestays([...selectedHomestays, homestay.id]);
-                            } else {
-                              setSelectedHomestays(selectedHomestays.filter((id) => id !== homestay.id));
-                            }
-                          }}
-                          className="rounded"
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium">{homestay.name}</div>
-                          <div className="text-sm text-gray-600">{homestay.address}</div>
-                        </div>
-                      </label>
-                    ))}
+          // Get unique locations
+          const uniqueLocations = Array.from(new Set(homestays.map(h => h.address))).filter(Boolean);
+
+          // Filter homestays
+          const filteredHomestays = homestays.filter((homestay) => {
+            const matchesSearch =
+              homestay.name.toLowerCase().includes(homestaySearchTerm.toLowerCase()) ||
+              homestay.address.toLowerCase().includes(homestaySearchTerm.toLowerCase());
+
+            const matchesLocation = !homestayLocationFilter || homestay.address === homestayLocationFilter;
+
+            return matchesSearch && matchesLocation;
+          });
+
+          // Pagination
+          const totalPages = Math.ceil(filteredHomestays.length / ITEMS_PER_PAGE);
+          const startIndex = (homestayCurrentPage - 1) * ITEMS_PER_PAGE;
+          const paginatedHomestays = filteredHomestays.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+          // Get selected homestay details
+          const selectedHomestayDetails = homestays.filter(h => selectedHomestays.includes(h.id));
+
+          return (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowHomestayModal(false)}
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              >
+                <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full h-[90vh] flex flex-col">
+                  {/* Header */}
+                  <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Manage Community Homestays</h2>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {selectedHomestays.length} of {homestays.length} homestays selected
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowHomestayModal(false)}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <X className="h-5 w-5 text-gray-500" />
+                    </button>
                   </div>
 
-                  <div className="flex gap-3 mt-6">
+                  {/* Main Content - Two Panel Layout */}
+                  <div className="flex-1 flex gap-6 p-6 overflow-hidden">
+                    {/* Left Panel - Available Homestays */}
+                    <div className="flex-1 flex flex-col">
+                      <h3 className="font-medium text-gray-900 mb-3">Available Homestays</h3>
+
+                      {/* Search and Filter */}
+                      <div className="space-y-3 mb-4">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Search by name or location..."
+                            value={homestaySearchTerm}
+                            onChange={(e) => {
+                              setHomestaySearchTerm(e.target.value);
+                              setHomestayCurrentPage(1);
+                            }}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#224240] focus:border-transparent"
+                          />
+                        </div>
+
+                        <div className="flex gap-2">
+                          <select
+                            value={homestayLocationFilter}
+                            onChange={(e) => {
+                              setHomestayLocationFilter(e.target.value);
+                              setHomestayCurrentPage(1);
+                            }}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#224240] focus:border-transparent"
+                          >
+                            <option value="">All Locations</option>
+                            {uniqueLocations.map((location) => (
+                              <option key={location} value={location}>
+                                {location}
+                              </option>
+                            ))}
+                          </select>
+
+                          {(homestaySearchTerm || homestayLocationFilter) && (
+                            <button
+                              onClick={() => {
+                                setHomestaySearchTerm('');
+                                setHomestayLocationFilter('');
+                                setHomestayCurrentPage(1);
+                              }}
+                              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          <span>
+                            Showing {filteredHomestays.length === 0 ? 0 : startIndex + 1}-
+                            {Math.min(startIndex + ITEMS_PER_PAGE, filteredHomestays.length)} of {filteredHomestays.length}
+                          </span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                const newSelected = filteredHomestays.map(h => h.id);
+                                setSelectedHomestays(Array.from(new Set([...selectedHomestays, ...newSelected])));
+                              }}
+                              className="text-[#224240] hover:underline"
+                            >
+                              Select All
+                            </button>
+                            <span className="text-gray-300">|</span>
+                            <button
+                              onClick={() => setSelectedHomestays([])}
+                              className="text-red-600 hover:underline"
+                            >
+                              Clear All
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Homestay List */}
+                      <div className="flex-1 overflow-y-auto border border-gray-200 rounded-lg">
+                        {paginatedHomestays.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-full text-gray-500 py-12">
+                            <Home className="h-12 w-12 mb-2 opacity-30" />
+                            <p className="text-sm">No homestays found</p>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-gray-200">
+                            {paginatedHomestays.map((homestay) => {
+                              const isSelected = selectedHomestays.includes(homestay.id);
+                              return (
+                                <label
+                                  key={homestay.id}
+                                  className={`flex items-start gap-3 p-4 cursor-pointer transition-colors ${
+                                    isSelected ? 'bg-[#224240]/5' : 'hover:bg-gray-50'
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedHomestays([...selectedHomestays, homestay.id]);
+                                      } else {
+                                        setSelectedHomestays(selectedHomestays.filter((id) => id !== homestay.id));
+                                      }
+                                    }}
+                                    className="mt-1 rounded border-gray-300 text-[#224240] focus:ring-[#224240]"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-medium text-gray-900">{homestay.name}</div>
+                                    <div className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                      <MapPin className="h-3 w-3" />
+                                      {homestay.address}
+                                    </div>
+                                  </div>
+                                  {isSelected && (
+                                    <Check className="h-5 w-5 text-[#224240] flex-shrink-0" />
+                                  )}
+                                </label>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Pagination */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between mt-4">
+                          <button
+                            onClick={() => setHomestayCurrentPage(Math.max(1, homestayCurrentPage - 1))}
+                            disabled={homestayCurrentPage === 1}
+                            className="px-3 py-1 text-sm border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                          >
+                            Previous
+                          </button>
+
+                          <div className="flex items-center gap-2">
+                            {Array.from({ length: totalPages }, (_, i) => i + 1)
+                              .filter(page => {
+                                // Show first, last, current, and adjacent pages
+                                return page === 1 ||
+                                       page === totalPages ||
+                                       Math.abs(page - homestayCurrentPage) <= 1;
+                              })
+                              .map((page, idx, arr) => {
+                                // Add ellipsis if there's a gap
+                                const showEllipsisBefore = idx > 0 && page - arr[idx - 1] > 1;
+                                return (
+                                  <React.Fragment key={page}>
+                                    {showEllipsisBefore && <span className="text-gray-400">...</span>}
+                                    <button
+                                      onClick={() => setHomestayCurrentPage(page)}
+                                      className={`px-3 py-1 text-sm rounded-lg ${
+                                        page === homestayCurrentPage
+                                          ? 'bg-[#224240] text-white'
+                                          : 'border border-gray-300 hover:bg-gray-50'
+                                      }`}
+                                    >
+                                      {page}
+                                    </button>
+                                  </React.Fragment>
+                                );
+                              })}
+                          </div>
+
+                          <button
+                            onClick={() => setHomestayCurrentPage(Math.min(totalPages, homestayCurrentPage + 1))}
+                            disabled={homestayCurrentPage === totalPages}
+                            className="px-3 py-1 text-sm border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right Panel - Selected Homestays */}
+                    <div className="w-80 flex flex-col border-l border-gray-200 pl-6">
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        Selected ({selectedHomestays.length})
+                      </h3>
+
+                      <div className="flex-1 overflow-y-auto border border-gray-200 rounded-lg">
+                        {selectedHomestayDetails.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-full text-gray-500 py-12">
+                            <Check className="h-12 w-12 mb-2 opacity-30" />
+                            <p className="text-sm text-center px-4">No homestays selected</p>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-gray-200">
+                            {selectedHomestayDetails.map((homestay) => (
+                              <div
+                                key={homestay.id}
+                                className="p-3 hover:bg-gray-50 group"
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-medium text-sm text-gray-900 truncate">
+                                      {homestay.name}
+                                    </div>
+                                    <div className="text-xs text-gray-600 flex items-center gap-1 mt-1">
+                                      <MapPin className="h-3 w-3 flex-shrink-0" />
+                                      <span className="truncate">{homestay.address}</span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={() => setSelectedHomestays(selectedHomestays.filter(id => id !== homestay.id))}
+                                    className="p-1 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded transition-all"
+                                    title="Remove"
+                                  >
+                                    <X className="h-4 w-4 text-red-600" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer Actions */}
+                  <div className="border-t border-gray-200 px-6 py-4 flex gap-3">
                     <button
                       onClick={() => setShowHomestayModal(false)}
                       className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
@@ -1079,16 +1309,17 @@ export default function CommunityManagement() {
                     </button>
                     <button
                       onClick={handleSaveHomestays}
-                      className="flex-1 px-4 py-2 bg-[#224240] text-white rounded-lg hover:bg-[#2a5350] transition-colors"
+                      disabled={selectedHomestays.length === 0}
+                      className="flex-1 px-4 py-2 bg-[#224240] text-white rounded-lg hover:bg-[#2a5350] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Save Changes
+                      Save {selectedHomestays.length} Homestay{selectedHomestays.length !== 1 ? 's' : ''}
                     </button>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          </>
-        )}
+              </motion.div>
+            </>
+          );
+        })()}
       </AnimatePresence>
     </div>
   );
