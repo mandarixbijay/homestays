@@ -27,6 +27,8 @@ import {
   Zap,
   Star,
   QrCode,
+  UsersRound,
+  Building2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminAuth, useSessionManager } from "@/hooks/useSessionManager";
@@ -67,6 +69,7 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
   const [blogMenuOpen, setBlogMenuOpen] = useState(false);
   const [masterDataMenuOpen, setMasterDataMenuOpen] = useState(false);
   const [campaignMenuOpen, setCampaignMenuOpen] = useState(false);
+  const [communityMenuOpen, setCommunityMenuOpen] = useState(false);
 
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -85,6 +88,16 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
       ],
     },
     { name: "Users", href: "/admin/users", icon: Users },
+    {
+      name: "Communities",
+      href: "/admin/communities",
+      icon: Building2,
+      menuKey: "community",
+      subMenu: [
+        { name: "Community Managers", href: "/admin/community-managers", icon: UsersRound },
+        { name: "Communities", href: "/admin/communities", icon: Building2 },
+      ],
+    },
     {
       name: "Campaigns",
       href: "/admin/campaigns",
@@ -123,6 +136,7 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
     if (menuKey === "blog") return blogMenuOpen;
     if (menuKey === "masterData") return masterDataMenuOpen;
     if (menuKey === "campaign") return campaignMenuOpen;
+    if (menuKey === "community") return communityMenuOpen;
     return false;
   };
 
@@ -130,6 +144,7 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
     if (menuKey === "blog") setBlogMenuOpen(!blogMenuOpen);
     if (menuKey === "masterData") setMasterDataMenuOpen(!masterDataMenuOpen);
     if (menuKey === "campaign") setCampaignMenuOpen(!campaignMenuOpen);
+    if (menuKey === "community") setCommunityMenuOpen(!communityMenuOpen);
   };
 
   const renderNav = () => (

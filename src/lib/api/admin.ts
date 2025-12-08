@@ -911,6 +911,100 @@ class AdminApiClient {
   async deleteTopHomestay(id: number) {
     return this.request(`/admin/top-homestays/${id}`, { method: 'DELETE' });
   }
+
+  // ============================================================================
+  // COMMUNITY MANAGERS MANAGEMENT
+  // ============================================================================
+
+  async getCommunityManagers(params?: any) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return this.request(`/admin/community-managers${query}`);
+  }
+
+  async getCommunityManager(id: number) {
+    return this.request<any>(`/admin/community-managers/${id}`);
+  }
+
+  async createCommunityManager(data: any) {
+    return this.request('/admin/community-managers', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCommunityManager(id: number, data: any) {
+    return this.request(`/admin/community-managers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteCommunityManager(id: number) {
+    return this.request(`/admin/community-managers/${id}`, { method: 'DELETE' });
+  }
+
+  // ============================================================================
+  // COMMUNITIES MANAGEMENT
+  // ============================================================================
+
+  async getCommunities(params?: any) {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return this.request(`/admin/communities${query}`);
+  }
+
+  async getCommunity(id: number) {
+    return this.request<any>(`/admin/communities/${id}`);
+  }
+
+  async createCommunity(data: any) {
+    return this.request('/admin/communities', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCommunity(id: number, data: any) {
+    return this.request(`/admin/communities/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteCommunity(id: number) {
+    return this.request(`/admin/communities/${id}`, { method: 'DELETE' });
+  }
+
+  async addHomestaysToCommunity(communityId: number, data: { homestayIds: number[] }) {
+    return this.request(`/admin/communities/${communityId}/homestays`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async removeHomestaysFromCommunity(communityId: number, data: { homestayIds: number[] }) {
+    return this.request(`/admin/communities/${communityId}/homestays`, {
+      method: 'DELETE',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const adminApi = new AdminApiClient();
