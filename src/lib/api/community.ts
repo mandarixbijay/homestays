@@ -1,8 +1,4 @@
-// Public Community API
-const API_BASE_URL = typeof window !== 'undefined'
-  ? (process.env.NEXT_PUBLIC_API_URL || 'http://13.61.8.56:3001')
-  : 'http://13.61.8.56:3001';
-
+// Public Community API - Use Next.js API routes to avoid CORS issues
 interface CommunityMeal {
   id: number;
   communityId: number;
@@ -132,25 +128,18 @@ export interface Homestay {
 }
 
 class CommunityAPI {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = API_BASE_URL;
-  }
-
   /**
-   * Fetch all communities
+   * Fetch all communities via Next.js API route
    */
   async getCommunities(): Promise<Community[]> {
     try {
-      const url = `${this.baseUrl}/communities`;
+      const url = '/api/communities';
       console.log('[CommunityAPI] Fetching communities from:', url);
 
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'accept': 'application/json',
         },
         cache: 'no-store',
       });
@@ -171,18 +160,17 @@ class CommunityAPI {
   }
 
   /**
-   * Fetch a single community by ID
+   * Fetch a single community by ID via Next.js API route
    */
   async getCommunity(id: number): Promise<Community> {
     try {
-      const url = `${this.baseUrl}/communities/${id}`;
+      const url = `/api/communities/${id}`;
       console.log('[CommunityAPI] Fetching community from:', url);
 
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'accept': 'application/json',
         },
         cache: 'no-store',
       });
@@ -204,17 +192,17 @@ class CommunityAPI {
 
   /**
    * Fetch homestay details by ID
+   * Uses existing homestays API endpoint
    */
   async getHomestay(id: number): Promise<Homestay> {
     try {
-      const url = `${this.baseUrl}/homestays/${id}`;
+      const url = `/api/homestays/${id}`;
       console.log('[CommunityAPI] Fetching homestay from:', url);
 
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'accept': 'application/json',
         },
         cache: 'no-store',
       });
