@@ -129,6 +129,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
           },
         ]
       : []),
+    { label: "Community Homestays", href: "/community-homestays" },
     { label: "About", href: "/about-us" },
     { label: "Blogs", href: "/blogs" },
     { label: "Support", href: "/contact-support" },
