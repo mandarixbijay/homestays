@@ -73,6 +73,85 @@ interface CommunityActivity {
   images?: string[];
 }
 
+interface HomestayImage {
+  id: number;
+  homestayId: number;
+  url: string;
+  isMain: boolean;
+  tags: string[];
+  createdAt: string;
+}
+
+interface HomestayFacility {
+  homestayId: number;
+  facilityId: number;
+  facility: {
+    id: number;
+    name: string;
+    isDefault: boolean;
+    createdBy: number | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+interface RoomImage {
+  id: number;
+  roomId: number;
+  url: string;
+  isMain: boolean;
+  tags: string[];
+  createdAt: string;
+}
+
+interface HomestayRoom {
+  id: number;
+  homestayId: number;
+  name: string;
+  description: string;
+  totalArea: number;
+  areaUnit: string;
+  maxOccupancy: number;
+  minOccupancy: number;
+  price: number;
+  currency: string;
+  includeBreakfast: boolean;
+  createdAt: string;
+  updatedAt: string;
+  rating: number | null;
+  reviews: number;
+  images: RoomImage[];
+  beds: any[];
+}
+
+interface DetailedHomestay {
+  id: number;
+  name: string;
+  address: string;
+  contactNumber: string;
+  ownerId: number;
+  description: string;
+  status: string;
+  rejectionReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+  rating: number | null;
+  reviews: number;
+  discount: number;
+  vipAccess: boolean;
+  isCampaignRegistered: boolean;
+  hostEmail: string | null;
+  hostPhone: string | null;
+  images: HomestayImage[];
+  facilities: HomestayFacility[];
+  rooms: HomestayRoom[];
+  owner: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
 interface CommunityFormData {
   name: string;
   description: string;
@@ -87,8 +166,9 @@ interface CommunityFormData {
 export default function CommunityManagement() {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [managers, setManagers] = useState<any[]>([]);
-  const [homestays, setHomestays] = useState<any[]>([]);
+  const [homestays, setHomestays] = useState<DetailedHomestay[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingHomestays, setLoadingHomestays] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<boolean | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
@@ -119,22 +199,74 @@ export default function CommunityManagement() {
     fetchData();
   }, [filterActive]);
 
+  const fetchAllHomestays = async (): Promise<DetailedHomestay[]> => {
+    try {
+      setLoadingHomestays(true);
+      const allHomestays: DetailedHomestay[] = [];
+      let currentPage = 1;
+      let totalPages = 1;
+
+      // Fetch first page to get total pages
+      const firstPageResponse = await adminApi.getHomestays({
+        status: 'APPROVED',
+        page: currentPage,
+        limit: 10
+      });
+
+      if (firstPageResponse && firstPageResponse.data) {
+        allHomestays.push(...firstPageResponse.data);
+        totalPages = firstPageResponse.totalPages || 1;
+
+        // Fetch remaining pages
+        const remainingPages = [];
+        for (let page = 2; page <= totalPages; page++) {
+          remainingPages.push(
+            adminApi.getHomestays({
+              status: 'APPROVED',
+              page,
+              limit: 10
+            })
+          );
+        }
+
+        if (remainingPages.length > 0) {
+          const remainingResults = await Promise.all(remainingPages);
+          remainingResults.forEach(response => {
+            if (response && response.data) {
+              allHomestays.push(...response.data);
+            }
+          });
+        }
+      }
+
+      console.log(`Fetched ${allHomestays.length} total homestays from ${totalPages} pages`);
+      return allHomestays;
+    } catch (error: any) {
+      console.error('Error fetching homestays:', error);
+      throw error;
+    } finally {
+      setLoadingHomestays(false);
+    }
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
       // Only pass isActive parameter if it's explicitly set (not undefined)
-      const promises: [Promise<any>, Promise<any>, Promise<any>] = [
+      const promises: [Promise<any>, Promise<any>] = [
         filterActive !== undefined
           ? adminApi.getCommunities({ isActive: filterActive })
           : adminApi.getCommunities(),
         adminApi.getCommunityManagers({ isActive: true }),
-        adminApi.getHomestays({ status: 'APPROVED' }),
       ];
 
-      const [communitiesData, managersData, homestaysData] = await Promise.all(promises);
+      const [communitiesData, managersData] = await Promise.all(promises);
       setCommunities(communitiesData || []);
       setManagers(managersData || []);
-      setHomestays(homestaysData || []);
+
+      // Fetch all homestays with pagination
+      const homestaysData = await fetchAllHomestays();
+      setHomestays(homestaysData);
     } catch (error: any) {
       console.error('Error fetching data:', error);
       alert(error.message || 'Failed to fetch data');
@@ -1078,7 +1210,17 @@ export default function CommunityManagement() {
                   </div>
 
                   {/* Main Content - Two Panel Layout */}
-                  <div className="flex-1 flex gap-6 p-6 overflow-hidden">
+                  <div className="flex-1 flex gap-6 p-6 overflow-hidden relative">
+                    {/* Loading Overlay */}
+                    {loadingHomestays && (
+                      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
+                        <div className="text-center">
+                          <Loader2 className="h-12 w-12 text-[#224240] animate-spin mx-auto mb-2" />
+                          <p className="text-sm text-gray-600">Loading homestays...</p>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Left Panel - Available Homestays */}
                     <div className="flex-1 flex flex-col">
                       <h3 className="font-medium text-gray-900 mb-3">Available Homestays</h3>
@@ -1254,8 +1396,8 @@ export default function CommunityManagement() {
                       )}
                     </div>
 
-                    {/* Right Panel - Selected Homestays */}
-                    <div className="w-80 flex flex-col border-l border-gray-200 pl-6">
+                    {/* Right Panel - Selected Homestays with Details */}
+                    <div className="w-96 flex flex-col border-l border-gray-200 pl-6">
                       <h3 className="font-medium text-gray-900 mb-3">
                         Selected ({selectedHomestays.length})
                       </h3>
@@ -1271,25 +1413,123 @@ export default function CommunityManagement() {
                             {selectedHomestayDetails.map((homestay) => (
                               <div
                                 key={homestay.id}
-                                className="p-3 hover:bg-gray-50 group"
+                                className="p-4 hover:bg-gray-50"
                               >
-                                <div className="flex items-start justify-between gap-2">
+                                {/* Header with Remove Button */}
+                                <div className="flex items-start justify-between gap-2 mb-3">
                                   <div className="flex-1 min-w-0">
-                                    <div className="font-medium text-sm text-gray-900 truncate">
+                                    <div className="font-medium text-sm text-gray-900">
                                       {homestay.name}
                                     </div>
                                     <div className="text-xs text-gray-600 flex items-center gap-1 mt-1">
                                       <MapPin className="h-3 w-3 flex-shrink-0" />
-                                      <span className="truncate">{homestay.address}</span>
+                                      <span>{homestay.address}</span>
                                     </div>
                                   </div>
                                   <button
                                     onClick={() => setSelectedHomestays(selectedHomestays.filter(id => id !== homestay.id))}
-                                    className="p-1 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded transition-all"
+                                    className="p-1 hover:bg-red-50 rounded transition-all flex-shrink-0"
                                     title="Remove"
                                   >
                                     <X className="h-4 w-4 text-red-600" />
                                   </button>
+                                </div>
+
+                                {/* Main Image */}
+                                {homestay.images && homestay.images.length > 0 && (
+                                  <div className="mb-3">
+                                    <img
+                                      src={homestay.images.find(img => img.isMain)?.url || homestay.images[0].url}
+                                      alt={homestay.name}
+                                      className="w-full h-32 object-cover rounded-lg"
+                                    />
+                                  </div>
+                                )}
+
+                                {/* Description */}
+                                {homestay.description && (
+                                  <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                                    {homestay.description}
+                                  </p>
+                                )}
+
+                                {/* Owner Info */}
+                                {homestay.owner && (
+                                  <div className="mb-3 pb-3 border-b border-gray-200">
+                                    <div className="text-xs font-medium text-gray-700 mb-1">Owner</div>
+                                    <div className="text-xs text-gray-600">
+                                      <div>{homestay.owner.name}</div>
+                                      <div className="text-xs text-gray-500">{homestay.owner.email}</div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Contact */}
+                                {homestay.contactNumber && (
+                                  <div className="mb-3 pb-3 border-b border-gray-200">
+                                    <div className="text-xs font-medium text-gray-700 mb-1">Contact</div>
+                                    <div className="text-xs text-gray-600">{homestay.contactNumber}</div>
+                                  </div>
+                                )}
+
+                                {/* Facilities */}
+                                {homestay.facilities && homestay.facilities.length > 0 && (
+                                  <div className="mb-3 pb-3 border-b border-gray-200">
+                                    <div className="text-xs font-medium text-gray-700 mb-2">Facilities</div>
+                                    <div className="flex flex-wrap gap-1">
+                                      {homestay.facilities.slice(0, 4).map((facility) => (
+                                        <span
+                                          key={facility.facilityId}
+                                          className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded"
+                                        >
+                                          {facility.facility.name}
+                                        </span>
+                                      ))}
+                                      {homestay.facilities.length > 4 && (
+                                        <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                                          +{homestay.facilities.length - 4} more
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Rooms */}
+                                {homestay.rooms && homestay.rooms.length > 0 && (
+                                  <div className="mb-3">
+                                    <div className="text-xs font-medium text-gray-700 mb-2">Rooms ({homestay.rooms.length})</div>
+                                    <div className="space-y-2">
+                                      {homestay.rooms.slice(0, 2).map((room) => (
+                                        <div key={room.id} className="bg-gray-50 rounded p-2">
+                                          <div className="text-xs font-medium text-gray-900">{room.name}</div>
+                                          <div className="text-xs text-gray-600 flex items-center gap-2 mt-1">
+                                            <span>{room.maxOccupancy} guests</span>
+                                            <span>•</span>
+                                            <span>{room.price} {room.currency}</span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                      {homestay.rooms.length > 2 && (
+                                        <div className="text-xs text-gray-500 text-center">
+                                          +{homestay.rooms.length - 2} more rooms
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Stats */}
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                  <div className="bg-green-50 rounded p-2">
+                                    <div className="text-green-600 font-medium">Rating</div>
+                                    <div className="text-gray-900">
+                                      {homestay.rating ? `${homestay.rating.toFixed(1)}` : 'N/A'}
+                                    </div>
+                                  </div>
+                                  <div className="bg-purple-50 rounded p-2">
+                                    <div className="text-purple-600 font-medium">Reviews</div>
+                                    <div className="text-gray-900">{homestay.reviews}</div>
+                                  </div>
                                 </div>
                               </div>
                             ))}
