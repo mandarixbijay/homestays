@@ -129,9 +129,12 @@ export default function CommunityManagement() {
       ];
 
       const [communitiesData, managersData, homestaysData] = await Promise.all(promises);
-      setCommunities(communitiesData || []);
-      setManagers(managersData || []);
-      setHomestays(homestaysData || []);
+
+      const normalize = (data: any) => (Array.isArray(data) ? data : data?.data ?? data?.items ?? []);
+
+      setCommunities(normalize(communitiesData) || []);
+      setManagers(normalize(managersData) || []);
+      setHomestays(normalize(homestaysData) || []);
     } catch (error: any) {
       console.error('Error fetching data:', error);
       alert(error.message || 'Failed to fetch data');
