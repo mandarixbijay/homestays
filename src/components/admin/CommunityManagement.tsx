@@ -207,18 +207,18 @@ export default function CommunityManagement() {
       let totalPages = 1;
 
       // Fetch first page to get total pages
-      const firstPageResponse = await adminApi.getHomestays({
+      const firstPageResponse: any = await adminApi.getHomestays({
         status: 'APPROVED',
         page: currentPage,
         limit: 10
       });
 
       if (firstPageResponse && firstPageResponse.data) {
-        allHomestays.push(...firstPageResponse.data);
+        allHomestays.push(...(firstPageResponse.data as DetailedHomestay[]));
         totalPages = firstPageResponse.totalPages || 1;
 
         // Fetch remaining pages
-        const remainingPages = [];
+        const remainingPages: Promise<any>[] = [];
         for (let page = 2; page <= totalPages; page++) {
           remainingPages.push(
             adminApi.getHomestays({
@@ -230,10 +230,11 @@ export default function CommunityManagement() {
         }
 
         if (remainingPages.length > 0) {
-          const remainingResults = await Promise.all(remainingPages);
+          const remainingResults: any[] = await Promise.all(remainingPages);
           remainingResults.forEach(response => {
-            if (response && response.data) {
-              allHomestays.push(...response.data);
+            const data = response && response.data ? (response.data as DetailedHomestay[]) : undefined;
+            if (data) {
+              allHomestays.push(...data);
             }
           });
         }
