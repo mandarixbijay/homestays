@@ -68,8 +68,12 @@ export default function CommunityManagerManagement() {
     try {
       setLoading(true);
       // Only pass isActive parameter if it's explicitly set (not undefined)
-      const params = filterActive !== undefined ? { isActive: filterActive } : undefined;
-      const response = await adminApi.getCommunityManagers(params);
+      let response;
+      if (filterActive !== undefined) {
+        response = await adminApi.getCommunityManagers({ isActive: filterActive });
+      } else {
+        response = await adminApi.getCommunityManagers();
+      }
       setManagers(response || []);
     } catch (error: any) {
       console.error('Error fetching community managers:', error);

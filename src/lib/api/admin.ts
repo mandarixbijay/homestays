@@ -927,6 +927,7 @@ class AdminApiClient {
     }
 
     const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    console.log('[getCommunityManagers] params:', params, 'query:', query);
     return this.request(`/admin/community-managers${query}`);
   }
 
@@ -967,6 +968,7 @@ class AdminApiClient {
     }
 
     const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    console.log('[getCommunities] params:', params, 'query:', query);
     return this.request(`/admin/communities${query}`);
   }
 
