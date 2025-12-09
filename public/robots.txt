@@ -15,4 +15,4 @@ Allow: /api/backend/blog/
 Crawl-delay: 1
 
 # Sitemap location
-Sitemap: https://nepalhomestays.com/sitemap.xml
+Sitemap: https://www.nepalhomestays.com/sitemap.xml
