@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { publicBlogApi } from '@/lib/api/public-blog-api';
+import { publicHomestayApi } from '@/lib/api/public-homestay-api';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nepalhomestays.com';
@@ -17,6 +18,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: blog.featured ? 0.9 : 0.8,
     }));
 
+    // Fetch all approved homestays
+    const homestaysResponse = await publicHomestayApi.getApprovedHomestays();
+    const homestays = homestaysResponse.data;
+
+    // Generate homestay profile URLs
+    const homestayUrls = homestays.map((homestay) => ({
+      url: `${baseUrl}/homestays/profile/${homestay.slug}`,
+      lastModified: homestay.updatedAt ? new Date(homestay.updatedAt) : new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }));
+
     // Static pages
     const staticPages = [
       {
@@ -24,6 +37,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
         priority: 1.0,
+      },
+      {
+        url: `${baseUrl}/homestays`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
       },
       {
         url: `${baseUrl}/blogs`,
@@ -43,19 +62,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'monthly' as const,
         priority: 0.7,
       },
+      {
+        url: `${baseUrl}/list-your-property`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+      },
     ];
 
-    return [...staticPages, ...blogUrls];
+    return [...staticPages, ...blogUrls, ...homestayUrls];
   } catch (error) {
     console.error('Error generating sitemap:', error);
 
-    // Return static pages only if blog fetch fails
+    // Return static pages only if fetch fails
     return [
       {
         url: baseUrl,
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
         priority: 1.0,
+      },
+      {
+        url: `${baseUrl}/homestays`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
       },
       {
         url: `${baseUrl}/blogs`,
