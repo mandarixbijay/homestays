@@ -7,27 +7,52 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: [
+          '/',
+          '/api/homestays/',
+          '/api/backend/homestays/',
+          '/api/backend/blog/',
+        ],
         disallow: [
           '/admin/',
-          '/api/',
-          '/admin/*',
-          '/api/*',
-          '/_next/',
+          '/api/auth/',
+          '/api/admin/',
+          '/api/sitemap/',
+          '/_next/static/',
           '/private/',
         ],
       },
       // Special rules for Google
       {
         userAgent: 'Googlebot',
-        allow: '/',
-        disallow: ['/admin/', '/api/'],
+        allow: [
+          '/',
+          '/api/homestays/',
+          '/api/backend/homestays/',
+          '/api/backend/blog/',
+        ],
+        disallow: [
+          '/admin/',
+          '/api/auth/',
+          '/api/admin/',
+          '/api/sitemap/',
+        ],
       },
       // Special rules for Bing
       {
         userAgent: 'Bingbot',
-        allow: '/',
-        disallow: ['/admin/', '/api/'],
+        allow: [
+          '/',
+          '/api/homestays/',
+          '/api/backend/homestays/',
+          '/api/backend/blog/',
+        ],
+        disallow: [
+          '/admin/',
+          '/api/auth/',
+          '/api/admin/',
+          '/api/sitemap/',
+        ],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
