@@ -29,24 +29,45 @@ class SitemapCache {
    */
   upsertHomestays(homestays: CachedHomestay[]): void {
     try {
+      console.log(`[SitemapCache] Starting upsert of ${homestays.length} homestays...`);
+      console.log(`[SitemapCache] Cache directory: ${CACHE_DIR}`);
+      console.log(`[SitemapCache] Cache file: ${CACHE_FILE}`);
+
       this.ensureCacheDir();
+      console.log(`[SitemapCache] Cache directory ensured`);
 
       // Read existing cache
       const existing = this.getAllHomestays();
+      console.log(`[SitemapCache] Existing homestays in cache: ${existing.length}`);
       const existingMap = new Map(existing.map(h => [h.id, h]));
 
       // Merge new homestays
       homestays.forEach(h => {
+        if (!h.id || !h.name || !h.status) {
+          console.warn(`[SitemapCache] Invalid homestay data:`, h);
+          return;
+        }
         existingMap.set(h.id, h);
       });
 
       // Write back to file
       const updated = Array.from(existingMap.values());
-      fs.writeFileSync(CACHE_FILE, JSON.stringify(updated, null, 2), 'utf-8');
+      const jsonContent = JSON.stringify(updated, null, 2);
+      console.log(`[SitemapCache] Writing ${updated.length} homestays to cache file...`);
+      console.log(`[SitemapCache] First homestay sample:`, updated[0]);
+
+      fs.writeFileSync(CACHE_FILE, jsonContent, 'utf-8');
+      console.log(`[SitemapCache] ✅ Successfully wrote cache file`);
+
+      // Verify the write
+      const verified = fs.readFileSync(CACHE_FILE, 'utf-8');
+      const verifiedData = JSON.parse(verified);
+      console.log(`[SitemapCache] ✅ Verified cache file contains ${verifiedData.length} homestays`);
 
       console.log(`[SitemapCache] Updated cache with ${homestays.length} homestays. Total: ${updated.length}`);
     } catch (error) {
-      console.error('[SitemapCache] Error upserting homestays:', error);
+      console.error('[SitemapCache] ❌ Error upserting homestays:', error);
+      throw error; // Re-throw to see the error in the API response
     }
   }
 
@@ -80,16 +101,34 @@ class SitemapCache {
    * Get cache statistics
    */
   getStats() {
-    const all = this.getAllHomestays();
-    const approved = all.filter(h => h.status === 'APPROVED');
+    try {
+      console.log(`[SitemapCache] Getting stats from cache...`);
+      console.log(`[SitemapCache] Cache file exists: ${fs.existsSync(CACHE_FILE)}`);
 
-    return {
-      total: all.length,
-      approved: approved.length,
-      lastUpdate: fs.existsSync(CACHE_FILE)
-        ? fs.statSync(CACHE_FILE).mtime
-        : null,
-    };
+      const all = this.getAllHomestays();
+      console.log(`[SitemapCache] Total homestays in cache: ${all.length}`);
+
+      const approved = all.filter(h => h.status === 'APPROVED');
+      console.log(`[SitemapCache] Approved homestays: ${approved.length}`);
+
+      const stats = {
+        total: all.length,
+        approved: approved.length,
+        lastUpdate: fs.existsSync(CACHE_FILE)
+          ? fs.statSync(CACHE_FILE).mtime
+          : null,
+      };
+
+      console.log(`[SitemapCache] Stats:`, stats);
+      return stats;
+    } catch (error) {
+      console.error('[SitemapCache] Error getting stats:', error);
+      return {
+        total: 0,
+        approved: 0,
+        lastUpdate: null,
+      };
+    }
   }
 
   /**
