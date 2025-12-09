@@ -21,8 +21,12 @@ import {
   ChevronUp,
   Utensils,
   Activity,
+  Upload,
+  Camera,
+  Trash,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getSession } from 'next-auth/react';
 
 interface Community {
   id: number;
@@ -194,6 +198,8 @@ export default function CommunityManagement() {
   const [imageInput, setImageInput] = useState('');
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [deletingImageIndex, setDeletingImageIndex] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -469,6 +475,156 @@ export default function CommunityManagement() {
     const updatedActivities = [...formData.activities];
     updatedActivities[index] = { ...updatedActivities[index], [field]: value };
     setFormData({ ...formData, activities: updatedActivities });
+  };
+
+  const handleMultipleImageUpload = async (files: FileList) => {
+    try {
+      setUploadingImages(true);
+
+      // Get session for authorization
+      const session = await getSession();
+      const accessToken = session?.user?.accessToken;
+
+      if (!accessToken) {
+        throw new Error('No access token found. Please login again.');
+      }
+
+      const API_BASE_URL = typeof window !== 'undefined'
+        ? '/api/backend'
+        : 'http://13.61.8.56:3001';
+
+      // Upload all files
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+
+        const response = await fetch(`${API_BASE_URL}/s3/upload/communities`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: uploadFormData,
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
+        }
+
+        const responseText = await response.text();
+
+        let imageUrl: string;
+        try {
+          const result = JSON.parse(responseText);
+          imageUrl = result.url || result.data?.url || result.fileUrl || result;
+        } catch (e) {
+          imageUrl = responseText.trim();
+        }
+
+        if (!imageUrl || !imageUrl.startsWith('http')) {
+          throw new Error(`Invalid URL returned for ${file.name}`);
+        }
+
+        return imageUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      // Add uploaded URLs to form data
+      setFormData({
+        ...formData,
+        images: [...formData.images, ...uploadedUrls],
+      });
+
+      alert(`Successfully uploaded ${uploadedUrls.length} image(s)`);
+    } catch (error: any) {
+      console.error('Error uploading images:', error);
+      alert(error.message || 'Failed to upload images');
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  const handleImageFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // Validate files
+    const validFiles: File[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      if (!file.type.startsWith('image/')) {
+        alert(`${file.name} is not an image file`);
+        continue;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`${file.name} is too large (max 5MB)`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) return;
+
+    // Create a new FileList-like object
+    const dataTransfer = new DataTransfer();
+    validFiles.forEach(file => dataTransfer.items.add(file));
+
+    await handleMultipleImageUpload(dataTransfer.files);
+
+    // Reset input
+    e.target.value = '';
+  };
+
+  const handleDeleteImage = async (index: number, imageUrl: string) => {
+    try {
+      setDeletingImageIndex(index);
+
+      // Extract S3 key from URL
+      const urlParts = imageUrl.split('/');
+      const key = urlParts.slice(3).join('/'); // Everything after the domain
+
+      if (!key) {
+        throw new Error('Invalid image URL');
+      }
+
+      const session = await getSession();
+      const accessToken = session?.user?.accessToken;
+
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+
+      const API_BASE_URL = typeof window !== 'undefined'
+        ? '/api/backend'
+        : 'http://13.61.8.56:3001';
+
+      const response = await fetch(`${API_BASE_URL}/s3/delete/${encodeURIComponent(key)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete image from S3');
+      }
+
+      // Remove from form data
+      setFormData({
+        ...formData,
+        images: formData.images.filter((_, i) => i !== index),
+      });
+    } catch (error: any) {
+      console.error('Error deleting image:', error);
+      alert(error.message || 'Failed to delete image');
+    } finally {
+      setDeletingImageIndex(null);
+    }
   };
 
   const addImage = () => {
