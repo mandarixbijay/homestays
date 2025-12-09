@@ -4,12 +4,22 @@
 User-agent: *
 Allow: /
 
-# Disallow admin and API routes
-Disallow: /admin/
-Disallow: /api/
-
-# Allow specific public API endpoints
+# Allow public API endpoints (must come BEFORE disallow rules)
+Allow: /api/homestays/
+Allow: /api/backend/homestays/
 Allow: /api/backend/blog/
+
+# Disallow private API endpoints
+Disallow: /api/auth/
+Disallow: /api/admin/
+Disallow: /api/sitemap/
+
+# Disallow admin routes
+Disallow: /admin/
+
+# Disallow Next.js internal routes
+Disallow: /_next/static/
+Disallow: /private/
 
 # Crawl-delay for polite crawlers
 Crawl-delay: 1
