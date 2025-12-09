@@ -84,9 +84,6 @@ export const metadata: Metadata = {
     site: '@nepalhomestays',
     images: [`${baseUrl}/images/logo/logo.png`],
   },
-  alternates: {
-    canonical: baseUrl,
-  },
   other: {
     'og:locale': 'en_US',
     'og:site_name': 'Nepal Homestays',
