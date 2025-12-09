@@ -21,8 +21,12 @@ import {
   ChevronUp,
   Utensils,
   Activity,
+  Upload,
+  Camera,
+  Trash,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getSession } from 'next-auth/react';
 
 interface Community {
   id: number;
@@ -194,6 +198,8 @@ export default function CommunityManagement() {
   const [imageInput, setImageInput] = useState('');
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [deletingImageIndex, setDeletingImageIndex] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -470,6 +476,156 @@ export default function CommunityManagement() {
     const updatedActivities = [...formData.activities];
     updatedActivities[index] = { ...updatedActivities[index], [field]: value };
     setFormData({ ...formData, activities: updatedActivities });
+  };
+
+  const handleMultipleImageUpload = async (files: FileList) => {
+    try {
+      setUploadingImages(true);
+
+      // Get session for authorization
+      const session = await getSession();
+      const accessToken = session?.user?.accessToken;
+
+      if (!accessToken) {
+        throw new Error('No access token found. Please login again.');
+      }
+
+      const API_BASE_URL = typeof window !== 'undefined'
+        ? '/api/backend'
+        : 'http://13.61.8.56:3001';
+
+      // Upload all files
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+
+        const response = await fetch(`${API_BASE_URL}/s3/upload/communities`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: uploadFormData,
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
+        }
+
+        const responseText = await response.text();
+
+        let imageUrl: string;
+        try {
+          const result = JSON.parse(responseText);
+          imageUrl = result.url || result.data?.url || result.fileUrl || result;
+        } catch (e) {
+          imageUrl = responseText.trim();
+        }
+
+        if (!imageUrl || !imageUrl.startsWith('http')) {
+          throw new Error(`Invalid URL returned for ${file.name}`);
+        }
+
+        return imageUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      // Add uploaded URLs to form data
+      setFormData({
+        ...formData,
+        images: [...formData.images, ...uploadedUrls],
+      });
+
+      alert(`Successfully uploaded ${uploadedUrls.length} image(s)`);
+    } catch (error: any) {
+      console.error('Error uploading images:', error);
+      alert(error.message || 'Failed to upload images');
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  const handleImageFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // Validate files
+    const validFiles: File[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      if (!file.type.startsWith('image/')) {
+        alert(`${file.name} is not an image file`);
+        continue;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`${file.name} is too large (max 5MB)`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) return;
+
+    // Create a new FileList-like object
+    const dataTransfer = new DataTransfer();
+    validFiles.forEach(file => dataTransfer.items.add(file));
+
+    await handleMultipleImageUpload(dataTransfer.files);
+
+    // Reset input
+    e.target.value = '';
+  };
+
+  const handleDeleteImage = async (index: number, imageUrl: string) => {
+    try {
+      setDeletingImageIndex(index);
+
+      // Extract S3 key from URL
+      const urlParts = imageUrl.split('/');
+      const key = urlParts.slice(3).join('/'); // Everything after the domain
+
+      if (!key) {
+        throw new Error('Invalid image URL');
+      }
+
+      const session = await getSession();
+      const accessToken = session?.user?.accessToken;
+
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+
+      const API_BASE_URL = typeof window !== 'undefined'
+        ? '/api/backend'
+        : 'http://13.61.8.56:3001';
+
+      const response = await fetch(`${API_BASE_URL}/s3/delete/${encodeURIComponent(key)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete image from S3');
+      }
+
+      // Remove from form data
+      setFormData({
+        ...formData,
+        images: formData.images.filter((_, i) => i !== index),
+      });
+    } catch (error: any) {
+      console.error('Error deleting image:', error);
+      alert(error.message || 'Failed to delete image');
+    } finally {
+      setDeletingImageIndex(null);
+    }
   };
 
   const addImage = () => {
@@ -953,40 +1109,98 @@ export default function CommunityManagement() {
                     </div>
                   </div>
 
-                  {/* Images */}
-                  <div>
-                    <h3 className="font-medium text-gray-900 mb-3">Images</h3>
-                    <div className="flex gap-2 mb-3">
-                      <input
-                        type="url"
-                        value={imageInput}
-                        onChange={(e) => setImageInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
-                        placeholder="Enter image URL and press Enter"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#224240] focus:border-transparent"
-                      />
-                      <button
-                        type="button"
-                        onClick={addImage}
-                        className="px-4 py-2 bg-[#224240] text-white rounded-lg hover:bg-[#2a5350] transition-colors"
-                      >
-                        Add
-                      </button>
+                  {/* Images - Enhanced S3 Upload */}
+                  <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border-2 border-dashed border-gray-300 hover:border-emerald-400 transition-all">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <Camera className="h-5 w-5 text-emerald-600" />
+                        Community Images
+                      </h3>
+                      <span className="text-xs text-gray-500">{formData.images.length} images</span>
                     </div>
+
+                    {/* Upload Button */}
+                    <div className="mb-4">
+                      <input
+                        type="file"
+                        id="community-images-upload"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageFileSelect}
+                        disabled={uploadingImages}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="community-images-upload"
+                        className={`flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all shadow-md hover:shadow-lg cursor-pointer font-medium ${
+                          uploadingImages ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        {uploadingImages ? (
+                          <>
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Uploading Images...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-5 w-5" />
+                            Upload Multiple Images
+                          </>
+                        )}
+                      </label>
+                      <p className="text-xs text-gray-600 text-center mt-2">
+                        Select multiple images (PNG, JPG up to 5MB each)
+                      </p>
+                    </div>
+
+                    {/* Image Gallery */}
                     {formData.images.length > 0 && (
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {formData.images.map((img, idx) => (
-                          <div key={idx} className="relative group">
-                            <img src={img} alt="" className="w-full h-24 object-cover rounded-lg" />
-                            <button
-                              type="button"
-                              onClick={() => removeImage(idx)}
-                              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </div>
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="relative group"
+                          >
+                            <div className="relative aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
+                              <img
+                                src={img}
+                                alt={`Community image ${idx + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteImage(idx, img)}
+                                  disabled={deletingImageIndex === idx}
+                                  className="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50"
+                                >
+                                  {deletingImageIndex === idx ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                  ) : (
+                                    <Trash className="h-5 w-5" />
+                                  )}
+                                </button>
+                              </div>
+                              {idx === 0 && (
+                                <div className="absolute top-2 left-2 px-2 py-1 bg-emerald-500 text-white text-xs font-semibold rounded-full">
+                                  Main
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Empty State */}
+                    {formData.images.length === 0 && !uploadingImages && (
+                      <div className="text-center py-8">
+                        <ImageIcon className="h-16 w-16 text-gray-300 mx-auto mb-3" />
+                        <p className="text-gray-500 text-sm">No images uploaded yet</p>
+                        <p className="text-gray-400 text-xs mt-1">Click the button above to upload images</p>
                       </div>
                     )}
                   </div>
