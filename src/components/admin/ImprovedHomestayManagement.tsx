@@ -414,6 +414,8 @@ export default function ImprovedHomestayManagement() {
   const [showFilters, setShowFilters] = useState(false);
   const [syncingMap, setSyncingMap] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
+  const [syncedCount, setSyncedCount] = useState(0);
+  const [autoSyncInProgress, setAutoSyncInProgress] = useState(false);
 
   // Debounced API call for loading data
   const debouncedLoadData = useMemo(
@@ -458,6 +460,17 @@ export default function ImprovedHomestayManagement() {
       loadData();
     }
   }, [status, session?.user?.role, router, loadData]);
+
+  // Auto-sync current page homestays to sitemap when homestays load
+  useEffect(() => {
+    if (homestays.length > 0 && status === 'authenticated') {
+      // Delay auto-sync slightly to not block UI
+      const timer = setTimeout(() => {
+        autoSyncCurrentPage(homestays);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [homestays, status, autoSyncCurrentPage]);
 
   const handleClearFilters = useCallback(() => {
     setSearch('');
@@ -586,6 +599,48 @@ export default function ImprovedHomestayManagement() {
     addToast({ type: 'success', title: 'Success', message: 'Exported to CSV' });
   };
 
+  // Auto-sync current page homestays to sitemap (runs in background)
+  const autoSyncCurrentPage = useCallback(async (homestaysToSync: any[]) => {
+    try {
+      // Only sync APPROVED homestays
+      const approvedHomestays = homestaysToSync.filter(h => h.status === 'APPROVED');
+
+      if (approvedHomestays.length === 0) {
+        return;
+      }
+
+      setAutoSyncInProgress(true);
+
+      const response = await fetch('/api/sitemap/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          homestays: approvedHomestays.map(h => ({
+            id: h.id,
+            name: h.name,
+            address: h.address,
+            status: h.status,
+            updatedAt: h.updatedAt,
+          })),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[Auto-sync] Updated sitemap with', approvedHomestays.length, 'homestays');
+        setSyncedCount(prev => prev + approvedHomestays.length);
+      }
+    } catch (error) {
+      console.error('[Auto-sync] Error:', error);
+      // Silent fail - don't bother user with auto-sync errors
+    } finally {
+      setAutoSyncInProgress(false);
+    }
+  }, []);
+
+  // Manual full sitemap sync
   const handleSyncSitemap = async () => {
     try {
       setSyncingMap(true);
@@ -604,10 +659,11 @@ export default function ImprovedHomestayManagement() {
       }
 
       setLastSyncTime(new Date());
+      setSyncedCount(stats.approved); // Reset synced count to total approved
       addToast({
         type: 'success',
         title: 'Sitemap Synced',
-        message: 'Sitemap has been updated with latest homestays'
+        message: 'Sitemap has been fully updated with all homestays'
       });
     } catch (error: any) {
       console.error('Error syncing sitemap:', error);
@@ -658,15 +714,30 @@ export default function ImprovedHomestayManagement() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <ActionButton
-                onClick={handleSyncSitemap}
-                variant="secondary"
-                icon={syncingMap ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                disabled={syncingMap}
-                title={lastSyncTime ? `Last synced: ${lastSyncTime.toLocaleTimeString()}` : 'Sync sitemap with latest homestays'}
-              >
-                {syncingMap ? 'Syncing...' : 'Sync Sitemap'}
-              </ActionButton>
+              <div className="relative">
+                <ActionButton
+                  onClick={handleSyncSitemap}
+                  variant="secondary"
+                  icon={syncingMap ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                  disabled={syncingMap}
+                  title={lastSyncTime ? `Last synced: ${lastSyncTime.toLocaleTimeString()}` : 'Sync sitemap with latest homestays'}
+                >
+                  {syncingMap ? 'Syncing...' : 'Sync Sitemap'}
+                </ActionButton>
+                {/* Out of sync badge */}
+                {syncedCount < stats.approved && (
+                  <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white shadow-lg animate-pulse">
+                    {stats.approved - syncedCount}
+                  </span>
+                )}
+                {/* Auto-sync in progress indicator */}
+                {autoSyncInProgress && (
+                  <span className="absolute -bottom-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </span>
+                )}
+              </div>
               <ActionButton
                 onClick={handleExport}
                 variant="secondary"
@@ -725,6 +796,40 @@ export default function ImprovedHomestayManagement() {
             subtitle="Declined properties"
           />
         </div>
+
+        {/* Sitemap Sync Status */}
+        {stats.approved > 0 && (
+          <div className="mb-6">
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-500 rounded-lg">
+                    <RefreshCw className={`h-5 w-5 text-white ${autoSyncInProgress ? 'animate-spin' : ''}`} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Sitemap Sync Status</h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {syncedCount >= stats.approved ? (
+                        <span className="text-green-600 dark:text-green-400 font-medium">✓ All approved homestays synced</span>
+                      ) : (
+                        <span className="text-orange-600 dark:text-orange-400 font-medium">
+                          {syncedCount} / {stats.approved} synced • {stats.approved - syncedCount} pending
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+                {syncedCount < stats.approved && (
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {autoSyncInProgress ? 'Syncing current page...' : 'Navigate pages to sync more'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Filters & Actions Bar */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
