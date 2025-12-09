@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Revalidate the sitemap
     revalidatePath('/sitemap.xml', 'page');
-    revalidateTag('homestays');
+    revalidateTag('default', 'homestays');
 
     console.log(`[Sitemap Update] ✅ Sitemap updated with ${homestays.length} homestays`);
 
