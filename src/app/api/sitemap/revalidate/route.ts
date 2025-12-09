@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
     revalidatePath('/sitemap.xml');
 
     // Revalidate specific cache tags
-    revalidateTag('homestays');
-    revalidateTag('blogs');
+    revalidateTag('default', 'homestays');
+    revalidateTag('default', 'blogs');
 
     console.log('[Sitemap] Manual revalidation triggered by:', session.user?.email);
 
