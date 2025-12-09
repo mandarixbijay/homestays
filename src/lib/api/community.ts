@@ -128,6 +128,12 @@ export interface Homestay {
 }
 
 class CommunityAPI {
+  private baseUrl: string;
+
+  constructor(baseUrl: string = '') {
+    this.baseUrl = baseUrl;
+  }
+
   /**
    * Fetch all communities via Next.js API route
    */

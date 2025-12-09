@@ -37,7 +37,6 @@ const footerSections: FooterSection[] = [
     title: "Company",
     links: [
       { label: "About Us", href: "/about-us", ariaLabel: "Learn About Us" },
-      { label: "Community Homestays", href: "/community-homestays", ariaLabel: "Explore Community Homestays" },
       { label: "Community Blog", href: "/blogs", ariaLabel: "Read Community Blog" },
       { label: "Privacy Policy", href: "/legal", ariaLabel: "View Privacy Policy" },
       { label: "Terms of Service", href: "/legal", ariaLabel: "View Terms of Service" },
