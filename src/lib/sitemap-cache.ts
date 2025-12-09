@@ -1,9 +1,16 @@
 // lib/sitemap-cache.ts
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
-const CACHE_DIR = path.join(process.cwd(), '.cache');
+// Use /tmp for serverless environments (Vercel, AWS Lambda)
+// This is temporary storage that persists only during the function invocation
+const CACHE_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), '.sitemap-cache')
+  : path.join(process.cwd(), '.cache');
 const CACHE_FILE = path.join(CACHE_DIR, 'sitemap-homestays.json');
+
+console.log('[SitemapCache] Using cache directory:', CACHE_DIR);
 
 export interface CachedHomestay {
   id: number;
