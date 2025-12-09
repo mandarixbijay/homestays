@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { sitemapCache } from '@/lib/sitemap-cache';
 
 /**
  * API endpoint to incrementally update sitemap with specific homestays
@@ -33,21 +34,28 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Sitemap Update] Processing ${homestays.length} homestays from admin`);
 
-    // Store homestay data in a temporary cache/storage
-    // This will be picked up by the sitemap generator
-    // For now, we'll just trigger revalidation which will fetch fresh data
+    // Store homestays in cache
+    sitemapCache.upsertHomestays(homestays);
+
+    // Get updated stats
+    const stats = sitemapCache.getStats();
 
     // Revalidate the sitemap
     revalidatePath('/sitemap.xml', 'page');
     revalidateTag('default', 'homestays');
 
-    console.log(`[Sitemap Update] ✅ Sitemap updated with ${homestays.length} homestays`);
+    console.log(`[Sitemap Update] ✅ Cache updated. Total: ${stats.total}, Approved: ${stats.approved}`);
 
     return NextResponse.json({
       success: true,
-      message: `Sitemap updated with ${homestays.length} homestays`,
+      message: `Sitemap cache updated with ${homestays.length} homestays`,
       timestamp: new Date().toISOString(),
       processed: homestays.length,
+      stats: {
+        total: stats.total,
+        approved: stats.approved,
+        lastUpdate: stats.lastUpdate,
+      },
     });
   } catch (error: any) {
     console.error('[Sitemap Update] Error:', error);
@@ -76,12 +84,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // For now, return 0 as we'll implement proper counting later
-    // In a real implementation, you'd check the sitemap or a cache
+    // Get stats from cache
+    const stats = sitemapCache.getStats();
+
     return NextResponse.json({
       success: true,
-      sitemapCount: 0,
-      lastUpdate: new Date().toISOString(),
+      stats: {
+        total: stats.total,
+        approved: stats.approved,
+        lastUpdate: stats.lastUpdate,
+      },
     });
   } catch (error: any) {
     return NextResponse.json(
