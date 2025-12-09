@@ -8,7 +8,7 @@ import {
   Home, Plus, Eye, Edit, Trash2, Check, X, MapPin, User, Star, Calendar,
   Filter, Download, Upload, RefreshCw, TrendingUp, TrendingDown, Minus,
   Search, Grid, List, MoreVertical, ChevronRight, CheckSquare, Square,
-  Settings, SlidersHorizontal, FileDown
+  Settings, SlidersHorizontal, FileDown, Loader2
 } from 'lucide-react';
 import { debounce } from 'lodash';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -412,6 +412,8 @@ export default function ImprovedHomestayManagement() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [syncingMap, setSyncingMap] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
   // Debounced API call for loading data
   const debouncedLoadData = useMemo(
@@ -471,6 +473,9 @@ export default function ImprovedHomestayManagement() {
       await deleteHomestay(id);
       await loadData();
       addToast({ type: 'success', title: 'Success', message: 'Deleted' });
+
+      // Auto-sync sitemap after deletion
+      handleSyncSitemap();
     } catch (error: any) {
       addToast({ type: 'error', title: 'Error', message: 'Failed' });
     }
@@ -492,6 +497,11 @@ export default function ImprovedHomestayManagement() {
       await loadData();
       addToast({ type: 'success', title: 'Success', message: 'Done' });
       setShowApprovalModal(false);
+
+      // Auto-sync sitemap after approval/rejection (affects APPROVED homestays in sitemap)
+      if (data.status === 'APPROVED' || data.status === 'REJECTED') {
+        handleSyncSitemap();
+      }
     } catch (error: any) { }
   };
 
@@ -525,6 +535,9 @@ export default function ImprovedHomestayManagement() {
       await loadData();
       setSelectedIds(new Set());
       addToast({ type: 'success', title: 'Success', message: `Approved ${selectedIds.size} homestays` });
+
+      // Auto-sync sitemap after bulk approval
+      handleSyncSitemap();
     } catch (error: any) {
       addToast({ type: 'error', title: 'Error', message: 'Some operations failed' });
     }
@@ -540,6 +553,9 @@ export default function ImprovedHomestayManagement() {
       await loadData();
       setSelectedIds(new Set());
       addToast({ type: 'success', title: 'Success', message: `Deleted ${selectedIds.size} homestays` });
+
+      // Auto-sync sitemap after bulk deletion
+      handleSyncSitemap();
     } catch (error: any) {
       addToast({ type: 'error', title: 'Error', message: 'Some operations failed' });
     }
@@ -568,6 +584,41 @@ export default function ImprovedHomestayManagement() {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
     addToast({ type: 'success', title: 'Success', message: 'Exported to CSV' });
+  };
+
+  const handleSyncSitemap = async () => {
+    try {
+      setSyncingMap(true);
+
+      const response = await fetch('/api/sitemap/revalidate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to sync sitemap');
+      }
+
+      setLastSyncTime(new Date());
+      addToast({
+        type: 'success',
+        title: 'Sitemap Synced',
+        message: 'Sitemap has been updated with latest homestays'
+      });
+    } catch (error: any) {
+      console.error('Error syncing sitemap:', error);
+      addToast({
+        type: 'error',
+        title: 'Sync Failed',
+        message: error.message || 'Failed to sync sitemap'
+      });
+    } finally {
+      setSyncingMap(false);
+    }
   };
 
   const stats = useMemo(() => {
@@ -607,6 +658,15 @@ export default function ImprovedHomestayManagement() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              <ActionButton
+                onClick={handleSyncSitemap}
+                variant="secondary"
+                icon={syncingMap ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                disabled={syncingMap}
+                title={lastSyncTime ? `Last synced: ${lastSyncTime.toLocaleTimeString()}` : 'Sync sitemap with latest homestays'}
+              >
+                {syncingMap ? 'Syncing...' : 'Sync Sitemap'}
+              </ActionButton>
               <ActionButton
                 onClick={handleExport}
                 variant="secondary"
