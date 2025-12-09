@@ -6,15 +6,16 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://13.61.8.56:30
 /**
  * Public API endpoint to fetch approved homestays for sitemap generation
  * This endpoint is used internally by the sitemap generator
- * Uses the public search endpoint which doesn't require authentication
+ * Fetches directly from backend using the backend URL
  */
 export async function GET(request: NextRequest) {
   try {
-    // Try the Next.js internal search API first (works without auth)
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    const searchUrl = `${siteUrl}/api/homestays/search?page=1&limit=1000`;
+    // Fetch directly from backend homestays endpoint with pagination
+    // Note: This assumes the backend allows public access to homestays or the search endpoint doesn't require auth
+    const backendUrl = BACKEND_URL;
+    const searchUrl = `${backendUrl}/homestays/search?page=1&limit=1000`;
 
-    console.log('[Sitemap Homestays API] Fetching from Next.js search API:', searchUrl);
+    console.log('[Sitemap Homestays API] Fetching from backend:', searchUrl);
 
     const response = await fetch(searchUrl, {
       method: 'GET',
@@ -27,11 +28,19 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[Sitemap Homestays API] Search API error:', {
+      console.error('[Sitemap Homestays API] Backend error:', {
         status: response.status,
-        error: errorText
+        error: errorText,
+        url: searchUrl
       });
-      throw new Error(`Search API error: ${response.status}`);
+
+      // If we get 401/403, it means backend requires auth for this endpoint
+      // In this case, return empty data with error info
+      if (response.status === 401 || response.status === 403) {
+        console.warn('[Sitemap Homestays API] ⚠️  Backend requires authentication. Consider creating a public homestays endpoint or using a service token.');
+      }
+
+      throw new Error(`Backend API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
