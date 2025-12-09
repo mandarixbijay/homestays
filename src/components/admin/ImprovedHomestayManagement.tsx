@@ -651,7 +651,6 @@ export default function ImprovedHomestayManagement() {
                 variant="secondary"
                 icon={syncingMap ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                 disabled={syncingMap}
-                title={lastSyncTime ? `Last synced: ${lastSyncTime.toLocaleTimeString()}` : 'Revalidate sitemap to refresh homestay listings'}
               >
                 {syncingMap ? 'Syncing...' : 'Sync Sitemap'}
               </ActionButton>
