@@ -493,8 +493,8 @@ export default function ImprovedHomestayManagement() {
       await loadData();
       addToast({ type: 'success', title: 'Success', message: 'Deleted' });
 
-      // Auto-sync sitemap after deletion
-      handleSyncSitemap();
+      // Refresh sync status (full sync can be done manually if needed)
+      fetchSyncStatus();
     } catch (error: any) {
       addToast({ type: 'error', title: 'Error', message: 'Failed' });
     }
@@ -517,9 +517,9 @@ export default function ImprovedHomestayManagement() {
       addToast({ type: 'success', title: 'Success', message: 'Done' });
       setShowApprovalModal(false);
 
-      // Auto-sync sitemap after approval/rejection (affects APPROVED homestays in sitemap)
+      // Refresh sync status after approval/rejection
       if (data.status === 'APPROVED' || data.status === 'REJECTED') {
-        handleSyncSitemap();
+        fetchSyncStatus();
       }
     } catch (error: any) { }
   };
@@ -555,8 +555,8 @@ export default function ImprovedHomestayManagement() {
       setSelectedIds(new Set());
       addToast({ type: 'success', title: 'Success', message: `Approved ${selectedIds.size} homestays` });
 
-      // Auto-sync sitemap after bulk approval
-      handleSyncSitemap();
+      // Refresh sync status after bulk approval
+      fetchSyncStatus();
     } catch (error: any) {
       addToast({ type: 'error', title: 'Error', message: 'Some operations failed' });
     }
@@ -573,8 +573,8 @@ export default function ImprovedHomestayManagement() {
       setSelectedIds(new Set());
       addToast({ type: 'success', title: 'Success', message: `Deleted ${selectedIds.size} homestays` });
 
-      // Auto-sync sitemap after bulk deletion
-      handleSyncSitemap();
+      // Refresh sync status after bulk deletion
+      fetchSyncStatus();
     } catch (error: any) {
       addToast({ type: 'error', title: 'Error', message: 'Some operations failed' });
     }
@@ -636,7 +636,12 @@ export default function ImprovedHomestayManagement() {
       if (response.ok) {
         const data = await response.json();
         console.log('[Auto-sync] Updated sitemap with', approvedHomestays.length, 'homestays');
-        setSyncedCount(prev => prev + approvedHomestays.length);
+        console.log('[Auto-sync] Cache stats:', data.stats);
+
+        // Update synced count from the actual cache stats
+        if (data.stats && data.stats.approved !== undefined) {
+          setSyncedCount(data.stats.approved);
+        }
       }
     } catch (error) {
       console.error('[Auto-sync] Error:', error);
@@ -646,33 +651,85 @@ export default function ImprovedHomestayManagement() {
     }
   }, []);
 
-  // Manual full sitemap sync
+  // Manual full sitemap sync - fetches ALL homestays and updates cache
   const handleSyncSitemap = async () => {
     try {
       setSyncingMap(true);
+      console.log('[Manual Sync] Starting full sitemap sync...');
 
-      const response = await fetch('/api/sitemap/revalidate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // Fetch all homestays (all pages) with authentication
+      const allHomestays: any[] = [];
+      let currentPageNum = 1;
+      let hasMore = true;
 
-      const data = await response.json();
+      while (hasMore) {
+        const response = await fetch(
+          `/api/homestays?page=${currentPageNum}&limit=50`,
+          {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to sync sitemap');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch homestays: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const pageHomestays = data.homestays || data.data || [];
+
+        allHomestays.push(...pageHomestays);
+        console.log(`[Manual Sync] Fetched page ${currentPageNum}, got ${pageHomestays.length} homestays, total: ${allHomestays.length}`);
+
+        // Check if there are more pages
+        const totalPages = data.totalPages || Math.ceil((data.total || 0) / 50);
+        hasMore = currentPageNum < totalPages && pageHomestays.length > 0;
+        currentPageNum++;
       }
 
+      console.log(`[Manual Sync] Fetched ${allHomestays.length} total homestays`);
+
+      // Update cache with all homestays
+      const updateResponse = await fetch('/api/sitemap/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          homestays: allHomestays.map(h => ({
+            id: h.id,
+            name: h.name || h.propertyName,
+            address: h.address || h.propertyAddress,
+            status: h.status,
+            updatedAt: h.updatedAt,
+          })),
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        throw new Error('Failed to update sitemap cache');
+      }
+
+      const updateData = await updateResponse.json();
+      console.log('[Manual Sync] Cache updated:', updateData.stats);
+
+      // Update synced count from cache stats
+      if (updateData.stats && updateData.stats.approved !== undefined) {
+        setSyncedCount(updateData.stats.approved);
+      }
+
+      // Revalidate sitemap to regenerate XML
+      await fetch('/api/sitemap/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
       setLastSyncTime(new Date());
-      setSyncedCount(stats.approved); // Reset synced count to total approved
       addToast({
         type: 'success',
         title: 'Sitemap Synced',
-        message: 'Sitemap has been fully updated with all homestays'
+        message: `Successfully synced ${updateData.stats?.approved || 0} approved homestays to sitemap`
       });
     } catch (error: any) {
-      console.error('Error syncing sitemap:', error);
+      console.error('[Manual Sync] Error:', error);
       addToast({
         type: 'error',
         title: 'Sync Failed',
