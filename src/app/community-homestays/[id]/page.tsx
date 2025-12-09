@@ -121,7 +121,7 @@ export default function CommunityDetailPage() {
         <Navbar />
         <div className="min-h-screen flex items-center justify-center pt-20">
           <div className="text-center">
-            <Loader2 className="h-12 w-12 text-[#224240] animate-spin mx-auto mb-4" />
+            <Loader2 className="h-12 w-12 text-emerald-600 animate-spin mx-auto mb-4" />
             <p className="text-gray-600">Loading community details...</p>
           </div>
         </div>
@@ -141,7 +141,7 @@ export default function CommunityDetailPage() {
             <p className="text-gray-600 mb-6">The community you're looking for doesn't exist.</p>
             <Link
               href="/community-homestays"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#224240] text-white rounded-lg hover:bg-[#2a5350] transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
             >
               <ChevronLeft className="h-5 w-5" />
               Back to Communities
@@ -177,12 +177,13 @@ export default function CommunityDetailPage() {
             {/* Image Gallery */}
             <div className="relative">
               {community.images && community.images.length > 0 ? (
-                <div className="relative h-96 lg:h-full min-h-[400px] rounded-2xl overflow-hidden">
+                <div className="relative h-96 lg:h-full min-h-[400px] rounded-2xl overflow-hidden bg-gray-200">
                   <Image
                     src={community.images[currentImageIndex]}
                     alt={community.name}
                     fill
                     className="object-cover"
+                    unoptimized
                   />
                   {community.images.length > 1 && (
                     <>
@@ -278,17 +279,16 @@ export default function CommunityDetailPage() {
               </div>
 
               {/* Pricing */}
-              <div className="bg-gradient-to-r from-[#224240] to-[#2a5350] text-white p-6 rounded-xl mb-6">
+              <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-6 rounded-xl mb-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-200 mb-1">Starting from</p>
+                    <p className="text-sm text-emerald-100 mb-1">Starting from</p>
                     <div className="flex items-baseline gap-2">
+                      <span className="text-sm font-medium">NPR</span>
                       <span className="text-4xl font-bold">{community.pricePerPerson}</span>
-                      <span className="text-xl">{community.currency}</span>
-                      <span className="text-sm text-gray-200">per person</span>
+                      <span className="text-sm text-emerald-100">per person</span>
                     </div>
                   </div>
-                  <DollarSign className="h-12 w-12 text-white/30" />
                 </div>
               </div>
 
@@ -298,7 +298,7 @@ export default function CommunityDetailPage() {
                   <h3 className="font-semibold text-gray-900 mb-4">Managed By</h3>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="bg-[#224240] p-2 rounded-lg">
+                      <div className="bg-emerald-600 p-2 rounded-lg">
                         <Users className="h-5 w-5 text-white" />
                       </div>
                       <div>
@@ -336,7 +336,7 @@ export default function CommunityDetailPage() {
                   value={checkIn}
                   onChange={(e) => setCheckIn(e.target.value)}
                   min={minDate}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#224240] focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -350,7 +350,7 @@ export default function CommunityDetailPage() {
                   value={checkOut}
                   onChange={(e) => setCheckOut(e.target.value)}
                   min={checkIn || minDate}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#224240] focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -362,7 +362,7 @@ export default function CommunityDetailPage() {
                 <select
                   value={adults}
                   onChange={(e) => setAdults(parseInt(e.target.value))}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#224240] focus:border-transparent appearance-none bg-white"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent appearance-none bg-white"
                 >
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                     <option key={num} value={num}>
@@ -380,7 +380,7 @@ export default function CommunityDetailPage() {
                 <select
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#224240] focus:border-transparent appearance-none bg-white"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent appearance-none bg-white"
                 >
                   <option value="">All Locations</option>
                   {uniqueLocations.map((location) => (
@@ -395,7 +395,7 @@ export default function CommunityDetailPage() {
             <div className="flex items-end">
               <button
                 onClick={handleCheckAvailability}
-                className="w-full px-6 py-2.5 bg-[#224240] text-white rounded-lg hover:bg-[#2a5350] transition-colors font-medium flex items-center justify-center gap-2"
+                className="w-full px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium flex items-center justify-center gap-2"
               >
                 <Search className="h-5 w-5" />
                 Check Availability
@@ -487,7 +487,7 @@ function MealCard({ meal }: { meal: any }) {
       <p className="text-gray-600 mb-4">{meal.description}</p>
       {!meal.isIncluded && meal.extraCost > 0 && (
         <div className="text-sm text-gray-500">
-          Extra cost: {meal.extraCost} {meal.currency}
+          Extra cost: NPR {meal.extraCost}
         </div>
       )}
     </motion.div>
@@ -519,7 +519,7 @@ function ActivityCard({ activity }: { activity: any }) {
       <p className="text-gray-600 mb-4">{activity.description}</p>
       {!activity.isIncluded && activity.extraCost > 0 && (
         <div className="text-sm font-medium text-purple-600">
-          + {activity.extraCost} {activity.currency}
+          + NPR {activity.extraCost}
         </div>
       )}
     </motion.div>
@@ -604,7 +604,7 @@ function HomestayCard({
         <button
           onClick={fetchHomestayDetails}
           disabled={loadingDetails}
-          className="w-full px-4 py-2.5 bg-[#224240] text-white rounded-lg hover:bg-[#2a5350] transition-colors font-medium flex items-center justify-center gap-2"
+          className="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium flex items-center justify-center gap-2"
         >
           {loadingDetails ? (
             <>
@@ -737,6 +737,7 @@ function HomestayDetailsModal({
             alt={homestay.name}
             fill
             className="object-cover"
+            unoptimized
           />
           {images.length > 1 && (
             <>
@@ -769,19 +770,18 @@ function HomestayDetailsModal({
 
         {/* Pricing Info */}
         {checkIn && checkOut && (
-          <div className="bg-gradient-to-r from-[#224240] to-[#2a5350] text-white p-6 rounded-xl mb-6">
+          <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-6 rounded-xl mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-200 mb-1">Total for your stay</p>
+                <p className="text-sm text-emerald-100 mb-1">Total for your stay</p>
                 <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-medium">NPR</span>
                   <span className="text-3xl font-bold">{calculateTotalPrice()}</span>
-                  <span className="text-xl">{currency}</span>
                 </div>
-                <p className="text-sm text-gray-200 mt-1">
+                <p className="text-sm text-emerald-100 mt-1">
                   {Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))} nights × {adults} adults
                 </p>
               </div>
-              <DollarSign className="h-12 w-12 text-white/30" />
             </div>
           </div>
         )}
@@ -794,7 +794,7 @@ function HomestayDetailsModal({
               {homestay.rooms.map((room) => (
                 <div
                   key={room.id}
-                  className="border border-gray-200 rounded-xl p-4 hover:border-[#224240] transition-colors"
+                  className="border border-gray-200 rounded-xl p-4 hover:border-emerald-500 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
@@ -825,14 +825,14 @@ function HomestayDetailsModal({
                       <div className="mb-3">
                         <p className="text-sm text-gray-600">Room price</p>
                         <p className="text-xl font-bold text-gray-900">
-                          {room.price} {room.currency}
+                          NPR {room.price}
                           <span className="text-sm font-normal text-gray-600">/night</span>
                         </p>
                       </div>
                       <button
                         onClick={() => handleBookNow(room)}
                         disabled={!checkIn || !checkOut}
-                        className="px-4 py-2 bg-[#224240] text-white rounded-lg hover:bg-[#2a5350] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                       >
                         Book Now
                       </button>

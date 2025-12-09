@@ -13,22 +13,18 @@ import {
   ChevronRight,
   Loader2,
   Filter,
-  DollarSign,
   Star,
   Heart,
   Award,
   Globe,
-  TrendingUp,
   Mountain,
   Smile,
   Coffee,
   Leaf,
   Shield,
-  Clock,
   Calendar,
   ArrowRight,
   Check,
-  Zap,
   Target,
   BookOpen,
 } from 'lucide-react';
@@ -100,10 +96,10 @@ export default function CommunityHomestaysPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-b from-white to-teal-50/30 pt-16">
-        {/* Hero Section with Background Image */}
-        <div className="relative min-h-[75vh] flex items-center justify-center overflow-hidden">
-          {/* Background Image with Overlay */}
+      <div className="min-h-screen bg-white pt-16">
+        {/* Hero Section - Clean Dark Design */}
+        <div className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+          {/* Background Image with Dark Overlay */}
           <div className="absolute inset-0 z-0">
             <Image
               src="/images/tophomestay/ghandruk_homestay.jpg"
@@ -112,106 +108,95 @@ export default function CommunityHomestaysPage() {
               className="object-cover"
               priority
             />
-            {/* Dark Green/Teal Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-900/95 via-emerald-900/90 to-teal-800/95"></div>
-            {/* Pattern Overlay */}
-            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
+            {/* Darker Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-teal-900/80 to-slate-900/85"></div>
           </div>
 
           {/* Hero Content */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-500/20 backdrop-blur-md border border-teal-400/30 rounded-full mb-6">
-                <Leaf className="h-4 w-4 text-teal-300" />
-                <span className="text-sm font-semibold text-teal-100">Authentic Community Tourism</span>
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-6">
+                <Leaf className="h-4 w-4 text-emerald-400" />
+                <span className="text-sm font-medium text-white">Authentic Community Tourism</span>
               </div>
 
               {/* Main Heading */}
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 text-white leading-tight">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-white leading-tight">
                 Discover Nepal Through
-                <span className="block mt-2 bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
+                <span className="block mt-2 text-emerald-400">
                   Community Homestays
                 </span>
               </h1>
 
               {/* Subtitle */}
-              <p className="text-xl sm:text-2xl text-teal-100 max-w-3xl mx-auto mb-10 leading-relaxed">
+              <p className="text-xl sm:text-2xl text-gray-200 max-w-3xl mx-auto mb-10 leading-relaxed">
                 Experience authentic cultural immersion with local families. Support sustainable tourism while creating unforgettable memories.
               </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
                 <button
                   onClick={() => document.getElementById('communities')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="group px-8 py-4 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-semibold rounded-xl shadow-2xl hover:shadow-teal-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                  className="group px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all duration-300 flex items-center gap-2"
                 >
                   Explore Communities
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button className="px-8 py-4 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300 flex items-center gap-2">
+                <button className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-lg hover:bg-white/20 transition-all duration-300 flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />
                   Learn More
                 </button>
               </div>
 
-              {/* Stats Grid */}
+              {/* Stats Grid - Clean & Minimal */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6"
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6"
                 >
-                  <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-xl mx-auto mb-3 shadow-lg">
-                    <Home className="h-7 w-7 text-white" />
+                  <div className="text-4xl font-bold text-white mb-2">
+                    {totalHomestays}
                   </div>
-                  <div className="text-4xl font-bold text-white mb-1">
-                    {totalHomestays}+
-                  </div>
-                  <div className="text-sm text-teal-200 font-medium">Homestays Available</div>
+                  <div className="text-sm text-gray-300 font-medium">Homestays Available</div>
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6"
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6"
                 >
-                  <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl mx-auto mb-3 shadow-lg">
-                    <Users className="h-7 w-7 text-white" />
+                  <div className="text-4xl font-bold text-white mb-2">
+                    {totalCapacity}
                   </div>
-                  <div className="text-4xl font-bold text-white mb-1">
-                    {totalCapacity}+
-                  </div>
-                  <div className="text-sm text-teal-200 font-medium">Guest Capacity</div>
+                  <div className="text-sm text-gray-300 font-medium">Guest Capacity</div>
                 </motion.div>
 
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6"
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6"
                 >
-                  <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-xl mx-auto mb-3 shadow-lg">
-                    <MapPin className="h-7 w-7 text-white" />
+                  <div className="text-4xl font-bold text-white mb-2">
+                    {communities.length}
                   </div>
-                  <div className="text-4xl font-bold text-white mb-1">
-                    {communities.length}+
-                  </div>
-                  <div className="text-sm text-teal-200 font-medium">Active Communities</div>
+                  <div className="text-sm text-gray-300 font-medium">Active Communities</div>
                 </motion.div>
               </div>
             </motion.div>
           </div>
         </div>
 
-        {/* What is Community Homestay - Informative Section */}
-        <div className="bg-white py-20">
+        {/* What is Community Homestay - Clean Section */}
+        <div className="bg-gray-50 py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -219,11 +204,11 @@ export default function CommunityHomestaysPage() {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-50 rounded-full mb-4">
-                <Target className="h-4 w-4 text-teal-600" />
-                <span className="text-sm font-semibold text-teal-700">Understanding Community Tourism</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-full mb-4">
+                <Target className="h-4 w-4 text-emerald-600" />
+                <span className="text-sm font-semibold text-emerald-700">Understanding Community Tourism</span>
               </div>
-              <h2 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-6">
+              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
                 What is a Community Homestay?
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -237,25 +222,33 @@ export default function CommunityHomestaysPage() {
                   icon: Heart,
                   title: 'Local Ownership',
                   description: 'Managed and operated by local community members, ensuring direct economic benefits to families.',
-                  color: 'from-rose-500 to-pink-600'
+                  color: 'bg-rose-50',
+                  iconColor: 'bg-rose-500',
+                  textColor: 'text-rose-900'
                 },
                 {
                   icon: Leaf,
                   title: 'Sustainable Tourism',
                   description: 'Eco-friendly practices that preserve natural resources and protect the environment for future generations.',
-                  color: 'from-emerald-500 to-teal-600'
+                  color: 'bg-emerald-50',
+                  iconColor: 'bg-emerald-600',
+                  textColor: 'text-emerald-900'
                 },
                 {
                   icon: Users,
                   title: 'Cultural Exchange',
                   description: 'Genuine interactions with host families, learning traditions, language, and local ways of life.',
-                  color: 'from-blue-500 to-indigo-600'
+                  color: 'bg-blue-50',
+                  iconColor: 'bg-blue-600',
+                  textColor: 'text-blue-900'
                 },
                 {
-                  icon: Zap,
+                  icon: Award,
                   title: 'Community Development',
                   description: 'Revenue directly funds local infrastructure, education, and community improvement projects.',
-                  color: 'from-amber-500 to-orange-600'
+                  color: 'bg-amber-50',
+                  iconColor: 'bg-amber-600',
+                  textColor: 'text-amber-900'
                 }
               ].map((item, index) => (
                 <motion.div
@@ -264,13 +257,13 @@ export default function CommunityHomestaysPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 border border-gray-200"
+                  className={`${item.color} rounded-2xl p-6 border border-gray-200`}
                 >
-                  <div className={`w-14 h-14 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center mb-4 shadow-lg`}>
+                  <div className={`w-14 h-14 ${item.iconColor} rounded-xl flex items-center justify-center mb-4`}>
                     <item.icon className="h-7 w-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                  <h3 className={`text-xl font-bold ${item.textColor} mb-3`}>{item.title}</h3>
+                  <p className="text-gray-700 leading-relaxed">{item.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -278,26 +271,26 @@ export default function CommunityHomestaysPage() {
         </div>
 
         {/* Search Bar - Sticky */}
-        <div id="communities" className="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-md">
+        <div id="communities" className="sticky top-16 z-30 bg-white border-b border-gray-200 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-teal-600" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
                 <input
                   type="text"
                   placeholder="Search communities by name or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all text-gray-900 placeholder:text-gray-500"
+                  className="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-gray-900 placeholder:text-gray-500"
                 />
               </div>
               <div className="sm:w-72">
                 <div className="relative">
-                  <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-teal-600" />
+                  <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
                   <select
                     value={selectedLocation}
                     onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="w-full pl-12 pr-10 py-3.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 appearance-none bg-white transition-all text-gray-900"
+                    className="w-full pl-12 pr-10 py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white transition-all text-gray-900"
                   >
                     <option value="">All Locations</option>
                     {uniqueLocations.map((location) => (
@@ -310,19 +303,19 @@ export default function CommunityHomestaysPage() {
               </div>
             </div>
             <div className="mt-3 flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
               <span className="text-gray-700">
-                <span className="font-bold text-teal-600">{filteredCommunities.length}</span> {filteredCommunities.length === 1 ? 'community' : 'communities'} found
+                <span className="font-bold text-emerald-600">{filteredCommunities.length}</span> {filteredCommunities.length === 1 ? 'community' : 'communities'} found
               </span>
             </div>
           </div>
         </div>
 
         {/* Communities Grid */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-32">
-              <Loader2 className="h-16 w-16 text-teal-600 animate-spin mb-4" />
+              <Loader2 className="h-16 w-16 text-emerald-600 animate-spin mb-4" />
               <p className="text-gray-600 text-lg font-medium">Loading communities...</p>
             </div>
           ) : filteredCommunities.length === 0 ? (
@@ -337,7 +330,7 @@ export default function CommunityHomestaysPage() {
                   setSearchTerm('');
                   setSelectedLocation('');
                 }}
-                className="px-6 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors"
+                className="px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
               >
                 Clear Filters
               </button>
@@ -351,9 +344,9 @@ export default function CommunityHomestaysPage() {
           )}
         </div>
 
-        {/* Why Choose Section - Enhanced */}
-        <div className="bg-gradient-to-br from-teal-900 via-emerald-900 to-teal-800 py-24 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
+        {/* Experience Section - Dark Elegant */}
+        <div className="bg-slate-900 py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-teal-900/20 to-slate-900"></div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -362,10 +355,10 @@ export default function CommunityHomestaysPage() {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4">
+              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                 Your Community Homestay Experience
               </h2>
-              <p className="text-xl text-teal-100 max-w-2xl mx-auto">
+              <p className="text-xl text-gray-300 max-w-2xl mx-auto">
                 Every stay includes these carefully curated benefits and experiences
               </p>
             </motion.div>
@@ -415,17 +408,17 @@ export default function CommunityHomestaysPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300"
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6"
                 >
-                  <div className="w-14 h-14 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+                  <div className="w-14 h-14 bg-emerald-600 rounded-xl flex items-center justify-center mb-4">
                     <item.icon className="h-7 w-7 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-3">{item.title}</h3>
-                  <p className="text-teal-100 mb-4 leading-relaxed">{item.description}</p>
+                  <p className="text-gray-300 mb-4 leading-relaxed">{item.description}</p>
                   <ul className="space-y-2">
                     {item.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-teal-200">
-                        <Check className="h-4 w-4 text-teal-400 flex-shrink-0" />
+                      <li key={feature} className="flex items-center gap-2 text-gray-400">
+                        <Check className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                         <span className="text-sm">{feature}</span>
                       </li>
                     ))}
@@ -437,7 +430,7 @@ export default function CommunityHomestaysPage() {
         </div>
 
         {/* Trust & Stats Section */}
-        <div className="bg-gradient-to-b from-teal-50 to-white py-20">
+        <div className="bg-gray-50 py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -445,7 +438,7 @@ export default function CommunityHomestaysPage() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">
                 Trusted by Travelers Worldwide
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -455,10 +448,10 @@ export default function CommunityHomestaysPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {[
-                { icon: Award, value: '100%', label: 'Verified Hosts', color: 'from-teal-500 to-emerald-600' },
-                { icon: Star, value: '4.8/5', label: 'Average Rating', color: 'from-amber-500 to-orange-600' },
-                { icon: Smile, value: '5000+', label: 'Happy Guests', color: 'from-rose-500 to-pink-600' },
-                { icon: Globe, value: '50+', label: 'Countries', color: 'from-blue-500 to-indigo-600' }
+                { icon: Award, value: '100%', label: 'Verified Hosts', color: 'bg-emerald-600' },
+                { icon: Star, value: '4.8/5', label: 'Average Rating', color: 'bg-amber-600' },
+                { icon: Smile, value: '5000', label: 'Happy Guests', color: 'bg-rose-600' },
+                { icon: Globe, value: '50', label: 'Countries', color: 'bg-blue-600' }
               ].map((stat, index) => (
                 <motion.div
                   key={stat.label}
@@ -468,7 +461,7 @@ export default function CommunityHomestaysPage() {
                   transition={{ delay: index * 0.1 }}
                   className="text-center"
                 >
-                  <div className={`w-20 h-20 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
+                  <div className={`w-20 h-20 ${stat.color} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
                     <stat.icon className="h-10 w-10 text-white" />
                   </div>
                   <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
@@ -480,22 +473,22 @@ export default function CommunityHomestaysPage() {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-teal-600 to-emerald-600 py-16">
+        <div className="bg-emerald-600 py-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
                 Ready to Start Your Adventure?
               </h2>
-              <p className="text-xl text-teal-100 mb-8">
+              <p className="text-xl text-emerald-100 mb-8">
                 Book your community homestay today and experience the real Nepal
               </p>
               <button
                 onClick={() => document.getElementById('communities')?.scrollIntoView({ behavior: 'smooth' })}
-                className="group px-8 py-4 bg-white text-teal-700 font-bold rounded-xl shadow-2xl hover:shadow-white/50 transition-all duration-300 hover:scale-105 inline-flex items-center gap-2"
+                className="group px-8 py-4 bg-white text-emerald-700 font-bold rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 inline-flex items-center gap-2"
               >
                 Browse All Communities
                 <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -520,35 +513,33 @@ function CommunityCard({ community, index }: { community: Community; index: numb
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      whileHover={{ y: -8 }}
       className="group"
     >
       <Link href={`/community-homestays/${community.id}`}>
-        <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200 h-full flex flex-col">
+        <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 h-full flex flex-col">
           {/* Image Section */}
           <div className="relative h-64 overflow-hidden">
             <Image
               src={mainImage}
               alt={community.name}
               fill
-              className="object-cover group-hover:scale-110 transition-transform duration-700"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
             {/* Price Badge */}
-            <div className="absolute top-4 right-4 bg-gradient-to-r from-teal-500 to-emerald-600 px-4 py-2.5 rounded-xl shadow-lg">
-              <div className="flex items-center gap-1.5 text-white">
-                <DollarSign className="h-5 w-5" />
+            <div className="absolute top-4 right-4 bg-emerald-600 px-4 py-2 rounded-lg shadow-lg">
+              <div className="flex items-center gap-1 text-white">
+                <span className="text-sm font-medium">NPR</span>
                 <span className="text-lg font-bold">{community.pricePerPerson}</span>
-                <span className="text-xs opacity-90">/person</span>
               </div>
             </div>
 
             {/* Homestay Count Badge */}
             {community.homestays.length > 0 && (
-              <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl shadow-md">
+              <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-lg shadow-md">
                 <div className="flex items-center gap-1.5">
-                  <Home className="h-4 w-4 text-teal-600" />
+                  <Home className="h-4 w-4 text-emerald-600" />
                   <span className="text-sm font-bold text-gray-900">{community.homestays.length}</span>
                 </div>
               </div>
@@ -556,7 +547,7 @@ function CommunityCard({ community, index }: { community: Community; index: numb
 
             {/* Title Overlay */}
             <div className="absolute bottom-4 left-4 right-4">
-              <h3 className="text-2xl font-bold text-white line-clamp-2 drop-shadow-lg">
+              <h3 className="text-2xl font-bold text-white line-clamp-2">
                 {community.name}
               </h3>
             </div>
@@ -570,22 +561,22 @@ function CommunityCard({ community, index }: { community: Community; index: numb
 
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-teal-50 rounded-xl border border-teal-100">
-                <div className="flex items-center justify-center w-9 h-9 bg-teal-100 rounded-lg">
-                  <Users className="h-4 w-4 text-teal-600" />
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-center w-9 h-9 bg-emerald-100 rounded-lg">
+                  <Users className="h-4 w-4 text-emerald-600" />
                 </div>
                 <div>
-                  <div className="text-xs text-teal-600 font-medium">Capacity</div>
+                  <div className="text-xs text-gray-600 font-medium">Capacity</div>
                   <div className="text-sm font-bold text-gray-900">{community.totalCapacity}</div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
-                <div className="flex items-center justify-center w-9 h-9 bg-emerald-100 rounded-lg">
-                  <Utensils className="h-4 w-4 text-emerald-600" />
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-center w-9 h-9 bg-amber-100 rounded-lg">
+                  <Utensils className="h-4 w-4 text-amber-600" />
                 </div>
                 <div>
-                  <div className="text-xs text-emerald-600 font-medium">Meals</div>
+                  <div className="text-xs text-gray-600 font-medium">Meals</div>
                   <div className="text-sm font-bold text-gray-900">{community.meals.length}</div>
                 </div>
               </div>
@@ -594,12 +585,12 @@ function CommunityCard({ community, index }: { community: Community; index: numb
             {/* Features Tags */}
             <div className="flex flex-wrap gap-2 mb-4">
               {community.activities.length > 0 && (
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-teal-50 to-emerald-50 text-teal-700 text-xs font-semibold rounded-lg border border-teal-200">
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg border border-emerald-200">
                   <Activity className="h-3 w-3" />
                   {community.activities.length} Activities
                 </span>
               )}
-              <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 text-xs font-semibold rounded-lg border border-amber-200">
+              <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg border border-blue-200">
                 <MapPin className="h-3 w-3" />
                 Nepal
               </span>
@@ -610,7 +601,7 @@ function CommunityCard({ community, index }: { community: Community; index: numb
               <div className="border-t border-gray-200 pt-4 mt-auto">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center shadow-md">
+                    <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-bold">
                         {community.manager.fullName.charAt(0)}
                       </span>
@@ -620,7 +611,7 @@ function CommunityCard({ community, index }: { community: Community; index: numb
                       <div className="text-sm font-bold text-gray-900">{community.manager.fullName}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-teal-600 group-hover:gap-2 transition-all">
+                  <div className="flex items-center gap-1 text-emerald-600 group-hover:gap-2 transition-all">
                     <span className="text-sm font-bold">View</span>
                     <ChevronRight className="h-4 w-4" />
                   </div>
