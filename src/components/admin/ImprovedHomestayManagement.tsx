@@ -668,6 +668,12 @@ export default function ImprovedHomestayManagement() {
       setSyncingMap(true);
       console.log('[Manual Sync] Starting full sitemap sync...');
 
+      // Get access token for authentication
+      const accessToken = session?.user?.accessToken;
+      if (!accessToken) {
+        throw new Error('Not authenticated');
+      }
+
       // Fetch all homestays (all pages) with authentication
       const allHomestays: any[] = [];
       let currentPageNum = 1;
@@ -675,10 +681,13 @@ export default function ImprovedHomestayManagement() {
 
       while (hasMore) {
         const response = await fetch(
-          `/admin/homestays?page=${currentPageNum}&limit=50`,
+          `/api/backend/admin/homestays?page=${currentPageNum}&limit=50`,
           {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+            },
           }
         );
 
