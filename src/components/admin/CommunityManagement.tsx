@@ -731,9 +731,9 @@ export default function CommunityManagement() {
           </div>
         )}
 
-        {/* Communities List */}
+        {/* Communities Grid - Attractive Cards */}
         {!loading && (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             <AnimatePresence>
               {filteredCommunities.map((community) => (
                 <motion.div
@@ -741,107 +741,167 @@ export default function CommunityManagement() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                  className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-emerald-200"
                 >
-                  {/* Community Header */}
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-semibold text-gray-900">{community.name}</h3>
-                          {community.isActive ? (
-                            <span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                              <Check className="h-3 w-3" />
-                              Active
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
-                              <XCircle className="h-3 w-3" />
-                              Inactive
-                            </span>
-                          )}
-                        </div>
-                        {community.description && (
-                          <p className="text-gray-600 text-sm mb-3">{community.description}</p>
+                  {/* Community Image Header */}
+                  <div className="relative h-48 overflow-hidden">
+                    {community.images && community.images.length > 0 ? (
+                      <div className="relative h-full">
+                        <img
+                          src={community.images[0]}
+                          alt={community.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+                        {/* Image Count Badge */}
+                        {community.images.length > 1 && (
+                          <div className="absolute bottom-3 right-3 px-3 py-1.5 bg-black/70 backdrop-blur-sm text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                            <ImageIcon className="h-3.5 w-3.5" />
+                            {community.images.length}
+                          </div>
                         )}
                       </div>
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                        <Building2 className="h-20 w-20 text-emerald-300" />
+                      </div>
+                    )}
+
+                    {/* Active Badge */}
+                    <div className="absolute top-3 right-3 z-10">
+                      {community.isActive ? (
+                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-xs font-semibold rounded-full shadow-lg">
+                          <Check className="h-3.5 w-3.5" />
+                          Active
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-500 text-white text-xs font-semibold rounded-full shadow-lg">
+                          <XCircle className="h-3.5 w-3.5" />
+                          Inactive
+                        </span>
+                      )}
                     </div>
 
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div className="flex items-center gap-2 text-sm">
-                        <DollarSign className="h-4 w-4 text-gray-400" />
-                        <span className="text-gray-900 font-medium">
-                          {community.pricePerPerson} {community.currency}
-                        </span>
-                        <span className="text-gray-500">/person</span>
+                    {/* Price Tag */}
+                    <div className="absolute bottom-3 left-3 z-10">
+                      <div className="px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
+                        <div className="flex items-center gap-1.5">
+                          <DollarSign className="h-4 w-4 text-emerald-600" />
+                          <span className="text-sm font-bold text-gray-900">
+                            {community.pricePerPerson} {community.currency}
+                          </span>
+                          <span className="text-xs text-gray-600">/person</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Home className="h-4 w-4 text-gray-400" />
-                        <span className="text-gray-900 font-medium">{community.homestays.length}</span>
-                        <span className="text-gray-500">homestays</span>
+                    </div>
+                  </div>
+
+                  {/* Community Content */}
+                  <div className="p-6">
+                    {/* Title & Description */}
+                    <div className="mb-4">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
+                        {community.name}
+                      </h3>
+                      {community.description && (
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {community.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div className="bg-blue-50 rounded-xl p-3 text-center">
+                        <Home className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                        <div className="text-lg font-bold text-gray-900">{community.homestays.length}</div>
+                        <div className="text-xs text-gray-600">Homestays</div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Building2 className="h-4 w-4 text-gray-400" />
-                        <span className="text-gray-900 font-medium">{community.totalRooms}</span>
-                        <span className="text-gray-500">rooms</span>
+                      <div className="bg-purple-50 rounded-xl p-3 text-center">
+                        <Building2 className="h-5 w-5 text-purple-600 mx-auto mb-1" />
+                        <div className="text-lg font-bold text-gray-900">{community.totalRooms}</div>
+                        <div className="text-xs text-gray-600">Rooms</div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Users className="h-4 w-4 text-gray-400" />
-                        <span className="text-gray-900 font-medium">{community.totalCapacity}</span>
-                        <span className="text-gray-500">capacity</span>
+                      <div className="bg-emerald-50 rounded-xl p-3 text-center">
+                        <Users className="h-5 w-5 text-emerald-600 mx-auto mb-1" />
+                        <div className="text-lg font-bold text-gray-900">{community.totalCapacity}</div>
+                        <div className="text-xs text-gray-600">Capacity</div>
                       </div>
                     </div>
 
                     {/* Manager Info */}
                     {community.manager && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-                        <Users className="h-4 w-4" />
-                        <span>
-                          Manager: <span className="font-medium">{community.manager.fullName}</span> (
-                          {community.manager.email})
-                        </span>
+                      <div className="mb-4 p-3 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100">
+                        <div className="flex items-start gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                            <Users className="h-4 w-4 text-emerald-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-gray-500 font-medium">Manager</p>
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {community.manager.fullName}
+                            </p>
+                            <p className="text-xs text-gray-600 truncate">{community.manager.email}</p>
+                          </div>
+                        </div>
                       </div>
                     )}
 
-                    {/* Actions */}
-                    <div className="flex flex-wrap gap-2">
+                    {/* Meal & Activity Count */}
+                    <div className="flex gap-2 mb-4">
+                      {community.meals && community.meals.length > 0 && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-700 rounded-lg text-xs font-medium">
+                          <Utensils className="h-3.5 w-3.5" />
+                          {community.meals.length} Meals
+                        </div>
+                      )}
+                      {community.activities && community.activities.length > 0 && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50 text-cyan-700 rounded-lg text-xs font-medium">
+                          <Activity className="h-3.5 w-3.5" />
+                          {community.activities.length} Activities
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
                       <button
                         onClick={() => setExpandedCommunity(expandedCommunity === community.id ? null : community.id)}
-                        className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all font-medium text-sm"
                       >
                         {expandedCommunity === community.id ? (
                           <>
                             <ChevronUp className="h-4 w-4" />
-                            Hide Details
+                            Hide
                           </>
                         ) : (
                           <>
                             <ChevronDown className="h-4 w-4" />
-                            Show Details
+                            Details
                           </>
                         )}
                       </button>
                       <button
                         onClick={() => handleManageHomestays(community.id)}
-                        className="flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors"
+                        className="flex items-center justify-center gap-2 px-3 py-2.5 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 transition-colors font-medium"
+                        title="Manage Homestays"
                       >
                         <Home className="h-4 w-4" />
-                        Manage Homestays
                       </button>
                       <button
                         onClick={() => handleEdit(community)}
-                        className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                        className="flex items-center justify-center gap-2 px-3 py-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
+                        title="Edit"
                       >
                         <Edit className="h-4 w-4" />
-                        Edit
                       </button>
                       <button
                         onClick={() => handleDelete(community.id)}
-                        className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                        className="flex items-center justify-center gap-2 px-3 py-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium"
+                        title="Delete"
                       >
                         <Trash2 className="h-4 w-4" />
-                        Delete
                       </button>
                     </div>
                   </div>
@@ -853,107 +913,172 @@ export default function CommunityManagement() {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="border-t border-gray-200 bg-gray-50"
+                        className="border-t border-gray-200"
                       >
-                        <div className="p-6 space-y-6">
-                          {/* Images */}
+                        <div className="p-6 bg-gradient-to-br from-gray-50 to-white space-y-6">
+                          {/* Image Gallery */}
                           {community.images.length > 0 && (
                             <div>
-                              <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                                <ImageIcon className="h-4 w-4" />
-                                Images
+                              <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <ImageIcon className="h-5 w-5 text-emerald-600" />
+                                Image Gallery
                               </h4>
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                                 {community.images.map((img, idx) => (
-                                  <img
+                                  <motion.div
                                     key={idx}
-                                    src={img}
-                                    alt={`${community.name} ${idx + 1}`}
-                                    className="w-full h-32 object-cover rounded-lg"
-                                  />
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    className="relative aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all group"
+                                  >
+                                    <img
+                                      src={img}
+                                      alt={`${community.name} ${idx + 1}`}
+                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    />
+                                    {idx === 0 && (
+                                      <div className="absolute top-2 left-2 px-2 py-1 bg-emerald-500 text-white text-xs font-semibold rounded-full">
+                                        Main
+                                      </div>
+                                    )}
+                                  </motion.div>
                                 ))}
                               </div>
                             </div>
                           )}
 
-                          {/* Meals */}
+                          {/* Meals Section */}
                           {community.meals.length > 0 && (
                             <div>
-                              <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                                <Utensils className="h-4 w-4" />
-                                Meals
+                              <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <Utensils className="h-5 w-5 text-orange-600" />
+                                Meals Offered
                               </h4>
-                              <div className="grid gap-2">
+                              <div className="grid gap-3">
                                 {community.meals.map((meal, idx) => (
-                                  <div key={idx} className="flex items-center justify-between p-3 bg-white rounded-lg">
-                                    <div>
-                                      <span className="font-medium">{meal.mealType}</span>
-                                      <p className="text-sm text-gray-600">{meal.description}</p>
+                                  <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    className="flex items-center justify-between p-4 bg-white border border-orange-100 rounded-xl hover:border-orange-200 hover:shadow-md transition-all"
+                                  >
+                                    <div className="flex items-start gap-3 flex-1">
+                                      <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
+                                        <Utensils className="h-5 w-5 text-orange-600" />
+                                      </div>
+                                      <div className="flex-1">
+                                        <div className="font-semibold text-gray-900 mb-1">{meal.mealType}</div>
+                                        <p className="text-sm text-gray-600">{meal.description}</p>
+                                      </div>
                                     </div>
-                                    <div className="text-right">
+                                    <div className="text-right ml-4">
                                       {meal.isIncluded ? (
-                                        <span className="text-green-600 text-sm font-medium">Included</span>
+                                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-semibold rounded-full">
+                                          <Check className="h-3.5 w-3.5" />
+                                          Included
+                                        </span>
                                       ) : (
-                                        <span className="text-gray-600 text-sm">
+                                        <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
                                           +{meal.extraCost} {meal.currency}
                                         </span>
                                       )}
                                     </div>
-                                  </div>
+                                  </motion.div>
                                 ))}
                               </div>
                             </div>
                           )}
 
-                          {/* Activities */}
+                          {/* Activities Section */}
                           {community.activities.length > 0 && (
                             <div>
-                              <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                                <Activity className="h-4 w-4" />
-                                Activities
+                              <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <Activity className="h-5 w-5 text-cyan-600" />
+                                Activities & Experiences
                               </h4>
-                              <div className="grid gap-2">
+                              <div className="grid gap-3">
                                 {community.activities.map((activity, idx) => (
-                                  <div key={idx} className="flex items-center justify-between p-3 bg-white rounded-lg">
-                                    <div>
-                                      <span className="font-medium">{activity.name}</span>
-                                      <p className="text-sm text-gray-600">{activity.description}</p>
-                                      {activity.duration && (
-                                        <p className="text-xs text-gray-500 mt-1">Duration: {activity.duration}</p>
-                                      )}
+                                  <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    className="p-4 bg-white border border-cyan-100 rounded-xl hover:border-cyan-200 hover:shadow-md transition-all"
+                                  >
+                                    <div className="flex items-start justify-between gap-4">
+                                      <div className="flex items-start gap-3 flex-1">
+                                        <div className="w-10 h-10 rounded-lg bg-cyan-50 flex items-center justify-center flex-shrink-0">
+                                          <Activity className="h-5 w-5 text-cyan-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                          <div className="font-semibold text-gray-900 mb-1">{activity.name}</div>
+                                          <p className="text-sm text-gray-600 mb-2">{activity.description}</p>
+                                          {activity.duration && (
+                                            <div className="inline-flex items-center gap-1 text-xs text-gray-500">
+                                              <span className="font-medium">Duration:</span>
+                                              <span>{activity.duration}</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        {activity.isIncluded ? (
+                                          <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-semibold rounded-full">
+                                            <Check className="h-3.5 w-3.5" />
+                                            Included
+                                          </span>
+                                        ) : (
+                                          <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
+                                            +{activity.extraCost} {activity.currency}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
-                                    <div className="text-right">
-                                      {activity.isIncluded ? (
-                                        <span className="text-green-600 text-sm font-medium">Included</span>
-                                      ) : (
-                                        <span className="text-gray-600 text-sm">
-                                          +{activity.extraCost} {activity.currency}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
+                                  </motion.div>
                                 ))}
                               </div>
                             </div>
                           )}
 
-                          {/* Homestays */}
+                          {/* Homestays Section */}
                           {community.homestays.length > 0 && (
                             <div>
-                              <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                                <Home className="h-4 w-4" />
-                                Homestays
+                              <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <Home className="h-5 w-5 text-blue-600" />
+                                Homestays in Community
                               </h4>
-                              <div className="grid gap-2">
-                                {community.homestays.map((homestay) => (
-                                  <div key={homestay.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
-                                    <div>
-                                      <span className="font-medium">{homestay.name}</span>
-                                      <p className="text-sm text-gray-600">{homestay.address}</p>
+                              <div className="grid gap-3">
+                                {community.homestays.map((homestay, idx) => (
+                                  <motion.div
+                                    key={homestay.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    className="flex items-center justify-between p-4 bg-white border border-blue-100 rounded-xl hover:border-blue-200 hover:shadow-md transition-all"
+                                  >
+                                    <div className="flex items-start gap-3 flex-1">
+                                      <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                        <Home className="h-5 w-5 text-blue-600" />
+                                      </div>
+                                      <div className="flex-1">
+                                        <div className="font-semibold text-gray-900 mb-1">{homestay.name}</div>
+                                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                                          <MapPin className="h-3.5 w-3.5" />
+                                          <p>{homestay.address}</p>
+                                        </div>
+                                      </div>
                                     </div>
-                                    <div className="text-right text-sm text-gray-600">
-                                      <div>{homestay.totalRooms} rooms</div>
-                                      <div>{homestay.totalCapacity} capacity</div>
+                                    <div className="flex gap-4 text-sm">
+                                      <div className="text-center px-3 py-2 bg-purple-50 rounded-lg">
+                                        <div className="font-bold text-gray-900">{homestay.totalRooms}</div>
+                                        <div className="text-xs text-gray-600">Rooms</div>
+                                      </div>
+                                      <div className="text-center px-3 py-2 bg-emerald-50 rounded-lg">
+                                        <div className="font-bold text-gray-900">{homestay.totalCapacity}</div>
+                                        <div className="text-xs text-gray-600">Capacity</div>
+                                      </div>
                                     </div>
                                   </div>
                                 ))}
