@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
     revalidatePath('/', 'layout'); // Revalidate the whole app to be safe
 
     // Revalidate specific cache tags
-    revalidateTag('homestays');
-    revalidateTag('blogs');
+    revalidateTag('default', 'homestays');
+    revalidateTag('default', 'blogs');
 
     console.log('[Sitemap] Revalidation completed successfully');
 
