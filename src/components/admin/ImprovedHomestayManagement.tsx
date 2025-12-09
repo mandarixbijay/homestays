@@ -663,7 +663,7 @@ export default function ImprovedHomestayManagement() {
                 variant="secondary"
                 icon={syncingMap ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                 disabled={syncingMap}
-                title={lastSyncTime ? `Last synced: ${lastSyncTime.toLocaleTimeString()}` : 'Sync sitemap with latest homestays'}
+                aria-label={lastSyncTime ? `Last synced: ${lastSyncTime.toLocaleTimeString()}` : 'Sync sitemap with latest homestays'}
               >
                 {syncingMap ? 'Syncing...' : 'Sync Sitemap'}
               </ActionButton>
