@@ -20,19 +20,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Revalidate the sitemap
-    revalidatePath('/sitemap.xml');
+    console.log('[Sitemap] Manual revalidation triggered by:', session.user?.email);
+
+    // Revalidate the sitemap and related paths
+    revalidatePath('/sitemap.xml', 'page');
+    revalidatePath('/', 'layout'); // Revalidate the whole app to be safe
 
     // Revalidate specific cache tags
     revalidateTag('homestays');
     revalidateTag('blogs');
 
-    console.log('[Sitemap] Manual revalidation triggered by:', session.user?.email);
+    console.log('[Sitemap] Revalidation completed successfully');
 
     return NextResponse.json({
       success: true,
-      message: 'Sitemap revalidated successfully',
+      message: 'Sitemap revalidated successfully. Changes may take a few moments to appear.',
       timestamp: new Date().toISOString(),
+      revalidated: {
+        paths: ['/sitemap.xml'],
+        tags: ['homestays', 'blogs']
+      }
     });
   } catch (error: any) {
     console.error('[Sitemap] Revalidation error:', error);

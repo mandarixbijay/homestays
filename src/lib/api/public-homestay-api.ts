@@ -41,60 +41,81 @@ class PublicHomestayApi {
    */
   getApprovedHomestays = cache(async (): Promise<HomestayListResponse> => {
     try {
-      // Use internal sitemap API endpoint (works for both server-side and client-side)
-      const baseUrl = typeof window !== 'undefined'
-        ? '' // Client-side: use relative URL
-        : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'; // Server-side: use full URL
-
-      const url = `${baseUrl}/api/sitemap/homestays`;
-      console.log(`[HomestayAPI] Fetching approved homestays from: ${url}`);
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        next: {
-          revalidate: 3600, // Cache for 1 hour
-          tags: ['homestays'] // Add tag for on-demand revalidation
-        },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[HomestayAPI] HTTP error ${response.status}:`, errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log(`[HomestayAPI] Response:`, {
-        hasData: !!result.data,
-        dataLength: result.data?.length || 0,
-        total: result.total,
-      });
+      // For server-side (sitemap generation), fetch directly from backend
+      // For client-side, use Next.js API route
+      const isServer = typeof window === 'undefined';
 
       let homestays: any[] = [];
 
-      // Handle different response formats
-      if (Array.isArray(result)) {
-        homestays = result;
-      } else if (result.data && Array.isArray(result.data)) {
-        homestays = result.data;
+      if (isServer) {
+        // Server-side: fetch directly from backend (used during sitemap generation)
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://13.61.8.56:3001';
+        const url = `${backendUrl}/homestays/search?page=1&limit=1000`;
+
+        console.log(`[HomestayAPI] Server-side fetch from backend: ${url}`);
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-store',
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`[HomestayAPI] Backend response:`, {
+            hasData: !!result.data,
+            dataLength: result.data?.length || 0,
+            total: result.total,
+          });
+
+          if (Array.isArray(result)) {
+            homestays = result;
+          } else if (result.data && Array.isArray(result.data)) {
+            homestays = result.data;
+          } else if (result.homestays && Array.isArray(result.homestays)) {
+            homestays = result.homestays;
+          }
+        } else {
+          console.error(`[HomestayAPI] Backend HTTP error ${response.status}`);
+        }
+      } else {
+        // Client-side: use Next.js API route
+        const url = '/api/sitemap/homestays';
+        console.log(`[HomestayAPI] Client-side fetch from: ${url}`);
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data && Array.isArray(result.data)) {
+            homestays = result.data;
+          }
+        }
       }
 
-      // Transform to public format with generated slugs (data is already filtered for APPROVED)
-      const publicHomestays: PublicHomestay[] = homestays.map((homestay: any) => ({
-        id: homestay.id,
-        name: homestay.name || 'Unnamed Homestay',
-        address: homestay.address || 'Nepal',
-        slug: PublicHomestayApi.generateSlug(
-          homestay.name || 'Unnamed Homestay',
-          homestay.address || 'Nepal',
-          homestay.id
-        ),
-        updatedAt: homestay.updatedAt || new Date().toISOString(),
-      }));
+      // Filter only APPROVED homestays and transform to public format with generated slugs
+      const publicHomestays: PublicHomestay[] = homestays
+        .filter((h: any) => h.status === 'APPROVED')
+        .map((homestay: any) => ({
+          id: homestay.id,
+          name: homestay.name || 'Unnamed Homestay',
+          address: homestay.address || 'Nepal',
+          slug: PublicHomestayApi.generateSlug(
+            homestay.name || 'Unnamed Homestay',
+            homestay.address || 'Nepal',
+            homestay.id
+          ),
+          updatedAt: homestay.updatedAt || new Date().toISOString(),
+        }));
 
       console.log(`[HomestayAPI] Transformed ${publicHomestays.length} approved homestays for sitemap`);
 
