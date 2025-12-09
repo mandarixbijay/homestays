@@ -41,67 +41,43 @@ class PublicHomestayApi {
    */
   async getApprovedHomestays(): Promise<HomestayListResponse> {
     try {
-      // For server-side (sitemap generation), fetch directly from backend
-      // For client-side, use Next.js API route
+      // Use Next.js internal API for both server and client-side
       const isServer = typeof window === 'undefined';
+
+      // For server-side, use full URL; for client-side, use relative URL
+      const baseUrl = isServer
+        ? (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
+        : '';
+
+      const url = `${baseUrl}/api/sitemap/homestays`;
+      console.log(`[HomestayAPI] Fetching from: ${url} (${isServer ? 'server' : 'client'}-side)`);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store', // NEVER cache
+      });
 
       let homestays: any[] = [];
 
-      if (isServer) {
-        // Server-side: fetch directly from backend (used during sitemap generation)
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://13.61.8.56:3001';
-        const url = `${backendUrl}/homestays/search?page=1&limit=1000`;
-
-        console.log(`[HomestayAPI] Server-side fetch from backend: ${url}`);
-
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-store', // NEVER cache
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`[HomestayAPI] API response:`, {
+          success: result.success,
+          hasData: !!result.data,
+          dataLength: result.data?.length || 0,
+          total: result.total,
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          console.log(`[HomestayAPI] Backend response:`, {
-            hasData: !!result.data,
-            dataLength: result.data?.length || 0,
-            total: result.total,
-          });
-
-          if (Array.isArray(result)) {
-            homestays = result;
-          } else if (result.data && Array.isArray(result.data)) {
-            homestays = result.data;
-          } else if (result.homestays && Array.isArray(result.homestays)) {
-            homestays = result.homestays;
-          }
-        } else {
-          const errorText = await response.text();
-          console.error(`[HomestayAPI] Backend HTTP error ${response.status}:`, errorText);
+        if (result.data && Array.isArray(result.data)) {
+          homestays = result.data;
         }
       } else {
-        // Client-side: use Next.js API route
-        const url = '/api/sitemap/homestays';
-        console.log(`[HomestayAPI] Client-side fetch from: ${url}`);
-
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-store', // NEVER cache
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          if (result.data && Array.isArray(result.data)) {
-            homestays = result.data;
-          }
-        }
+        const errorText = await response.text();
+        console.error(`[HomestayAPI] HTTP error ${response.status}:`, errorText);
       }
 
       // Filter only APPROVED homestays and transform to public format with generated slugs
