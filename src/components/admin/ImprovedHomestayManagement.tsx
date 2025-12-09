@@ -675,7 +675,7 @@ export default function ImprovedHomestayManagement() {
 
       while (hasMore) {
         const response = await fetch(
-          `/api/homestays?page=${currentPageNum}&limit=50`,
+          `/admin/homestays?page=${currentPageNum}&limit=50`,
           {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
