@@ -417,6 +417,22 @@ export default function ImprovedHomestayManagement() {
   const [syncedCount, setSyncedCount] = useState(0);
   const [autoSyncInProgress, setAutoSyncInProgress] = useState(false);
 
+  // Fetch current sync status from cache
+  const fetchSyncStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/sitemap/update');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.stats) {
+          setSyncedCount(data.stats.approved || 0);
+          console.log('[HomestayManagement] Sync status:', data.stats);
+        }
+      }
+    } catch (error) {
+      console.error('[HomestayManagement] Error fetching sync status:', error);
+    }
+  }, []);
+
   // Debounced API call for loading data
   const debouncedLoadData = useMemo(
     () => debounce((params: any) => {
@@ -458,8 +474,9 @@ export default function ImprovedHomestayManagement() {
     }
     if (status === 'authenticated') {
       loadData();
+      fetchSyncStatus(); // Load current sync count from cache
     }
-  }, [status, session?.user?.role, router, loadData]);
+  }, [status, session?.user?.role, router, loadData, fetchSyncStatus]);
 
   // Auto-sync current page homestays to sitemap when homestays load
   useEffect(() => {
