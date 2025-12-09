@@ -3,7 +3,7 @@ import { publicBlogApi } from '@/lib/api/public-blog-api';
 import { publicHomestayApi } from '@/lib/api/public-homestay-api';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nepalhomestays.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.nepalhomestays.com';
 
   try {
     // Fetch all published blogs using optimized thumbnails endpoint
@@ -51,6 +51,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
       },
       {
+        url: `${baseUrl}/list-your-property`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+      },
+      {
         url: `${baseUrl}/about`,
         lastModified: new Date(),
         changeFrequency: 'monthly' as const,
@@ -63,10 +69,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       },
       {
-        url: `${baseUrl}/list-your-property`,
+        url: `${baseUrl}/help-center`,
         lastModified: new Date(),
         changeFrequency: 'monthly' as const,
-        priority: 0.8,
+        priority: 0.6,
+      },
+      {
+        url: `${baseUrl}/contact-support`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.6,
+      },
+      {
+        url: `${baseUrl}/cancellation-options`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.6,
+      },
+      {
+        url: `${baseUrl}/safety-information`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.6,
+      },
+      {
+        url: `${baseUrl}/legal`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.5,
+      },
+      {
+        url: `${baseUrl}/partnerships`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.6,
+      },
+      {
+        url: `${baseUrl}/faqs`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
       },
     ];
 
