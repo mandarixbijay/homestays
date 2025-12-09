@@ -1081,7 +1081,7 @@ export default function CommunityManagement() {
                                         <div className="text-xs text-gray-600">Capacity</div>
                                       </div>
                                     </div>
-                                  </div>
+                                  </motion.div>
                                 ))}
                               </div>
                             </div>
