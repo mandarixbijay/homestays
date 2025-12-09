@@ -6,15 +6,17 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://13.61.8.56:30
 /**
  * Public API endpoint to fetch approved homestays for sitemap generation
  * This endpoint is used internally by the sitemap generator
+ * Uses the public search endpoint which doesn't require authentication
  */
 export async function GET(request: NextRequest) {
   try {
-    // Fetch from backend search endpoint
-    const backendUrl = `${BACKEND_URL}/homestays/search?page=1&limit=1000`;
+    // Try the Next.js internal search API first (works without auth)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const searchUrl = `${siteUrl}/api/homestays/search?page=1&limit=1000`;
 
-    console.log('[Sitemap Homestays API] Fetching from:', backendUrl);
+    console.log('[Sitemap Homestays API] Fetching from Next.js search API:', searchUrl);
 
-    const response = await fetch(backendUrl, {
+    const response = await fetch(searchUrl, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -24,12 +26,17 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      throw new Error(`Backend API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('[Sitemap Homestays API] Search API error:', {
+        status: response.status,
+        error: errorText
+      });
+      throw new Error(`Search API error: ${response.status}`);
     }
 
     const data = await response.json();
 
-    console.log('[Sitemap Homestays API] Response:', {
+    console.log('[Sitemap Homestays API] Search API response:', {
       hasData: !!data.data,
       dataLength: data.data?.length || 0,
       total: data.total,
@@ -56,20 +63,22 @@ export async function GET(request: NextRequest) {
         status: h.status,
       }));
 
-    console.log('[Sitemap Homestays API] Returning', approvedHomestays.length, 'approved homestays');
+    console.log('[Sitemap Homestays API] ✅ Returning', approvedHomestays.length, 'approved homestays');
 
     return NextResponse.json({
+      success: true,
       data: approvedHomestays,
       total: approvedHomestays.length,
     }, {
       headers: {
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
+        'Cache-Control': 'no-store', // Don't cache sitemap data
       },
     });
   } catch (error: any) {
-    console.error('[Sitemap Homestays API] Error:', error);
+    console.error('[Sitemap Homestays API] ❌ Error:', error);
     return NextResponse.json(
       {
+        success: false,
         error: 'Failed to fetch homestays',
         details: error.message,
         data: [],
