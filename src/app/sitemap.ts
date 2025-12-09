@@ -9,10 +9,15 @@ export const revalidate = 0;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.nepalhomestays.com';
 
+  console.log('[Sitemap] Starting sitemap generation...');
+  console.log('[Sitemap] Base URL:', baseUrl);
+
   try {
     // Fetch all published blogs using optimized thumbnails endpoint
+    console.log('[Sitemap] Fetching blogs...');
     const blogsResponse = await publicBlogApi.getThumbnails({ limit: 1000 });
     const blogs = blogsResponse.data;
+    console.log(`[Sitemap] ✅ Found ${blogs.length} blogs`);
 
     // Generate blog post URLs
     const blogUrls = blogs.map((blog) => ({
@@ -23,8 +28,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     // Fetch all approved homestays
+    console.log('[Sitemap] Fetching homestays...');
     const homestaysResponse = await publicHomestayApi.getApprovedHomestays();
     const homestays = homestaysResponse.data;
+    console.log(`[Sitemap] ✅ Found ${homestays.length} approved homestays`);
 
     // Generate homestay profile URLs
     const homestayUrls = homestays.map((homestay) => ({
@@ -33,6 +40,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     }));
+
+    console.log(`[Sitemap] Sample homestay URLs:`, homestayUrls.slice(0, 3));
 
     // Static pages
     const staticPages = [
@@ -116,9 +125,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     ];
 
+    const totalUrls = staticPages.length + blogUrls.length + homestayUrls.length;
+    console.log(`[Sitemap] ✅ COMPLETE - Generated ${totalUrls} total URLs:`);
+    console.log(`[Sitemap]   - ${staticPages.length} static pages`);
+    console.log(`[Sitemap]   - ${blogUrls.length} blog posts`);
+    console.log(`[Sitemap]   - ${homestayUrls.length} homestay profiles`);
+
     return [...staticPages, ...blogUrls, ...homestayUrls];
   } catch (error) {
-    console.error('Error generating sitemap:', error);
+    console.error('[Sitemap] ❌ Error generating sitemap:', error);
 
     // Return static pages only if fetch fails
     return [
