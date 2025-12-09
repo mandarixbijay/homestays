@@ -147,14 +147,24 @@ export default function CommunityManagerManagement() {
         throw new Error(`Failed to upload image: ${response.status}`);
       }
 
-      const result = await response.json();
-      console.log('Upload result:', result);
+      // Get response text first
+      const responseText = await response.text();
+      console.log('Upload response:', responseText);
 
-      // The API should return the uploaded file URL
-      const imageUrl = result.url || result.data?.url || result.fileUrl;
+      let imageUrl: string;
 
-      if (!imageUrl) {
-        throw new Error('No image URL returned from upload');
+      // Try to parse as JSON first
+      try {
+        const result = JSON.parse(responseText);
+        imageUrl = result.url || result.data?.url || result.fileUrl || result;
+      } catch (e) {
+        // If not JSON, treat as plain URL string
+        imageUrl = responseText.trim();
+      }
+
+      // Validate the URL
+      if (!imageUrl || !imageUrl.startsWith('http')) {
+        throw new Error('Invalid image URL returned from upload');
       }
 
       // Update form data and preview
