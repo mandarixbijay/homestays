@@ -2,6 +2,10 @@ import { MetadataRoute } from 'next';
 import { publicBlogApi } from '@/lib/api/public-blog-api';
 import { publicHomestayApi } from '@/lib/api/public-homestay-api';
 
+// Force dynamic rendering - don't cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.nepalhomestays.com';
 
