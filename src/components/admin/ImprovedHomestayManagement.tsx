@@ -461,17 +461,6 @@ export default function ImprovedHomestayManagement() {
     }
   }, [status, session?.user?.role, router, loadData]);
 
-  // Auto-sync current page homestays to sitemap when homestays load
-  useEffect(() => {
-    if (homestays.length > 0 && status === 'authenticated') {
-      // Delay auto-sync slightly to not block UI
-      const timer = setTimeout(() => {
-        autoSyncCurrentPage(homestays);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [homestays, status, autoSyncCurrentPage]);
-
   const handleClearFilters = useCallback(() => {
     setSearch('');
     setStatusFilter('');
@@ -715,15 +704,16 @@ export default function ImprovedHomestayManagement() {
             </div>
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <ActionButton
-                  onClick={handleSyncSitemap}
-                  variant="secondary"
-                  icon={syncingMap ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                  disabled={syncingMap}
-                  title={lastSyncTime ? `Last synced: ${lastSyncTime.toLocaleTimeString()}` : 'Sync sitemap with latest homestays'}
-                >
-                  {syncingMap ? 'Syncing...' : 'Sync Sitemap'}
-                </ActionButton>
+                <div title={lastSyncTime ? `Last synced: ${lastSyncTime.toLocaleTimeString()}` : 'Sync sitemap with latest homestays'}>
+                  <ActionButton
+                    onClick={handleSyncSitemap}
+                    variant="secondary"
+                    icon={syncingMap ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                    disabled={syncingMap}
+                  >
+                    {syncingMap ? 'Syncing...' : 'Sync Sitemap'}
+                  </ActionButton>
+                </div>
                 {/* Out of sync badge */}
                 {syncedCount < stats.approved && (
                   <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white shadow-lg animate-pulse">
