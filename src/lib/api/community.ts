@@ -125,6 +125,40 @@ export interface Homestay {
   lastMinuteDeal: any | null;
   imageSrc: string;
   features: any[];
+  owner?: {
+    id: number;
+    fullName: string;
+    email: string;
+    phone: string;
+  };
+}
+
+export interface CommunityAvailabilityRequest {
+  communityId: number;
+  checkInDate: string; // YYYY-MM-DD format
+  checkOutDate: string; // YYYY-MM-DD format
+  totalGuests: number;
+}
+
+export interface CommunityAvailabilityResponse {
+  communityId: number;
+  communityName: string;
+  isAvailable: boolean;
+  totalCapacity: number;
+  availableCapacity: number;
+  requestedGuests: number;
+  pricePerPerson: number;
+  totalPrice: number;
+  currency: string;
+  nights: number;
+  availableRooms: {
+    homestayId: number;
+    homestayName: string;
+    roomId: number;
+    roomName: string;
+    maxOccupancy: number;
+    availableSpace: number;
+  }[];
 }
 
 class CommunityAPI {
@@ -264,6 +298,39 @@ class CommunityAPI {
       console.error('Error checking room availability:', error);
       // Return default availability on error
       return { available: true, roomsLeft: 1 };
+    }
+  }
+
+  /**
+   * Check community availability via Next.js API route
+   */
+  async checkCommunityAvailability(
+    request: CommunityAvailabilityRequest
+  ): Promise<CommunityAvailabilityResponse> {
+    try {
+      const url = '/api/communities/check-availability';
+      console.log('[CommunityAPI] Checking availability:', request);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[CommunityAPI] Availability check error:', errorText);
+        throw new Error(`Failed to check availability: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('[CommunityAPI] Availability response:', data);
+      return data;
+    } catch (error) {
+      console.error('[CommunityAPI] Error checking community availability:', error);
+      throw error;
     }
   }
 }
