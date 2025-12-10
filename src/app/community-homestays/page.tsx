@@ -113,54 +113,81 @@ export default function CommunityHomestaysPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-gradient-to-b from-background to-gray-50/50 pt-16">
-        {/* Hero Section - Clean & Professional */}
+        {/* Hero Section with Background Image */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-card/50 backdrop-blur-sm border-b border-border"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative h-[500px] md:h-[600px] overflow-hidden"
         >
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-            <div className="max-w-3xl mx-auto text-center">
+          {/* Background Image */}
+          <div className="absolute inset-0">
+            <Image
+              src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2070"
+              alt="Community Homestays Nepal"
+              fill
+              className="object-cover"
+              unoptimized
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
+          </div>
+
+          {/* Content */}
+          <div className="relative h-full container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+            <div className="max-w-4xl mx-auto text-center">
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full mb-6 border border-white/20"
               >
                 <Sparkles className="h-4 w-4 text-primary" />
-                <span className="text-sm font-semibold text-primary">Community Tourism</span>
+                <span className="text-sm font-semibold text-white">Community Tourism</span>
               </motion.div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-card-foreground mb-6 tracking-tight">
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight"
+              >
                 Discover Community Homestays
-              </h1>
-              <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed mb-10"
+              >
                 Experience authentic Nepalese culture while directly supporting local communities through sustainable tourism
-              </p>
+              </motion.p>
 
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-6 mt-10 max-w-2xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.6 }}
+                className="grid grid-cols-3 gap-6 max-w-2xl mx-auto"
+              >
                 {[
                   { icon: Home, value: totalHomestays, label: 'Homestays' },
                   { icon: Users, value: totalCapacity, label: 'Capacity' },
                   { icon: CheckCircle, value: communities.length, label: 'Communities' }
                 ].map((stat, index) => (
-                  <motion.div
+                  <div
                     key={stat.label}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    className="text-center"
+                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4"
                   >
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-3">
-                      <stat.icon className="h-6 w-6 text-primary" />
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/20 mb-3">
+                      <stat.icon className="h-6 w-6 text-white" />
                     </div>
-                    <div className="text-2xl font-bold text-card-foreground">{stat.value}</div>
-                    <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
-                  </motion.div>
+                    <div className="text-2xl font-bold text-white">{stat.value}</div>
+                    <div className="text-sm text-white/80 mt-1">{stat.label}</div>
+                  </div>
                 ))}
-              </div>
+              </motion.div>
             </div>
           </div>
         </motion.div>
