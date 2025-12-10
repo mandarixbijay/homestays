@@ -91,6 +91,57 @@ const MealIcons = {
   ),
 };
 
+// SVG Activity Icons
+const ActivityIcons = {
+  cultural: () => (
+    <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
+      <circle cx="32" cy="32" r="28" fill="#E1F5FE"/>
+      <path d="M32 10l4 12h12l-10 8 4 12-10-8-10 8 4-12-10-8h12z" fill="#4FC3F7" stroke="#0288D1" strokeWidth="2"/>
+      <circle cx="24" cy="28" r="2" fill="#0277BD"/>
+      <circle cx="40" cy="28" r="2" fill="#0277BD"/>
+      <path d="M26 38c2 3 10 3 12 0" stroke="#0277BD" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  ),
+  nature: () => (
+    <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
+      <circle cx="32" cy="32" r="28" fill="#E8F5E9"/>
+      <path d="M32 8c-6 0-10 4-10 10s4 10 10 10 10-4 10-10-4-10-10-10z" fill="#81C784"/>
+      <path d="M20 22c0 6 4 12 12 12s12-6 12-12" fill="#66BB6A"/>
+      <rect x="30" y="34" width="4" height="20" fill="#8D6E63"/>
+      <ellipse cx="32" cy="54" rx="8" ry="3" fill="#A1887F"/>
+    </svg>
+  ),
+  adventure: () => (
+    <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
+      <circle cx="32" cy="32" r="28" fill="#FFF3E0"/>
+      <path d="M16 40l16-24 16 24z" fill="#FFB74D" stroke="#F57C00" strokeWidth="2"/>
+      <path d="M32 16v24M24 28l16 8" stroke="#F57C00" strokeWidth="2"/>
+      <circle cx="32" cy="48" r="6" fill="#FF9800"/>
+    </svg>
+  ),
+  default: () => (
+    <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
+      <circle cx="32" cy="32" r="28" fill="#F3E5F5"/>
+      <circle cx="32" cy="28" r="8" fill="#BA68C8"/>
+      <path d="M20 44c0-6 5-10 12-10s12 4 12 10" fill="#AB47BC"/>
+      <circle cx="26" cy="26" r="2" fill="#8E24AA"/>
+      <circle cx="38" cy="26" r="2" fill="#8E24AA"/>
+    </svg>
+  ),
+};
+
+const getActivityIcon = (activityName: string) => {
+  const name = activityName.toLowerCase();
+  if (name.includes('cultural') || name.includes('dance') || name.includes('show')) {
+    return ActivityIcons.cultural;
+  } else if (name.includes('nature') || name.includes('wildlife') || name.includes('bird')) {
+    return ActivityIcons.nature;
+  } else if (name.includes('trek') || name.includes('hike') || name.includes('adventure')) {
+    return ActivityIcons.adventure;
+  }
+  return ActivityIcons.default;
+};
+
 export default function CommunityDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -151,10 +202,43 @@ export default function CommunityDetailPage() {
 
   const fetchBlogs = async () => {
     try {
-      const blogs = await publicBlogApi.getFeaturedBlogs(3);
+      // Try to search blogs by community name or location first
+      let blogs = [];
+
+      if (community?.name) {
+        const searchResults = await publicBlogApi.searchBlogs({
+          query: community.name,
+          limit: 3,
+          sortBy: 'relevance'
+        });
+        blogs = searchResults.data;
+      }
+
+      // If no results from search, try searching by location keywords
+      if (blogs.length === 0) {
+        const locationSearchResults = await publicBlogApi.searchBlogs({
+          query: 'Chitwan homestay community',
+          limit: 3,
+          sortBy: 'relevance'
+        });
+        blogs = locationSearchResults.data;
+      }
+
+      // Fallback to featured blogs if still no results
+      if (blogs.length === 0) {
+        blogs = await publicBlogApi.getFeaturedBlogs(3);
+      }
+
       setRelatedBlogs(blogs);
     } catch (error) {
       console.error('Error fetching blogs:', error);
+      // Fallback to featured blogs on error
+      try {
+        const blogs = await publicBlogApi.getFeaturedBlogs(3);
+        setRelatedBlogs(blogs);
+      } catch (fallbackError) {
+        console.error('Error fetching featured blogs:', fallbackError);
+      }
     }
   };
 
@@ -574,62 +658,47 @@ export default function CommunityDetailPage() {
 
         {/* Main Content */}
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-          {/* Meals Section - Enhanced */}
+          {/* Meals Section - Compact */}
           {community.meals && community.meals.length > 0 && (
             <section>
-              <div className="text-center mb-8">
-                <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">Included Meals</h2>
-                <p className="text-muted-foreground">Enjoy authentic Nepali cuisine prepared with fresh, local ingredients</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <h2 className="text-2xl font-bold text-card-foreground mb-4 flex items-center gap-2">
+                <Utensils className="h-6 w-6 text-primary" />
+                Included Meals
+              </h2>
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                 {community.meals.map((meal, index) => {
                   const MealIcon = MealIcons[meal.mealType] || MealIcons.BREAKFAST;
                   return (
                     <motion.div
                       key={meal.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
-                      whileHover={{ y: -8 }}
-                      className="bg-gradient-to-br from-card to-primary/5 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border"
+                      className="flex-shrink-0 w-64 bg-gradient-to-br from-card to-primary/5 rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-border"
                     >
-                      {/* Meal SVG Icon */}
-                      <div className="relative h-48 flex items-center justify-center bg-gradient-to-br from-muted/20 to-muted/5">
-                        <div className="w-32 h-32">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 flex-shrink-0">
                           <MealIcon />
                         </div>
-                        {meal.isIncluded && (
-                          <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-                            <Check className="h-3 w-3" />
-                            Included
-                          </div>
-                        )}
-                        <div className="absolute bottom-4 left-4">
-                          <h3 className="text-xl font-bold text-card-foreground">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-card-foreground text-sm">
                             {meal.mealType.charAt(0) + meal.mealType.slice(1).toLowerCase()}
                           </h3>
+                          {meal.isIncluded && (
+                            <span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+                              <Check className="h-3 w-3" />
+                              Included
+                            </span>
+                          )}
                         </div>
                       </div>
-
-                      {/* Meal Content */}
-                      <div className="p-6">
-                        <div className="flex items-start gap-3 mb-4">
-                          <div className="bg-primary/10 p-2 rounded-lg">
-                            <Utensils className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm text-muted-foreground leading-relaxed">{meal.description}</p>
-                          </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{meal.description}</p>
+                      {!meal.isIncluded && meal.extraCost > 0 && (
+                        <div className="mt-2 pt-2 border-t border-border">
+                          <span className="text-sm font-bold text-primary">NPR {meal.extraCost}</span>
                         </div>
-
-                        {!meal.isIncluded && meal.extraCost > 0 && (
-                          <div className="flex items-center justify-between pt-4 border-t border-border">
-                            <span className="text-sm text-muted-foreground">Extra Cost</span>
-                            <span className="text-lg font-bold text-primary">NPR {meal.extraCost}</span>
-                          </div>
-                        )}
-                      </div>
+                      )}
                     </motion.div>
                   );
                 })}
@@ -637,80 +706,63 @@ export default function CommunityDetailPage() {
             </section>
           )}
 
-          {/* Activities Section - Enhanced */}
+          {/* Activities Section - Horizontal Scroll with SVG */}
           {community.activities && community.activities.length > 0 && (
             <section>
-              <div className="text-center mb-8">
-                <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">Activities & Experiences</h2>
-                <p className="text-muted-foreground">Immerse yourself in local culture through engaging activities</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <h2 className="text-2xl font-bold text-card-foreground mb-4 flex items-center gap-2">
+                <Activity className="h-6 w-6 text-primary" />
+                Activities & Experiences
+              </h2>
+              <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
                 {community.activities.map((activity, index) => {
-                  const activityImages = [
-                    'https://images.unsplash.com/photo-1533093818801-37d5bc1e1ea2?w=600&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1604079681992-ca5c952a6b98?w=600&h=400&fit=crop',
-                    'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=600&h=400&fit=crop',
-                  ];
+                  const ActivityIcon = getActivityIcon(activity.name);
                   return (
                     <motion.div
                       key={activity.id}
-                      initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                      initial={{ opacity: 0, x: -20 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
-                      whileHover={{ scale: 1.02 }}
-                      className="group bg-card rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-border"
+                      className="flex-shrink-0 w-80 bg-card rounded-xl shadow-md hover:shadow-xl transition-all border border-border overflow-hidden"
                     >
-                      <div className="grid md:grid-cols-5">
-                        {/* Activity Image */}
-                        <div className="relative h-48 md:h-auto md:col-span-2 overflow-hidden">
-                          <Image
-                            src={activityImages[index % activityImages.length]}
-                            alt={activity.name}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-500"
-                            unoptimized
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20"></div>
-                          {activity.isIncluded && (
-                            <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-                              <Check className="h-3 w-3" />
-                              Included
-                            </div>
-                          )}
+                      {/* Activity SVG Icon */}
+                      <div className="relative h-40 flex items-center justify-center bg-gradient-to-br from-muted/10 to-muted/5 p-4">
+                        <div className="w-24 h-24">
+                          <ActivityIcon />
+                        </div>
+                        {activity.isIncluded && (
+                          <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                            <Check className="h-3 w-3" />
+                            Included
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Activity Content */}
+                      <div className="p-5">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-card-foreground mb-1 line-clamp-2">{activity.name}</h3>
+                            {activity.duration && (
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Clock className="h-3.5 w-3.5" />
+                                <span>{activity.duration} hours</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
-                        {/* Activity Content */}
-                        <div className="md:col-span-3 p-6 flex flex-col">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <div className="bg-primary/10 p-2.5 rounded-xl">
-                                <Activity className="h-6 w-6 text-primary" />
-                              </div>
-                              <div>
-                                <h3 className="text-xl font-bold text-card-foreground">{activity.name}</h3>
-                                {activity.duration && (
-                                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                                    <Clock className="h-4 w-4" />
-                                    <span>{activity.duration} hours</span>
-                                  </div>
-                                )}
-                              </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">{activity.description}</p>
+
+                        {!activity.isIncluded && activity.extraCost > 0 && (
+                          <div className="flex items-center justify-between pt-4 border-t border-border">
+                            <span className="text-xs font-medium text-muted-foreground">Price for group</span>
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-xs font-semibold text-primary">NPR</span>
+                              <span className="text-lg font-bold text-primary">{activity.extraCost}</span>
                             </div>
                           </div>
-
-                          <p className="text-muted-foreground leading-relaxed mb-4 flex-grow">{activity.description}</p>
-
-                          {!activity.isIncluded && activity.extraCost > 0 && (
-                            <div className="flex items-center justify-between pt-4 border-t border-border">
-                              <span className="text-sm font-medium text-muted-foreground">Price for group</span>
-                              <div className="flex items-baseline gap-1">
-                                <span className="text-xs font-semibold text-primary">NPR</span>
-                                <span className="text-2xl font-bold text-primary">{activity.extraCost}</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </motion.div>
                   );
