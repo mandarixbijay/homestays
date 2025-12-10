@@ -38,6 +38,7 @@ import {
   Copy,
   ExternalLink,
   Sparkles,
+  Heart,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -847,43 +848,43 @@ export default function CommunityDetailPage() {
 
                           {/* Homestay Name - Bottom */}
                           <div className="absolute bottom-0 left-0 right-0 p-4">
-                            <h3 className="text-lg font-bold text-white mb-2 drop-shadow-lg line-clamp-2">
-                              {homestay.name}
-                            </h3>
-                            <div className="flex items-center gap-2 text-white/90">
-                              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                              <span className="text-xs line-clamp-1">{homestay.address}</span>
-                            </div>
+                          <h3 className="text-lg font-bold text-white mb-2 drop-shadow-lg line-clamp-2">
+                            {homestay.name}
+                          </h3>
+                          <div className="flex items-center gap-2 text-white/90">
+                            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span className="text-xs line-clamp-1">{homestay.address}</span>
                             {homestay.rating && homestay.rating > 0 && (
                               <div className="flex items-center gap-1 mt-2">
                                 <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400" />
                                 <span className="text-sm font-semibold text-white">{homestay.rating.toFixed(1)}</span>
-                                <span className="text-xs text-white/70 ml-1">• Hosted by {homestay.owner?.fullName || 'Family'}</span>
+                                <span className="text-xs text-white/70 ml-1">• Hosted by {homestay.ownerId || 'Family'}</span>
                               </div>
                             )}
+                            </div>
                           </div>
-
-                          {/* Hover Overlay with Quick Info */}
-                          <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6">
+  
+                            {/* Hover Overlay with Quick Info */}
+                            <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6">
                             <div className="text-center space-y-3">
                               <div className="flex items-center justify-center gap-6">
-                                <div className="text-center">
-                                  <p className="text-2xl font-bold text-white">{homestay.rooms?.length || 0}</p>
-                                  <p className="text-xs text-white/80">Rooms</p>
-                                </div>
-                                <div className="h-8 w-px bg-white/30"></div>
-                                <div className="text-center">
-                                  <p className="text-2xl font-bold text-white">
-                                    {homestay.rooms?.reduce((sum, room) => sum + (room.capacity || 0), 0) || 0}
-                                  </p>
-                                  <p className="text-xs text-white/80">Guests</p>
-                                </div>
-                                <div className="h-8 w-px bg-white/30"></div>
-                                <div className="text-center">
-                                  <p className="text-2xl font-bold text-white">{homestay.facilities?.length || 0}</p>
-                                  <p className="text-xs text-white/80">Amenities</p>
-                                </div>
-                              </div>
+                                    <div className="text-center">
+                                      <p className="text-2xl font-bold text-white">{homestay.rooms?.length || 0}</p>
+                                      <p className="text-xs text-white/80">Rooms</p>
+                                    </div>
+                                    <div className="h-8 w-px bg-white/30"></div>
+                                    <div className="text-center">
+                                      <p className="text-2xl font-bold text-white">
+                                        {homestay.rooms?.reduce((sum, room) => sum + (((room as any)?.capacity || 0)), 0) || 0}
+                                      </p>
+                                      <p className="text-xs text-white/80">Guests</p>
+                                    </div>
+                                    <div className="h-8 w-px bg-white/30"></div>
+                                    <div className="text-center">
+                                      <p className="text-2xl font-bold text-white">{homestay.facilities?.length || 0}</p>
+                                      <p className="text-xs text-white/80">Amenities</p>
+                                    </div>
+                                  </div>
                             </div>
                           </div>
                         </div>
