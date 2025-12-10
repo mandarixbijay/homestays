@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { communityAPI, Community } from '@/lib/api/community';
+import { generateCommunitySlug } from '@/lib/utils/slug';
 import Link from 'next/link';
 import {
   Search,
@@ -333,13 +334,16 @@ function CommunityCard({ community, index }: { community: Community; index: numb
     ? community.images[0]
     : '/images/placeholder-homestay.jpg';
 
+  // Generate SEO-friendly slug
+  const communitySlug = generateCommunitySlug(community.name, 'chitwan', community.id);
+
   return (
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -6 }}
       transition={{ duration: 0.3 }}
     >
-      <Link href={`/community-homestays/${community.id}`}>
+      <Link href={`/community-homestays/${communitySlug}`}>
         <div className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-border h-full flex flex-col">
           {/* Image */}
           <div className="relative h-48 overflow-hidden">
