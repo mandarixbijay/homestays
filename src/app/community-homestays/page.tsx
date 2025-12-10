@@ -37,7 +37,6 @@ const containerVariants = {
     },
   },
 };
-
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -45,7 +44,8 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
+      // use a named easing to satisfy TypeScript typings
+      ease: 'easeOut',
     },
   },
 };
@@ -339,7 +339,6 @@ function CommunityCard({ community, index }: { community: Community; index: numb
 
   return (
     <motion.div
-      variants={itemVariants}
       whileHover={{ y: -6 }}
       transition={{ duration: 0.3 }}
     >
