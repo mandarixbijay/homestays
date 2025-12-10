@@ -122,8 +122,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Fetch blogs
     try {
-      console.log('[Sitemap] Fetching blogs from:', `${API_BASE_URL}/blogs/thumbnails`);
-      const blogsResponse = await fetch(`${API_BASE_URL}/blogs/thumbnails?limit=1000`, {
+      console.log('[Sitemap] Fetching blogs from:', `${API_BASE_URL}/blog/blogs/thumbnails`);
+      const blogsResponse = await fetch(`${API_BASE_URL}/blog/blogs/thumbnails?limit=1000`, {
         method: 'GET',
         headers: { accept: 'application/json' },
         next: { revalidate: 0 },
@@ -149,26 +149,53 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Fetch homestays
     try {
-      console.log('[Sitemap] Fetching homestays from:', `${API_BASE_URL}/homestays/approved`);
-      const homestaysResponse = await fetch(`${API_BASE_URL}/homestays/approved`, {
+      console.log('[Sitemap] Fetching homestays from:', `${API_BASE_URL}/homestays/search?status=APPROVED`);
+
+      // Fetch first page to get total count
+      const firstPageResponse = await fetch(`${API_BASE_URL}/homestays/search?page=1&limit=100&status=APPROVED`, {
         method: 'GET',
         headers: { accept: 'application/json' },
         next: { revalidate: 0 },
       });
 
-      if (homestaysResponse.ok) {
-        const homestaysData = await homestaysResponse.json();
-        const homestays = homestaysData.data || [];
-        console.log(`[Sitemap] ✅ Found ${homestays.length} approved homestays`);
+      if (firstPageResponse.ok) {
+        const firstPageData = await firstPageResponse.json();
+        const allHomestays = firstPageData.data || [];
+        const totalPages = firstPageData.totalPages || 1;
 
-        homestayUrls = homestays.map((homestay: any) => ({
+        console.log(`[Sitemap] Found ${firstPageData.total || allHomestays.length} total homestays across ${totalPages} pages`);
+
+        // Fetch remaining pages if there are more
+        if (totalPages > 1) {
+          const pagePromises = [];
+          for (let page = 2; page <= totalPages; page++) {
+            pagePromises.push(
+              fetch(`${API_BASE_URL}/homestays/search?page=${page}&limit=100&status=APPROVED`, {
+                method: 'GET',
+                headers: { accept: 'application/json' },
+                next: { revalidate: 0 },
+              }).then(res => res.json())
+            );
+          }
+
+          const additionalPages = await Promise.all(pagePromises);
+          additionalPages.forEach(pageData => {
+            if (pageData.data) {
+              allHomestays.push(...pageData.data);
+            }
+          });
+        }
+
+        console.log(`[Sitemap] ✅ Found ${allHomestays.length} approved homestays`);
+
+        homestayUrls = allHomestays.map((homestay: any) => ({
           url: `${baseUrl}/homestays/profile/${homestay.slug}`,
           lastModified: homestay.updatedAt ? new Date(homestay.updatedAt) : new Date(),
           changeFrequency: 'weekly' as const,
           priority: 0.8,
         }));
       } else {
-        console.error('[Sitemap] ⚠️  Failed to fetch homestays:', homestaysResponse.statusText);
+        console.error('[Sitemap] ⚠️  Failed to fetch homestays:', firstPageResponse.statusText);
       }
     } catch (error) {
       console.error('[Sitemap] ⚠️  Error fetching homestays:', error);
