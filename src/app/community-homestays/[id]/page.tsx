@@ -773,15 +773,25 @@ export default function CommunityDetailPage() {
           {/* Homestays Section - Enhanced with Real Data */}
           {homestayDetails.length > 0 && (
             <section>
-              <div className="text-center mb-8">
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full mb-4">
+                  <Home className="h-4 w-4" />
+                  <span className="text-sm font-semibold">{homestayDetails.length} Partner Homestays</span>
+                </div>
                 <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">
-                  Partner Homestays ({homestayDetails.length})
+                  Choose Your Perfect Stay
                 </h2>
-                <p className="text-muted-foreground">Collaborative community approach - Choose from our network of welcoming family homes</p>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Collaborative community approach - Experience authentic hospitality across our network of welcoming family homes
+                </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {homestayDetails.map((homestay, index) => {
                   const mainImage = homestay.images?.find(img => img.isMain)?.url || homestay.images?.[0]?.url || homestay.imageSrc;
+                  const totalCapacity = homestay.rooms?.reduce((sum, room) => sum + (room.capacity || 0), 0) || 0;
+                  const facilitiesCount = homestay.facilities?.length || 0;
+                  const hasRating = homestay.rating && homestay.rating > 0;
+
                   return (
                     <motion.div
                       key={homestay.id}
@@ -789,61 +799,133 @@ export default function CommunityDetailPage() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.05 }}
-                      whileHover={{ y: -6 }}
-                      className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border"
+                      whileHover={{ y: -8 }}
+                      className="group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-border"
                     >
-                      {/* Homestay Image */}
-                      <div className="relative h-48 overflow-hidden">
+                      {/* Homestay Image with Overlay Info */}
+                      <div className="relative h-56 overflow-hidden">
                         {mainImage ? (
                           <Image
                             src={mainImage}
                             alt={homestay.name}
                             fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
                             unoptimized
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center">
-                            <Home className="h-16 w-16 text-muted-foreground" />
+                          <div className="w-full h-full bg-gradient-to-br from-primary/10 via-accent/10 to-muted/10 flex items-center justify-center">
+                            <Home className="h-20 w-20 text-muted-foreground opacity-50" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <h3 className="text-base font-bold text-white line-clamp-2">{homestay.name}</h3>
+
+                        {/* Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+                        {/* Top Badges */}
+                        <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
+                          <div className="flex flex-wrap gap-2">
+                            <div className="bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
+                              <div className="flex items-center gap-1.5">
+                                <Award className="h-3.5 w-3.5 text-primary" />
+                                <span className="text-xs font-bold text-primary">Verified</span>
+                              </div>
+                            </div>
+                            {hasRating && (
+                              <div className="bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
+                                <div className="flex items-center gap-1">
+                                  <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+                                  <span className="text-xs font-bold text-card-foreground">{homestay.rating.toFixed(1)}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          {homestay.images && homestay.images.length > 1 && (
+                            <div className="bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                              <span className="text-xs font-medium text-white">+{homestay.images.length - 1}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Bottom: Homestay Name */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="text-lg font-bold text-white line-clamp-2 mb-1 drop-shadow-lg">
+                            {homestay.name}
+                          </h3>
+                          <div className="flex items-center gap-1.5 text-white/90">
+                            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span className="text-xs line-clamp-1">{homestay.address}</span>
+                          </div>
                         </div>
                       </div>
 
                       {/* Homestay Content */}
                       <div className="p-5">
-                        <div className="flex items-start gap-2 text-sm text-muted-foreground mb-4">
-                          <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
-                          <span className="line-clamp-2">{homestay.address}</span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-3 rounded-lg border border-primary/20">
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                              <Home className="h-4 w-4 text-primary" />
-                              <span className="font-medium">Rooms</span>
-                            </div>
-                            <p className="text-xl font-bold text-card-foreground">{homestay.rooms?.length || 0}</p>
+                        {/* Quick Stats */}
+                        <div className="grid grid-cols-3 gap-2 mb-4">
+                          <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-3 rounded-lg border border-primary/20 text-center">
+                            <Home className="h-4 w-4 text-primary mx-auto mb-1" />
+                            <p className="text-lg font-bold text-card-foreground">{homestay.rooms?.length || 0}</p>
+                            <p className="text-[10px] text-muted-foreground font-medium">Rooms</p>
                           </div>
-                          <div className="bg-gradient-to-br from-accent/5 to-accent/10 p-3 rounded-lg border border-accent/20">
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                              <Star className="h-4 w-4 text-accent" />
-                              <span className="font-medium">Rating</span>
-                            </div>
-                            <p className="text-xl font-bold text-card-foreground">{homestay.rating?.toFixed(1) || 'N/A'}</p>
+                          <div className="bg-gradient-to-br from-accent/5 to-accent/10 p-3 rounded-lg border border-accent/20 text-center">
+                            <Users className="h-4 w-4 text-accent mx-auto mb-1" />
+                            <p className="text-lg font-bold text-card-foreground">{totalCapacity}</p>
+                            <p className="text-[10px] text-muted-foreground font-medium">Guests</p>
+                          </div>
+                          <div className="bg-gradient-to-br from-green-500/5 to-green-500/10 p-3 rounded-lg border border-green-500/20 text-center">
+                            <Award className="h-4 w-4 text-green-600 mx-auto mb-1" />
+                            <p className="text-lg font-bold text-card-foreground">{facilitiesCount}</p>
+                            <p className="text-[10px] text-muted-foreground font-medium">Amenities</p>
                           </div>
                         </div>
 
-                        {/* Partner Badge */}
-                        <div className="mt-4 pt-4 border-t border-border">
-                          <div className="flex items-center gap-2 text-xs text-primary">
-                            <Award className="h-4 w-4" />
-                            <span className="font-semibold">Community Partner</span>
+                        {/* Key Features */}
+                        {homestay.facilities && homestay.facilities.length > 0 && (
+                          <div className="mb-4">
+                            <div className="flex flex-wrap gap-1.5">
+                              {homestay.facilities.slice(0, 3).map((facility: any, idx: number) => {
+                                const facilityName = facility.name || facility;
+                                return (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-muted/50 text-muted-foreground rounded-md text-xs"
+                                  >
+                                    <Check className="h-3 w-3 text-primary" />
+                                    {String(facilityName)}
+                                  </span>
+                                );
+                              })}
+                              {homestay.facilities.length > 3 && (
+                                <span className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-semibold">
+                                  +{homestay.facilities.length - 3} more
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        )}
+
+                        {/* Host Information */}
+                        {homestay.owner && (
+                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg mb-4">
+                            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-sm font-bold">
+                                {homestay.owner.fullName?.charAt(0) || 'H'}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-muted-foreground">Hosted by</p>
+                              <p className="text-sm font-semibold text-card-foreground truncate">
+                                {homestay.owner.fullName || 'Host Family'}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* View Details Button */}
+                        <button className="w-full px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold text-sm flex items-center justify-center gap-2 group-hover:shadow-lg">
+                          <span>View Details</span>
+                          <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </button>
                       </div>
                     </motion.div>
                   );
