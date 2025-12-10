@@ -188,8 +188,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.log(`[Sitemap] ✅ Found ${communities.length} community homestays`);
 
         communityUrls = communities.map((community: any) => {
-          // Extract location from community or use default
-          const location = 'chitwan'; // You can make this dynamic based on community data
+          // Extract location from community address
+          // Address format is typically "City, District" or just "City"
+          let location = 'nepal';
+          if (community.address) {
+            // Take the first part before comma, or the whole address if no comma
+            const addressParts = community.address.split(',');
+            location = addressParts[0].trim();
+          }
+
           const slug = generateCommunitySlug(community.name, location, community.id);
 
           return {

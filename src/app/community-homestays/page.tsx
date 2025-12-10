@@ -334,8 +334,16 @@ function CommunityCard({ community, index }: { community: Community; index: numb
     ? community.images[0]
     : '/images/placeholder-homestay.jpg';
 
+  // Extract location from community address
+  let location = 'nepal';
+  if (community.address) {
+    // Take the first part before comma, or the whole address if no comma
+    const addressParts = community.address.split(',');
+    location = addressParts[0].trim();
+  }
+
   // Generate SEO-friendly slug
-  const communitySlug = generateCommunitySlug(community.name, 'chitwan', community.id);
+  const communitySlug = generateCommunitySlug(community.name, location, community.id);
 
   return (
     <motion.div
