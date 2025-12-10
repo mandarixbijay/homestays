@@ -101,33 +101,37 @@ export default function PaymentOptionsDialog({
         selectedRooms,
       });
 
-      const selectedGuests = selectedRooms.reduce(
-        (acc, room) => {
-          if (!room.roomId) {
-            throw new Error(`Room ID missing for selected room: ${room.roomTitle}`);
-          }
-          return {
-            adults: acc.adults + room.adults,
-            children: acc.children + room.children,
-          };
-        },
-        { adults: 0, children: 0 }
-      );
+      // Only validate selectedRooms if they exist (for individual homestay bookings)
+      // Skip validation for community bookings where selectedRooms is empty
+      if (selectedRooms.length > 0) {
+        const selectedGuests = selectedRooms.reduce(
+          (acc, room) => {
+            if (!room.roomId) {
+              throw new Error(`Room ID missing for selected room: ${room.roomTitle}`);
+            }
+            return {
+              adults: acc.adults + room.adults,
+              children: acc.children + room.children,
+            };
+          },
+          { adults: 0, children: 0 }
+        );
 
-      if (
-        inputGuests.adults !== selectedGuests.adults ||
-        inputGuests.children !== selectedGuests.children
-      ) {
-        setError("The number of guests selected does not match the input. Please adjust your room selections.");
-        console.error("Guest validation failed:", { inputGuests, selectedGuests });
-        return;
-      }
+        if (
+          inputGuests.adults !== selectedGuests.adults ||
+          inputGuests.children !== selectedGuests.children
+        ) {
+          setError("The number of guests selected does not match the input. Please adjust your room selections.");
+          console.error("Guest validation failed:", { inputGuests, selectedGuests });
+          return;
+        }
 
-      const inputRooms = parseInt(rooms || "1");
-      if (selectedRooms.length !== inputRooms) {
-        setError(`Please select exactly ${inputRooms} room${inputRooms !== 1 ? "s" : ""}.`);
-        console.error("Room count validation failed:", { selectedRooms, inputRooms });
-        return;
+        const inputRooms = parseInt(rooms || "1");
+        if (selectedRooms.length !== inputRooms) {
+          setError(`Please select exactly ${inputRooms} room${inputRooms !== 1 ? "s" : ""}.`);
+          console.error("Room count validation failed:", { selectedRooms, inputRooms });
+          return;
+        }
       }
 
       setIsLoading(true);
@@ -146,19 +150,24 @@ export default function PaymentOptionsDialog({
         queryParams.append("checkOut", checkOut || "");
         queryParams.append("guests", guests || "");
         queryParams.append("rooms", rooms || "");
-        queryParams.append(
-          "selectedRooms",
-          JSON.stringify(
-            selectedRooms.map((room) => ({
-              roomTitle: room.roomTitle,
-              adults: room.adults,
-              children: room.children || 0,
-              nightlyPrice: room.nightlyPrice,
-              totalPrice: room.totalPrice,
-              roomId: room.roomId,
-            }))
-          )
-        );
+
+        // Only include selectedRooms if they exist (for individual homestay bookings)
+        if (selectedRooms.length > 0) {
+          queryParams.append(
+            "selectedRooms",
+            JSON.stringify(
+              selectedRooms.map((room) => ({
+                roomTitle: room.roomTitle,
+                adults: room.adults,
+                children: room.children || 0,
+                nightlyPrice: room.nightlyPrice,
+                totalPrice: room.totalPrice,
+                roomId: room.roomId,
+              }))
+            )
+          );
+        }
+
         queryParams.append("homestayId", homestayId.toString());
 
         const redirectUrl = `/checkout?${queryParams.toString()}`;

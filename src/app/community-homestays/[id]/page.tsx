@@ -45,6 +45,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/navbar/navbar';
 import Footer from '@/components/footer/footer';
+import PaymentOptionsDialog from '@/components/homestay/components/dialogs/payment-options-dialog';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -856,37 +857,6 @@ export default function CommunityDetailPage() {
                     </div>
                   </div>
 
-                  {/* Available Rooms */}
-                  {availabilityResult.availableRooms.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                        Available Rooms ({availabilityResult.availableRooms.length})
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {availabilityResult.availableRooms.map((room, index) => (
-                          <div
-                            key={`${room.homestayId}-${room.roomId}-${index}`}
-                            className="bg-muted/50 rounded-lg p-4 border border-border hover:border-primary/50 transition-colors"
-                          >
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Home className="h-4 w-4 text-primary" />
-                                <p className="font-semibold text-sm text-card-foreground">{room.roomName}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-xs text-muted-foreground">Capacity</p>
-                                <p className="font-bold text-sm text-primary">
-                                  {room.availableSpace} / {room.maxOccupancy}
-                                </p>
-                              </div>
-                            </div>
-                            <p className="text-xs text-muted-foreground">{room.homestayName}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   {/* Additional Information */}
                   <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
                     <div className="flex gap-3">
@@ -908,10 +878,21 @@ export default function CommunityDetailPage() {
                   <div className="flex flex-col sm:flex-row gap-3 pt-2">
                     {availabilityResult.isAvailable ? (
                       <>
-                        <button className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all font-semibold flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
-                          <Calendar className="h-5 w-5" />
-                          Book Now
-                        </button>
+                        <PaymentOptionsDialog
+                          nightlyPrice={availabilityResult.pricePerPerson}
+                          totalPrice={availabilityResult.totalPrice}
+                          checkIn={checkIn}
+                          checkOut={checkOut}
+                          guests={`${availabilityResult.requestedGuests}A0C`}
+                          rooms="1"
+                          homestayName={availabilityResult.communityName}
+                          homestayId={communityId || 0}
+                        >
+                          <button className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all font-semibold flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+                            <Calendar className="h-5 w-5" />
+                            Book Now
+                          </button>
+                        </PaymentOptionsDialog>
                         <button
                           onClick={() => {
                             setAvailabilityResult(null);
