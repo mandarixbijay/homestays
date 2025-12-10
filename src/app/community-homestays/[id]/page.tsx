@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { communityAPI, Community } from '@/lib/api/community';
+import { communityAPI, Community, Homestay } from '@/lib/api/community';
+import { publicBlogApi } from '@/lib/api/public-blog-api';
 import {
   MapPin,
   Users,
@@ -34,6 +35,7 @@ import {
   Twitter,
   Link as LinkIcon,
   Copy,
+  ExternalLink,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -53,6 +55,42 @@ const itemVariants = {
   },
 };
 
+// SVG Meal Icons
+const MealIcons = {
+  BREAKFAST: () => (
+    <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
+      <path d="M32 8C18.745 8 8 18.745 8 32s10.745 24 24 24 24-10.745 24-24S45.255 8 32 8z" fill="#FFF3E0"/>
+      <circle cx="32" cy="28" r="12" fill="#FFB74D"/>
+      <path d="M32 16v12M38 22h-12" stroke="#F57C00" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M16 40h32" stroke="#FF9800" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M20 44c0 2 1 4 3 5M44 44c0 2-1 4-3 5" stroke="#FF9800" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  LUNCH: () => (
+    <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
+      <path d="M32 6C17.088 6 5 18.088 5 33s12.088 27 27 27 27-12.088 27-27S46.912 6 32 6z" fill="#F1F8E9"/>
+      <ellipse cx="32" cy="30" rx="18" ry="16" fill="#AED581"/>
+      <path d="M20 22c2-2 5-3 12-3s10 1 12 3" stroke="#689F38" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="26" cy="26" r="2" fill="#558B2F"/>
+      <circle cx="38" cy="26" r="2" fill="#558B2F"/>
+      <circle cx="32" cy="32" r="2" fill="#558B2F"/>
+      <path d="M20 40h24M24 44h16M26 48h12" stroke="#7CB342" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  ),
+  DINNER: () => (
+    <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
+      <circle cx="32" cy="32" r="26" fill="#E8EAF6"/>
+      <path d="M18 24h28v20H18z" fill="#9FA8DA" rx="2"/>
+      <path d="M18 24c0-2 2-4 6-4h12c4 0 6 2 6 4" stroke="#5C6BC0" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="24" cy="30" r="1.5" fill="#3F51B5"/>
+      <circle cx="32" cy="32" r="1.5" fill="#3F51B5"/>
+      <circle cx="40" cy="30" r="1.5" fill="#3F51B5"/>
+      <path d="M22 38h20M24 42h16" stroke="#7986CB" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M16 48h32" stroke="#5C6BC0" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+  ),
+};
+
 export default function CommunityDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -64,28 +102,29 @@ export default function CommunityDetailPage() {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [adults, setAdults] = useState(2);
-  const [selectedLocation, setSelectedLocation] = useState('');
-  const [filteredHomestays, setFilteredHomestays] = useState<any[]>([]);
+  const [homestayDetails, setHomestayDetails] = useState<Homestay[]>([]);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [relatedBlogs, setRelatedBlogs] = useState<any[]>([]);
+  const [isCheckAvailabilityVisible, setIsCheckAvailabilityVisible] = useState(false);
 
   useEffect(() => {
     fetchCommunity();
+    fetchBlogs();
   }, [communityId]);
 
   useEffect(() => {
-    if (community) {
-      filterHomestays();
+    if (community && community.homestays.length > 0) {
+      fetchHomestayDetails();
     }
-  }, [selectedLocation, community]);
+  }, [community]);
 
   const fetchCommunity = async () => {
     try {
       setLoading(true);
       const data = await communityAPI.getCommunity(communityId);
       setCommunity(data);
-      setFilteredHomestays(data.homestays || []);
     } catch (error) {
       console.error('Error fetching community:', error);
     } finally {
@@ -93,13 +132,30 @@ export default function CommunityDetailPage() {
     }
   };
 
-  const filterHomestays = () => {
+  const fetchHomestayDetails = async () => {
     if (!community) return;
-    let filtered = community.homestays || [];
-    if (selectedLocation) {
-      filtered = filtered.filter((h) => h.address.includes(selectedLocation));
+
+    try {
+      const detailsPromises = community.homestays.map(h =>
+        communityAPI.getHomestay(h.id).catch(err => {
+          console.error(`Error fetching homestay ${h.id}:`, err);
+          return null;
+        })
+      );
+      const details = await Promise.all(detailsPromises);
+      setHomestayDetails(details.filter(d => d !== null) as Homestay[]);
+    } catch (error) {
+      console.error('Error fetching homestay details:', error);
     }
-    setFilteredHomestays(filtered);
+  };
+
+  const fetchBlogs = async () => {
+    try {
+      const blogs = await publicBlogApi.getFeaturedBlogs(3);
+      setRelatedBlogs(blogs);
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+    }
   };
 
   const handleShare = async (platform: string) => {
@@ -125,17 +181,62 @@ export default function CommunityDetailPage() {
     }
   };
 
-  // Sample amenities data
-  const amenities = [
-    { icon: Wifi, name: 'Free WiFi', description: 'High-speed internet access' },
-    { icon: Car, name: 'Parking', description: 'Free parking available' },
-    { icon: Coffee, name: 'Breakfast', description: 'Traditional Nepali breakfast' },
-    { icon: Bath, name: 'Hot Shower', description: 'Hot water available' },
-    { icon: Tv, name: 'Common TV', description: 'Shared entertainment area' },
-    { icon: Wind, name: 'Garden', description: 'Outdoor relaxation space' },
-  ];
+  // Extract unique amenities from all homestays
+  const getUniqueAmenities = () => {
+    const iconMap: Record<string, any> = {
+      'wifi': Wifi,
+      'wi-fi': Wifi,
+      'parking': Car,
+      'breakfast': Coffee,
+      'hot': Bath,
+      'shower': Bath,
+      'tv': Tv,
+      'television': Tv,
+      'garden': Wind,
+      'yard': Wind,
+    };
 
-  // Sample FAQ data
+    const amenitiesSet = new Set<string>();
+    const amenitiesList: Array<{ icon: any; name: string; description: string }> = [];
+
+    homestayDetails.forEach(homestay => {
+      homestay?.facilities?.forEach((facility: any) => {
+        const facilityName = facility.name || facility;
+        const lowerName = String(facilityName).toLowerCase();
+
+        if (!amenitiesSet.has(lowerName)) {
+          amenitiesSet.add(lowerName);
+
+          // Find matching icon
+          let icon = Award; // Default icon
+          Object.keys(iconMap).forEach(key => {
+            if (lowerName.includes(key)) {
+              icon = iconMap[key];
+            }
+          });
+
+          amenitiesList.push({
+            icon,
+            name: String(facilityName),
+            description: facility.description || 'Available at community homestays'
+          });
+        }
+      });
+    });
+
+    return amenitiesList.length > 0 ? amenitiesList : [
+      { icon: Wifi, name: 'Free WiFi', description: 'High-speed internet access' },
+      { icon: Car, name: 'Parking', description: 'Free parking available' },
+      { icon: Coffee, name: 'Breakfast', description: 'Traditional Nepali breakfast' },
+      { icon: Bath, name: 'Hot Shower', description: 'Hot water available' },
+      { icon: Tv, name: 'Common TV', description: 'Shared entertainment area' },
+      { icon: Wind, name: 'Garden', description: 'Outdoor relaxation space' },
+    ];
+  };
+
+  const amenities = getUniqueAmenities();
+
+  // FAQ data
   const faqs = [
     {
       question: 'What is included in the community homestay package?',
@@ -159,31 +260,6 @@ export default function CommunityDetailPage() {
     },
   ];
 
-  // Sample related blogs
-  const relatedBlogs = [
-    {
-      id: 1,
-      title: 'A Complete Guide to Community Tourism in Nepal',
-      excerpt: 'Discover how community-based tourism is transforming rural Nepal...',
-      image: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=400',
-      date: '2024-01-15'
-    },
-    {
-      id: 2,
-      title: 'Traditional Nepali Cuisine: What to Expect',
-      excerpt: 'From dal bhat to local delicacies, explore the flavors of Nepal...',
-      image: 'https://images.unsplash.com/photo-1596040033229-a0b8d1e0e939?w=400',
-      date: '2024-01-10'
-    },
-    {
-      id: 3,
-      title: 'Cultural Experiences in Madi Community',
-      excerpt: 'Immerse yourself in authentic cultural traditions and daily life...',
-      image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400',
-      date: '2024-01-05'
-    },
-  ];
-
   const nextImage = () => {
     if (community && community.images) {
       setCurrentImageIndex((prev) => (prev + 1) % community.images.length);
@@ -196,14 +272,13 @@ export default function CommunityDetailPage() {
     }
   };
 
-  const uniqueLocations = community
-    ? Array.from(new Set(community.homestays.map((h) => {
-        const parts = h.address.split(',');
-        return parts[parts.length - 2]?.trim() || parts[0]?.trim() || h.address;
-      }))).filter(Boolean)
-    : [];
-
   const minDate = new Date().toISOString().split('T')[0];
+
+  const getGoogleMapsDirectionUrl = () => {
+    if (!community) return '';
+    const address = `${community.name}, Madi, Chitwan, Nepal`;
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+  };
 
   if (loading) {
     return (
@@ -432,47 +507,47 @@ export default function CommunityDetailPage() {
           </div>
         </div>
 
-        {/* Search Section */}
-        <div className="bg-card shadow-sm border-b border-border sticky top-16 z-20">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-            <h2 className="text-xl font-bold text-card-foreground mb-4">Check Availability</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {/* Check Availability Section - Sticky bottom on mobile, sticky top on desktop */}
+        <div className="fixed bottom-0 left-0 right-0 md:sticky md:top-16 bg-card shadow-lg md:shadow-sm border-t md:border-b border-border z-20">
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+            <h2 className="text-lg md:text-xl font-bold text-card-foreground mb-3 md:mb-4">Check Availability</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">Check-in</label>
+                <label className="block text-xs md:text-sm font-medium text-muted-foreground mb-1 md:mb-2">Check-in</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Calendar className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 h-4 md:h-5 w-4 md:w-5 text-muted-foreground" />
                   <input
                     type="date"
                     value={checkIn}
                     onChange={(e) => setCheckIn(e.target.value)}
                     min={minDate}
-                    className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-card-foreground"
+                    className="w-full pl-8 md:pl-10 pr-2 md:pr-4 py-2 md:py-2.5 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-card-foreground"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">Check-out</label>
+                <label className="block text-xs md:text-sm font-medium text-muted-foreground mb-1 md:mb-2">Check-out</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Calendar className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 h-4 md:h-5 w-4 md:w-5 text-muted-foreground" />
                   <input
                     type="date"
                     value={checkOut}
                     onChange={(e) => setCheckOut(e.target.value)}
                     min={checkIn || minDate}
-                    className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-card-foreground"
+                    className="w-full pl-8 md:pl-10 pr-2 md:pr-4 py-2 md:py-2.5 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-card-foreground"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">Adults</label>
+                <label className="block text-xs md:text-sm font-medium text-muted-foreground mb-1 md:mb-2">Adults</label>
                 <div className="relative">
-                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Users className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 h-4 md:h-5 w-4 md:w-5 text-muted-foreground" />
                   <select
                     value={adults}
                     onChange={(e) => setAdults(parseInt(e.target.value))}
-                    className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-background text-card-foreground"
+                    className="w-full pl-8 md:pl-10 pr-2 md:pr-4 py-2 md:py-2.5 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-background text-card-foreground"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                       <option key={num} value={num}>
@@ -483,34 +558,19 @@ export default function CommunityDetailPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">Location</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <select
-                    value={selectedLocation}
-                    onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-background text-card-foreground"
-                  >
-                    <option value="">All Locations</option>
-                    {uniqueLocations.map((location) => (
-                      <option key={location} value={location}>
-                        {location}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
               <div className="flex items-end">
-                <button className="w-full px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold flex items-center justify-center gap-2">
-                  <Search className="h-5 w-5" />
-                  Search
+                <button className="w-full px-4 md:px-6 py-2 md:py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold flex items-center justify-center gap-2 text-sm md:text-base">
+                  <Search className="h-4 md:h-5 w-4 md:w-5" />
+                  <span className="hidden sm:inline">Search</span>
+                  <span className="sm:hidden">Go</span>
                 </button>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Spacer for fixed bottom bar on mobile */}
+        <div className="h-32 md:h-0"></div>
 
         {/* Main Content */}
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-12">
@@ -523,11 +583,7 @@ export default function CommunityDetailPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {community.meals.map((meal, index) => {
-                  const mealImages = [
-                    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop',
-                  ];
+                  const MealIcon = MealIcons[meal.mealType] || MealIcons.BREAKFAST;
                   return (
                     <motion.div
                       key={meal.id}
@@ -538,16 +594,11 @@ export default function CommunityDetailPage() {
                       whileHover={{ y: -8 }}
                       className="bg-gradient-to-br from-card to-primary/5 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border"
                     >
-                      {/* Meal Image */}
-                      <div className="relative h-48 overflow-hidden">
-                        <Image
-                          src={mealImages[index % mealImages.length]}
-                          alt={meal.mealType}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                      {/* Meal SVG Icon */}
+                      <div className="relative h-48 flex items-center justify-center bg-gradient-to-br from-muted/20 to-muted/5">
+                        <div className="w-32 h-32">
+                          <MealIcon />
+                        </div>
                         {meal.isIncluded && (
                           <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
                             <Check className="h-3 w-3" />
@@ -555,7 +606,7 @@ export default function CommunityDetailPage() {
                           </div>
                         )}
                         <div className="absolute bottom-4 left-4">
-                          <h3 className="text-xl font-bold text-white">
+                          <h3 className="text-xl font-bold text-card-foreground">
                             {meal.mealType.charAt(0) + meal.mealType.slice(1).toLowerCase()}
                           </h3>
                         </div>
@@ -668,26 +719,18 @@ export default function CommunityDetailPage() {
             </section>
           )}
 
-          {/* Homestays Section - Enhanced */}
-          {filteredHomestays.length > 0 && (
+          {/* Homestays Section - Enhanced with Real Data */}
+          {homestayDetails.length > 0 && (
             <section>
               <div className="text-center mb-8">
                 <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">
-                  Partner Homestays ({filteredHomestays.length})
+                  Partner Homestays ({homestayDetails.length})
                 </h2>
                 <p className="text-muted-foreground">Collaborative community approach - Choose from our network of welcoming family homes</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredHomestays.map((homestay, index) => {
-                  const homestayImages = [
-                    'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400&h=300&fit=crop',
-                    'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=400&h=300&fit=crop',
-                  ];
+                {homestayDetails.map((homestay, index) => {
+                  const mainImage = homestay.images?.find(img => img.isMain)?.url || homestay.images?.[0]?.url || homestay.imageSrc;
                   return (
                     <motion.div
                       key={homestay.id}
@@ -700,13 +743,19 @@ export default function CommunityDetailPage() {
                     >
                       {/* Homestay Image */}
                       <div className="relative h-48 overflow-hidden">
-                        <Image
-                          src={homestayImages[index % homestayImages.length]}
-                          alt={homestay.name}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          unoptimized
-                        />
+                        {mainImage ? (
+                          <Image
+                            src={mainImage}
+                            alt={homestay.name}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center">
+                            <Home className="h-16 w-16 text-muted-foreground" />
+                          </div>
+                        )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div className="absolute bottom-3 left-3 right-3">
                           <h3 className="text-base font-bold text-white line-clamp-2">{homestay.name}</h3>
@@ -726,14 +775,14 @@ export default function CommunityDetailPage() {
                               <Home className="h-4 w-4 text-primary" />
                               <span className="font-medium">Rooms</span>
                             </div>
-                            <p className="text-xl font-bold text-card-foreground">{homestay.totalRooms}</p>
+                            <p className="text-xl font-bold text-card-foreground">{homestay.rooms?.length || 0}</p>
                           </div>
                           <div className="bg-gradient-to-br from-accent/5 to-accent/10 p-3 rounded-lg border border-accent/20">
                             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                              <Users className="h-4 w-4 text-accent" />
-                              <span className="font-medium">Capacity</span>
+                              <Star className="h-4 w-4 text-accent" />
+                              <span className="font-medium">Rating</span>
                             </div>
-                            <p className="text-xl font-bold text-card-foreground">{homestay.totalCapacity}</p>
+                            <p className="text-xl font-bold text-card-foreground">{homestay.rating?.toFixed(1) || 'N/A'}</p>
                           </div>
                         </div>
 
@@ -830,7 +879,7 @@ export default function CommunityDetailPage() {
                 </div>
               </motion.div>
 
-              {/* Map Placeholder */}
+              {/* Google Maps Direction */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -846,15 +895,25 @@ export default function CommunityDetailPage() {
                     unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
-                    <div className="p-6 w-full">
+                    <div className="p-6 w-full space-y-4">
                       <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 mb-4">
                           <MapPin className="h-5 w-5 text-primary" />
                           <div>
                             <p className="font-bold text-card-foreground">{community?.name}</p>
                             <p className="text-sm text-muted-foreground">Madi, Chitwan, Nepal</p>
                           </div>
                         </div>
+                        <a
+                          href={getGoogleMapsDirectionUrl()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+                        >
+                          <Navigation className="h-5 w-5" />
+                          <span>Get Directions</span>
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -912,55 +971,63 @@ export default function CommunityDetailPage() {
             </div>
           </section>
 
-          {/* Related Blogs Section */}
-          <section>
-            <div className="text-center mb-8">
-              <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">Related Blogs</h2>
-              <p className="text-muted-foreground">Learn more about community tourism in Nepal</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedBlogs.map((blog, index) => (
-                <motion.div
-                  key={blog.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -6 }}
-                >
-                  <Link href={`/blogs/${blog.id}`} className="block">
-                    <div className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border h-full">
-                      {/* Blog Image */}
-                      <div className="relative h-48 overflow-hidden">
-                        <Image
-                          src={blog.image}
-                          alt={blog.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          unoptimized
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                      </div>
+          {/* Related Blogs Section - Real Data */}
+          {relatedBlogs.length > 0 && (
+            <section>
+              <div className="text-center mb-8">
+                <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">Related Blogs</h2>
+                <p className="text-muted-foreground">Learn more about community tourism in Nepal</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {relatedBlogs.map((blog, index) => (
+                  <motion.div
+                    key={blog.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ y: -6 }}
+                  >
+                    <Link href={`/blogs/${blog.slug}`} className="block">
+                      <div className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border h-full">
+                        {/* Blog Image */}
+                        <div className="relative h-48 overflow-hidden">
+                          {blog.featuredImage ? (
+                            <Image
+                              src={blog.featuredImage}
+                              alt={blog.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+                              <BookOpen className="h-16 w-16 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        </div>
 
-                      {/* Blog Content */}
-                      <div className="p-5">
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                          <BookOpen className="h-4 w-4" />
-                          <span>{new Date(blog.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                        </div>
-                        <h3 className="text-lg font-bold text-card-foreground mb-2 line-clamp-2">{blog.title}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{blog.excerpt}</p>
-                        <div className="mt-4 flex items-center gap-2 text-primary font-semibold text-sm">
-                          <span>Read More</span>
-                          <ChevronRight className="h-4 w-4" />
+                        {/* Blog Content */}
+                        <div className="p-5">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                            <BookOpen className="h-4 w-4" />
+                            <span>{new Date(blog.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                          </div>
+                          <h3 className="text-lg font-bold text-card-foreground mb-2 line-clamp-2">{blog.title}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{blog.excerpt}</p>
+                          <div className="mt-4 flex items-center gap-2 text-primary font-semibold text-sm">
+                            <span>Read More</span>
+                            <ChevronRight className="h-4 w-4" />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </section>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </div>
       <Footer />
