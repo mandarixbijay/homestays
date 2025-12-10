@@ -188,12 +188,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.log(`[Sitemap] ✅ Found ${communities.length} community homestays`);
 
         communityUrls = communities.map((community: any) => {
-          // Extract location from community address
+          // Extract location from first homestay's address (if available)
           // Address format is typically "City, District" or just "City"
           let location = 'nepal';
-          if (community.address) {
+          if (community.homestays && community.homestays.length > 0 && community.homestays[0].address) {
             // Take the first part before comma, or the whole address if no comma
-            const addressParts = community.address.split(',');
+            const addressParts = community.homestays[0].address.split(',');
             location = addressParts[0].trim();
           }
 
