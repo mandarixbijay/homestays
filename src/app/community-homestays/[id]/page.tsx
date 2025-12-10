@@ -729,16 +729,24 @@ export default function CommunityDetailPage() {
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6"
+                className="bg-red-50 border-2 border-red-200 rounded-xl p-6 mb-6"
               >
-                <div className="flex items-start gap-3">
-                  <div className="bg-red-100 p-2 rounded-lg">
-                    <ExternalLink className="h-5 w-5 text-red-600" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-red-100 p-3 rounded-full">
+                      <ExternalLink className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-red-900">Not Available</h3>
+                      <p className="text-red-700 text-sm mt-1">{availabilityError}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-red-900 mb-1">Availability Check Failed</h3>
-                    <p className="text-red-700 text-sm">{availabilityError}</p>
-                  </div>
+                  <button
+                    onClick={() => setAvailabilityError('')}
+                    className="text-red-400 hover:text-red-600 transition-colors"
+                  >
+                    <ChevronUp className="h-5 w-5" />
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -747,91 +755,160 @@ export default function CommunityDetailPage() {
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`${
-                  availabilityResult.isAvailable
-                    ? 'bg-green-50 border-green-200'
-                    : 'bg-orange-50 border-orange-200'
-                } border rounded-xl p-6 mb-6`}
+                className="bg-card border-2 border-primary/20 rounded-2xl shadow-lg overflow-hidden mb-6"
               >
-                <div className="flex items-start gap-4">
-                  <div className={`${
-                    availabilityResult.isAvailable ? 'bg-green-100' : 'bg-orange-100'
-                  } p-3 rounded-lg`}>
-                    {availabilityResult.isAvailable ? (
-                      <Check className="h-6 w-6 text-green-600" />
-                    ) : (
-                      <ExternalLink className="h-6 w-6 text-orange-600" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className={`text-xl font-bold mb-2 ${
-                      availabilityResult.isAvailable ? 'text-green-900' : 'text-orange-900'
-                    }`}>
-                      {availabilityResult.isAvailable
-                        ? '✓ Available for Your Dates!'
-                        : 'Limited Availability'}
-                    </h3>
-                    <p className={`text-sm mb-4 ${
-                      availabilityResult.isAvailable ? 'text-green-700' : 'text-orange-700'
-                    }`}>
-                      {availabilityResult.isAvailable
-                        ? `We can accommodate ${availabilityResult.requestedGuests} guest${availabilityResult.requestedGuests > 1 ? 's' : ''} for ${availabilityResult.nights} night${availabilityResult.nights > 1 ? 's' : ''}.`
-                        : `We have limited space available. Only ${availabilityResult.availableCapacity} out of ${availabilityResult.requestedGuests} guests can be accommodated.`}
-                    </p>
-
-                    {/* Pricing Details */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      <div className="bg-white rounded-lg p-4 border border-gray-200">
-                        <p className="text-xs text-muted-foreground mb-1">Price per Person</p>
-                        <p className="text-lg font-bold text-card-foreground">
-                          {availabilityResult.currency} {availabilityResult.pricePerPerson}
-                        </p>
-                      </div>
-                      <div className="bg-white rounded-lg p-4 border border-gray-200">
-                        <p className="text-xs text-muted-foreground mb-1">Number of Nights</p>
-                        <p className="text-lg font-bold text-card-foreground">{availabilityResult.nights}</p>
-                      </div>
-                      <div className="bg-white rounded-lg p-4 border border-gray-200">
-                        <p className="text-xs text-muted-foreground mb-1">Total Price</p>
-                        <p className="text-lg font-bold text-primary">
-                          {availabilityResult.currency} {availabilityResult.totalPrice}
+                {/* Status Header */}
+                <div className={`${
+                  availabilityResult.isAvailable
+                    ? 'bg-gradient-to-r from-green-500 to-green-600'
+                    : 'bg-gradient-to-r from-orange-500 to-orange-600'
+                } px-6 py-4`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {availabilityResult.isAvailable ? (
+                        <div className="bg-white/20 p-2 rounded-full">
+                          <Check className="h-6 w-6 text-white" />
+                        </div>
+                      ) : (
+                        <div className="bg-white/20 p-2 rounded-full">
+                          <ExternalLink className="h-6 w-6 text-white" />
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="text-xl font-bold text-white">
+                          {availabilityResult.isAvailable ? 'Available' : 'Not Available'}
+                        </h3>
+                        <p className="text-white/90 text-sm">
+                          {availabilityResult.isAvailable
+                            ? `Perfect! We can accommodate your group.`
+                            : `Sorry, we cannot accommodate the full group.`}
                         </p>
                       </div>
                     </div>
+                    <button
+                      onClick={() => {
+                        setAvailabilityResult(null);
+                        setAvailabilityError('');
+                      }}
+                      className="text-white/80 hover:text-white transition-colors"
+                    >
+                      <ChevronUp className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
 
-                    {/* Available Rooms */}
-                    {availabilityResult.availableRooms.length > 0 && (
-                      <div className="bg-white rounded-lg p-4 border border-gray-200">
-                        <h4 className="font-semibold text-card-foreground mb-3 flex items-center gap-2">
-                          <Home className="h-4 w-4 text-primary" />
-                          Available Rooms
-                        </h4>
-                        <div className="space-y-2">
-                          {availabilityResult.availableRooms.map((room, index) => (
-                            <div
-                              key={`${room.homestayId}-${room.roomId}-${index}`}
-                              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                            >
-                              <div>
-                                <p className="font-medium text-sm text-card-foreground">{room.roomName}</p>
-                                <p className="text-xs text-muted-foreground">{room.homestayName}</p>
+                {/* Details Section */}
+                <div className="p-6 space-y-6">
+                  {/* Booking Details */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                      Booking Details
+                    </h4>
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Community</span>
+                        <span className="font-semibold text-card-foreground">{availabilityResult.communityName}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Guests</span>
+                        <span className="font-semibold text-card-foreground">
+                          {availabilityResult.requestedGuests} {availabilityResult.requestedGuests === 1 ? 'person' : 'people'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Duration</span>
+                        <span className="font-semibold text-card-foreground">
+                          {availabilityResult.nights} {availabilityResult.nights === 1 ? 'night' : 'nights'}
+                        </span>
+                      </div>
+                      {!availabilityResult.isAvailable && (
+                        <div className="flex items-center justify-between pt-2 border-t border-border">
+                          <span className="text-sm text-orange-600 font-medium">Available Capacity</span>
+                          <span className="font-bold text-orange-600">
+                            {availabilityResult.availableCapacity} / {availabilityResult.requestedGuests} guests
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Billing Information */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                      Billing Information
+                    </h4>
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          {availabilityResult.currency} {availabilityResult.pricePerPerson} × {availabilityResult.requestedGuests} {availabilityResult.requestedGuests === 1 ? 'guest' : 'guests'} × {availabilityResult.nights} {availabilityResult.nights === 1 ? 'night' : 'nights'}
+                        </span>
+                        <span className="font-semibold text-card-foreground">
+                          {availabilityResult.currency} {availabilityResult.totalPrice}
+                        </span>
+                      </div>
+                      <div className="h-px bg-border"></div>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="font-bold text-card-foreground">Total Amount</span>
+                        <span className="text-2xl font-bold text-primary">
+                          {availabilityResult.currency} {availabilityResult.totalPrice}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Available Rooms */}
+                  {availabilityResult.availableRooms.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                        Available Rooms ({availabilityResult.availableRooms.length})
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {availabilityResult.availableRooms.map((room, index) => (
+                          <div
+                            key={`${room.homestayId}-${room.roomId}-${index}`}
+                            className="bg-muted/50 rounded-lg p-4 border border-border hover:border-primary/50 transition-colors"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Home className="h-4 w-4 text-primary" />
+                                <p className="font-semibold text-sm text-card-foreground">{room.roomName}</p>
                               </div>
                               <div className="text-right">
                                 <p className="text-xs text-muted-foreground">Capacity</p>
-                                <p className="font-semibold text-sm text-card-foreground">
+                                <p className="font-bold text-sm text-primary">
                                   {room.availableSpace} / {room.maxOccupancy}
                                 </p>
                               </div>
                             </div>
-                          ))}
-                        </div>
+                            <p className="text-xs text-muted-foreground">{room.homestayName}</p>
+                          </div>
+                        ))}
                       </div>
-                    )}
+                    </div>
+                  )}
 
-                    {/* Book Now Button */}
-                    {availabilityResult.isAvailable && (
-                      <div className="mt-4 flex gap-3">
-                        <button className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold flex items-center justify-center gap-2">
+                  {/* Additional Information */}
+                  <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                    <div className="flex gap-3">
+                      <div className="bg-blue-100 p-2 rounded-lg h-fit">
+                        <BookOpen className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-blue-900 font-medium mb-1">Important Information</p>
+                        <p className="text-xs text-blue-700 leading-relaxed">
+                          {availabilityResult.isAvailable
+                            ? 'This availability is subject to confirmation. Once you proceed with booking, our team will verify the dates and send you a confirmation within 24 hours.'
+                            : 'We currently cannot accommodate your full group for the selected dates. Please try different dates or reduce the number of guests.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    {availabilityResult.isAvailable ? (
+                      <>
+                        <button className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all font-semibold flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
                           <Calendar className="h-5 w-5" />
                           Book Now
                         </button>
@@ -840,11 +917,21 @@ export default function CommunityDetailPage() {
                             setAvailabilityResult(null);
                             setAvailabilityError('');
                           }}
-                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+                          className="px-6 py-3 bg-muted text-card-foreground rounded-lg hover:bg-muted/80 transition-colors font-semibold"
                         >
                           Check Different Dates
                         </button>
-                      </div>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setAvailabilityResult(null);
+                          setAvailabilityError('');
+                        }}
+                        className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+                      >
+                        Try Different Dates
+                      </button>
                     )}
                   </div>
                 </div>
