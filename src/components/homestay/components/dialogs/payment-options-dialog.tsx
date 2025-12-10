@@ -149,10 +149,13 @@ export default function PaymentOptionsDialog({
         queryParams.append("checkIn", checkIn || "");
         queryParams.append("checkOut", checkOut || "");
         queryParams.append("guests", guests || "");
-        queryParams.append("rooms", rooms || "");
 
-        // Only include selectedRooms if they exist (for individual homestay bookings)
-        if (selectedRooms.length > 0) {
+        // Determine if this is a community booking (no selected rooms)
+        const isCommunityBooking = selectedRooms.length === 0;
+
+        if (!isCommunityBooking) {
+          // For individual homestay bookings, include rooms and selectedRooms
+          queryParams.append("rooms", rooms || "");
           queryParams.append(
             "selectedRooms",
             JSON.stringify(
@@ -170,7 +173,11 @@ export default function PaymentOptionsDialog({
 
         queryParams.append("homestayId", homestayId.toString());
 
-        const redirectUrl = `/checkout?${queryParams.toString()}`;
+        // Redirect to appropriate checkout page
+        const redirectUrl = isCommunityBooking
+          ? `/community-checkout?${queryParams.toString()}`
+          : `/checkout?${queryParams.toString()}`;
+
         console.log("Redirecting to:", redirectUrl);
         router.push(redirectUrl);
       } catch (err: any) {
@@ -305,7 +312,7 @@ export default function PaymentOptionsDialog({
               </div>
 
               {/* Quick Details */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className={`grid ${selectedRooms.length > 0 ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-3'} gap-4 mb-6`}>
                 <div className="text-center p-3 bg-white rounded-xl">
                   <Calendar className="h-5 w-5 text-blue-600 mx-auto mb-2" />
                   <div className="text-xs text-gray-500 mb-1">Check-in</div>
@@ -327,11 +334,14 @@ export default function PaymentOptionsDialog({
                     {inputGuests.adults + inputGuests.children}
                   </div>
                 </div>
-                <div className="text-center p-3 bg-white rounded-xl">
-                  <Bed className="h-5 w-5 text-blue-600 mx-auto mb-2" />
-                  <div className="text-xs text-gray-500 mb-1">Rooms</div>
-                  <div className="text-sm font-semibold text-gray-900">{rooms}</div>
-                </div>
+                {/* Only show Rooms for individual homestay bookings */}
+                {selectedRooms.length > 0 && (
+                  <div className="text-center p-3 bg-white rounded-xl">
+                    <Bed className="h-5 w-5 text-blue-600 mx-auto mb-2" />
+                    <div className="text-xs text-gray-500 mb-1">Rooms</div>
+                    <div className="text-sm font-semibold text-gray-900">{rooms}</div>
+                  </div>
+                )}
               </div>
 
               {/* Room Details Toggle */}
