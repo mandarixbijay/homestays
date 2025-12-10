@@ -37,8 +37,10 @@ function PaymentSuccessContent() {
   const checkOut = searchParams.get("checkOut") || new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0];
   const guests = searchParams.get("guests") || "0A0C";
   const rooms = searchParams.get("rooms") || "0";
-  const selectedRooms = searchParams.get("selectedRooms") ? JSON.parse(searchParams.get("selectedRooms") || "[]") : [];
+  const selectedRoomsParam = searchParams.get("selectedRooms");
+  const selectedRooms = selectedRoomsParam && selectedRoomsParam !== "undefined" ? JSON.parse(selectedRoomsParam) : [];
   const transactionId = searchParams.get("transactionId") || "N/A";
+  const bookingType = searchParams.get("type") || "homestay"; // "community" or "homestay"
   const sessionId = searchParams.get("session_id");
   const paymentMethod = searchParams.get("paymentMethod") || "Unknown";
 
@@ -55,6 +57,7 @@ function PaymentSuccessContent() {
     sessionId,
     status,
     paymentMethod,
+    bookingType,
   });
 
   // Format dates and calculate nights
@@ -242,25 +245,30 @@ function PaymentSuccessContent() {
                   <strong>Guests:</strong> {totalGuests.adults} Adult{totalGuests.adults !== 1 ? "s" : ""}, {totalGuests.children} Child{totalGuests.children !== 1 ? "ren" : ""}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Bed className="h-4 w-4 text-primary" />
-                <span>
-                  <strong>Rooms:</strong> {bookingDetails?.rooms?.length || rooms}
-                </span>
-              </div>
-              {(bookingDetails?.rooms || selectedRooms).map((room: any, index: number) => (
-                <div key={index} className="border-t border-gray-200 pt-3 mt-3">
-                  <p className="text-sm font-medium text-gray-800">
-                    Room {index + 1}: {room.roomName || room.roomTitle || "Unknown"}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    {room.adults || 0} Adult{room.adults !== 1 ? "s" : ""}, {room.children || 0} Child{(room.children || 0) !== 1 ? "ren" : ""}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    Total: NPR {(room.totalPrice || room.nightlyPrice || 0).toFixed(2)} for {nightStay}
-                  </p>
-                </div>
-              ))}
+              {/* Only show rooms section for individual homestay bookings */}
+              {bookingType !== "community" && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Bed className="h-4 w-4 text-primary" />
+                    <span>
+                      <strong>Rooms:</strong> {bookingDetails?.rooms?.length || rooms}
+                    </span>
+                  </div>
+                  {(bookingDetails?.rooms || selectedRooms).map((room: any, index: number) => (
+                    <div key={index} className="border-t border-gray-200 pt-3 mt-3">
+                      <p className="text-sm font-medium text-gray-800">
+                        Room {index + 1}: {room.roomName || room.roomTitle || "Unknown"}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {room.adults || 0} Adult{room.adults !== 1 ? "s" : ""}, {room.children || 0} Child{(room.children || 0) !== 1 ? "ren" : ""}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Total: NPR {(room.totalPrice || room.nightlyPrice || 0).toFixed(2)} for {nightStay}
+                      </p>
+                    </div>
+                  ))}
+                </>
+              )}
               <div className="mt-4 text-center">
                 <p className="text-base font-semibold text-primary">
                   Grand Total: {bookingDetails?.currency || "NPR"} {(bookingDetails?.totalPrice || totalPrice).toFixed(2)}
