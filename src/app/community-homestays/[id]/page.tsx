@@ -37,6 +37,7 @@ import {
   Link as LinkIcon,
   Copy,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -613,20 +614,25 @@ export default function CommunityDetailPage() {
               </div>
 
               <div>
-                <label className="block text-xs md:text-sm font-medium text-muted-foreground mb-1 md:mb-2">Adults</label>
+                <label className="block text-xs md:text-sm font-medium text-muted-foreground mb-1 md:mb-2">
+                  Adults (Max: {community.totalCapacity})
+                </label>
                 <div className="relative">
                   <Users className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 h-4 md:h-5 w-4 md:w-5 text-muted-foreground" />
-                  <select
+                  <input
+                    type="number"
+                    min="1"
+                    max={community.totalCapacity}
                     value={adults}
-                    onChange={(e) => setAdults(parseInt(e.target.value))}
-                    className="w-full pl-8 md:pl-10 pr-2 md:pr-4 py-2 md:py-2.5 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-background text-card-foreground"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                      <option key={num} value={num}>
-                        {num} {num === 1 ? 'Adult' : 'Adults'}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 1;
+                      if (value >= 1 && value <= community.totalCapacity) {
+                        setAdults(value);
+                      }
+                    }}
+                    className="w-full pl-8 md:pl-10 pr-2 md:pr-4 py-2 md:py-2.5 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-card-foreground"
+                    placeholder={`1-${community.totalCapacity}`}
+                  />
                 </div>
               </div>
 
@@ -776,14 +782,21 @@ export default function CommunityDetailPage() {
               <div className="text-center mb-10">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full mb-4">
                   <Home className="h-4 w-4" />
-                  <span className="text-sm font-semibold">{homestayDetails.length} Partner Homestays</span>
+                  <span className="text-sm font-semibold">{homestayDetails.length} Family Homestays</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">
-                  Choose Your Perfect Stay
+                <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-4">
+                  Meet Your Host Families
                 </h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Collaborative community approach - Experience authentic hospitality across our network of welcoming family homes
-                </p>
+                <div className="max-w-3xl mx-auto mb-8">
+                  <p className="text-muted-foreground leading-relaxed mb-3">
+                    Our community homestay brings together {homestayDetails.length} welcoming families who will host you during your stay.
+                    Each family opens their home to share authentic Nepali culture, home-cooked meals, and warm hospitality.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    When you book with our community, you'll be matched with one of these wonderful families based on availability and your preferences.
+                    Every homestay offers a unique experience while maintaining the high standards of comfort and authenticity we're known for.
+                  </p>
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {homestayDetails.map((homestay, index) => {
@@ -873,7 +886,7 @@ export default function CommunityDetailPage() {
                             <p className="text-[10px] text-muted-foreground font-medium">Guests</p>
                           </div>
                           <div className="bg-gradient-to-br from-green-500/5 to-green-500/10 p-3 rounded-lg border border-green-500/20 text-center">
-                            <Award className="h-4 w-4 text-green-600 mx-auto mb-1" />
+                            <Sparkles className="h-4 w-4 text-green-600 mx-auto mb-1" />
                             <p className="text-lg font-bold text-card-foreground">{facilitiesCount}</p>
                             <p className="text-[10px] text-muted-foreground font-medium">Amenities</p>
                           </div>
@@ -906,7 +919,7 @@ export default function CommunityDetailPage() {
 
                         {/* Host Information */}
                         {homestay.owner && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg mb-4">
+                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
                             <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white text-sm font-bold">
                                 {homestay.owner.fullName?.charAt(0) || 'H'}
@@ -920,12 +933,6 @@ export default function CommunityDetailPage() {
                             </div>
                           </div>
                         )}
-
-                        {/* View Details Button */}
-                        <button className="w-full px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold text-sm flex items-center justify-center gap-2 group-hover:shadow-lg">
-                          <span>View Details</span>
-                          <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                        </button>
                       </div>
                     </motion.div>
                   );
