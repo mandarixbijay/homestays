@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { communityAPI, Community, Homestay } from '@/lib/api/community';
 import { publicBlogApi } from '@/lib/api/public-blog-api';
+import { extractCommunityId } from '@/lib/utils/slug';
 import {
   MapPin,
   Users,
@@ -95,7 +96,9 @@ const MealIcons = {
 export default function CommunityDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const communityId = parseInt(params.id as string);
+
+  // Extract ID from slug (supports both slug and numeric ID formats)
+  const communityId = extractCommunityId(params.id as string);
 
   const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
@@ -121,7 +124,64 @@ export default function CommunityDetailPage() {
     }
   }, [community]);
 
+  // Update meta tags for social media sharing
+  useEffect(() => {
+    if (!community) return;
+
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const ogImage = community.images && community.images.length > 0
+      ? community.images[0]
+      : 'https://www.nepalhomestays.com/images/og-default.jpg';
+
+    const description = `${community.description.slice(0, 155)}... Experience authentic Nepali hospitality with ${community.homestays.length} partner homestays.`;
+
+    // Update document title
+    document.title = `${community.name} - Community Homestays | Nepal Homestays`;
+
+    // Update or create meta tags
+    const updateMetaTag = (property: string, content: string, isName = false) => {
+      const attribute = isName ? 'name' : 'property';
+      let meta = document.querySelector(`meta[${attribute}="${property}"]`);
+
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute(attribute, property);
+        document.head.appendChild(meta);
+      }
+
+      meta.setAttribute('content', content);
+    };
+
+    // Open Graph tags
+    updateMetaTag('og:title', `${community.name} - Community Homestays`);
+    updateMetaTag('og:description', description);
+    updateMetaTag('og:image', ogImage);
+    updateMetaTag('og:url', currentUrl);
+    updateMetaTag('og:type', 'website');
+    updateMetaTag('og:site_name', 'Nepal Homestays');
+
+    // Twitter Card tags
+    updateMetaTag('twitter:card', 'summary_large_image', true);
+    updateMetaTag('twitter:title', `${community.name} - Community Homestays`, true);
+    updateMetaTag('twitter:description', description, true);
+    updateMetaTag('twitter:image', ogImage, true);
+
+    // Standard meta tags
+    updateMetaTag('description', description, true);
+    updateMetaTag('keywords', `${community.name}, community homestays, Nepal, authentic travel, cultural tourism, ${community.homestays.length} homestays`, true);
+
+    return () => {
+      // Cleanup: reset to default title on unmount
+      document.title = 'Nepal Homestays';
+    };
+  }, [community]);
+
   const fetchCommunity = async () => {
+    if (!communityId) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const data = await communityAPI.getCommunity(communityId);
