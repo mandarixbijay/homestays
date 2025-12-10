@@ -67,7 +67,7 @@ export default function HostDashboardLayout({
   ];
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login" });
+    await signOut({ callbackUrl: "/signin" });
   };
 
   return (
