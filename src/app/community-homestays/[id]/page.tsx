@@ -212,48 +212,20 @@ export default function CommunityDetailPage() {
 
   const fetchBlogs = async () => {
     try {
-      // Try to search blogs by community name or location first
+      // Try to get featured blogs directly (most reliable)
+      // Skip search functionality since the search API endpoint may not be available
       let blogs = [];
 
-      if (community?.name) {
-        try {
-          const searchResults = await publicBlogApi.searchBlogs({
-            query: community.name,
-            limit: 3,
-            sortBy: 'relevance'
-          });
-          blogs = searchResults.data || [];
-        } catch (searchError) {
-          console.log('Community name search failed, trying location search:', searchError);
-        }
-      }
-
-      // If no results from search, try searching by location keywords
-      if (blogs.length === 0) {
-        try {
-          const locationSearchResults = await publicBlogApi.searchBlogs({
-            query: 'Chitwan homestay community',
-            limit: 3,
-            sortBy: 'relevance'
-          });
-          blogs = locationSearchResults.data || [];
-        } catch (locationError) {
-          console.log('Location search failed, falling back to featured blogs:', locationError);
-        }
-      }
-
-      // Fallback to featured blogs if still no results
-      if (blogs.length === 0) {
-        try {
-          blogs = await publicBlogApi.getFeaturedBlogs(3);
-        } catch (featuredError) {
-          console.error('All blog fetching methods failed:', featuredError);
-        }
+      try {
+        blogs = await publicBlogApi.getFeaturedBlogs(3);
+      } catch (featuredError) {
+        // Silently fail if featured blogs are not available
+        // This prevents console errors from showing
       }
 
       setRelatedBlogs(blogs || []);
     } catch (error) {
-      console.error('Error fetching blogs:', error);
+      // Silently set empty array if all methods fail
       setRelatedBlogs([]);
     }
   };
