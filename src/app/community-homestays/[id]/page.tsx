@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { communityAPI, Community, Homestay } from '@/lib/api/community';
+import { communityAPI, Community, Homestay, CommunityAvailabilityResponse } from '@/lib/api/community';
 import { publicBlogApi } from '@/lib/api/public-blog-api';
 import { extractCommunityId } from '@/lib/utils/slug';
 import {
@@ -38,6 +38,7 @@ import {
   Copy,
   ExternalLink,
   Sparkles,
+  Heart,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -113,6 +114,9 @@ export default function CommunityDetailPage() {
   const [copySuccess, setCopySuccess] = useState(false);
   const [relatedBlogs, setRelatedBlogs] = useState<any[]>([]);
   const [isCheckAvailabilityVisible, setIsCheckAvailabilityVisible] = useState(false);
+  const [availabilityResult, setAvailabilityResult] = useState<CommunityAvailabilityResponse | null>(null);
+  const [availabilityError, setAvailabilityError] = useState<string>('');
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
 
   useEffect(() => {
     fetchCommunity();
@@ -251,6 +255,60 @@ export default function CommunityDetailPage() {
           console.error('Failed to copy:', err);
         }
         break;
+    }
+  };
+
+  const handleCheckAvailability = async () => {
+    // Validate inputs
+    if (!checkIn || !checkOut) {
+      setAvailabilityError('Please select check-in and check-out dates');
+      return;
+    }
+
+    if (!communityId || !community) {
+      setAvailabilityError('Community information not available');
+      return;
+    }
+
+    if (adults < 1 || adults > community.totalCapacity) {
+      setAvailabilityError(`Number of adults must be between 1 and ${community.totalCapacity}`);
+      return;
+    }
+
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today) {
+      setAvailabilityError('Check-in date cannot be in the past');
+      return;
+    }
+
+    if (checkOutDate <= checkInDate) {
+      setAvailabilityError('Check-out date must be after check-in date');
+      return;
+    }
+
+    // Clear previous results and errors
+    setAvailabilityError('');
+    setAvailabilityResult(null);
+    setIsCheckingAvailability(true);
+
+    try {
+      const result = await communityAPI.checkCommunityAvailability({
+        communityId,
+        checkInDate: checkIn,
+        checkOutDate: checkOut,
+        totalGuests: adults,
+      });
+
+      setAvailabilityResult(result);
+    } catch (error: any) {
+      console.error('Error checking availability:', error);
+      setAvailabilityError(error.message || 'Failed to check availability. Please try again.');
+    } finally {
+      setIsCheckingAvailability(false);
     }
   };
 
@@ -637,10 +695,24 @@ export default function CommunityDetailPage() {
               </div>
 
               <div className="flex items-end">
-                <button className="w-full px-4 md:px-6 py-2 md:py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold flex items-center justify-center gap-2 text-sm md:text-base">
-                  <Search className="h-4 md:h-5 w-4 md:w-5" />
-                  <span className="hidden sm:inline">Search</span>
-                  <span className="sm:hidden">Go</span>
+                <button
+                  onClick={handleCheckAvailability}
+                  disabled={isCheckingAvailability}
+                  className="w-full px-4 md:px-6 py-2 md:py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold flex items-center justify-center gap-2 text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isCheckingAvailability ? (
+                    <>
+                      <Loader2 className="h-4 md:h-5 w-4 md:w-5 animate-spin" />
+                      <span className="hidden sm:inline">Checking...</span>
+                      <span className="sm:hidden">...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Search className="h-4 md:h-5 w-4 md:w-5" />
+                      <span className="hidden sm:inline">Check</span>
+                      <span className="sm:hidden">Go</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -649,6 +721,137 @@ export default function CommunityDetailPage() {
 
         {/* Spacer for fixed bottom bar on mobile */}
         <div className="h-32 md:h-0"></div>
+
+        {/* Availability Results Section */}
+        {(availabilityResult || availabilityError) && (
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">
+            {availabilityError && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="bg-red-100 p-2 rounded-lg">
+                    <ExternalLink className="h-5 w-5 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-red-900 mb-1">Availability Check Failed</h3>
+                    <p className="text-red-700 text-sm">{availabilityError}</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {availabilityResult && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`${
+                  availabilityResult.isAvailable
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-orange-50 border-orange-200'
+                } border rounded-xl p-6 mb-6`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`${
+                    availabilityResult.isAvailable ? 'bg-green-100' : 'bg-orange-100'
+                  } p-3 rounded-lg`}>
+                    {availabilityResult.isAvailable ? (
+                      <Check className="h-6 w-6 text-green-600" />
+                    ) : (
+                      <ExternalLink className="h-6 w-6 text-orange-600" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className={`text-xl font-bold mb-2 ${
+                      availabilityResult.isAvailable ? 'text-green-900' : 'text-orange-900'
+                    }`}>
+                      {availabilityResult.isAvailable
+                        ? '✓ Available for Your Dates!'
+                        : 'Limited Availability'}
+                    </h3>
+                    <p className={`text-sm mb-4 ${
+                      availabilityResult.isAvailable ? 'text-green-700' : 'text-orange-700'
+                    }`}>
+                      {availabilityResult.isAvailable
+                        ? `We can accommodate ${availabilityResult.requestedGuests} guest${availabilityResult.requestedGuests > 1 ? 's' : ''} for ${availabilityResult.nights} night${availabilityResult.nights > 1 ? 's' : ''}.`
+                        : `We have limited space available. Only ${availabilityResult.availableCapacity} out of ${availabilityResult.requestedGuests} guests can be accommodated.`}
+                    </p>
+
+                    {/* Pricing Details */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="bg-white rounded-lg p-4 border border-gray-200">
+                        <p className="text-xs text-muted-foreground mb-1">Price per Person</p>
+                        <p className="text-lg font-bold text-card-foreground">
+                          {availabilityResult.currency} {availabilityResult.pricePerPerson}
+                        </p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 border border-gray-200">
+                        <p className="text-xs text-muted-foreground mb-1">Number of Nights</p>
+                        <p className="text-lg font-bold text-card-foreground">{availabilityResult.nights}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 border border-gray-200">
+                        <p className="text-xs text-muted-foreground mb-1">Total Price</p>
+                        <p className="text-lg font-bold text-primary">
+                          {availabilityResult.currency} {availabilityResult.totalPrice}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Available Rooms */}
+                    {availabilityResult.availableRooms.length > 0 && (
+                      <div className="bg-white rounded-lg p-4 border border-gray-200">
+                        <h4 className="font-semibold text-card-foreground mb-3 flex items-center gap-2">
+                          <Home className="h-4 w-4 text-primary" />
+                          Available Rooms
+                        </h4>
+                        <div className="space-y-2">
+                          {availabilityResult.availableRooms.map((room, index) => (
+                            <div
+                              key={`${room.homestayId}-${room.roomId}-${index}`}
+                              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                            >
+                              <div>
+                                <p className="font-medium text-sm text-card-foreground">{room.roomName}</p>
+                                <p className="text-xs text-muted-foreground">{room.homestayName}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground">Capacity</p>
+                                <p className="font-semibold text-sm text-card-foreground">
+                                  {room.availableSpace} / {room.maxOccupancy}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Book Now Button */}
+                    {availabilityResult.isAvailable && (
+                      <div className="mt-4 flex gap-3">
+                        <button className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold flex items-center justify-center gap-2">
+                          <Calendar className="h-5 w-5" />
+                          Book Now
+                        </button>
+                        <button
+                          onClick={() => {
+                            setAvailabilityResult(null);
+                            setAvailabilityError('');
+                          }}
+                          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+                        >
+                          Check Different Dates
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 space-y-12">
@@ -699,6 +902,33 @@ export default function CommunityDetailPage() {
               </div>
             </section>
           )}
+
+          {/* Amenities Section */}
+          <section>
+            <div className="text-center mb-8">
+              <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">Amenities</h2>
+              <p className="text-muted-foreground">Comfortable facilities for a pleasant stay</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {amenities.map((amenity, index) => (
+                <motion.div
+                  key={amenity.name}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ y: -4 }}
+                  className="bg-gradient-to-br from-card to-primary/5 rounded-xl p-5 text-center shadow-sm hover:shadow-md transition-all border border-border"
+                >
+                  <div className="bg-primary/10 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <amenity.icon className="h-7 w-7 text-primary" />
+                  </div>
+                  <h4 className="font-semibold text-card-foreground text-sm mb-1">{amenity.name}</h4>
+                  <p className="text-xs text-muted-foreground">{amenity.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          </section>
 
           {/* Activities Section - Horizontal Scroll with Real Images */}
           {community.activities && community.activities.length > 0 && (
@@ -925,7 +1155,7 @@ export default function CommunityDetailPage() {
                   </div>
                   <h3 className="text-lg font-bold text-card-foreground mb-2">Authentic Cuisine</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Enjoy traditional {community.meals.length}+ meal options prepared with locally sourced ingredients and family recipes passed down through generations.
+                    Enjoy traditional {community.meals.length > 0 ? `${community.meals.length}+` : ''} meal options prepared with locally sourced ingredients and family recipes passed down through generations.
                   </p>
                 </motion.div>
 
@@ -942,7 +1172,7 @@ export default function CommunityDetailPage() {
                   </div>
                   <h3 className="text-lg font-bold text-card-foreground mb-2">Cultural Experiences</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Participate in {community.activities.length}+ authentic activities including traditional dances, local crafts, and village tours.
+                    Participate in {community.activities.length > 0 ? `${community.activities.length}+` : ''} authentic activities including traditional dances, local crafts, and village tours.
                   </p>
                 </motion.div>
 
@@ -1156,33 +1386,6 @@ export default function CommunityDetailPage() {
                   </div>
                 </div>
               </motion.div>
-            </div>
-          </section>
-
-          {/* Amenities Section */}
-          <section>
-            <div className="text-center mb-8">
-              <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">Amenities</h2>
-              <p className="text-muted-foreground">Comfortable facilities for a pleasant stay</p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {amenities.map((amenity, index) => (
-                <motion.div
-                  key={amenity.name}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ y: -4 }}
-                  className="bg-gradient-to-br from-card to-primary/5 rounded-xl p-5 text-center shadow-sm hover:shadow-md transition-all border border-border"
-                >
-                  <div className="bg-primary/10 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <amenity.icon className="h-7 w-7 text-primary" />
-                  </div>
-                  <h4 className="font-semibold text-card-foreground text-sm mb-1">{amenity.name}</h4>
-                  <p className="text-xs text-muted-foreground">{amenity.description}</p>
-                </motion.div>
-              ))}
             </div>
           </section>
 
