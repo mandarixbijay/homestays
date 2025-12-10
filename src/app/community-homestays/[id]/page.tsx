@@ -776,7 +776,7 @@ export default function CommunityDetailPage() {
             </section>
           )}
 
-          {/* Homestays Section - Enhanced with Real Data */}
+          {/* Homestays Section - Gallery Format */}
           {homestayDetails.length > 0 && (
             <section>
               <div className="text-center mb-10">
@@ -798,141 +798,95 @@ export default function CommunityDetailPage() {
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+              {/* Staggered Gallery Grid */}
+              <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
                 {homestayDetails.map((homestay, index) => {
                   const mainImage = homestay.images?.find(img => img.isMain)?.url || homestay.images?.[0]?.url || homestay.imageSrc;
-                  const totalCapacity = homestay.rooms?.reduce((sum, room) => sum + (room.capacity || 0), 0) || 0;
-                  const facilitiesCount = homestay.facilities?.length || 0;
-                  const hasRating = homestay.rating && homestay.rating > 0;
+                  // Vary heights for staggered effect
+                  const heights = ['h-64', 'h-72', 'h-80', 'h-64', 'h-72', 'h-80'];
+                  const heightClass = heights[index % heights.length];
 
                   return (
                     <motion.div
                       key={homestay.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.05 }}
-                      whileHover={{ y: -8 }}
-                      className="group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-border"
+                      className="break-inside-avoid mb-4"
                     >
-                      {/* Homestay Image with Overlay Info */}
-                      <div className="relative h-56 overflow-hidden">
-                        {mainImage ? (
-                          <Image
-                            src={mainImage}
-                            alt={homestay.name}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-primary/10 via-accent/10 to-muted/10 flex items-center justify-center">
-                            <Home className="h-20 w-20 text-muted-foreground opacity-50" />
-                          </div>
-                        )}
+                      <div className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer">
+                        <div className={`relative ${heightClass} overflow-hidden`}>
+                          {mainImage ? (
+                            <Image
+                              src={mainImage}
+                              alt={homestay.name}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-700"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/20 via-accent/20 to-muted/20 flex items-center justify-center">
+                              <Home className="h-16 w-16 text-muted-foreground opacity-50" />
+                            </div>
+                          )}
 
-                        {/* Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                          {/* Gradient Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
 
-                        {/* Top Badges */}
-                        <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
-                          <div className="flex flex-wrap gap-2">
+                          {/* Verification Badge */}
+                          <div className="absolute top-3 right-3">
                             <div className="bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
                               <div className="flex items-center gap-1.5">
-                                <Award className="h-3.5 w-3.5 text-primary" />
+                                <Award className="h-3 w-3 text-primary" />
                                 <span className="text-xs font-bold text-primary">Verified</span>
                               </div>
                             </div>
-                            {hasRating && (
-                              <div className="bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
-                                  <span className="text-xs font-bold text-card-foreground">{homestay.rating.toFixed(1)}</span>
-                                </div>
+                          </div>
+
+                          {/* Homestay Name - Bottom */}
+                          <div className="absolute bottom-0 left-0 right-0 p-4">
+                            <h3 className="text-lg font-bold text-white mb-2 drop-shadow-lg line-clamp-2">
+                              {homestay.name}
+                            </h3>
+                            <div className="flex items-center gap-2 text-white/90">
+                              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                              <span className="text-xs line-clamp-1">{homestay.address}</span>
+                            </div>
+                            {homestay.rating && homestay.rating > 0 && (
+                              <div className="flex items-center gap-1 mt-2">
+                                <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400" />
+                                <span className="text-sm font-semibold text-white">{homestay.rating.toFixed(1)}</span>
+                                <span className="text-xs text-white/70 ml-1">• Hosted by {homestay.owner?.fullName || 'Family'}</span>
                               </div>
                             )}
                           </div>
-                          {homestay.images && homestay.images.length > 1 && (
-                            <div className="bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                              <span className="text-xs font-medium text-white">+{homestay.images.length - 1}</span>
+
+                          {/* Hover Overlay with Quick Info */}
+                          <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6">
+                            <div className="text-center space-y-3">
+                              <div className="flex items-center justify-center gap-6">
+                                <div className="text-center">
+                                  <p className="text-2xl font-bold text-white">{homestay.rooms?.length || 0}</p>
+                                  <p className="text-xs text-white/80">Rooms</p>
+                                </div>
+                                <div className="h-8 w-px bg-white/30"></div>
+                                <div className="text-center">
+                                  <p className="text-2xl font-bold text-white">
+                                    {homestay.rooms?.reduce((sum, room) => sum + (room.capacity || 0), 0) || 0}
+                                  </p>
+                                  <p className="text-xs text-white/80">Guests</p>
+                                </div>
+                                <div className="h-8 w-px bg-white/30"></div>
+                                <div className="text-center">
+                                  <p className="text-2xl font-bold text-white">{homestay.facilities?.length || 0}</p>
+                                  <p className="text-xs text-white/80">Amenities</p>
+                                </div>
+                              </div>
                             </div>
-                          )}
-                        </div>
-
-                        {/* Bottom: Homestay Name */}
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <h3 className="text-lg font-bold text-white line-clamp-2 mb-1 drop-shadow-lg">
-                            {homestay.name}
-                          </h3>
-                          <div className="flex items-center gap-1.5 text-white/90">
-                            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                            <span className="text-xs line-clamp-1">{homestay.address}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Homestay Content */}
-                      <div className="p-5">
-                        {/* Quick Stats */}
-                        <div className="grid grid-cols-3 gap-2 mb-4">
-                          <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-3 rounded-lg border border-primary/20 text-center">
-                            <Home className="h-4 w-4 text-primary mx-auto mb-1" />
-                            <p className="text-lg font-bold text-card-foreground">{homestay.rooms?.length || 0}</p>
-                            <p className="text-[10px] text-muted-foreground font-medium">Rooms</p>
-                          </div>
-                          <div className="bg-gradient-to-br from-accent/5 to-accent/10 p-3 rounded-lg border border-accent/20 text-center">
-                            <Users className="h-4 w-4 text-accent mx-auto mb-1" />
-                            <p className="text-lg font-bold text-card-foreground">{totalCapacity}</p>
-                            <p className="text-[10px] text-muted-foreground font-medium">Guests</p>
-                          </div>
-                          <div className="bg-gradient-to-br from-green-500/5 to-green-500/10 p-3 rounded-lg border border-green-500/20 text-center">
-                            <Sparkles className="h-4 w-4 text-green-600 mx-auto mb-1" />
-                            <p className="text-lg font-bold text-card-foreground">{facilitiesCount}</p>
-                            <p className="text-[10px] text-muted-foreground font-medium">Amenities</p>
                           </div>
                         </div>
-
-                        {/* Key Features */}
-                        {homestay.facilities && homestay.facilities.length > 0 && (
-                          <div className="mb-4">
-                            <div className="flex flex-wrap gap-1.5">
-                              {homestay.facilities.slice(0, 3).map((facility: any, idx: number) => {
-                                const facilityName = facility.name || facility;
-                                return (
-                                  <span
-                                    key={idx}
-                                    className="inline-flex items-center gap-1 px-2 py-1 bg-muted/50 text-muted-foreground rounded-md text-xs"
-                                  >
-                                    <Check className="h-3 w-3 text-primary" />
-                                    {String(facilityName)}
-                                  </span>
-                                );
-                              })}
-                              {homestay.facilities.length > 3 && (
-                                <span className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-semibold">
-                                  +{homestay.facilities.length - 3} more
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Host Information */}
-                        {homestay.owner && (
-                          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-white text-sm font-bold">
-                                {homestay.owner.fullName?.charAt(0) || 'H'}
-                              </span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs text-muted-foreground">Hosted by</p>
-                              <p className="text-sm font-semibold text-card-foreground truncate">
-                                {homestay.owner.fullName || 'Host Family'}
-                              </p>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </motion.div>
                   );
@@ -940,6 +894,270 @@ export default function CommunityDetailPage() {
               </div>
             </section>
           )}
+
+          {/* Homestay Highlights Section */}
+          {community && (
+            <section>
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full mb-4">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-sm font-semibold">What Makes Us Special</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">
+                  Community Highlights
+                </h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Discover what makes our community homestay experience truly authentic and memorable
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Highlight 1: Local Cuisine */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0 }}
+                  className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-2xl p-6 border border-orange-500/20 hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <Utensils className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-card-foreground mb-2">Authentic Cuisine</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Enjoy traditional {community.meals.length}+ meal options prepared with locally sourced ingredients and family recipes passed down through generations.
+                  </p>
+                </motion.div>
+
+                {/* Highlight 2: Cultural Activities */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl p-6 border border-blue-500/20 hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <Activity className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-card-foreground mb-2">Cultural Experiences</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Participate in {community.activities.length}+ authentic activities including traditional dances, local crafts, and village tours.
+                  </p>
+                </motion.div>
+
+                {/* Highlight 3: Community Living */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-2xl p-6 border border-green-500/20 hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <Users className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-card-foreground mb-2">Community Living</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Experience life as part of a {community.totalCapacity}-person community with {homestayDetails.length} welcoming families working together.
+                  </p>
+                </motion.div>
+
+                {/* Highlight 4: Sustainable Tourism */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                  className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-2xl p-6 border border-purple-500/20 hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <Heart className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-card-foreground mb-2">Sustainable Tourism</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Your stay directly supports local families and preserves cultural heritage while promoting responsible travel practices.
+                  </p>
+                </motion.div>
+              </div>
+            </section>
+          )}
+
+          {/* Nearby Attractions Section */}
+          <section>
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full mb-4">
+                <MapPin className="h-4 w-4" />
+                <span className="text-sm font-semibold">Explore the Area</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-card-foreground mb-3">
+                Nearby Attractions
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Discover amazing places and experiences within reach of our community
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Attraction 1 */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="group relative bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-border"
+              >
+                <div className="flex flex-col md:flex-row">
+                  <div className="relative md:w-2/5 h-48 md:h-auto overflow-hidden">
+                    <Image
+                      src="https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=800&h=600&fit=crop"
+                      alt="Chitwan National Park"
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      unoptimized
+                    />
+                    <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <span className="text-xs font-bold text-white">5 km</span>
+                    </div>
+                  </div>
+                  <div className="flex-1 p-6">
+                    <h3 className="text-xl font-bold text-card-foreground mb-2">Chitwan National Park</h3>
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                      UNESCO World Heritage Site famous for rhinoceros, Bengal tigers, and diverse wildlife. Enjoy jungle safaris, canoe rides, and bird watching.
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>15 min drive</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+                        <span className="font-semibold">4.8</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Attraction 2 */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="group relative bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-border"
+              >
+                <div className="flex flex-col md:flex-row">
+                  <div className="relative md:w-2/5 h-48 md:h-auto overflow-hidden">
+                    <Image
+                      src="https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=800&h=600&fit=crop"
+                      alt="Rapti River"
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      unoptimized
+                    />
+                    <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <span className="text-xs font-bold text-white">2 km</span>
+                    </div>
+                  </div>
+                  <div className="flex-1 p-6">
+                    <h3 className="text-xl font-bold text-card-foreground mb-2">Rapti River</h3>
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                      Scenic river perfect for canoeing, boat rides, and sunset views. Watch crocodiles basking and enjoy peaceful riverside walks.
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>5 min walk</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+                        <span className="font-semibold">4.6</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Attraction 3 */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="group relative bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-border"
+              >
+                <div className="flex flex-col md:flex-row">
+                  <div className="relative md:w-2/5 h-48 md:h-auto overflow-hidden">
+                    <Image
+                      src="https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800&h=600&fit=crop"
+                      alt="Tharu Cultural Museum"
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      unoptimized
+                    />
+                    <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <span className="text-xs font-bold text-white">3 km</span>
+                    </div>
+                  </div>
+                  <div className="flex-1 p-6">
+                    <h3 className="text-xl font-bold text-card-foreground mb-2">Tharu Cultural Museum</h3>
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                      Learn about indigenous Tharu culture, traditional lifestyle, and heritage. Experience authentic dance performances and cultural exhibits.
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>10 min drive</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+                        <span className="font-semibold">4.5</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Attraction 4 */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="group relative bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-border"
+              >
+                <div className="flex flex-col md:flex-row">
+                  <div className="relative md:w-2/5 h-48 md:h-auto overflow-hidden">
+                    <Image
+                      src="https://images.unsplash.com/photo-1551244072-5d12893278ab?w=800&h=600&fit=crop"
+                      alt="Elephant Breeding Center"
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      unoptimized
+                    />
+                    <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <span className="text-xs font-bold text-white">8 km</span>
+                    </div>
+                  </div>
+                  <div className="flex-1 p-6">
+                    <h3 className="text-xl font-bold text-card-foreground mb-2">Elephant Breeding Center</h3>
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                      Visit baby elephants and learn about conservation efforts. Observe elephants bathing in the river and enjoy close encounters.
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>20 min drive</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+                        <span className="font-semibold">4.7</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </section>
 
           {/* Amenities Section */}
           <section>
