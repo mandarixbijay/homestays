@@ -334,11 +334,11 @@ function CommunityCard({ community, index }: { community: Community; index: numb
     ? community.images[0]
     : '/images/placeholder-homestay.jpg';
 
-  // Extract location from community address
+  // Extract location from first homestay's address (if available)
   let location = 'nepal';
-  if (community.address) {
+  if (community.homestays && community.homestays.length > 0 && community.homestays[0].address) {
     // Take the first part before comma, or the whole address if no comma
-    const addressParts = community.address.split(',');
+    const addressParts = community.homestays[0].address.split(',');
     location = addressParts[0].trim();
   }
 
