@@ -66,6 +66,7 @@ export default function CommunityManagerManagement() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [showPasswordField, setShowPasswordField] = useState(false);
 
   useEffect(() => {
     fetchManagers();
@@ -246,6 +247,8 @@ export default function CommunityManagerManagement() {
         cleanData.password = formData.password.trim();
       }
 
+      console.log('Submitting community manager data:', { ...cleanData, password: cleanData.password ? '***' : undefined });
+
       if (editingManager) {
         await adminApi.updateCommunityManager(editingManager.id, cleanData);
         alert('Community manager updated successfully');
@@ -278,6 +281,7 @@ export default function CommunityManagerManagement() {
       password: '', // Don't populate password when editing
     });
     setImagePreview(manager.image || '');
+    setShowPasswordField(false); // Hide password field by default when editing
     setShowForm(true);
   };
 
@@ -309,6 +313,7 @@ export default function CommunityManagerManagement() {
     setFormErrors({});
     setEditingManager(null);
     setImagePreview('');
+    setShowPasswordField(false);
   };
 
   const handleCloseForm = () => {
@@ -750,32 +755,64 @@ export default function CommunityManagerManagement() {
                     </div>
 
                     {/* Password Field */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Password {!editingManager && <span className="text-red-500">*</span>}
-                        {editingManager && <span className="text-xs font-normal text-gray-500 ml-1">(Leave empty to keep current)</span>}
-                      </label>
-                      <input
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all ${
-                          formErrors.password ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white'
-                        }`}
-                        placeholder="Enter password (min 8 characters)"
-                      />
-                      {formErrors.password && (
-                        <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                          <XCircle className="h-4 w-4" />
-                          {formErrors.password}
+                    {(!editingManager || showPasswordField) && (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Password {!editingManager && <span className="text-red-500">*</span>}
+                          {editingManager && <span className="text-xs font-normal text-gray-500 ml-1">(Optional - Leave empty to keep current)</span>}
+                        </label>
+                        <input
+                          type="password"
+                          value={formData.password}
+                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                          className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all ${
+                            formErrors.password ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white'
+                          }`}
+                          placeholder="Enter password (min 8 characters)"
+                        />
+                        {formErrors.password && (
+                          <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                            <XCircle className="h-4 w-4" />
+                            {formErrors.password}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-600 mt-2">
+                          {editingManager
+                            ? 'Password must be at least 8 characters if you want to update it'
+                            : 'Password must be at least 8 characters'}
                         </p>
-                      )}
-                      <p className="text-xs text-gray-600 mt-2">
-                        {editingManager
-                          ? 'Password must be at least 8 characters if you want to update it'
-                          : 'Password must be at least 8 characters'}
-                      </p>
-                    </div>
+                        {editingManager && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowPasswordField(false);
+                              setFormData({ ...formData, password: '' });
+                              setFormErrors({ ...formErrors, password: undefined });
+                            }}
+                            className="mt-2 text-sm text-gray-600 hover:text-gray-800 underline"
+                          >
+                            Cancel password change
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Change Password Button (only show when editing and password field is hidden) */}
+                    {editingManager && !showPasswordField && (
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswordField(true)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                          </svg>
+                          Change Password
+                        </button>
+                        <p className="text-xs text-gray-500 mt-2">Click to update the manager's password</p>
+                      </div>
+                    )}
                   </div>
 
                     {/* Address Section */}

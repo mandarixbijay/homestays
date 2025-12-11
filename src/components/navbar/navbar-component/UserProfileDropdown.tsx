@@ -45,6 +45,8 @@ const UserProfileDropdown = ({ isMobile = false }: UserProfileDropdownProps) => 
         return { href: '/host/dashboard', label: 'Host Dashboard', icon: <Home className="h-4 w-4" /> };
       case 'ADMIN':
         return { href: '/admin', label: 'Admin Panel', icon: <Shield className="h-4 w-4" /> };
+      case 'COMMUNITY_MANAGER':
+        return { href: '/community-manager-dashboard', label: 'Manager Dashboard', icon: <Home className="h-4 w-4" /> };
       case 'GUEST':
       default:
         return { href: '/account', label: 'My Account', icon: <UserCircle className="h-4 w-4" /> };
