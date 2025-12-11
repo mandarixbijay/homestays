@@ -776,8 +776,6 @@ export default function CommunityManagerManagement() {
                           : 'Password must be at least 8 characters'}
                       </p>
                     </div>
-                  </div>
-
                     {/* Address Section */}
                     <div className="space-y-5">
                       <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 border-b pb-2">
