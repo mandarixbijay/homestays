@@ -787,7 +787,8 @@ export default function CommunityManagerManagement() {
                             onClick={() => {
                               setShowPasswordField(false);
                               setFormData({ ...formData, password: '' });
-                              setFormErrors({ ...formErrors, password: undefined });
+                              const { password, ...rest } = formErrors;
+                              setFormErrors(rest);
                             }}
                             className="mt-2 text-sm text-gray-600 hover:text-gray-800 underline"
                           >
@@ -813,10 +814,9 @@ export default function CommunityManagerManagement() {
                         <p className="text-xs text-gray-500 mt-2">Click to update the manager's password</p>
                       </div>
                     )}
-                  </div>
 
-                    {/* Address Section */}
-                    <div className="space-y-5">
+                  {/* Address Section */}
+                  <div className="space-y-5">
                       <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 border-b pb-2">
                         <MapPin className="h-5 w-5 text-emerald-600" />
                         Address <span className="text-xs font-normal text-gray-500 ml-auto">(Optional)</span>
