@@ -200,6 +200,8 @@ export default function CommunityManagement() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [deletingImageIndex, setDeletingImageIndex] = useState<number | null>(null);
+  const [uploadingActivityImages, setUploadingActivityImages] = useState<{ [key: number]: boolean }>({});
+  const [deletingActivityImage, setDeletingActivityImage] = useState<{ activityIndex: number; imageIndex: number } | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -625,6 +627,151 @@ export default function CommunityManagement() {
       alert(error.message || 'Failed to delete image');
     } finally {
       setDeletingImageIndex(null);
+    }
+  };
+
+  const handleActivityImageUpload = async (activityIndex: number, files: FileList) => {
+    try {
+      setUploadingActivityImages({ ...uploadingActivityImages, [activityIndex]: true });
+
+      const session = await getSession();
+      const accessToken = session?.user?.accessToken;
+
+      if (!accessToken) {
+        throw new Error('No access token found. Please login again.');
+      }
+
+      const API_BASE_URL = typeof window !== 'undefined'
+        ? '/api/backend'
+        : 'http://13.61.8.56:3001';
+
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+
+        const response = await fetch(`${API_BASE_URL}/s3/upload/communities`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: uploadFormData,
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
+        }
+
+        const responseText = await response.text();
+        let imageUrl: string;
+        try {
+          const result = JSON.parse(responseText);
+          imageUrl = result.url || result.data?.url || result.fileUrl || result;
+        } catch (e) {
+          imageUrl = responseText.trim();
+        }
+
+        if (!imageUrl || !imageUrl.startsWith('http')) {
+          throw new Error(`Invalid URL returned for ${file.name}`);
+        }
+
+        return imageUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      const updatedActivities = [...formData.activities];
+      updatedActivities[activityIndex] = {
+        ...updatedActivities[activityIndex],
+        images: [...(updatedActivities[activityIndex].images || []), ...uploadedUrls],
+      };
+
+      setFormData({ ...formData, activities: updatedActivities });
+      alert(`Successfully uploaded ${uploadedUrls.length} image(s)`);
+    } catch (error: any) {
+      console.error('Error uploading activity images:', error);
+      alert(error.message || 'Failed to upload images');
+    } finally {
+      setUploadingActivityImages({ ...uploadingActivityImages, [activityIndex]: false });
+    }
+  };
+
+  const handleActivityImageFileSelect = async (activityIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const validFiles: File[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      if (!file.type.startsWith('image/')) {
+        alert(`${file.name} is not an image file`);
+        continue;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`${file.name} is too large (max 5MB)`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) return;
+
+    const dataTransfer = new DataTransfer();
+    validFiles.forEach(file => dataTransfer.items.add(file));
+
+    await handleActivityImageUpload(activityIndex, dataTransfer.files);
+    e.target.value = '';
+  };
+
+  const handleDeleteActivityImage = async (activityIndex: number, imageIndex: number, imageUrl: string) => {
+    try {
+      setDeletingActivityImage({ activityIndex, imageIndex });
+
+      const urlParts = imageUrl.split('/');
+      const key = urlParts.slice(3).join('/');
+
+      if (!key) {
+        throw new Error('Invalid image URL');
+      }
+
+      const session = await getSession();
+      const accessToken = session?.user?.accessToken;
+
+      if (!accessToken) {
+        throw new Error('No access token found');
+      }
+
+      const API_BASE_URL = typeof window !== 'undefined'
+        ? '/api/backend'
+        : 'http://13.61.8.56:3001';
+
+      const response = await fetch(`${API_BASE_URL}/s3/delete/${encodeURIComponent(key)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete image from S3');
+      }
+
+      const updatedActivities = [...formData.activities];
+      updatedActivities[activityIndex] = {
+        ...updatedActivities[activityIndex],
+        images: (updatedActivities[activityIndex].images || []).filter((_, i) => i !== imageIndex),
+      };
+
+      setFormData({ ...formData, activities: updatedActivities });
+    } catch (error: any) {
+      console.error('Error deleting activity image:', error);
+      alert(error.message || 'Failed to delete image');
+    } finally {
+      setDeletingActivityImage(null);
     }
   };
 
@@ -1448,6 +1595,73 @@ export default function CommunityManagement() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3"
                           />
                         )}
+
+                        {/* Activity Images Upload */}
+                        <div className="mb-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="text-sm font-medium text-gray-700">Activity Images</label>
+                            <label
+                              className={`flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer ${
+                                uploadingActivityImages[idx] ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
+                            >
+                              {uploadingActivityImages[idx] ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  Uploading...
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="h-4 w-4" />
+                                  Upload Images
+                                </>
+                              )}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                className="hidden"
+                                onChange={(e) => handleActivityImageFileSelect(idx, e)}
+                                disabled={uploadingActivityImages[idx]}
+                              />
+                            </label>
+                          </div>
+
+                          {/* Display Activity Images */}
+                          {activity.images && activity.images.length > 0 && (
+                            <div className="grid grid-cols-3 gap-2">
+                              {activity.images.map((imgUrl, imgIdx) => (
+                                <div key={imgIdx} className="relative group">
+                                  <img
+                                    src={imgUrl}
+                                    alt={`Activity ${idx + 1} Image ${imgIdx + 1}`}
+                                    className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteActivityImage(idx, imgIdx, imgUrl)}
+                                    disabled={deletingActivityImage?.activityIndex === idx && deletingActivityImage?.imageIndex === imgIdx}
+                                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                                  >
+                                    {deletingActivityImage?.activityIndex === idx && deletingActivityImage?.imageIndex === imgIdx ? (
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : (
+                                      <Trash className="h-3 w-3" />
+                                    )}
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {(!activity.images || activity.images.length === 0) && !uploadingActivityImages[idx] && (
+                            <div className="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
+                              <Camera className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                              <p className="text-sm text-gray-500">No images uploaded yet</p>
+                            </div>
+                          )}
+                        </div>
+
                         <button
                           type="button"
                           onClick={() => removeActivity(idx)}

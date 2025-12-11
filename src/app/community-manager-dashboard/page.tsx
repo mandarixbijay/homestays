@@ -42,7 +42,7 @@ export default function CommunityManagerDashboard() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 text-emerald-500 animate-spin mx-auto mb-4" />
+          <Loader2 className="h-12 w-12 text-[#214B3F] animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function CommunityManagerDashboard() {
           <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={fetchStats}
-            className="px-6 py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors"
+            className="px-6 py-3 bg-[#214B3F] text-white rounded-xl hover:bg-[#1a3d32] transition-colors"
           >
             Try Again
           </button>
@@ -90,9 +90,9 @@ export default function CommunityManagerDashboard() {
       name: 'Confirmed Bookings',
       value: stats?.confirmedBookings || 0,
       icon: CheckCircle2,
-      color: 'from-emerald-500 to-emerald-600',
-      bgColor: 'bg-emerald-50',
-      textColor: 'text-emerald-600',
+      color: 'from-[#214B3F] to-[#1a3d32]',
+      bgColor: 'bg-[#214B3F]/10',
+      textColor: 'text-[#214B3F]',
       link: '/community-manager-dashboard/bookings?status=CONFIRMED',
     },
     {
@@ -144,7 +144,7 @@ export default function CommunityManagerDashboard() {
               transition={{ delay: index * 0.1 }}
             >
               <Link href={stat.link}>
-                <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-emerald-200 cursor-pointer">
+                <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-[#214B3F]/30 cursor-pointer">
                   <div className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -196,7 +196,7 @@ export default function CommunityManagerDashboard() {
             </Link>
 
             <Link href="/community-manager-dashboard/stats">
-              <button className="w-full flex items-center gap-3 px-4 py-4 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-700 rounded-xl hover:from-emerald-100 hover:to-emerald-200 transition-all shadow-md hover:shadow-lg">
+              <button className="w-full flex items-center gap-3 px-4 py-4 bg-[#214B3F]/10 text-[#214B3F] rounded-xl hover:bg-[#214B3F]/20 transition-all shadow-md hover:shadow-lg">
                 <TrendingUp className="h-5 w-5" />
                 <span className="font-medium">View Statistics</span>
               </button>
