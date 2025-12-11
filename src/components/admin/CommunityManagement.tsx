@@ -312,17 +312,14 @@ export default function CommunityManagement() {
     setSubmitting(true);
 
     try {
-      // Clean activities data - ensure images arrays are properly formatted
+      // Clean activities data - keep all fields, only clean images
       const cleanedActivities = formData.activities.map(activity => {
+        // Filter out empty image URLs
         const cleanedImages = activity.images?.filter(img => img && img.trim()) || [];
+
         return {
-          name: activity.name,
-          description: activity.description,
-          isIncluded: activity.isIncluded,
-          extraCost: activity.extraCost || undefined,
-          currency: activity.currency || undefined,
-          duration: activity.duration || undefined,
-          images: cleanedImages.length > 0 ? cleanedImages : undefined,
+          ...activity, // Keep all existing fields
+          images: cleanedImages, // Replace images with cleaned version
         };
       });
 
