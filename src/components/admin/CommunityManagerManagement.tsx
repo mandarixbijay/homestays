@@ -43,6 +43,7 @@ interface CommunityManagerFormData {
   email: string;
   alternatePhone?: string;
   address?: string;
+  password?: string;
 }
 
 export default function CommunityManagerManagement() {
@@ -59,6 +60,7 @@ export default function CommunityManagerManagement() {
     image: '',
     alternatePhone: '',
     address: '',
+    password: '',
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -105,6 +107,17 @@ export default function CommunityManagerManagement() {
       if (hasEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
         errors.email = 'Invalid email format';
       }
+    }
+
+    // Password validation - required when creating, optional when editing
+    if (!editingManager) {
+      if (!formData.password || formData.password.trim() === '') {
+        errors.password = 'Password is required';
+      } else if (formData.password.length < 8) {
+        errors.password = 'Password must be at least 8 characters';
+      }
+    } else if (formData.password && formData.password.trim() !== '' && formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters';
     }
 
     setFormErrors(errors);
@@ -215,7 +228,7 @@ export default function CommunityManagerManagement() {
 
     try {
       // Clean up the data - remove empty strings and convert to null/undefined
-      const cleanData = {
+      const cleanData: any = {
         fullName: formData.fullName.trim(),
         phone: formData.phone.trim(),
         email: formData.email.trim(),
@@ -223,6 +236,15 @@ export default function CommunityManagerManagement() {
         alternatePhone: formData.alternatePhone?.trim() || undefined,
         address: formData.address?.trim() || undefined,
       };
+
+      // Include password for create, or for update if it's provided
+      if (!editingManager) {
+        // Creating new manager - password is required
+        cleanData.password = formData.password?.trim();
+      } else if (formData.password && formData.password.trim()) {
+        // Updating existing manager - password is optional, only include if provided
+        cleanData.password = formData.password.trim();
+      }
 
       if (editingManager) {
         await adminApi.updateCommunityManager(editingManager.id, cleanData);
@@ -253,6 +275,7 @@ export default function CommunityManagerManagement() {
       email: manager.email,
       alternatePhone: manager.alternatePhone || '',
       address: manager.address || '',
+      password: '', // Don't populate password when editing
     });
     setImagePreview(manager.image || '');
     setShowForm(true);
@@ -281,6 +304,7 @@ export default function CommunityManagerManagement() {
       image: '',
       alternatePhone: '',
       address: '',
+      password: '',
     });
     setFormErrors({});
     setEditingManager(null);
@@ -724,6 +748,35 @@ export default function CommunityManagerManagement() {
                         />
                       </div>
                     </div>
+
+                    {/* Password Field */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Password {!editingManager && <span className="text-red-500">*</span>}
+                        {editingManager && <span className="text-xs font-normal text-gray-500 ml-1">(Leave empty to keep current)</span>}
+                      </label>
+                      <input
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all ${
+                          formErrors.password ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white'
+                        }`}
+                        placeholder="Enter password (min 8 characters)"
+                      />
+                      {formErrors.password && (
+                        <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                          <XCircle className="h-4 w-4" />
+                          {formErrors.password}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-600 mt-2">
+                        {editingManager
+                          ? 'Password must be at least 8 characters if you want to update it'
+                          : 'Password must be at least 8 characters'}
+                      </p>
+                    </div>
+                  </div>
 
                     {/* Address Section */}
                     <div className="space-y-5">
