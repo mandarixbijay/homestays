@@ -273,9 +273,8 @@ export default function CommunityManagement() {
       setCommunities(communitiesData || []);
       setManagers(managersData || []);
 
-      // Fetch all homestays with pagination
-      const homestaysData = await fetchAllHomestays();
-      setHomestays(homestaysData);
+      // Don't fetch homestays on initial load - only fetch when modal is opened
+      // This significantly improves page load performance
     } catch (error: any) {
       console.error('Error fetching data:', error);
       alert(error.message || 'Failed to fetch data');
@@ -313,11 +312,19 @@ export default function CommunityManagement() {
     setSubmitting(true);
 
     try {
-      // Clean activities data - ensure images arrays are properly cleaned
-      const cleanedActivities = formData.activities.map(activity => ({
-        ...activity,
-        images: activity.images?.filter(img => img && img.trim()) || undefined,
-      }));
+      // Clean activities data - ensure images arrays are properly formatted
+      const cleanedActivities = formData.activities.map(activity => {
+        const cleanedImages = activity.images?.filter(img => img && img.trim()) || [];
+        return {
+          name: activity.name,
+          description: activity.description,
+          isIncluded: activity.isIncluded,
+          extraCost: activity.extraCost || undefined,
+          currency: activity.currency || undefined,
+          duration: activity.duration || undefined,
+          images: cleanedImages.length > 0 ? cleanedImages : undefined,
+        };
+      });
 
       const cleanData = {
         name: formData.name.trim(),
@@ -329,6 +336,14 @@ export default function CommunityManagement() {
         meals: formData.meals.length > 0 ? formData.meals : undefined,
         activities: cleanedActivities.length > 0 ? cleanedActivities : undefined,
       };
+
+      console.log('Submitting community data:', {
+        ...cleanData,
+        activities: cleanData.activities?.map(a => ({
+          ...a,
+          imagesCount: a.images?.length || 0
+        }))
+      });
 
       if (editingCommunity) {
         await adminApi.updateCommunity(editingCommunity.id, cleanData);
@@ -380,7 +395,7 @@ export default function CommunityManagement() {
     }
   };
 
-  const handleManageHomestays = (communityId: number) => {
+  const handleManageHomestays = async (communityId: number) => {
     const community = communities.find((c) => c.id === communityId);
     if (community) {
       setSelectedCommunityForHomestays(communityId);
@@ -389,6 +404,17 @@ export default function CommunityManagement() {
       setHomestayCurrentPage(1);
       setHomestayLocationFilter('');
       setShowHomestayModal(true);
+
+      // Lazy load homestays only when modal is opened (only if not already loaded)
+      if (homestays.length === 0) {
+        try {
+          const homestaysData = await fetchAllHomestays();
+          setHomestays(homestaysData);
+        } catch (error: any) {
+          console.error('Error fetching homestays:', error);
+          alert(error.message || 'Failed to fetch homestays');
+        }
+      }
     }
   };
 
