@@ -337,19 +337,20 @@ export default function CommunityManagement() {
         activities: cleanedActivities.length > 0 ? cleanedActivities : undefined,
       };
 
-      console.log('Submitting community data:', {
-        ...cleanData,
-        activities: cleanData.activities?.map(a => ({
-          ...a,
-          imagesCount: a.images?.length || 0
-        }))
-      });
+      console.log('=== COMMUNITY SUBMISSION DEBUG ===');
+      console.log('Full data being sent:', JSON.stringify(cleanData, null, 2));
+      console.log('Activities count:', cleanData.activities?.length || 0);
+      console.log('Activities detail:', cleanData.activities);
+      console.log('================================');
 
+      let response;
       if (editingCommunity) {
-        await adminApi.updateCommunity(editingCommunity.id, cleanData);
+        response = await adminApi.updateCommunity(editingCommunity.id, cleanData);
+        console.log('Update response:', response);
         alert('Community updated successfully');
       } else {
-        await adminApi.createCommunity(cleanData);
+        response = await adminApi.createCommunity(cleanData);
+        console.log('Create response:', response);
         alert('Community created successfully');
       }
 

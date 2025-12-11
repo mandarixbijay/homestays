@@ -977,6 +977,8 @@ class AdminApiClient {
   }
 
   async createCommunity(data: any) {
+    console.log('[AdminAPI] Creating community with data:', JSON.stringify(data, null, 2));
+    console.log('[AdminAPI] Activities in request:', data.activities);
     return this.request('/admin/communities', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -984,6 +986,8 @@ class AdminApiClient {
   }
 
   async updateCommunity(id: number, data: any) {
+    console.log('[AdminAPI] Updating community', id, 'with data:', JSON.stringify(data, null, 2));
+    console.log('[AdminAPI] Activities in request:', data.activities);
     return this.request(`/admin/communities/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
