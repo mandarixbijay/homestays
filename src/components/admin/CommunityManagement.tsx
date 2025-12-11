@@ -313,6 +313,12 @@ export default function CommunityManagement() {
     setSubmitting(true);
 
     try {
+      // Clean activities data - ensure images arrays are properly cleaned
+      const cleanedActivities = formData.activities.map(activity => ({
+        ...activity,
+        images: activity.images?.filter(img => img && img.trim()) || undefined,
+      }));
+
       const cleanData = {
         name: formData.name.trim(),
         description: formData.description?.trim() || undefined,
@@ -321,7 +327,7 @@ export default function CommunityManagement() {
         pricePerPerson: Number(formData.pricePerPerson),
         currency: formData.currency || 'NPR',
         meals: formData.meals.length > 0 ? formData.meals : undefined,
-        activities: formData.activities.length > 0 ? formData.activities : undefined,
+        activities: cleanedActivities.length > 0 ? cleanedActivities : undefined,
       };
 
       if (editingCommunity) {
