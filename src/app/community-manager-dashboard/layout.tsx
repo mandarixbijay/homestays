@@ -75,7 +75,7 @@ export default function CommunityManagerDashboardLayout({
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-[#214B3F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -105,7 +105,7 @@ export default function CommunityManagerDashboardLayout({
         {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[#214B3F] flex items-center justify-center">
               <Building2 className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -131,7 +131,7 @@ export default function CommunityManagerDashboardLayout({
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                   item.current
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30'
+                    ? 'bg-[#214B3F] text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
                 onClick={() => setSidebarOpen(false)}
@@ -145,9 +145,9 @@ export default function CommunityManagerDashboardLayout({
 
         {/* User Info & Sign Out */}
         <div className="border-t border-gray-200 p-4 space-y-3">
-          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
-              <User className="h-5 w-5 text-emerald-600" />
+          <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="w-10 h-10 rounded-xl bg-[#214B3F]/10 flex items-center justify-center">
+              <User className="h-5 w-5 text-[#214B3F]" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900 truncate">
@@ -180,7 +180,7 @@ export default function CommunityManagerDashboardLayout({
             <Menu className="h-6 w-6 text-gray-600" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#214B3F] flex items-center justify-center">
               <Building2 className="h-5 w-5 text-white" />
             </div>
             <span className="font-bold text-gray-900">Manager Dashboard</span>

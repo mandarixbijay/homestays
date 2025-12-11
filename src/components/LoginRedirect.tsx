@@ -27,6 +27,9 @@ const LoginRedirect = () => {
         case 'ADMIN':
           redirectPath = '/admin';
           break;
+        case 'COMMUNITY_MANAGER':
+          redirectPath = '/community-manager-dashboard';
+          break;
         case 'GUEST':
           redirectPath = '/account';
           break;
