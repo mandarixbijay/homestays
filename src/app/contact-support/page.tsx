@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 import Navbar from '@/components/navbar/navbar';
 import Footer from '@/components/footer/footer';
 
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
+const RECAPTCHA_SITE_KEY =
+  process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '6LeoqkEsAAAAAH3vJbA884iflCwPvgIqy3SGDHVm';
 
 const ContactSupport = () => {
   const [formData, setFormData] = useState({
