@@ -19,7 +19,6 @@ declare global {
       render: (container: string | HTMLElement, options: { sitekey: string; callback: (token: string) => void; 'expired-callback': () => void }) => number;
       reset: (widgetId?: number) => void;
     };
-    onRecaptchaLoad: () => void;
   }
 }
 
@@ -52,21 +51,11 @@ const ContactSupport = () => {
   }, []);
 
   useEffect(() => {
-    console.log('[reCAPTCHA] Setting up onRecaptchaLoad callback');
-    window.onRecaptchaLoad = () => {
-      console.log('[reCAPTCHA] Script loaded, grecaptcha ready');
-      setRecaptchaReady(true);
-    };
-
-    // Check if grecaptcha is already loaded
+    // Check if grecaptcha is already loaded (e.g., from cache)
     if (typeof window !== 'undefined' && window.grecaptcha) {
-      console.log('[reCAPTCHA] grecaptcha already available');
+      console.log('[reCAPTCHA] grecaptcha already available on mount');
       setRecaptchaReady(true);
     }
-
-    return () => {
-      delete (window as any).onRecaptchaLoad;
-    };
   }, []);
 
   useEffect(() => {
@@ -223,8 +212,12 @@ const ContactSupport = () => {
   return (
     <>
       <Script
-        src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
+        src="https://www.google.com/recaptcha/api.js?render=explicit"
         strategy="afterInteractive"
+        onLoad={() => {
+          console.log('[reCAPTCHA] Script onLoad fired');
+          setRecaptchaReady(true);
+        }}
       />
       <Navbar />
       <div className="flex justify-center items-center min-h-screen bg-background px-4 pt-20">
