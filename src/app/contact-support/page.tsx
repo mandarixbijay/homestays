@@ -41,6 +41,7 @@ const ContactSupport = () => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [recaptchaWidgetId, setRecaptchaWidgetId] = useState<number | null>(null);
   const [recaptchaReady, setRecaptchaReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCaptchaChange = useCallback((token: string) => {
     setCaptchaToken(token);
