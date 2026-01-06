@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import Script from 'next/script';
 import { Mail, Phone } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -43,19 +42,65 @@ const ContactSupport = () => {
   const [recaptchaReady, setRecaptchaReady] = useState(false);
 
   const handleCaptchaChange = useCallback((token: string) => {
+    console.log('[reCAPTCHA] Token received:', token?.substring(0, 20) + '...');
     setCaptchaToken(token);
   }, []);
 
   const handleCaptchaExpired = useCallback(() => {
+    console.log('[reCAPTCHA] Token expired');
     setCaptchaToken(null);
   }, []);
 
+  // Load reCAPTCHA script
   useEffect(() => {
-    // Check if grecaptcha is already loaded (e.g., from cache)
-    if (typeof window !== 'undefined' && window.grecaptcha) {
-      console.log('[reCAPTCHA] grecaptcha already available on mount');
+    // Check if script is already loaded
+    if (window.grecaptcha) {
+      console.log('[reCAPTCHA] grecaptcha already exists');
       setRecaptchaReady(true);
+      return;
     }
+
+    // Check if script tag already exists
+    const existingScript = document.querySelector('script[src*="recaptcha"]');
+    if (existingScript) {
+      console.log('[reCAPTCHA] Script tag already exists, waiting for load');
+      const checkInterval = setInterval(() => {
+        if (window.grecaptcha) {
+          console.log('[reCAPTCHA] grecaptcha now available');
+          setRecaptchaReady(true);
+          clearInterval(checkInterval);
+        }
+      }, 100);
+      return () => clearInterval(checkInterval);
+    }
+
+    console.log('[reCAPTCHA] Loading script...');
+    const script = document.createElement('script');
+    script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+
+    script.onload = () => {
+      console.log('[reCAPTCHA] Script loaded successfully');
+      // Wait for grecaptcha to be ready
+      const checkInterval = setInterval(() => {
+        if (window.grecaptcha) {
+          console.log('[reCAPTCHA] grecaptcha ready');
+          setRecaptchaReady(true);
+          clearInterval(checkInterval);
+        }
+      }, 100);
+    };
+
+    script.onerror = (error) => {
+      console.error('[reCAPTCHA] Script failed to load:', error);
+    };
+
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup if needed
+    };
   }, []);
 
   useEffect(() => {
@@ -211,14 +256,6 @@ const ContactSupport = () => {
 
   return (
     <>
-      <Script
-        src="https://www.google.com/recaptcha/api.js?render=explicit"
-        strategy="afterInteractive"
-        onLoad={() => {
-          console.log('[reCAPTCHA] Script onLoad fired');
-          setRecaptchaReady(true);
-        }}
-      />
       <Navbar />
       <div className="flex justify-center items-center min-h-screen bg-background px-4 pt-20">
         <Card className="w-full max-w-2xl p-6 sm:p-10 my-10 rounded-lg shadow-md overflow-visible">
