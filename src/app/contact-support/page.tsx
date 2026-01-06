@@ -10,6 +10,8 @@ import { toast } from 'sonner';
 import Navbar from '@/components/navbar/navbar';
 import Footer from '@/components/footer/footer';
 
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
+
 const ContactSupport = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -99,7 +101,7 @@ const ContactSupport = () => {
     }
 
     // Only require CAPTCHA if the site key is configured
-    if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !captchaToken) {
+    if (RECAPTCHA_SITE_KEY && !captchaToken) {
       toast.error('Please complete the CAPTCHA verification');
       return;
     }
@@ -217,11 +219,11 @@ const ContactSupport = () => {
               />
               {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
             </div>
-            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+            {RECAPTCHA_SITE_KEY && (
               <div className="flex justify-center">
                 <ReCAPTCHA
                   ref={recaptchaRef}
-                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                  sitekey={RECAPTCHA_SITE_KEY}
                   onChange={handleCaptchaChange}
                 />
               </div>
