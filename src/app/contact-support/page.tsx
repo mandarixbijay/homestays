@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import Navbar from '@/components/navbar/navbar';
 import Footer from '@/components/footer/footer';
 
-const RECAPTCHA_SITE_KEY = '6LeoqkEsAAAAAH3vJbA884iflCwPvgIqy3SGDHVm';
+const RECAPTCHA_SITE_KEY = '6Ld9v0EsAAAAABWifrlE2Qd8G5IpZi6glJ6B8p2b';
 
 declare global {
   interface Window {
