@@ -98,7 +98,8 @@ const ContactSupport = () => {
       return;
     }
 
-    if (!captchaToken) {
+    // Only require CAPTCHA if the site key is configured
+    if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !captchaToken) {
       toast.error('Please complete the CAPTCHA verification');
       return;
     }
@@ -108,7 +109,7 @@ const ContactSupport = () => {
       const response = await fetch('/api/email/contact-support', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ ...formData, captchaToken }),
+        body: JSON.stringify(captchaToken ? { ...formData, captchaToken } : formData),
       });
 
       const result = await response.json();
