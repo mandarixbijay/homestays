@@ -1,6 +1,7 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Mail, Phone } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -25,11 +26,17 @@ const ContactSupport = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: '' }));
+  };
+
+  const handleCaptchaChange = (token: string | null) => {
+    setCaptchaToken(token);
   };
 
   const isValidEmail = (email: string) => {
@@ -91,12 +98,17 @@ const ContactSupport = () => {
       return;
     }
 
+    if (!captchaToken) {
+      toast.error('Please complete the CAPTCHA verification');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/email/contact-support', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, captchaToken }),
       });
 
       const result = await response.json();
@@ -104,6 +116,8 @@ const ContactSupport = () => {
         toast.success(result.message);
         setFormData({ name: '', email: '', subject: '', message: '' });
         setErrors({ name: '', email: '', subject: '', message: '' });
+        setCaptchaToken(null);
+        recaptchaRef.current?.reset();
       } else {
         if (response.status === 400) {
           const errorDetails = result.errors
@@ -120,9 +134,14 @@ const ContactSupport = () => {
         } else {
           toast.error(result.message || 'An unexpected error occurred. Please try again.');
         }
+        // Reset captcha on error
+        recaptchaRef.current?.reset();
+        setCaptchaToken(null);
       }
     } catch (error) {
       toast.error('Failed to connect to the server. Please try again later.');
+      recaptchaRef.current?.reset();
+      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -131,6 +150,8 @@ const ContactSupport = () => {
   const handleReset = () => {
     setFormData({ name: '', email: '', subject: '', message: '' });
     setErrors({ name: '', email: '', subject: '', message: '' });
+    setCaptchaToken(null);
+    recaptchaRef.current?.reset();
     toast.info('Form has been reset');
   };
 
@@ -195,6 +216,15 @@ const ContactSupport = () => {
               />
               {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
             </div>
+            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+              <div className="flex justify-center">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                  onChange={handleCaptchaChange}
+                />
+              </div>
+            )}
             <div className="flex gap-4 justify-center">
               <Button
                 type="submit"
