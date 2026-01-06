@@ -51,11 +51,12 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: `
                 default-src 'self';
-                script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.segment.com https://www.googletagmanager.com;
-                connect-src 'self' https://cdn.segment.com https://www.google-analytics.com;
+                script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.segment.com https://www.googletagmanager.com https://www.google.com https://www.gstatic.com;
+                connect-src 'self' https://cdn.segment.com https://www.google-analytics.com https://www.google.com;
                 img-src 'self' data: https: https://s3-np1.datahub.com.np;
                 style-src 'self' 'unsafe-inline';
-                font-src 'self';
+                font-src 'self' https://fonts.gstatic.com;
+                frame-src 'self' https://www.google.com https://recaptcha.google.com;
               `.replace(/\s{2,}/g, " ").trim(),
           },
         ],
