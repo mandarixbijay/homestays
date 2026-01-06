@@ -52,9 +52,17 @@ const ContactSupport = () => {
   }, []);
 
   useEffect(() => {
+    console.log('[reCAPTCHA] Setting up onRecaptchaLoad callback');
     window.onRecaptchaLoad = () => {
+      console.log('[reCAPTCHA] Script loaded, grecaptcha ready');
       setRecaptchaReady(true);
     };
+
+    // Check if grecaptcha is already loaded
+    if (typeof window !== 'undefined' && window.grecaptcha) {
+      console.log('[reCAPTCHA] grecaptcha already available');
+      setRecaptchaReady(true);
+    }
 
     return () => {
       delete (window as any).onRecaptchaLoad;
@@ -62,18 +70,22 @@ const ContactSupport = () => {
   }, []);
 
   useEffect(() => {
+    console.log('[reCAPTCHA] Render effect - ready:', recaptchaReady, 'widgetId:', recaptchaWidgetId);
     if (recaptchaReady && recaptchaWidgetId === null) {
       const container = document.getElementById('recaptcha-container');
+      console.log('[reCAPTCHA] Container found:', !!container, 'grecaptcha:', !!window.grecaptcha);
       if (container && window.grecaptcha) {
         try {
+          console.log('[reCAPTCHA] Rendering widget with sitekey:', RECAPTCHA_SITE_KEY);
           const widgetId = window.grecaptcha.render('recaptcha-container', {
             sitekey: RECAPTCHA_SITE_KEY,
             callback: handleCaptchaChange,
             'expired-callback': handleCaptchaExpired,
           });
+          console.log('[reCAPTCHA] Widget rendered with id:', widgetId);
           setRecaptchaWidgetId(widgetId);
         } catch (error) {
-          console.error('Error rendering reCAPTCHA:', error);
+          console.error('[reCAPTCHA] Error rendering:', error);
         }
       }
     }
@@ -274,7 +286,11 @@ const ContactSupport = () => {
               {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
             </div>
             <div className="flex justify-center">
-              <div id="recaptcha-container"></div>
+              <div id="recaptcha-container" className="min-h-[78px]">
+                {!recaptchaReady && (
+                  <p className="text-sm text-muted-foreground">Loading CAPTCHA...</p>
+                )}
+              </div>
             </div>
             <div className="flex gap-4 justify-center">
               <Button
