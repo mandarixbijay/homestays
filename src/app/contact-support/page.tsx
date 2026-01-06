@@ -1,7 +1,7 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Script from 'next/script';
 import { Mail, Phone } from 'lucide-react';
-import ReCAPTCHA from 'react-google-recaptcha';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,18 @@ import { toast } from 'sonner';
 import Navbar from '@/components/navbar/navbar';
 import Footer from '@/components/footer/footer';
 
-const RECAPTCHA_SITE_KEY =
-  process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '6LeoqkEsAAAAAH3vJbA884iflCwPvgIqy3SGDHVm';
+const RECAPTCHA_SITE_KEY = '6LeoqkEsAAAAAH3vJbA884iflCwPvgIqy3SGDHVm';
+
+declare global {
+  interface Window {
+    grecaptcha: {
+      ready: (callback: () => void) => void;
+      render: (container: string | HTMLElement, options: { sitekey: string; callback: (token: string) => void; 'expired-callback': () => void }) => number;
+      reset: (widgetId?: number) => void;
+    };
+    onRecaptchaLoad: () => void;
+  }
+}
 
 const ContactSupport = () => {
   const [formData, setFormData] = useState({
@@ -30,16 +40,56 @@ const ContactSupport = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const [recaptchaWidgetId, setRecaptchaWidgetId] = useState<number | null>(null);
+  const [recaptchaReady, setRecaptchaReady] = useState(false);
+
+  const handleCaptchaChange = useCallback((token: string) => {
+    setCaptchaToken(token);
+  }, []);
+
+  const handleCaptchaExpired = useCallback(() => {
+    setCaptchaToken(null);
+  }, []);
+
+  useEffect(() => {
+    window.onRecaptchaLoad = () => {
+      setRecaptchaReady(true);
+    };
+
+    return () => {
+      delete (window as any).onRecaptchaLoad;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (recaptchaReady && recaptchaWidgetId === null) {
+      const container = document.getElementById('recaptcha-container');
+      if (container && window.grecaptcha) {
+        try {
+          const widgetId = window.grecaptcha.render('recaptcha-container', {
+            sitekey: RECAPTCHA_SITE_KEY,
+            callback: handleCaptchaChange,
+            'expired-callback': handleCaptchaExpired,
+          });
+          setRecaptchaWidgetId(widgetId);
+        } catch (error) {
+          console.error('Error rendering reCAPTCHA:', error);
+        }
+      }
+    }
+  }, [recaptchaReady, recaptchaWidgetId, handleCaptchaChange, handleCaptchaExpired]);
+
+  const resetCaptcha = () => {
+    if (recaptchaWidgetId !== null && window.grecaptcha) {
+      window.grecaptcha.reset(recaptchaWidgetId);
+    }
+    setCaptchaToken(null);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: '' }));
-  };
-
-  const handleCaptchaChange = (token: string | null) => {
-    setCaptchaToken(token);
   };
 
   const isValidEmail = (email: string) => {
@@ -120,8 +170,7 @@ const ContactSupport = () => {
         toast.success(result.message);
         setFormData({ name: '', email: '', subject: '', message: '' });
         setErrors({ name: '', email: '', subject: '', message: '' });
-        setCaptchaToken(null);
-        recaptchaRef.current?.reset();
+        resetCaptcha();
       } else {
         if (response.status === 400) {
           const errorDetails = result.errors
@@ -139,12 +188,12 @@ const ContactSupport = () => {
           toast.error(result.message || 'An unexpected error occurred. Please try again.');
         }
         // Reset captcha on error
-        recaptchaRef.current?.reset();
+        resetCaptcha();
         setCaptchaToken(null);
       }
     } catch (error) {
       toast.error('Failed to connect to the server. Please try again later.');
-      recaptchaRef.current?.reset();
+      resetCaptcha();
       setCaptchaToken(null);
     } finally {
       setIsLoading(false);
@@ -155,12 +204,16 @@ const ContactSupport = () => {
     setFormData({ name: '', email: '', subject: '', message: '' });
     setErrors({ name: '', email: '', subject: '', message: '' });
     setCaptchaToken(null);
-    recaptchaRef.current?.reset();
+    resetCaptcha();
     toast.info('Form has been reset');
   };
 
   return (
     <>
+      <Script
+        src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
+        strategy="afterInteractive"
+      />
       <Navbar />
       <div className="flex justify-center items-center min-h-screen bg-background px-4 pt-20">
         <Card className="w-full max-w-2xl p-6 sm:p-10 my-10 rounded-lg shadow-md overflow-visible">
@@ -220,15 +273,9 @@ const ContactSupport = () => {
               />
               {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
             </div>
-            {RECAPTCHA_SITE_KEY && (
-              <div className="flex justify-center">
-                <ReCAPTCHA
-                  ref={recaptchaRef}
-                  sitekey={RECAPTCHA_SITE_KEY}
-                  onChange={handleCaptchaChange}
-                />
-              </div>
-            )}
+            <div className="flex justify-center">
+              <div id="recaptcha-container"></div>
+            </div>
             <div className="flex gap-4 justify-center">
               <Button
                 type="submit"
