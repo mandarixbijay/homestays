@@ -256,8 +256,20 @@ export default function BlogDetailClient({
         )}
 
         {/* Blog Content */}
+        <style jsx global>{`
+          .blog-content img:not(:first-of-type) {
+            margin-top: -60px !important;
+          }
+          .blog-content p + p img,
+          .blog-content h2 + p img,
+          .blog-content h3 + p img,
+          .blog-content ul + p img,
+          .blog-content ol + p img {
+            margin-top: -60px !important;
+          }
+        `}</style>
         <article
-          className="prose prose-lg max-w-none
+          className="blog-content prose prose-lg max-w-none
             prose-headings:text-gray-900 prose-headings:font-bold
             prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2
             prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
@@ -267,8 +279,8 @@ export default function BlogDetailClient({
             prose-ul:my-6 prose-ol:my-6
             prose-li:text-gray-700 prose-li:my-1
             prose-blockquote:border-l-4 prose-blockquote:border-[#D1AA5A] prose-blockquote:bg-gray-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:text-gray-700 prose-blockquote:rounded-r-lg
-            prose-img:rounded-lg prose-img:shadow-md prose-img:my-4 prose-img:mx-auto prose-img:max-w-full
-            [&_img]:!mt-4 [&_img]:!mb-4 [&_img]:block [&_img]:mx-auto
+            prose-img:rounded-lg prose-img:shadow-md prose-img:mx-auto prose-img:max-w-full
+            [&_img]:block [&_img]:mx-auto
             [&_figure]:my-6 [&_figure]:text-center
             [&_figcaption]:text-sm [&_figcaption]:text-gray-500 [&_figcaption]:mt-2
           "
