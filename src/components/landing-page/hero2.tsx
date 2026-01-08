@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 import CategoryCard from "./landing-page-components/cards/category-card";
 import { useRouter } from "next/navigation";
 
@@ -121,6 +122,16 @@ export default function Hero2() {
               Discover Nepal's most enchanting homestay locations
             </p>
           </div>
+          <div>
+            <Button
+              variant="default"
+              className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary/90"
+              onClick={() => router.push("/destinations")}
+              aria-label="View all destinations"
+            >
+              View All Destinations
+            </Button>
+          </div>
         </motion.div>
 
         {isLoading ? (
@@ -151,12 +162,12 @@ export default function Hero2() {
                 whileHover={{ y: -8, scale: 1.02 }}
                 transition={{ duration: 0.3 }}
                 className="snap-start w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0 cursor-pointer"
-                onClick={() => router.push(`/search?destination=${card.categoryName.toLowerCase()}`)}
+                onClick={() => router.push(`/destinations?destination=${card.categoryName.toLowerCase()}`)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
-                    router.push(`/search?destination=${card.categoryName.toLowerCase()}`);
+                    router.push(`/destinations?destination=${card.categoryName.toLowerCase()}`);
                   }
                 }}
                 aria-label={`View homestays in ${card.categoryName}`}
