@@ -8,13 +8,17 @@ const API_BASE_URL = process.env.NEXTAUTH_URL || "http://13.61.8.56";
 async function refreshAccessToken(token: any) {
   try {
     console.log("[NextAuth] Attempting to refresh token");
-    
+
+    // Send refresh token in body for better reliability (in addition to cookies)
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
+      body: JSON.stringify({
+        token: token.refreshToken
+      }),
     });
 
     if (!response.ok) {
@@ -30,17 +34,23 @@ async function refreshAccessToken(token: any) {
     }
 
     console.log("[NextAuth] Token refreshed successfully");
-    
+
+    // Calculate token expiry - use backend provided value if available, otherwise default to 1 hour
+    const expiresIn = refreshedTokens.data.expiresIn || 60 * 60 * 1000; // Default 1 hour
+    const tokenExpiry = typeof expiresIn === 'number'
+      ? Date.now() + expiresIn
+      : Date.now() + (60 * 60 * 1000);
+
     return {
       ...token,
       accessToken: refreshedTokens.data.accessToken,
       refreshToken: refreshedTokens.data.refreshToken ?? token.refreshToken,
-      tokenExpiry: Date.now() + (60 * 60 * 1000),
+      tokenExpiry: tokenExpiry,
       error: null,
     };
   } catch (error) {
     console.error("[NextAuth] Error refreshing token:", error);
-    
+
     return {
       ...token,
       error: "RefreshAccessTokenError",
@@ -127,18 +137,22 @@ export const authOptions: NextAuthOptions = {
           });
 
           const result = await response.json();
-          
-          console.log("[NextAuth] Login response:", { 
-            ok: response.ok, 
+
+          console.log("[NextAuth] Login response:", {
+            ok: response.ok,
             status: response.status,
-            hasData: !!result.data 
+            hasData: !!result.data
           });
 
           if (!response.ok) {
             throw new Error(result.message || "Invalid credentials");
           }
 
-          const tokenExpiry = Date.now() + (60 * 60 * 1000);
+          // Calculate token expiry - use backend provided value if available
+          const expiresIn = result.data.expiresIn || 60 * 60 * 1000; // Default 1 hour
+          const tokenExpiry = typeof expiresIn === 'number'
+            ? Date.now() + expiresIn
+            : Date.now() + (60 * 60 * 1000);
 
           return {
             id: result.data.user.id.toString(),

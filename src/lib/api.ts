@@ -96,14 +96,25 @@ api.interceptors.response.use(
 
     try {
       console.log('[API] Token expired, attempting refresh...');
-      
-      // ✅ Call backend refresh endpoint
+
+      // Get refresh token from session
+      let refreshToken: string | null = null;
+      if (typeof window !== 'undefined') {
+        try {
+          const session = await getSession();
+          refreshToken = session?.user?.refreshToken || null;
+        } catch (sessionError) {
+          console.error('[API] Failed to get session for refresh:', sessionError);
+        }
+      }
+
+      // ✅ Call backend refresh endpoint with token in body for better reliability
       const response = await axios.post(
         `${API_BASE_URL}/auth/refresh`,
-        {},
-        { 
+        refreshToken ? { token: refreshToken } : {},
+        {
           withCredentials: true, // Send cookies
-          timeout: 10000 
+          timeout: 10000
         }
       );
 

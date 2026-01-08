@@ -1,8 +1,71 @@
 // hooks/useSessionManager.ts
-import { useSession, signOut } from 'next-auth/react';
-import { useEffect, useCallback, useState } from 'react';
+import { useSession, signOut, getSession } from 'next-auth/react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.61.8.56';
+
+/**
+ * Check if the current session is valid by calling /auth/me endpoint
+ */
+export async function checkSession(): Promise<any | null> {
+  try {
+    const res = await fetch('/api/auth/me', {
+      credentials: 'include'
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Refresh the tokens using the /auth/refresh endpoint
+ */
+export async function refreshTokens(): Promise<any | null> {
+  try {
+    const session = await getSession();
+    const refreshToken = session?.user?.refreshToken;
+
+    const res = await fetch('/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: refreshToken ? JSON.stringify({ token: refreshToken }) : undefined,
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Ensure the user is authenticated, attempting refresh if needed
+ */
+export async function ensureAuthenticated(): Promise<any | null> {
+  let session = await checkSession();
+
+  if (!session) {
+    // Access token expired, try refresh
+    const refreshResult = await refreshTokens();
+    if (refreshResult?.status === 'success') {
+      session = await checkSession();
+    }
+  }
+
+  return session;
+}
 
 interface ExtendedSession {
   user?: {
@@ -25,21 +88,39 @@ interface ExtendedSession {
 export function useSessionManager() {
   const { data: session, status, update } = useSession();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const refreshAttempts = useRef(0);
+  const maxRefreshAttempts = 3;
 
   const typedSession = session as ExtendedSession | null;
   const hasRefreshError = typedSession?.error === 'RefreshAccessTokenError';
 
   // ✅ Auto-refresh is now handled by NextAuth JWT callback
-  // This effect just monitors for near-expiry and triggers update()
+  // This effect monitors for near-expiry and triggers update()
   useEffect(() => {
     if (status === 'authenticated' && typedSession?.user?.tokenExpiry) {
       const timeUntilExpiry = typedSession.user.tokenExpiry - Date.now();
+      // Refresh 5 minutes before expiry, but at least 1 minute from now
       const refreshTime = Math.max(timeUntilExpiry - (5 * 60 * 1000), 60000);
 
       if (refreshTime > 0 && refreshTime < (50 * 60 * 1000)) {
-        const refreshTimer = setTimeout(() => {
-          console.log('[SessionManager] Triggering session refresh...');
-          update(); // This triggers JWT callback which will refresh if needed
+        const refreshTimer = setTimeout(async () => {
+          console.log('[SessionManager] Auto-refresh triggered, checking session validity...');
+
+          // First try to refresh via the API
+          try {
+            const refreshResult = await refreshTokens();
+            if (refreshResult?.status === 'success') {
+              console.log('[SessionManager] API refresh successful, updating NextAuth session...');
+              await update(); // Update NextAuth session with new tokens
+              refreshAttempts.current = 0; // Reset attempts on success
+            } else {
+              console.warn('[SessionManager] API refresh returned non-success, falling back to NextAuth update');
+              await update(); // Fallback to NextAuth update
+            }
+          } catch (error) {
+            console.error('[SessionManager] API refresh failed, falling back to NextAuth update:', error);
+            await update(); // Fallback to NextAuth update
+          }
         }, refreshTime);
 
         return () => clearTimeout(refreshTimer);
@@ -47,28 +128,59 @@ export function useSessionManager() {
     }
   }, [typedSession, status, update]);
 
-  // Handle refresh errors
+  // Handle refresh errors with retry logic
   useEffect(() => {
     if (hasRefreshError) {
-      console.error('[SessionManager] Session refresh failed, signing out...');
-      signOut({ 
-        redirect: true,
-        callbackUrl: '/signin?error=SessionExpired'
-      });
-    }
-  }, [hasRefreshError]);
+      refreshAttempts.current += 1;
 
-  // Manual session refresh
+      if (refreshAttempts.current < maxRefreshAttempts) {
+        console.warn(`[SessionManager] Refresh attempt ${refreshAttempts.current}/${maxRefreshAttempts} failed, retrying...`);
+        // Wait with exponential backoff before retrying
+        const backoffDelay = Math.pow(2, refreshAttempts.current) * 1000;
+        setTimeout(async () => {
+          try {
+            const refreshResult = await refreshTokens();
+            if (refreshResult?.status === 'success') {
+              console.log('[SessionManager] Retry refresh successful');
+              await update();
+              refreshAttempts.current = 0;
+            }
+          } catch (error) {
+            console.error('[SessionManager] Retry refresh failed:', error);
+          }
+        }, backoffDelay);
+      } else {
+        console.error('[SessionManager] Max refresh attempts reached, signing out...');
+        refreshAttempts.current = 0;
+        signOut({
+          redirect: true,
+          callbackUrl: '/signin?error=SessionExpired'
+        });
+      }
+    }
+  }, [hasRefreshError, update]);
+
+  // Manual session refresh with enhanced error handling
   const refreshSession = useCallback(async () => {
     if (isRefreshing) return;
-    
+
     setIsRefreshing(true);
     try {
       console.log('[SessionManager] Manually refreshing session...');
-      await update(); // JWT callback will handle the actual refresh
+
+      // First try direct API refresh
+      const refreshResult = await refreshTokens();
+      if (refreshResult?.status === 'success') {
+        console.log('[SessionManager] API refresh successful');
+        await update(); // Update NextAuth session
+        refreshAttempts.current = 0;
+      } else {
+        console.log('[SessionManager] API refresh failed, trying NextAuth update');
+        await update(); // Fallback to NextAuth update
+      }
     } catch (error) {
       console.error('[SessionManager] Manual refresh failed:', error);
-      await signOut({ 
+      await signOut({
         redirect: true,
         callbackUrl: '/signin?error=SessionExpired'
       });

@@ -2,31 +2,27 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { format, addDays, isAfter, isBefore } from "date-fns";
-import { Calendar as CalendarIcon, MapPin, Users, X, Plus, Minus } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, Users, X, Plus, Minus, Loader2, Check, ChevronsUpDown } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { useDebounce } from "@/hooks/useDebounce";
 
-// Define locations array sorted alphabetically by label
-const locations = [
-  { value: "all", label: "All Locations" },
-  { value: "bardiya", label: "Bardiya, Nepal" },
-  { value: "bhaktapur", label: "Bhaktapur, Nepal" },
-  { value: "biratnagar", label: "Biratnagar, Nepal" },
-  { value: "chitwan", label: "Chitwan, Nepal" },
-  { value: "dharan", label: "Dharan, Nepal" },
-  { value: "ghandruk", label: "Ghandruk, Nepal" },
-  { value: "kathmandu", label: "Kathmandu, Nepal" },
-  { value: "lalitpur", label: "Lalitpur, Nepal" },
-  { value: "lumbini", label: "Lumbini, Nepal" },
-  { value: "pokhara", label: "Pokhara, Nepal" },
-  { value: "syangja", label: "Syangja, Nepal" },
-  { value: "thori", label: "Thori, Nepal" },
-];
+interface LocationSuggestion {
+  location: string;
+  homestayCount: number;
+}
 
 // Rest of the component remains unchanged
 interface Room {
@@ -62,12 +58,19 @@ export function DateGuestLocationPicker({
   const [isGuestPopoverOpen, setIsGuestPopoverOpen] = useState(false);
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
-  const [location, setLocation] = useState<string>(initialLocation || "all");
+  const [location, setLocation] = useState<string>(initialLocation || "");
+
+  // Location search state
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const [locationSearchQuery, setLocationSearchQuery] = useState("");
+  const [locationSuggestions, setLocationSuggestions] = useState<LocationSuggestion[]>([]);
+  const [isLoadingLocations, setIsLoadingLocations] = useState(false);
+  const debouncedLocationQuery = useDebounce(locationSearchQuery, 300);
 
   // Initialize state when props change
   useEffect(() => {
     if (initialLocation !== undefined) {
-      setLocation(initialLocation || "all");
+      setLocation(initialLocation || "");
     }
     if (initialDate !== undefined) {
       setCheckInDate(initialDate?.from);
@@ -77,6 +80,37 @@ export function DateGuestLocationPicker({
       setRooms(initialRooms);
     }
   }, [initialLocation, initialDate, initialRooms]);
+
+  // Fetch location suggestions from the search API
+  useEffect(() => {
+    const fetchLocationSuggestions = async () => {
+      if (debouncedLocationQuery.length < 2) {
+        setLocationSuggestions([]);
+        return;
+      }
+
+      try {
+        setIsLoadingLocations(true);
+        const response = await fetch(
+          `/api/bookings/locations/search?query=${encodeURIComponent(debouncedLocationQuery)}&limit=10`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch locations");
+        }
+
+        const data = await response.json();
+        setLocationSuggestions(data.suggestions || []);
+      } catch (error) {
+        console.error("Error fetching location suggestions:", error);
+        setLocationSuggestions([]);
+      } finally {
+        setIsLoadingLocations(false);
+      }
+    };
+
+    fetchLocationSuggestions();
+  }, [debouncedLocationQuery]);
 
   // Handle check-in date selection
   const handleCheckInSelect = useCallback((date: Date | undefined) => {
@@ -133,8 +167,10 @@ export function DateGuestLocationPicker({
     }
   }, [rooms.length]);
 
-  const handleLocationChange = useCallback((value: string) => {
+  const handleLocationSelect = useCallback((value: string) => {
     setLocation(value);
+    setLocationSearchQuery(value);
+    setIsLocationOpen(false);
     onSelectLocation?.(value);
   }, [onSelectLocation]);
 
@@ -161,8 +197,8 @@ export function DateGuestLocationPicker({
       to: checkOutDate
     };
 
-    // Send location as null if "All Locations" is selected
-    const searchLocation = location === "all" ? null : location;
+    // Send location as null if empty or not selected
+    const searchLocation = location && location.trim() ? location : null;
 
     onSearch?.({
       location: searchLocation,
@@ -190,30 +226,79 @@ export function DateGuestLocationPicker({
           <MapPin className="inline h-3 w-3 mr-1 text-accent" />
           Location
         </label>
-        <Select value={location} onValueChange={handleLocationChange} defaultValue="all">
-          <SelectTrigger
-            className="w-full h-10 sm:h-11 bg-background border border-border rounded-xl hover:border-primary focus:border-accent focus:ring-2 focus:ring-accent/50 text-sm font-medium shadow-sm"
-            aria-label="Select a location"
-          >
-            <SelectValue placeholder="Where to?" className="text-muted-foreground" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-border shadow-lg">
-            {locations.map((locationOption) => (
-              <SelectItem
-                key={locationOption.value}
-                value={locationOption.value}
-                className="py-2 hover:bg-primary/10 focus:bg-primary/10 rounded-lg"
-              >
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-accent" />
-                  <span className="text-sm font-medium text-foreground">
-                    {locationOption.label}
-                  </span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Popover open={isLocationOpen} onOpenChange={setIsLocationOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={isLocationOpen}
+              className={cn(
+                "w-full h-10 sm:h-11 justify-between bg-background border border-border rounded-xl hover:border-primary focus:border-accent focus:ring-2 focus:ring-accent/50 text-sm font-medium shadow-sm",
+                !location && "text-muted-foreground"
+              )}
+            >
+              <div className="flex items-center gap-2 overflow-hidden">
+                <MapPin className="h-4 w-4 shrink-0 text-accent" />
+                <span className="truncate">
+                  {location || "Where to?"}
+                </span>
+              </div>
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full p-0 rounded-xl border-border shadow-lg" align="start">
+            <Command shouldFilter={false}>
+              <CommandInput
+                placeholder="Search location..."
+                value={locationSearchQuery}
+                onValueChange={setLocationSearchQuery}
+              />
+              <CommandList>
+                {isLoadingLocations ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <span className="text-sm text-muted-foreground">Searching...</span>
+                  </div>
+                ) : locationSearchQuery.length < 2 ? (
+                  <div className="py-6 text-center text-sm text-muted-foreground">
+                    Type at least 2 characters to search
+                  </div>
+                ) : locationSuggestions.length === 0 ? (
+                  <CommandEmpty>No location found.</CommandEmpty>
+                ) : (
+                  <CommandGroup>
+                    {locationSuggestions.map((item, index) => (
+                      <CommandItem
+                        key={`${item.location}-${index}`}
+                        value={item.location}
+                        onSelect={(currentValue) => {
+                          handleLocationSelect(currentValue === location ? "" : currentValue);
+                        }}
+                        className="cursor-pointer py-2 hover:bg-primary/10 focus:bg-primary/10 rounded-lg"
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            location === item.location ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        <MapPin className="mr-2 h-4 w-4 text-accent" />
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <span className="text-sm font-medium text-foreground truncate">
+                            {item.location}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {item.homestayCount} homestay{item.homestayCount !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                )}
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </motion.div>
 
       {/* Check-in Date */}
