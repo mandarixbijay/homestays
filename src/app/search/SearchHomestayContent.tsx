@@ -47,13 +47,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -662,8 +662,8 @@ export function SearchHomestayContent({
                   </div>
 
                   {/* Mobile Filter Button */}
-                  <Sheet open={showMobileFilters} onOpenChange={setShowMobileFilters}>
-                    <SheetTrigger asChild>
+                  <Drawer open={showMobileFilters} onOpenChange={setShowMobileFilters}>
+                    <DrawerTrigger asChild>
                       <Button variant="outline" className="lg:hidden h-11 gap-2">
                         <SlidersHorizontal className="h-4 w-4" />
                         Filters
@@ -673,15 +673,17 @@ export function SearchHomestayContent({
                           </Badge>
                         )}
                       </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="w-80">
-                      <SheetHeader>
-                        <SheetTitle>Filters</SheetTitle>
-                        <SheetDescription>Refine your search results</SheetDescription>
-                      </SheetHeader>
-                      <FilterSidebar isMobile />
-                    </SheetContent>
-                  </Sheet>
+                    </DrawerTrigger>
+                    <DrawerContent className="max-h-[85vh]">
+                      <DrawerHeader>
+                        <DrawerTitle>Filters</DrawerTitle>
+                        <DrawerDescription>Refine your search results</DrawerDescription>
+                      </DrawerHeader>
+                      <div className="overflow-y-auto pb-8">
+                        <FilterSidebar isMobile />
+                      </div>
+                    </DrawerContent>
+                  </Drawer>
                 </div>
 
                 {/* Results Count */}
