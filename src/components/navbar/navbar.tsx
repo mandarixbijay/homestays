@@ -20,6 +20,7 @@ import { useTheme } from "next-themes";
 import {
   // Bell,
   UserPlus,
+  LogIn,
   // Sun,
   // Moon,
   Menu,
@@ -197,8 +198,8 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
   // };
 
   return (
-    <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-[100] border-b border-gray-200/20 dark:border-gray-700/20">
-      <div className="flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-20">
+    <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md fixed top-0 left-0 right-0 z-[100] border-b border-gray-100 dark:border-gray-800 shadow-sm">
+      <div className="flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-18">
         {/* Logo */}
         <Link href="/" className="flex items-center" onClick={closeMenu}>
           <div className="p-2">
@@ -235,16 +236,16 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
           </div>
         </Link>
 
-        {/* Desktop Navigation - Right Aligned, Smaller Text */}
-        <div className="hidden lg:flex items-center gap-4">
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex items-center gap-6">
           <NavigationMenu>
-            <NavigationMenuList className="gap-3">
+            <NavigationMenuList className="gap-1">
               {navigationItems.map((item) => (
                 <NavigationMenuItem key={item.label}>
                   <NavigationMenuLink asChild>
                     <Button
                       variant="ghost"
-                      className="text-card-foreground hover:text-primary hover:bg-primary/10 transition-colors text-sm px-4 py-2 font-medium flex items-center"
+                      className="text-gray-600 hover:text-[#214B3F] hover:bg-[#214B3F]/5 transition-all text-sm px-4 py-2 font-medium flex items-center rounded-lg"
                       onClick={item.action || (() => toPage(item.href))}
                     >
                       {item.icon}
@@ -289,12 +290,20 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
               {isLoggedIn ? (
                 <UserProfileDropdown />
               ) : (
-                <Button asChild variant="default" size="sm" className="gap-2 text-xs font-medium">
-                  <Link href="/signup" className="flex items-center">
-                    <UserPlus className="h-5 w-5" />
-                    <span>Register</span>
-                  </Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button asChild variant="ghost" size="sm" className="text-sm font-medium text-gray-700 hover:text-[#214B3F] hover:bg-[#214B3F]/5">
+                    <Link href="/signin" className="flex items-center gap-2">
+                      <LogIn className="h-4 w-4" />
+                      <span>Sign In</span>
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" className="gap-2 text-sm font-medium bg-[#214B3F] hover:bg-[#1a3d33] text-white shadow-sm">
+                    <Link href="/signup" className="flex items-center">
+                      <UserPlus className="h-4 w-4" />
+                      <span>Register</span>
+                    </Link>
+                  </Button>
+                </div>
               )}
             </div>
           )}
@@ -365,21 +374,37 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                   {isLoggedIn ? (
                     <UserProfileDropdown isMobile />
                   ) : (
-                    <Button
-                      asChild
-                      variant="default"
-                      size="lg"
-                      className="w-full h-11 text-sm font-medium gap-2 bg-primary hover:bg-primary/90 transition-all duration-200"
-                    >
-                      <Link
-                        href="/signup"
-                        className="flex items-center justify-center"
-                        onClick={closeMenu}
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="lg"
+                        className="w-full h-11 text-sm font-medium gap-2 border-[#214B3F] text-[#214B3F] hover:bg-[#214B3F]/5"
                       >
-                        <UserPlus className="h-4 w-4" />
-                        <span>Register</span>
-                      </Link>
-                    </Button>
+                        <Link
+                          href="/signin"
+                          className="flex items-center justify-center"
+                          onClick={closeMenu}
+                        >
+                          <LogIn className="h-4 w-4" />
+                          <span>Sign In</span>
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        size="lg"
+                        className="w-full h-11 text-sm font-medium gap-2 bg-[#214B3F] hover:bg-[#1a3d33] text-white"
+                      >
+                        <Link
+                          href="/signup"
+                          className="flex items-center justify-center"
+                          onClick={closeMenu}
+                        >
+                          <UserPlus className="h-4 w-4" />
+                          <span>Register</span>
+                        </Link>
+                      </Button>
+                    </div>
                   )}
 
                   <DrawerClose asChild>
