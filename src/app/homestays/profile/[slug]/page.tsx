@@ -35,6 +35,7 @@ interface HomestayRoom {
   id: number;
   name: string;
   description?: string;
+  price?: number;
   originalPrice?: number;
   discountedPrice?: number;
   maxOccupancy: number;
@@ -60,9 +61,9 @@ interface AvailableRoom {
   refundable: boolean;
   extrasOptions: any[];
   roomsLeft: number;
-  originalPrice: number;
-  discountedPrice: number;
-  savings: number;
+  originalPrice?: number;
+  discountedPrice?: number;
+  savings?: number;
 }
 
 interface LastMinuteDeal {
@@ -438,8 +439,8 @@ export default function HomestayProfilePage() {
       if (homestay.originalPrice) return homestay.originalPrice;
       if (homestay.rooms && homestay.rooms.length > 0) {
         const prices = homestay.rooms
-          .map(r => r.discountedPrice ?? r.originalPrice)
-          .filter((p): p is number => typeof p === "number");
+          .map(r => r.discountedPrice ?? r.originalPrice ?? r.price)
+          .filter((p): p is number => typeof p === "number" && p > 0);
         if (prices.length > 0) {
           return Math.min(...prices);
         }
@@ -464,26 +465,29 @@ export default function HomestayProfilePage() {
       region: homestay.address.split(",")[1] || "Nepal",
       features: homestay.facilities,
       vipAccess: homestay.vipAccess || false,
-      rooms: (homestay.rooms || []).map(room => ({
-        imageUrls: room.imageUrls || [homestay.imageSrc],
-        roomTitle: room.name,
-        rating: homestay.rating || 0,
-        reviews: homestay.reviews,
-        facilities: room.facilities || [],
-        bedType: room.bedType || "Standard",
-        refundable: true,
-        nightlyPrice: room.discountedPrice ?? room.originalPrice ?? 0,
-        totalPrice: (room.discountedPrice ?? room.originalPrice ?? 0) * numNights,
-        originalPrice: room.originalPrice,
-        extrasOptions: [],
-        roomsLeft: room.roomsLeft || 10,
-        sqFt: room.maxOccupancy * 100,
-        sleeps: room.maxOccupancy,
-        cityView: false,
-        freeParking: room.facilities?.includes("Parking") || false,
-        freeWifi: room.facilities?.includes("Wifi") || false,
-        roomId: room.id,
-      })),
+      rooms: (homestay.rooms || []).map(room => {
+        const roomPrice = room.discountedPrice ?? room.originalPrice ?? room.price ?? 0;
+        return {
+          imageUrls: room.imageUrls || [homestay.imageSrc],
+          roomTitle: room.name,
+          rating: homestay.rating || 0,
+          reviews: homestay.reviews,
+          facilities: room.facilities || [],
+          bedType: room.bedType || "Standard",
+          refundable: true,
+          nightlyPrice: roomPrice,
+          totalPrice: roomPrice * numNights,
+          originalPrice: room.originalPrice ?? room.price,
+          extrasOptions: [],
+          roomsLeft: room.roomsLeft || 10,
+          sqFt: room.maxOccupancy * 100,
+          sleeps: room.maxOccupancy,
+          cityView: false,
+          freeParking: room.facilities?.includes("Parking") || false,
+          freeWifi: room.facilities?.includes("Wifi") || false,
+          roomId: room.id,
+        };
+      }),
     };
 
   return (
@@ -723,7 +727,7 @@ export default function HomestayProfilePage() {
                                   </div>
                                 )}
                                 <div className="text-2xl font-bold text-gray-900">
-                                  NPR {(room.discountedPrice || room.originalPrice || 0).toLocaleString()}
+                                  NPR {(room.discountedPrice || room.originalPrice || room.price || 0).toLocaleString()}
                                   <span className="text-sm font-normal text-gray-500"> / night</span>
                                 </div>
                               </div>
@@ -844,7 +848,7 @@ export default function HomestayProfilePage() {
 
                             <div className="flex items-end justify-between pt-4 border-t border-gray-200">
                               <div>
-                                {room.savings > 0 && (
+                                {room.savings && room.savings > 0 && room.originalPrice && (
                                   <div className="flex items-center gap-2 mb-1">
                                     <Badge className="bg-green-600 text-white text-xs">
                                       Save NPR {room.savings.toLocaleString()}
@@ -856,7 +860,7 @@ export default function HomestayProfilePage() {
                                 )}
                                 <div className="flex items-baseline gap-2">
                                   <div className="text-3xl font-bold text-blue-600">
-                                    NPR {room.discountedPrice.toLocaleString()}
+                                    NPR {(room.discountedPrice ?? room.nightlyPrice).toLocaleString()}
                                   </div>
                                   <span className="text-sm font-normal text-gray-500">/ night</span>
                                 </div>
