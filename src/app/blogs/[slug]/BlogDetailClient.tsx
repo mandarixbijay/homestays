@@ -276,7 +276,7 @@ export default function BlogDetailClient({
         </div>
 
         {/* Content */}
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center py-12 sm:py-16 lg:py-20">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center pt-12 sm:pt-16 lg:pt-20 pb-6 sm:pb-8">
           <div className="max-w-4xl mx-auto">
             {/* Breadcrumb */}
             <div className="mb-6">
@@ -350,9 +350,9 @@ export default function BlogDetailClient({
 
       {/* Image Gallery - Lazy Loaded */}
       {images.length > 1 && (
-        <section className="py-4 sm:py-6 bg-white">
+        <section className="pt-0 pb-4 sm:pb-6 bg-white" style={{ marginTop: 0, paddingTop: 0 }}>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-            <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="flex items-center justify-center gap-3 mb-4 pt-3">
               <Camera className="h-5 w-5 text-[#214B3F]" />
               <h3 className="text-lg sm:text-xl font-bold text-card-foreground">Gallery</h3>
               <Badge className="bg-[#D1AA5A]/20 text-[#214B3F] border-[#D1AA5A]">
