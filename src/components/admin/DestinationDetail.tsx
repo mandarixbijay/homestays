@@ -1074,10 +1074,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                           {!showRemoveSelection && (
                             <div className="flex items-center space-x-2">
                               <ActionButton
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(`/admin/homestays/${homestay.id}`, '_blank');
-                                }}
+                                onClick={() => window.open(`/admin/homestays/${homestay.id}`, '_blank')}
                                 variant="secondary"
                                 size="xs"
                                 icon={<ExternalLink className="h-3 w-3" />}
@@ -1085,10 +1082,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                                 View
                               </ActionButton>
                               <ActionButton
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveHomestay(homestay.id);
-                                }}
+                                onClick={() => handleRemoveHomestay(homestay.id)}
                                 variant="danger"
                                 size="xs"
                                 icon={<Unlink className="h-3 w-3" />}
