@@ -77,7 +77,7 @@ export default function BlogDetailClient({
     } else {
       bookmarks.push(blog.id);
       localStorage.setItem("blogBookmarks", JSON.stringify(bookmarks));
-      toast.success("Added to bookmarks!");
+      toast.success("Bookmarked!");
     }
     setBookmarked(!bookmarked);
   };
