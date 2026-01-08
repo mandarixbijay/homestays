@@ -45,15 +45,18 @@ function BlogContent({ content }: { content: string }) {
     // Process HTML to wrap images in centered containers
     let processed = content;
 
-    // Match img tags and wrap them in centered divs with zero top margin
+    // Match img tags and wrap them in centered divs with zero top margin using !important
     processed = processed.replace(
       /<img([^>]+)>/gi,
-      '<div class="blog-image-wrapper" style="text-align:center;margin:0 auto 0.5rem auto;max-width:100%;"><img$1 style="max-width:min(100%, 900px);height:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);background:white;display:inline-block;margin-top:0;"/></div>'
+      '<div class="blog-image-wrapper" style="text-align:center !important;margin:0 auto 8px auto !important;padding:0 !important;max-width:100%;"><img$1 style="max-width:min(100%, 900px);height:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);background:white;display:inline-block;margin:0 !important;padding:0 !important;"/></div>'
     );
 
-    // Remove any double spacing or extra line breaks around images
+    // Remove paragraph margin before images by closing p tag without spacing
     processed = processed.replace(/<\/p>\s*<div class="blog-image-wrapper"/g, '</p><div class="blog-image-wrapper"');
     processed = processed.replace(/<\/div>\s*<p>/g, '</div><p>');
+
+    // Also handle images that might be directly after paragraphs - reduce the p margin
+    processed = processed.replace(/<p([^>]*)>([^<]*)<\/p>\s*<div class="blog-image-wrapper"/g, '<p$1 style="margin-bottom:4px !important;">$2</p><div class="blog-image-wrapper"');
 
     return processed;
   }, [content]);
@@ -81,7 +84,8 @@ function BlogContent({ content }: { content: string }) {
         prose-table:my-6 prose-table:border-collapse
         prose-th:bg-gray-50 prose-th:p-3 prose-th:text-left prose-th:font-semibold
         prose-td:p-3 prose-td:border prose-td:border-gray-200
-        [&_.blog-image-wrapper]:mt-0 [&_.blog-image-wrapper]:mb-2
+        [&_.blog-image-wrapper]:!mt-0 [&_.blog-image-wrapper]:!mb-2 [&_.blog-image-wrapper]:!pt-0
+        [&_.blog-image-wrapper_img]:!mt-0 [&_.blog-image-wrapper_img]:!mb-0
       "
       dangerouslySetInnerHTML={{ __html: processedContent }}
     />
@@ -259,7 +263,7 @@ export default function BlogDetailClient({
       </div>
 
       {/* Hero Section - Modern Magazine Style */}
-      <section className="relative min-h-[60vh] sm:min-h-[70vh] lg:min-h-[75vh] flex items-center justify-center overflow-hidden mt-16">
+      <section className="relative min-h-[60vh] sm:min-h-[70vh] lg:min-h-[75vh] flex items-center justify-center overflow-hidden mt-32">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <div className="relative w-full h-full">
