@@ -292,84 +292,86 @@ export default function BlogDetailClient({
           </main>
 
           {/* Sidebar */}
-          <aside className="lg:col-span-4 space-y-6">
-            {/* Floating Actions - Desktop */}
-            <div className="hidden lg:flex items-center gap-2 bg-white rounded-xl p-4 shadow-sm sticky top-20 z-10">
-              <Button variant="ghost" size="sm" onClick={handleLike} className={liked ? "text-red-500" : "text-gray-600"}>
-                <Heart className={`h-4 w-4 mr-1.5 ${liked ? "fill-current" : ""}`} />
-                {likes}
-              </Button>
-              <Separator orientation="vertical" className="h-5" />
-              <Button variant="ghost" size="icon" onClick={handleBookmark} className={bookmarked ? "text-[#D1AA5A]" : "text-gray-600"}>
-                <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => handleShare("facebook")} className="text-gray-600 hover:text-blue-600">
-                <Facebook className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => handleShare("twitter")} className="text-gray-600 hover:text-sky-500">
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => handleShare("copy")} className="text-gray-600">
-                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Link2 className="h-4 w-4" />}
-              </Button>
-            </div>
-
-            {/* Table of Contents */}
-            <div className="hidden lg:block bg-white rounded-xl shadow-sm overflow-hidden">
-              <TableOfContents content={blog.content} />
-            </div>
-
-            {/* Newsletter */}
-            <div className="bg-[#214B3F] rounded-xl p-6 text-white">
-              <Mountain className="h-8 w-8 text-[#D1AA5A] mb-3" />
-              <h3 className="font-bold text-lg mb-2">Stay Updated</h3>
-              <p className="text-sm text-white/80 mb-4">
-                Get travel tips and stories delivered weekly.
-              </p>
-              <input
-                type="email"
-                placeholder="Your email"
-                className="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 placeholder:text-white/50 text-white text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-[#D1AA5A]/50"
-              />
-              <Button className="w-full bg-[#D1AA5A] hover:bg-[#c49d4f] text-[#214B3F] font-semibold">
-                Subscribe
-              </Button>
-            </div>
-
-            {/* Trending Posts */}
-            {trendingBlogs.length > 0 && (
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-[#214B3F]" />
-                  Trending
-                </h3>
-                <div className="space-y-4">
-                  {trendingBlogs.slice(0, 3).map((post, index) => (
-                    <Link key={post.id} href={`/blogs/${post.slug}`} className="group block">
-                      <div className="flex gap-4">
-                        <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                          <SafeBlogImage
-                            src={post.images?.[0]?.url || post.featuredImage || "/images/fallback-image.png"}
-                            alt={post.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 text-sm line-clamp-2 group-hover:text-[#214B3F] transition-colors">
-                            {post.title}
-                          </h4>
-                          <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
-                            <Eye className="h-3 w-3" />
-                            {post.viewCount.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+          <aside className="lg:col-span-4">
+            <div className="lg:sticky lg:top-24 space-y-6 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:scrollbar-thin lg:scrollbar-thumb-gray-300 lg:scrollbar-track-transparent lg:pr-1">
+              {/* Floating Actions - Desktop */}
+              <div className="hidden lg:flex items-center gap-2 bg-white rounded-xl p-4 shadow-sm">
+                <Button variant="ghost" size="sm" onClick={handleLike} className={liked ? "text-red-500" : "text-gray-600"}>
+                  <Heart className={`h-4 w-4 mr-1.5 ${liked ? "fill-current" : ""}`} />
+                  {likes}
+                </Button>
+                <Separator orientation="vertical" className="h-5" />
+                <Button variant="ghost" size="icon" onClick={handleBookmark} className={bookmarked ? "text-[#D1AA5A]" : "text-gray-600"}>
+                  <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleShare("facebook")} className="text-gray-600 hover:text-blue-600">
+                  <Facebook className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleShare("twitter")} className="text-gray-600 hover:text-sky-500">
+                  <Twitter className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => handleShare("copy")} className="text-gray-600">
+                  {copied ? <Check className="h-4 w-4 text-green-500" /> : <Link2 className="h-4 w-4" />}
+                </Button>
               </div>
-            )}
+
+              {/* Table of Contents */}
+              <div className="hidden lg:block bg-white rounded-xl shadow-sm overflow-hidden">
+                <TableOfContents content={blog.content} />
+              </div>
+
+              {/* Newsletter */}
+              <div className="bg-[#214B3F] rounded-xl p-6 text-white">
+                <Mountain className="h-8 w-8 text-[#D1AA5A] mb-3" />
+                <h3 className="font-bold text-lg mb-2">Stay Updated</h3>
+                <p className="text-sm text-white/80 mb-4">
+                  Get travel tips and stories delivered weekly.
+                </p>
+                <input
+                  type="email"
+                  placeholder="Your email"
+                  className="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 placeholder:text-white/50 text-white text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-[#D1AA5A]/50"
+                />
+                <Button className="w-full bg-[#D1AA5A] hover:bg-[#c49d4f] text-[#214B3F] font-semibold">
+                  Subscribe
+                </Button>
+              </div>
+
+              {/* Trending Posts */}
+              {trendingBlogs.length > 0 && (
+                <div className="bg-white rounded-xl p-6 shadow-sm">
+                  <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-[#214B3F]" />
+                    Trending
+                  </h3>
+                  <div className="space-y-4">
+                    {trendingBlogs.slice(0, 3).map((post) => (
+                      <Link key={post.id} href={`/blogs/${post.slug}`} className="group block">
+                        <div className="flex gap-4">
+                          <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                            <SafeBlogImage
+                              src={post.images?.[0]?.url || post.featuredImage || "/images/fallback-image.png"}
+                              alt={post.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-gray-900 text-sm line-clamp-2 group-hover:text-[#214B3F] transition-colors">
+                              {post.title}
+                            </h4>
+                            <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                              <Eye className="h-3 w-3" />
+                              {post.viewCount.toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </aside>
         </div>
       </div>
