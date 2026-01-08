@@ -26,6 +26,8 @@ import { TableOfContents } from "@/components/blog/TableOfContents";
 
 interface BlogDetailClientProps {
   blog: PublicBlog;
+  initialRelatedBlogs?: PublicBlog[];
+  initialTrendingBlogs?: PublicBlog[];
 }
 
 // Simple Avatar Component with Dark Teal Theme
@@ -86,10 +88,15 @@ function BlogContent({ content }: { content: string }) {
   );
 }
 
-export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
-  const [relatedBlogs, setRelatedBlogs] = useState<PublicBlog[]>([]);
-  const [trendingBlogs, setTrendingBlogs] = useState<PublicBlog[]>([]);
-  const [trendingLoading, setTrendingLoading] = useState(true);
+export default function BlogDetailClient({
+  blog,
+  initialRelatedBlogs = [],
+  initialTrendingBlogs = [],
+}: BlogDetailClientProps) {
+  // Use server-prefetched data - no client-side fetching needed
+  const relatedBlogs = initialRelatedBlogs;
+  const trendingBlogs = initialTrendingBlogs;
+
   const [copied, setCopied] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -103,42 +110,14 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
     offset: ["start start", "end end"],
   });
 
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const headerScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
-
+  // Load bookmark/like status from localStorage (client-only)
   useEffect(() => {
-    loadRelatedBlogs();
-    loadTrendingBlogs();
     const bookmarks = JSON.parse(localStorage.getItem("blogBookmarks") || "[]");
     setBookmarked(bookmarks.includes(blog.id));
 
     const likedPosts = JSON.parse(localStorage.getItem("likedPosts") || "[]");
     setLiked(likedPosts.includes(blog.id));
   }, [blog.id]);
-
-  const loadRelatedBlogs = async () => {
-    try {
-      if (blog.categories && blog.categories.length > 0) {
-        const response = await publicBlogApi.getRelatedBlogs(blog.slug, 4);
-        setRelatedBlogs(response.filter((b) => b.id !== blog.id).slice(0, 4));
-      }
-    } catch (error) {
-      console.error("Error loading related blogs:", error);
-    }
-  };
-
-  const loadTrendingBlogs = async () => {
-    try {
-      setTrendingLoading(true);
-      const response = await publicBlogApi.getFeaturedBlogs(3);
-      setTrendingBlogs(response.filter((b) => b.id !== blog.id).slice(0, 3));
-    } catch (error) {
-      console.error("Error loading trending blogs:", error);
-      setTrendingBlogs([]);
-    } finally {
-      setTrendingLoading(false);
-    }
-  };
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const images = blog.images?.map((img) => img.url) || [blog.featuredImage || "/images/fallback-image.png"];
@@ -204,12 +183,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
         />
 
       {/* Enhanced Floating Actions Sidebar - Desktop Only */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.5 }}
-        className="fixed left-8 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-3 z-40"
-      >
+      <div className="fixed left-8 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-3 z-40 animate-fade-in">
         <Button
           variant="outline"
           size="icon"
@@ -282,7 +256,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
         >
           {copied ? <Check className="h-5 w-5" /> : <Link2 className="h-5 w-5" />}
         </Button>
-      </motion.div>
+      </div>
 
       {/* Hero Section - Modern Magazine Style */}
       <section className="relative min-h-[60vh] sm:min-h-[70vh] lg:min-h-[75vh] flex items-center justify-center overflow-hidden">
@@ -588,11 +562,7 @@ export default function BlogDetailClient({ blog }: BlogDetailClientProps) {
                     Trending Now
                   </h3>
                   <div className="space-y-4">
-                    {trendingLoading ? (
-                      [1, 2, 3].map((i) => (
-                        <TrendingBlogSkeleton key={i} />
-                      ))
-                    ) : trendingBlogs.length === 0 ? (
+                    {trendingBlogs.length === 0 ? (
                       <p className="text-muted-foreground text-sm text-center">No trending stories available</p>
                     ) : (
                       trendingBlogs.map((trendingBlog) => (

@@ -19,10 +19,26 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+// Cache blog data between generateMetadata and page render
+const blogCache = new Map<string, PublicBlog>();
+
+async function getBlogWithCache(slug: string): Promise<PublicBlog | null> {
+  if (blogCache.has(slug)) {
+    return blogCache.get(slug)!;
+  }
+  const blog = await publicBlogApi.getBlogBySlug(slug);
+  if (blog) {
+    blogCache.set(slug, blog);
+    // Clear cache after 5 seconds to prevent memory leaks
+    setTimeout(() => blogCache.delete(slug), 5000);
+  }
+  return blog;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { slug } = await params;
-    const blog = await publicBlogApi.getBlogBySlug(slug);
+    const blog = await getBlogWithCache(slug);
 
     if (!blog) {
       return {
@@ -137,16 +153,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BlogDetailPage({ params }: Props) {
   try {
     const { slug } = await params;
-    console.log(`[BlogDetailPage] Loading blog with slug: ${slug}`);
-    
-    const blog = await publicBlogApi.getBlogBySlug(slug);
+
+    // Use cached blog data from generateMetadata
+    const blog = await getBlogWithCache(slug);
 
     if (!blog) {
-      console.log(`[BlogDetailPage] Blog not found for slug: ${slug}`);
       notFound();
     }
 
-    console.log(`[BlogDetailPage] Blog loaded successfully:`, blog.title);
+    // Prefetch related and trending blogs in parallel on server
+    const [relatedBlogs, trendingBlogs] = await Promise.all([
+      publicBlogApi.getRelatedBlogs(blog.slug, 4).catch(() => []),
+      publicBlogApi.getFeaturedBlogs(3).catch(() => []),
+    ]);
+
+    // Filter out current blog from results
+    const filteredRelated = relatedBlogs.filter((b: PublicBlog) => b.id !== blog.id).slice(0, 4);
+    const filteredTrending = trendingBlogs.filter((b: PublicBlog) => b.id !== blog.id).slice(0, 3);
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nepalhomestays.com';
 
@@ -361,7 +384,11 @@ export default async function BlogDetailPage({ params }: Props) {
         />
         <div className="bg-background min-h-screen font-manrope">
           <Navbar />
-          <BlogDetailClient blog={blog} />
+          <BlogDetailClient
+            blog={blog}
+            initialRelatedBlogs={filteredRelated}
+            initialTrendingBlogs={filteredTrending}
+          />
           <Footer />
         </div>
       </>
