@@ -163,14 +163,14 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
                   className={`group flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
                     isActive
                       ? "bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg shadow-[#224240]/20"
-                      : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50"
+                      : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   <span className="flex items-center gap-3">
                     <div className={`p-1.5 rounded-lg ${
                       isActive
                         ? "bg-white/20"
-                        : "bg-gray-200 dark:bg-gray-700 group-hover:bg-[#224240]/10"
+                        : "bg-gray-200 group-hover:bg-[#224240]/10"
                     }`}>
                       <item.icon className="h-5 w-5" />
                     </div>
@@ -189,13 +189,13 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="ml-4 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4"
+                      className="ml-4 mt-2 space-y-1 border-l-2 border-gray-200 pl-4"
                     >
                       {item.subMenu.map((sub: any, idx: number) => {
                         if (sub.isSectionLabel) {
                           return (
                             <div key={`section-${idx}`} className="pt-3 pb-1 px-3">
-                              <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                                 {sub.name}
                               </span>
                             </div>
@@ -208,8 +208,8 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
                             href={sub.href}
                             className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                               isSubActive
-                                ? "bg-[#224240]/10 text-[#224240] dark:bg-[#224240]/20 dark:text-[#2a5350] border-l-2 border-[#224240] -ml-[2px] pl-[10px]"
-                                : "text-gray-600 hover:bg-gray-100 hover:text-[#224240] dark:text-gray-400 dark:hover:bg-gray-700/50 dark:hover:text-gray-300"
+                                ? "bg-[#224240]/10 text-[#224240] border-l-2 border-[#224240] -ml-[2px] pl-[10px]"
+                                : "text-gray-600 hover:bg-gray-100 hover:text-[#224240]"
                             }`}
                           >
                             <sub.icon className={`h-4 w-4 ${isSubActive ? "" : "opacity-60 group-hover:opacity-100"}`} />
@@ -230,13 +230,13 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
                 className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
                   isExactMatch
                     ? "bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg shadow-[#224240]/20"
-                    : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <div className={`p-1.5 rounded-lg ${
                   isExactMatch
                     ? "bg-white/20"
-                    : "bg-gray-200 dark:bg-gray-700 group-hover:bg-[#224240]/10"
+                    : "bg-gray-200 group-hover:bg-[#224240]/10"
                 }`}>
                   <item.icon className="h-5 w-5" />
                 </div>
@@ -253,9 +253,9 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar (desktop) */}
-      <div className="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0 bg-white dark:bg-gray-800 shadow-2xl border-r border-gray-200 dark:border-gray-700">
+      <div className="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0 bg-white shadow-2xl border-r border-gray-200">
         {/* Logo Header */}
         <div className="relative overflow-hidden bg-gradient-to-br from-[#224240] via-[#2a5350] to-[#224240] p-6">
           {/* Decorative Background */}
@@ -305,18 +305,18 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
         {renderNav()}
 
         {/* Footer */}
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50">
+        <div className="border-t border-gray-200 p-4 bg-gray-50">
           <div className="flex items-center justify-between mb-3">
             <ConnectionStatus />
             <button
               onClick={handleSignOut}
-              className="group p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+              className="group p-2 hover:bg-red-50 rounded-lg transition-all duration-200"
               title="Sign Out"
             >
-              <LogOut className="h-4 w-4 text-gray-600 group-hover:text-red-600 dark:text-gray-400 dark:group-hover:text-red-400" />
+              <LogOut className="h-4 w-4 text-gray-600 group-hover:text-red-600" />
             </button>
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+          <div className="text-xs text-gray-500 text-center">
             © 2025 Homestays Admin
           </div>
         </div>
@@ -341,7 +341,7 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-2xl lg:hidden flex flex-col"
+              className="fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl lg:hidden flex flex-col"
             >
               {/* Logo Header */}
               <div className="relative overflow-hidden bg-gradient-to-br from-[#224240] via-[#2a5350] to-[#224240] p-6">
@@ -399,19 +399,19 @@ const AdminLayout = ({ children, title }: { children: React.ReactNode; title?: s
               {renderNav()}
 
               {/* Footer */}
-              <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50">
+              <div className="border-t border-gray-200 p-4 bg-gray-50">
                 <div className="flex items-center justify-between mb-3">
                   <ConnectionStatus />
                   <button
                     onClick={handleSignOut}
-                    className="group p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+                    className="group p-2 hover:bg-red-50 rounded-lg transition-all duration-200"
                     title="Sign Out"
                   >
-                    <LogOut className="h-4 w-4 text-gray-600 group-hover:text-red-600 dark:text-gray-400 dark:group-hover:text-red-400" />
+                    <LogOut className="h-4 w-4 text-gray-600 group-hover:text-red-600" />
                   </button>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  © 2024 Homestays Admin
+                <div className="text-xs text-gray-500 text-center">
+                  © 2025 Homestays Admin
                 </div>
               </div>
             </motion.div>

@@ -206,10 +206,10 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
             <Image
               src="/images/logo/logo.png"
               alt="Homestay Nepal Logo"
-              width={120}
-              height={120}
+              width={160}
+              height={160}
               priority
-              className="w-auto h-14 sm:h-16"
+              className="w-auto h-16 sm:h-20"
             />
           </div>
         </Link>
