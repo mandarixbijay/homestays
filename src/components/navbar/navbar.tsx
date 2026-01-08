@@ -11,17 +11,17 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Bell,
-  LogIn,
-  Sun,
-  Moon,
+  // Bell,
+  UserPlus,
+  // Sun,
+  // Moon,
   Menu,
   Shield,
 } from "lucide-react";
@@ -62,11 +62,11 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
   React.useEffect(() => {
     if (isLoggedIn && userRole && typeof window !== 'undefined') {
       const currentPath = window.location.pathname;
-      
+
       // Only redirect from signin page, and only if not already on correct dashboard
       if (currentPath === '/signin') {
         let redirectPath = '';
-        
+
         switch (userRole) {
           case 'HOST':
             redirectPath = '/host/dashboard';
@@ -80,7 +80,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
           default:
             return;
         }
-        
+
         console.log(`[Navbar] Redirecting ${userRole} from signin to ${redirectPath}`);
         router.replace(redirectPath); // Use replace instead of push to avoid back button issues
       }
@@ -135,69 +135,66 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
     { label: "Support", href: "/contact-support" },
   ];
 
-  // Fixed Desktop Theme Toggle Component
-  const DesktopThemeToggle = () => {
-    if (!mounted) {
-      // Return a placeholder that matches the button layout
-      return (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hover:bg-primary/10 transition-colors"
-          disabled
-        >
-          <div className="h-6 w-6" /> {/* Invisible placeholder */}
-        </Button>
-      );
-    }
+  // Theme Toggle Components - Commented out for later use
+  // const DesktopThemeToggle = () => {
+  //   if (!mounted) {
+  //     return (
+  //       <Button
+  //         variant="ghost"
+  //         size="icon"
+  //         className="hover:bg-primary/10 transition-colors"
+  //         disabled
+  //       >
+  //         <div className="h-6 w-6" />
+  //       </Button>
+  //     );
+  //   }
 
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        className="hover:bg-primary/10 transition-colors"
-      >
-        {theme === "dark" ? (
-          <Sun className="h-6 w-6" />
-        ) : (
-          <Moon className="h-6 w-6" />
-        )}
-      </Button>
-    );
-  };
+  //   return (
+  //     <Button
+  //       variant="ghost"
+  //       size="icon"
+  //       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+  //       className="hover:bg-primary/10 transition-colors"
+  //     >
+  //       {theme === "dark" ? (
+  //         <Sun className="h-6 w-6" />
+  //       ) : (
+  //         <Moon className="h-6 w-6" />
+  //       )}
+  //     </Button>
+  //   );
+  // };
 
-  // Fixed Mobile Theme Toggle Component
-  const MobileThemeToggle = () => {
-    if (!mounted) {
-      // Return a placeholder that matches the button layout
-      return (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hover:bg-primary/10 transition-colors"
-          disabled
-        >
-          <div className="h-6 w-6" /> {/* Invisible placeholder */}
-        </Button>
-      );
-    }
+  // const MobileThemeToggle = () => {
+  //   if (!mounted) {
+  //     return (
+  //       <Button
+  //         variant="ghost"
+  //         size="icon"
+  //         className="hover:bg-primary/10 transition-colors"
+  //         disabled
+  //       >
+  //         <div className="h-6 w-6" />
+  //       </Button>
+  //     );
+  //   }
 
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        className="hover:bg-primary/10 transition-colors"
-      >
-        {theme === "dark" ? (
-          <Sun className="h-6 w-6" />
-        ) : (
-          <Moon className="h-6 w-6" />
-        )}
-      </Button>
-    );
-  };
+  //   return (
+  //     <Button
+  //       variant="ghost"
+  //       size="icon"
+  //       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+  //       className="hover:bg-primary/10 transition-colors"
+  //     >
+  //       {theme === "dark" ? (
+  //         <Sun className="h-6 w-6" />
+  //       ) : (
+  //         <Moon className="h-6 w-6" />
+  //       )}
+  //     </Button>
+  //   );
+  // };
 
   return (
     <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-[100] border-b border-gray-200/20 dark:border-gray-700/20">
@@ -262,9 +259,11 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
           {/* Desktop User Actions */}
           {!hideUserCircle && (
             <div className="flex items-center gap-4">
-              <DesktopThemeToggle />
+              {/* Theme Toggle - Commented out for later use */}
+              {/* <DesktopThemeToggle /> */}
 
-              <DropdownMenu>
+              {/* Notification Icon - Commented out for later use */}
+              {/* <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
@@ -285,15 +284,15 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                     </div>
                   </div>
                 </DropdownMenuContent>
-              </DropdownMenu>
+              </DropdownMenu> */}
 
               {isLoggedIn ? (
                 <UserProfileDropdown />
               ) : (
                 <Button asChild variant="default" size="sm" className="gap-2 text-xs font-medium">
-                  <Link href="/signin" className="flex items-center">
-                    <LogIn className="h-5 w-5" />
-                    <span>Sign In</span>
+                  <Link href="/signup" className="flex items-center">
+                    <UserPlus className="h-5 w-5" />
+                    <span>Register</span>
                   </Link>
                 </Button>
               )}
@@ -303,7 +302,8 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
 
         {/* Mobile Menu */}
         <div className="flex items-center gap-3 lg:hidden">
-          <MobileThemeToggle />
+          {/* Mobile Theme Toggle - Commented out for later use */}
+          {/* <MobileThemeToggle /> */}
 
           <Drawer direction="bottom" open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DrawerTrigger asChild>
@@ -351,7 +351,8 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
               {/* User Actions - Fixed Bottom */}
               {!hideUserCircle && (
                 <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-3">
-                  <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-all duration-200">
+                  {/* Notification Button - Commented out for later use */}
+                  {/* <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-all duration-200">
                     <div className="relative">
                       <Bell className="h-5 w-5 text-primary" />
                       <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full"></span>
@@ -359,7 +360,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                     <span className="text-sm font-medium text-card-foreground">
                       Notifications
                     </span>
-                  </button>
+                  </button> */}
 
                   {isLoggedIn ? (
                     <UserProfileDropdown isMobile />
@@ -371,12 +372,12 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                       className="w-full h-11 text-sm font-medium gap-2 bg-primary hover:bg-primary/90 transition-all duration-200"
                     >
                       <Link
-                        href="/signin"
+                        href="/signup"
                         className="flex items-center justify-center"
                         onClick={closeMenu}
                       >
-                        <LogIn className="h-4 w-4" />
-                        <span>Sign In</span>
+                        <UserPlus className="h-4 w-4" />
+                        <span>Register</span>
                       </Link>
                     </Button>
                   )}

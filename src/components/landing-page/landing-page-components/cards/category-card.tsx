@@ -9,10 +9,11 @@ const FALLBACK_IMAGE = "/images/fallback-image.png";
 interface CategoryCardProps {
   imageSrc: string;
   categoryName: string;
+  homestayCount?: number;
   onClick?: () => void;
 }
 
-const CategoryCard: React.FC<CategoryCardProps> = ({ imageSrc, categoryName, onClick }) => {
+const CategoryCard: React.FC<CategoryCardProps> = ({ imageSrc, categoryName, homestayCount, onClick }) => {
   return (
     <Card className="w-full h-[300px] sm:h-[360px] md:h-[400px] rounded-xl border border-gray-200" onClick={onClick}>
       <div className="relative w-full h-full">
@@ -29,8 +30,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ imageSrc, categoryName, onC
           }}
         />
         <div className="absolute bottom-4 left-4">
-          <div className="bg-black/50 rounded px-3 py-1">
+          <div className="bg-black/50 rounded px-3 py-1.5">
             <h3 className="text-base font-bold text-white text-left">{categoryName}</h3>
+            {homestayCount !== undefined && (
+              <p className="text-xs text-white/80 text-left">
+                {homestayCount} {homestayCount === 1 ? "homestay" : "homestays"}
+              </p>
+            )}
           </div>
         </div>
       </div>
