@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Image from "next/image";
 import { Hero3Card } from "@/types/homestay";
 import { differenceInDays, format } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { useFavorite } from "@/hooks/useFavorite";
 
 const FALLBACK_IMAGE = "https://via.placeholder.com/350x208?text=No+Image+Available";
 
@@ -35,6 +36,7 @@ interface DestinationCardProps {
   roomsLeft?: number;
   aboutDescription?: string;
   onClick?: () => void;
+  homestayId?: number;
 }
 
 interface DestinationCardsProps {
@@ -66,9 +68,13 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
   roomsLeft,
   aboutDescription,
   onClick,
+  homestayId,
 }) => {
   const [current, setCurrent] = useState(0);
   const imgArr = images.length > 0 ? images : [FALLBACK_IMAGE];
+  const { isFavorite, toggleFavorite, isToggling } = useFavorite();
+  const favorited = homestayId ? isFavorite(homestayId) : false;
+  const isTogglingThis = homestayId ? isToggling === homestayId : false;
 
   const handlePrev = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
@@ -147,7 +153,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
             </Badge>
           )}
           {discount && (
-            <Badge className="absolute top-3 right-3 bg-discount text-discount-foreground font-semibold px-3 py-1 rounded-full text-xs">
+            <Badge className="absolute top-3 right-12 bg-discount text-discount-foreground font-semibold px-3 py-1 rounded-full text-xs">
               {discount}
             </Badge>
           )}
@@ -155,6 +161,28 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
             <Badge className="absolute top-3 left-3 bg-warning text-warning-foreground font-semibold px-3 py-1 rounded-full text-xs">
               {roomsLeft} {roomsLeft === 1 ? "room" : "rooms"} left
             </Badge>
+          )}
+          {/* Favorite Heart Button */}
+          {homestayId && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(homestayId, e);
+              }}
+              disabled={isTogglingThis}
+              className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-200 disabled:opacity-50 z-10"
+              aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+            >
+              {isTogglingThis ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+              ) : (
+                <Heart
+                  className={`h-4 w-4 transition-colors ${
+                    favorited ? "text-red-500 fill-red-500" : "text-gray-600 hover:text-red-500"
+                  }`}
+                />
+              )}
+            </button>
           )}
         </div>
         <CardContent className="flex flex-col sm:flex-row p-4 sm:p-6 w-full gap-4 sm:gap-6 min-h-64">
@@ -275,6 +303,15 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
     }
   }
 
+  // Extract homestay ID from slug if not available directly
+  const extractIdFromSlug = (slug: string): number | undefined => {
+    const match = slug.match(/-id-(\d+)$/);
+    if (match && match[1]) {
+      return parseInt(match[1]);
+    }
+    return undefined;
+  };
+
   const adaptHomestay = (homestay: Hero3Card): DestinationCardProps => {
     const totalPriceNum = parseFloat(homestay.price.replace("NPR ", ""));
     const nightlyPriceNum = homestay.rooms[0]?.nightlyPrice || totalPriceNum / numNights;
@@ -283,6 +320,7 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
       ? `${Math.round(((mockOriginalPrice - nightlyPriceNum) / mockOriginalPrice) * 100)}% off`
       : undefined;
     const totalRoomsLeft = homestay.rooms.reduce((sum, room) => sum + (room.roomsLeft || 0), 0);
+    const homestayId = homestay.id || extractIdFromSlug(homestay.slug);
 
     // Combine main homestay image with room images
     const allImages = [];
@@ -318,6 +356,7 @@ const DestinationCards: React.FC<DestinationCardsProps> = ({
       discount,
       roomsLeft: totalRoomsLeft,
       aboutDescription: homestay.aboutDescription,
+      homestayId,
       onClick: () => {
         // Clean slug by URL encoding to handle special characters
         const cleanSlug = encodeURIComponent(homestay.slug);
