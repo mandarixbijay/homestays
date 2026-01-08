@@ -154,7 +154,10 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
 
   // Filter out already associated homestays
   const availableHomestays = useMemo(() => {
-    const associatedIds = new Set((destination?.homestays || []).map((h: any) => h.id));
+    // Handle nested structure: item.homestay.id or item.homestayId or item.id
+    const associatedIds = new Set((destination?.homestays || []).map((item: any) =>
+      item.homestay?.id || item.homestayId || item.id
+    ));
     return searchedHomestays.filter(h => !associatedIds.has(h.id));
   }, [searchedHomestays, destination?.homestays]);
 
@@ -257,17 +260,37 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
 
   // Helper function to get homestay image from various possible sources
   const getHomestayImage = (homestay: any): string | null => {
+    // Handle nested structure (homestay.homestay.images)
+    const actualHomestay = homestay.homestay || homestay;
+
     // Check mainImage first
-    if (homestay.mainImage) return homestay.mainImage;
+    if (actualHomestay.mainImage) return actualHomestay.mainImage;
     // Check images array for main image
-    if (homestay.images?.length > 0) {
-      const mainImg = homestay.images.find((img: any) => img.isMain);
+    if (actualHomestay.images?.length > 0) {
+      const mainImg = actualHomestay.images.find((img: any) => img.isMain);
       if (mainImg?.url) return mainImg.url;
-      if (homestay.images[0]?.url) return homestay.images[0].url;
+      if (actualHomestay.images[0]?.url) return actualHomestay.images[0].url;
     }
     // Check image field
-    if (homestay.image) return homestay.image;
+    if (actualHomestay.image) return actualHomestay.image;
     return null;
+  };
+
+  // Helper function to get actual homestay data from nested structure
+  const getHomestayData = (item: any) => {
+    // API returns { homestayId, destinationId, homestay: { id, name, ... } }
+    if (item.homestay) {
+      return {
+        id: item.homestay.id || item.homestayId,
+        name: item.homestay.name,
+        address: item.homestay.address,
+        rating: item.homestay.rating,
+        images: item.homestay.images,
+        location: item.homestay.location
+      };
+    }
+    // Direct structure
+    return item;
   };
 
   // Bulk remove handlers
@@ -280,7 +303,10 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
   };
 
   const handleSelectAllForRemoval = () => {
-    const allHomestayIds = (destination?.homestays || []).map((h: any) => h.id);
+    // Handle nested structure: item.homestay.id or item.homestayId or item.id
+    const allHomestayIds = (destination?.homestays || []).map((item: any) =>
+      item.homestay?.id || item.homestayId || item.id
+    );
     if (selectedForRemoval.length === allHomestayIds.length) {
       setSelectedForRemoval([]);
     } else {
@@ -1026,8 +1052,9 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {(destination.homestays || []).map((homestay: any) => {
-                    const homestayImage = getHomestayImage(homestay);
+                  {(destination.homestays || []).map((item: any) => {
+                    const homestay = getHomestayData(item);
+                    const homestayImage = getHomestayImage(item);
                     const isSelected = selectedForRemoval.includes(homestay.id);
 
                     return (
