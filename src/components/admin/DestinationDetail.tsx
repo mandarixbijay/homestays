@@ -1101,8 +1101,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                           {!showRemoveSelection && (
                             <div className="flex items-center space-x-2">
                               <ActionButton
-                                onClick={(e) => {
-                                  e.stopPropagation();
+                                onClick={() => {
                                   window.open(`/admin/homestays/${homestay.id}`, '_blank');
                                 }}
                                 variant="secondary"
@@ -1112,8 +1111,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                                 View
                               </ActionButton>
                               <ActionButton
-                                onClick={(e) => {
-                                  e.stopPropagation();
+                                onClick={() => {
                                   handleRemoveHomestay(homestay.id);
                                 }}
                                 variant="danger"
