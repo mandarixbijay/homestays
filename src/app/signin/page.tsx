@@ -63,18 +63,46 @@ const LoginPage = () => {
   const { handleFailedAttempt, isBlocked, getBlockedMessage } = useErrorBlock();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const isEmail = (identifier: string) => z.string().email().safeParse(identifier).success;
 
+  // Handle session state changes
   useEffect(() => {
+    // During active login, don't interfere with the loading state
+    if (isLoggingIn) {
+      if (status === "authenticated") {
+        // Login successful, handle redirect
+        setIsLoggingIn(false);
+        setIsCheckingSession(false);
+        if (session?.user?.isEmailVerified || session?.user?.isMobileVerified) {
+          toast.success("Successfully logged in!");
+          const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
+          sessionStorage.removeItem("redirectAfterLogin");
+          router.push(redirectPath);
+        } else {
+          setIsOtpDialogOpen(true);
+          handleResendOtp();
+        }
+      } else if (status === "unauthenticated") {
+        // Login failed, reset states
+        setIsLoggingIn(false);
+        setIsCheckingSession(false);
+      }
+      // If status is "loading", keep waiting
+      return;
+    }
+
+    // Initial session check (not during login)
     if (status === "loading") {
       setIsCheckingSession(true);
       return;
     }
     setIsCheckingSession(false);
+
+    // If already authenticated on page load, redirect
     if (status === "authenticated") {
       if (session?.user?.isEmailVerified || session?.user?.isMobileVerified) {
-        toast.success("Successfully logged in!");
         const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
         sessionStorage.removeItem("redirectAfterLogin");
         router.push(redirectPath);
@@ -83,7 +111,7 @@ const LoginPage = () => {
         handleResendOtp();
       }
     }
-  }, [status, session, router]);
+  }, [status, session, router, isLoggingIn]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (isBlocked("identifier") || isBlocked("password")) {
@@ -92,6 +120,7 @@ const LoginPage = () => {
     }
 
     try {
+      setIsLoggingIn(true);
       setIsCheckingSession(true);
       const payload = {
         action: "login",
@@ -107,13 +136,16 @@ const LoginPage = () => {
         handleFailedAttempt("identifier");
         handleFailedAttempt("password");
         toast.error(response.error);
+        setIsLoggingIn(false);
+        setIsCheckingSession(false);
         return;
       }
+      // Success: keep isLoggingIn true, useEffect will handle the redirect
     } catch (error) {
       handleFailedAttempt("identifier");
       handleFailedAttempt("password");
       toast.error("Failed to login. Please try again.");
-    } finally {
+      setIsLoggingIn(false);
       setIsCheckingSession(false);
     }
   };
