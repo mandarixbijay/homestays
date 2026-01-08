@@ -14,13 +14,18 @@ import {
   Heart,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   SlidersHorizontal,
   X,
-  Grid3X3,
-  List,
   Loader2,
   Home,
-  ArrowUpDown,
+  Wifi,
+  Car,
+  Coffee,
+  Users,
+  BedDouble,
+  Check,
 } from "lucide-react";
 import { DateGuestLocationPicker } from "@/components/homestay/components/details/date-guest-location-picker";
 import Navbar from "@/components/navbar/navbar";
@@ -62,6 +67,7 @@ interface FilterState {
   minRating: number;
   cities: string[];
   vipOnly: boolean;
+  amenities: string[];
 }
 
 interface SearchHomestayContentProps {
@@ -74,10 +80,18 @@ interface SearchHomestayContentProps {
   searchRooms: string;
 }
 
-type SortOption = "price_low" | "price_high" | "rating" | "reviews";
-type ViewMode = "grid" | "list";
+type SortOption = "recommended" | "price_low" | "price_high" | "rating";
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 15;
+
+// Rating label helper
+const getRatingLabel = (rating: number) => {
+  if (rating >= 4.5) return { label: "Exceptional", color: "bg-green-700" };
+  if (rating >= 4.0) return { label: "Wonderful", color: "bg-green-600" };
+  if (rating >= 3.5) return { label: "Very Good", color: "bg-green-500" };
+  if (rating >= 3.0) return { label: "Good", color: "bg-blue-500" };
+  return { label: "Pleasant", color: "bg-gray-500" };
+};
 
 export function SearchHomestayContent({
   initialHomestays,
@@ -90,26 +104,30 @@ export function SearchHomestayContent({
 }: SearchHomestayContentProps) {
   const { setHomestays } = useHomestayContext();
   const [homestays, setLocalHomestays] = useState<Hero3Card[]>(initialHomestays);
-  const [loading, setLoading] = useState(false);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(error);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("price_low");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [sortBy, setSortBy] = useState<SortOption>("recommended");
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [expandedFilters, setExpandedFilters] = useState<Record<string, boolean>>({
+    price: true,
+    rating: true,
+    location: false,
+    amenities: false,
+  });
   const [filters, setFilters] = useState<FilterState>({
     minPrice: "",
     maxPrice: "",
     minRating: 0,
     cities: [],
     vipOnly: false,
+    amenities: [],
   });
 
   const router = useRouter();
   const { isFavorite, toggleFavorite, isToggling } = useFavorite();
 
-  // Parse query parameters for DateGuestLocationPicker
+  // Parse query parameters
   const initialDate: DateRange | undefined = searchCheckIn
     ? {
         from: new Date(searchCheckIn),
@@ -124,24 +142,22 @@ export function SearchHomestayContent({
       })
     : [{ adults: 2, children: 0 }];
 
-  // Extract available cities from homestays
-  const availableCities = useMemo(() => {
-    return [...new Set(homestays.map((h) => h.city))].filter(Boolean).sort();
+  const totalGuests = initialRooms.reduce((sum, r) => sum + r.adults + r.children, 0);
+  const nightsCount = searchCheckIn && searchCheckOut
+    ? Math.ceil((new Date(searchCheckOut).getTime() - new Date(searchCheckIn).getTime()) / (1000 * 60 * 60 * 24))
+    : 1;
+
+  // Extract available data from homestays
+  const availableData = useMemo(() => {
+    const cities = [...new Set(homestays.map((h) => h.city))].filter(Boolean).sort();
+    const allAmenities = new Set<string>();
+    homestays.forEach((homestay) => {
+      (homestay.features || []).forEach((f) => allAmenities.add(f));
+    });
+    return { cities, amenities: Array.from(allAmenities).sort() };
   }, [homestays]);
 
-  // Debounced search
-  useEffect(() => {
-    if (searchQuery) {
-      setSearchLoading(true);
-      const timer = setTimeout(() => {
-        setSearchLoading(false);
-        setCurrentPage(1);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [searchQuery]);
-
-  // Filter, search, and sort homestays
+  // Filter and sort homestays
   const filteredHomestays = useMemo(() => {
     let result = [...homestays];
 
@@ -181,26 +197,32 @@ export function SearchHomestayContent({
       result = result.filter((h) => h.vipAccess);
     }
 
+    // Amenities filter
+    if (filters.amenities.length > 0) {
+      result = result.filter((h) => {
+        const homestayFeatures = h.features || [];
+        return filters.amenities.every((a) => homestayFeatures.includes(a));
+      });
+    }
+
     // Sort
     switch (sortBy) {
       case "price_low":
-        result.sort(
-          (a, b) =>
-            parseFloat(a.price.replace("NPR ", "")) - parseFloat(b.price.replace("NPR ", ""))
-        );
+        result.sort((a, b) => parseFloat(a.price.replace("NPR ", "")) - parseFloat(b.price.replace("NPR ", "")));
         break;
       case "price_high":
-        result.sort(
-          (a, b) =>
-            parseFloat(b.price.replace("NPR ", "")) - parseFloat(a.price.replace("NPR ", ""))
-        );
+        result.sort((a, b) => parseFloat(b.price.replace("NPR ", "")) - parseFloat(a.price.replace("NPR ", "")));
         break;
       case "rating":
         result.sort((a, b) => b.rating - a.rating);
         break;
-      case "reviews":
-        result.sort((a, b) => (b.rooms[0]?.reviews || 0) - (a.rooms[0]?.reviews || 0));
-        break;
+      default:
+        // Recommended: mix of rating and price
+        result.sort((a, b) => {
+          const scoreA = a.rating * 1000 - parseFloat(a.price.replace("NPR ", "")) * 0.01;
+          const scoreB = b.rating * 1000 - parseFloat(b.price.replace("NPR ", "")) * 0.01;
+          return scoreB - scoreA;
+        });
     }
 
     return result;
@@ -218,34 +240,7 @@ export function SearchHomestayContent({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const maxVisible = 5;
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) pages.push(i);
-        pages.push("...");
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push("...");
-        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
-      } else {
-        pages.push(1);
-        pages.push("...");
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
-        pages.push("...");
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
-
-  // Update context with initial homestays
+  // Update context
   useEffect(() => {
     if (initialHomestays.length > 0) {
       setHomestays(initialHomestays);
@@ -256,29 +251,18 @@ export function SearchHomestayContent({
     }
   }, [initialHomestays, error, setHomestays]);
 
-  // Handle search form submission
+  // Handle search - no loading state needed, page will refresh with new data
   const handleSearch = (searchData: {
     location: string | null;
     date: DateRange | undefined;
     rooms: Room[];
   }) => {
-    setLoading(true);
     const queryParams = new URLSearchParams();
-    if (searchData.location) {
-      queryParams.append("location", searchData.location);
-    }
-    if (searchData.date?.from) {
-      queryParams.append("checkIn", format(searchData.date.from, "yyyy-MM-dd"));
-    }
-    if (searchData.date?.to) {
-      queryParams.append("checkOut", format(searchData.date.to, "yyyy-MM-dd"));
-    }
-    queryParams.append(
-      "guests",
-      searchData.rooms.map((room) => `${room.adults}A${room.children}C`).join(",")
-    );
+    if (searchData.location) queryParams.append("location", searchData.location);
+    if (searchData.date?.from) queryParams.append("checkIn", format(searchData.date.from, "yyyy-MM-dd"));
+    if (searchData.date?.to) queryParams.append("checkOut", format(searchData.date.to, "yyyy-MM-dd"));
+    queryParams.append("guests", searchData.rooms.map((room) => `${room.adults}A${room.children}C`).join(","));
     queryParams.append("rooms", searchData.rooms.length.toString());
-
     router.push(`/search?${queryParams.toString()}`);
   };
 
@@ -302,6 +286,7 @@ export function SearchHomestayContent({
       minRating: 0,
       cities: [],
       vipOnly: false,
+      amenities: [],
     });
     setSearchQuery("");
     setCurrentPage(1);
@@ -314,576 +299,553 @@ export function SearchHomestayContent({
     if (filters.minRating > 0) count++;
     if (filters.cities.length > 0) count++;
     if (filters.vipOnly) count++;
+    if (filters.amenities.length > 0) count++;
     return count;
   }, [filters]);
 
-  // Filter sidebar component
+  const toggleFilterSection = (section: string) => {
+    setExpandedFilters((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  // Collapsible Filter Section Component
+  const FilterSection = ({
+    title,
+    section,
+    children,
+  }: {
+    title: string;
+    section: string;
+    children: React.ReactNode;
+  }) => (
+    <div className="border-b border-gray-200 py-4">
+      <button
+        onClick={() => toggleFilterSection(section)}
+        className="flex items-center justify-between w-full text-left"
+      >
+        <span className="font-semibold text-gray-900">{title}</span>
+        {expandedFilters[section] ? (
+          <ChevronUp className="h-4 w-4 text-gray-500" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-gray-500" />
+        )}
+      </button>
+      <AnimatePresence>
+        {expandedFilters[section] && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-3">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
+  // Filter Sidebar Content
   const FilterContent = () => (
-    <div className="space-y-6">
-      {/* Price Range */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">Price Range (NPR)</h3>
-        <div className="flex items-center gap-3">
+    <div className="divide-y divide-gray-200">
+      {/* Search within results */}
+      <div className="pb-4">
+        <h3 className="font-semibold text-gray-900 mb-3">Search by property name</h3>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            type="number"
-            placeholder="Min"
-            value={filters.minPrice}
-            onChange={(e) => setFilters((prev) => ({ ...prev, minPrice: e.target.value }))}
-            className="h-10"
-          />
-          <span className="text-muted-foreground">-</span>
-          <Input
-            type="number"
-            placeholder="Max"
-            value={filters.maxPrice}
-            onChange={(e) => setFilters((prev) => ({ ...prev, maxPrice: e.target.value }))}
-            className="h-10"
+            type="text"
+            placeholder="e.g. Himalayan Lodge"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="pl-9 h-10 border-gray-300"
           />
         </div>
       </div>
 
-      {/* Rating */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">Minimum Rating</h3>
-        <div className="flex flex-wrap gap-2">
-          {[0, 3, 3.5, 4, 4.5].map((rating) => (
-            <button
-              key={rating}
-              onClick={() => setFilters((prev) => ({ ...prev, minRating: rating }))}
-              className={cn(
-                "px-3 py-1.5 rounded-full text-sm font-medium transition-all border",
-                filters.minRating === rating
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-foreground border-border hover:border-primary/50"
-              )}
-            >
-              {rating === 0 ? "Any" : `${rating}+`}
-            </button>
+      {/* Popular Filters */}
+      <div className="py-4">
+        <h3 className="font-semibold text-gray-900 mb-3">Popular filters</h3>
+        <div className="space-y-2">
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <Checkbox
+              checked={filters.vipOnly}
+              onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, vipOnly: checked as boolean }))}
+              className="border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+            />
+            <span className="text-sm text-gray-700 group-hover:text-gray-900">VIP Access</span>
+          </label>
+          {filters.minRating === 0 && (
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <Checkbox
+                checked={filters.minRating >= 4}
+                onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, minRating: checked ? 4 : 0 }))}
+                className="border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+              />
+              <span className="text-sm text-gray-700 group-hover:text-gray-900">Highly rated (4+)</span>
+            </label>
+          )}
+        </div>
+      </div>
+
+      {/* Price Range */}
+      <FilterSection title="Price per night" section="price">
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <Input
+              type="number"
+              placeholder="Min"
+              value={filters.minPrice}
+              onChange={(e) => setFilters((prev) => ({ ...prev, minPrice: e.target.value }))}
+              className="h-10 border-gray-300"
+            />
+          </div>
+          <span className="text-gray-400">–</span>
+          <div className="flex-1">
+            <Input
+              type="number"
+              placeholder="Max"
+              value={filters.maxPrice}
+              onChange={(e) => setFilters((prev) => ({ ...prev, maxPrice: e.target.value }))}
+              className="h-10 border-gray-300"
+            />
+          </div>
+        </div>
+      </FilterSection>
+
+      {/* Guest Rating */}
+      <FilterSection title="Guest rating" section="rating">
+        <div className="space-y-2">
+          {[
+            { value: 4.5, label: "Exceptional 4.5+" },
+            { value: 4, label: "Wonderful 4+" },
+            { value: 3.5, label: "Very Good 3.5+" },
+            { value: 3, label: "Good 3+" },
+          ].map(({ value, label }) => (
+            <label key={value} className="flex items-center gap-3 cursor-pointer group">
+              <Checkbox
+                checked={filters.minRating === value}
+                onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, minRating: checked ? value : 0 }))}
+                className="border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+              />
+              <span className="text-sm text-gray-700 group-hover:text-gray-900">{label}</span>
+            </label>
           ))}
         </div>
-      </div>
+      </FilterSection>
 
-      {/* Cities */}
-      {availableCities.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-foreground">Location</h3>
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {availableCities.map((city) => (
-              <label key={city} className="flex items-center gap-2 cursor-pointer">
+      {/* Location/City */}
+      {availableData.cities.length > 0 && (
+        <FilterSection title="Neighborhood" section="location">
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {availableData.cities.map((city) => (
+              <label key={city} className="flex items-center gap-3 cursor-pointer group">
                 <Checkbox
                   checked={filters.cities.includes(city)}
                   onCheckedChange={(checked) => {
                     setFilters((prev) => ({
                       ...prev,
-                      cities: checked
-                        ? [...prev.cities, city]
-                        : prev.cities.filter((c) => c !== city),
+                      cities: checked ? [...prev.cities, city] : prev.cities.filter((c) => c !== city),
                     }));
                   }}
+                  className="border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                 />
-                <span className="text-sm text-foreground">{city}</span>
+                <span className="text-sm text-gray-700 group-hover:text-gray-900">{city}</span>
               </label>
             ))}
           </div>
-        </div>
+        </FilterSection>
       )}
 
-      {/* VIP Only */}
-      <div className="space-y-3">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <Checkbox
-            checked={filters.vipOnly}
-            onCheckedChange={(checked) =>
-              setFilters((prev) => ({ ...prev, vipOnly: checked as boolean }))
-            }
-          />
-          <span className="text-sm font-medium text-foreground">VIP Access Only</span>
-        </label>
-      </div>
+      {/* Amenities */}
+      {availableData.amenities.length > 0 && (
+        <FilterSection title="Amenities" section="amenities">
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {availableData.amenities.slice(0, 10).map((amenity) => (
+              <label key={amenity} className="flex items-center gap-3 cursor-pointer group">
+                <Checkbox
+                  checked={filters.amenities.includes(amenity)}
+                  onCheckedChange={(checked) => {
+                    setFilters((prev) => ({
+                      ...prev,
+                      amenities: checked ? [...prev.amenities, amenity] : prev.amenities.filter((a) => a !== amenity),
+                    }));
+                  }}
+                  className="border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                />
+                <span className="text-sm text-gray-700 group-hover:text-gray-900">{amenity}</span>
+              </label>
+            ))}
+          </div>
+        </FilterSection>
+      )}
 
-      {/* Reset Button */}
+      {/* Clear Filters */}
       {activeFiltersCount > 0 && (
-        <Button variant="outline" className="w-full" onClick={handleResetFilters}>
-          Clear All Filters ({activeFiltersCount})
-        </Button>
+        <div className="pt-4">
+          <Button variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-50" onClick={handleResetFilters}>
+            Clear all filters
+          </Button>
+        </div>
       )}
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-100">
       <Navbar />
 
-      {/* Hero Section - Clean and Simple */}
-      <section className="bg-primary pt-24 pb-8">
+      {/* Search Header */}
+      <div className="bg-blue-800 pt-20 pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-primary-foreground mb-2">
-              {searchLocation ? `Homestays in ${searchLocation}` : "Search Results"}
-            </h1>
-            <p className="text-primary-foreground/70 text-sm">
-              {searchCheckIn && searchCheckOut && (
-                <>
-                  {format(new Date(searchCheckIn), "MMM d")} -{" "}
-                  {format(new Date(searchCheckOut), "MMM d, yyyy")} •{" "}
-                </>
-              )}
-              {initialRooms.reduce((sum, r) => sum + r.adults + r.children, 0)} Guest
-              {initialRooms.reduce((sum, r) => sum + r.adults + r.children, 0) !== 1 ? "s" : ""} •{" "}
-              {searchRooms} Room{parseInt(searchRooms) !== 1 ? "s" : ""}
-            </p>
-          </div>
-
-          {/* Search Bar */}
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-card rounded-xl p-2 shadow-lg">
-              <DateGuestLocationPicker
-                className="w-full"
-                onSearch={handleSearch}
-                initialLocation={searchLocation || undefined}
-                initialDate={initialDate}
-                initialRooms={initialRooms}
-              />
-            </div>
+          <div className="bg-white rounded-xl p-3 shadow-lg">
+            <DateGuestLocationPicker
+              className="w-full"
+              onSearch={handleSearch}
+              initialLocation={searchLocation || undefined}
+              initialDate={initialDate}
+              initialRooms={initialRooms}
+            />
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <Loader2 className="h-10 w-10 text-primary animate-spin mx-auto mb-4" />
-              <p className="text-muted-foreground">Searching for the best homestays...</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {fetchError ? (
+          <div className="bg-white rounded-xl p-12 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <X className="h-8 w-8 text-red-500" />
             </div>
-          </div>
-        ) : fetchError ? (
-          <div className="text-center py-20">
-            <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <X className="h-8 w-8 text-destructive" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">Something went wrong</h3>
-            <p className="text-muted-foreground mb-6">{fetchError}</p>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h3>
+            <p className="text-gray-600 mb-6">{fetchError}</p>
+            <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700">
+              Try Again
+            </Button>
           </div>
         ) : (
-          <div className="flex gap-8">
+          <div className="flex gap-6">
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:block w-64 flex-shrink-0">
-              <div className="sticky top-24 bg-card rounded-xl border border-border p-5">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="font-semibold text-foreground">Filters</h2>
+            <aside className="hidden lg:block w-72 flex-shrink-0">
+              <div className="bg-white rounded-xl p-5 shadow-sm sticky top-24">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-gray-900">Filter by</h2>
                   {activeFiltersCount > 0 && (
-                    <Badge variant="secondary">{activeFiltersCount}</Badge>
+                    <span className="text-sm text-blue-600">{activeFiltersCount} active</span>
                   )}
                 </div>
                 <FilterContent />
               </div>
             </aside>
 
-            {/* Main Content Area */}
+            {/* Main Content */}
             <main className="flex-1 min-w-0">
-              {/* Controls Bar */}
-              <div className="bg-card rounded-xl border border-border p-4 mb-6">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {/* Search Input */}
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="text"
-                      placeholder="Search by name or location..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 pr-10 h-10"
-                    />
-                    {searchQuery && !searchLoading && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
-                    {searchLoading && (
-                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary animate-spin" />
-                    )}
-                  </div>
+              {/* Results Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">
+                    {searchLocation || "All"} homestays
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    {filteredHomestays.length} properties found
+                    {searchCheckIn && searchCheckOut && ` • ${nightsCount} night${nightsCount !== 1 ? "s" : ""}`}
+                    {totalGuests > 0 && ` • ${totalGuests} guest${totalGuests !== 1 ? "s" : ""}`}
+                  </p>
+                </div>
 
-                  {/* Sort */}
-                  <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                    <SelectTrigger className="w-full sm:w-44 h-10">
-                      <ArrowUpDown className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="price_low">Price: Low to High</SelectItem>
-                      <SelectItem value="price_high">Price: High to Low</SelectItem>
-                      <SelectItem value="rating">Highest Rated</SelectItem>
-                      <SelectItem value="reviews">Most Reviews</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {/* View Toggle */}
-                  <div className="hidden sm:flex items-center gap-1 bg-muted rounded-lg p-1">
-                    <button
-                      onClick={() => setViewMode("grid")}
-                      className={cn(
-                        "p-2 rounded-md transition-all",
-                        viewMode === "grid"
-                          ? "bg-background shadow-sm text-primary"
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <Grid3X3 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => setViewMode("list")}
-                      className={cn(
-                        "p-2 rounded-md transition-all",
-                        viewMode === "list"
-                          ? "bg-background shadow-sm text-primary"
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <List className="h-4 w-4" />
-                    </button>
-                  </div>
-
+                <div className="flex items-center gap-3">
                   {/* Mobile Filter Button */}
                   <Drawer open={showMobileFilters} onOpenChange={setShowMobileFilters}>
                     <DrawerTrigger asChild>
-                      <Button variant="outline" className="lg:hidden h-10 gap-2">
+                      <Button variant="outline" className="lg:hidden gap-2 border-gray-300">
                         <SlidersHorizontal className="h-4 w-4" />
                         Filters
                         {activeFiltersCount > 0 && (
-                          <Badge variant="secondary" className="ml-1 h-5 px-1.5">
-                            {activeFiltersCount}
-                          </Badge>
+                          <Badge className="bg-blue-600 text-white ml-1">{activeFiltersCount}</Badge>
                         )}
                       </Button>
                     </DrawerTrigger>
-                    <DrawerContent className="max-h-[85vh]">
-                      <DrawerHeader className="border-b border-border">
+                    <DrawerContent className="max-h-[90vh]">
+                      <DrawerHeader className="border-b">
                         <DrawerTitle>Filters</DrawerTitle>
                       </DrawerHeader>
-                      <div className="overflow-y-auto p-4 pb-8">
+                      <div className="overflow-y-auto p-4 pb-24">
                         <FilterContent />
                       </div>
-                      <div className="p-4 border-t border-border">
+                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t">
                         <DrawerClose asChild>
-                          <Button className="w-full">Apply Filters</Button>
+                          <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                            Show {filteredHomestays.length} properties
+                          </Button>
                         </DrawerClose>
                       </div>
                     </DrawerContent>
                   </Drawer>
-                </div>
 
-                {/* Results Count */}
-                <div className="mt-4 pt-4 border-t border-border">
-                  <p className="text-sm text-muted-foreground">
-                    Showing{" "}
-                    <span className="font-medium text-foreground">{paginatedHomestays.length}</span>{" "}
-                    of <span className="font-medium text-foreground">{filteredHomestays.length}</span>{" "}
-                    homestays
-                    {filteredHomestays.length !== homestays.length && (
-                      <span className="text-muted-foreground"> (filtered from {homestays.length})</span>
-                    )}
-                  </p>
+                  {/* Sort */}
+                  <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                    <SelectTrigger className="w-48 bg-white border-gray-300">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recommended">Recommended</SelectItem>
+                      <SelectItem value="price_low">Price (low to high)</SelectItem>
+                      <SelectItem value="price_high">Price (high to low)</SelectItem>
+                      <SelectItem value="rating">Guest rating</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
-              {/* Results */}
+              {/* Results List */}
               {filteredHomestays.length > 0 ? (
                 <>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={`${viewMode}-${currentPage}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className={cn(
-                        viewMode === "grid"
-                          ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
-                          : "flex flex-col gap-4"
-                      )}
-                    >
-                      {paginatedHomestays.map((homestay, index) => {
-                        const homestayId = homestay.id;
-                        const favorited = homestayId ? isFavorite(homestayId) : false;
-                        const isTogglingThis = homestayId ? isToggling === homestayId : false;
-                        const slug = generateProfileSlug(homestay.name, homestay.address, homestayId || 0);
-                        const price = parseFloat(homestay.price.replace("NPR ", ""));
-                        const discount = homestay.rooms[0]?.originalPrice
-                          ? Math.round(
-                              ((homestay.rooms[0].originalPrice - homestay.rooms[0].nightlyPrice) /
-                                homestay.rooms[0].originalPrice) *
-                                100
-                            )
-                          : null;
+                  <div className="space-y-4">
+                    {paginatedHomestays.map((homestay, index) => {
+                      const homestayId = homestay.id;
+                      const favorited = homestayId ? isFavorite(homestayId) : false;
+                      const isTogglingThis = homestayId ? isToggling === homestayId : false;
+                      const slug = generateProfileSlug(homestay.name, homestay.address, homestayId || 0);
+                      const price = parseFloat(homestay.price.replace("NPR ", ""));
+                      const totalPrice = price * nightsCount;
+                      const ratingInfo = getRatingLabel(homestay.rating);
+                      const discount = homestay.rooms[0]?.originalPrice
+                        ? Math.round(
+                            ((homestay.rooms[0].originalPrice - homestay.rooms[0].nightlyPrice) /
+                              homestay.rooms[0].originalPrice) *
+                              100
+                          )
+                        : null;
 
-                        return (
-                          <motion.div
-                            key={homestay.slug}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.02 }}
-                          >
-                            <Link href={`/homestays/profile/${slug}`}>
-                              {viewMode === "grid" ? (
-                                /* Grid Card */
-                                <div className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg hover:border-primary/20 transition-all duration-300 h-full flex flex-col">
-                                  <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                                    <Image
-                                      src={homestay.image || "/images/fallback-image.png"}
-                                      alt={homestay.name}
-                                      fill
-                                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                    />
+                      return (
+                        <motion.div
+                          key={homestay.slug}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.02 }}
+                        >
+                          <Link href={`/homestays/profile/${slug}`}>
+                            <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 group">
+                              <div className="flex flex-col md:flex-row">
+                                {/* Image Section */}
+                                <div className="relative w-full md:w-80 h-52 md:h-auto flex-shrink-0">
+                                  <Image
+                                    src={homestay.image || "/images/fallback-image.png"}
+                                    alt={homestay.name}
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 320px"
+                                  />
 
+                                  {/* Heart Button */}
+                                  {homestayId && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        toggleFavorite(homestayId, e);
+                                      }}
+                                      disabled={isTogglingThis}
+                                      className="absolute top-3 right-3 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform disabled:opacity-50"
+                                    >
+                                      {isTogglingThis ? (
+                                        <Loader2 className="h-5 w-5 text-red-500 animate-spin" />
+                                      ) : (
+                                        <Heart
+                                          className={cn(
+                                            "h-5 w-5",
+                                            favorited ? "text-red-500 fill-red-500" : "text-gray-600"
+                                          )}
+                                        />
+                                      )}
+                                    </button>
+                                  )}
+
+                                  {/* Badges */}
+                                  <div className="absolute top-3 left-3 flex flex-col gap-2">
                                     {homestay.vipAccess && (
-                                      <Badge className="absolute top-3 left-3 bg-yellow-500 text-yellow-950 text-xs">
-                                        VIP
+                                      <Badge className="bg-yellow-400 text-yellow-900 font-semibold">
+                                        VIP Access
                                       </Badge>
                                     )}
                                     {discount && discount > 0 && (
-                                      <Badge className="absolute top-3 right-12 bg-green-600 text-white text-xs">
-                                        {discount}% OFF
+                                      <Badge className="bg-green-600 text-white font-semibold">
+                                        {discount}% off
                                       </Badge>
                                     )}
-
-                                    {/* Heart Button */}
-                                    {homestayId && (
-                                      <button
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          toggleFavorite(homestayId, e);
-                                        }}
-                                        disabled={isTogglingThis}
-                                        className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white hover:scale-110 transition-all disabled:opacity-50"
-                                      >
-                                        {isTogglingThis ? (
-                                          <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
-                                        ) : (
-                                          <Heart
-                                            className={cn(
-                                              "h-4 w-4 transition-colors",
-                                              favorited
-                                                ? "text-red-500 fill-red-500"
-                                                : "text-gray-600 hover:text-red-500"
-                                            )}
-                                          />
-                                        )}
-                                      </button>
-                                    )}
                                   </div>
+                                </div>
 
-                                  <div className="p-4 flex flex-col flex-grow">
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                                      <MapPin className="h-3 w-3 flex-shrink-0" />
-                                      <span className="line-clamp-1">{homestay.address}</span>
+                                {/* Content Section */}
+                                <div className="flex-1 p-4 md:p-5 flex flex-col">
+                                  <div className="flex-1">
+                                    {/* Title and Location */}
+                                    <div className="flex items-start justify-between gap-4">
+                                      <div className="flex-1 min-w-0">
+                                        <h3 className="text-lg font-bold text-blue-700 group-hover:underline line-clamp-1">
+                                          {homestay.name}
+                                        </h3>
+                                        <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+                                          <MapPin className="h-4 w-4 flex-shrink-0" />
+                                          <span className="line-clamp-1">{homestay.address}</span>
+                                        </div>
+                                      </div>
+
+                                      {/* Rating Badge */}
+                                      {homestay.rating > 0 && (
+                                        <div className="flex flex-col items-end flex-shrink-0">
+                                          <div className="flex items-center gap-2">
+                                            <div className="text-right">
+                                              <p className="text-sm font-semibold text-gray-900">{ratingInfo.label}</p>
+                                              {homestay.rooms[0]?.reviews > 0 && (
+                                                <p className="text-xs text-gray-500">
+                                                  {homestay.rooms[0].reviews} reviews
+                                                </p>
+                                              )}
+                                            </div>
+                                            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold", ratingInfo.color)}>
+                                              {homestay.rating.toFixed(1)}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
 
-                                    <h3 className="font-semibold text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors">
-                                      {homestay.name}
-                                    </h3>
+                                    {/* Features */}
+                                    {homestay.features && homestay.features.length > 0 && (
+                                      <div className="flex flex-wrap gap-2 mt-3">
+                                        {homestay.features.slice(0, 4).map((feature, idx) => (
+                                          <span
+                                            key={idx}
+                                            className="inline-flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded"
+                                          >
+                                            <Check className="h-3 w-3 text-green-600" />
+                                            {feature}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
 
-                                    {/* Rating */}
-                                    {homestay.rating > 0 && (
-                                      <div className="flex items-center gap-2 mb-3">
-                                        <div className="flex items-center gap-1 bg-primary/10 text-primary rounded px-2 py-0.5">
-                                          <Star className="h-3 w-3 fill-current" />
-                                          <span className="text-xs font-semibold">{homestay.rating.toFixed(1)}</span>
-                                        </div>
-                                        {homestay.rooms[0]?.reviews > 0 && (
-                                          <span className="text-xs text-muted-foreground">
-                                            ({homestay.rooms[0].reviews} reviews)
+                                    {/* Room Info */}
+                                    <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
+                                      <span className="flex items-center gap-1">
+                                        <BedDouble className="h-4 w-4" />
+                                        {homestay.rooms.length} room{homestay.rooms.length !== 1 ? "s" : ""} available
+                                      </span>
+                                      {homestay.rooms[0]?.maxGuests && (
+                                        <span className="flex items-center gap-1">
+                                          <Users className="h-4 w-4" />
+                                          Up to {homestay.rooms[0].maxGuests} guests
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Price Section */}
+                                  <div className="flex items-end justify-between mt-4 pt-4 border-t border-gray-100">
+                                    <div className="text-sm text-gray-500">
+                                      {nightsCount} night{nightsCount !== 1 ? "s" : ""}, {totalGuests} guest{totalGuests !== 1 ? "s" : ""}
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="flex items-baseline gap-2">
+                                        {homestay.rooms[0]?.originalPrice && homestay.rooms[0].originalPrice > price && (
+                                          <span className="text-sm text-gray-400 line-through">
+                                            NPR {homestay.rooms[0].originalPrice.toLocaleString()}
                                           </span>
                                         )}
-                                      </div>
-                                    )}
-
-                                    <div className="mt-auto pt-3 border-t border-border flex items-end justify-between">
-                                      <div>
-                                        <p className="text-xs text-muted-foreground">From</p>
-                                        <p className="text-lg font-bold text-foreground">
+                                        <span className="text-xl font-bold text-gray-900">
                                           NPR {price.toLocaleString()}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">per night</p>
-                                      </div>
-                                      <span className="text-sm font-medium text-primary group-hover:underline">
-                                        View →
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              ) : (
-                                /* List Card */
-                                <div className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg hover:border-primary/20 transition-all duration-300">
-                                  <div className="flex flex-col sm:flex-row">
-                                    <div className="relative w-full sm:w-64 h-48 sm:h-auto flex-shrink-0 overflow-hidden bg-muted">
-                                      <Image
-                                        src={homestay.image || "/images/fallback-image.png"}
-                                        alt={homestay.name}
-                                        fill
-                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                        sizes="(max-width: 640px) 100vw, 256px"
-                                      />
-
-                                      {homestay.vipAccess && (
-                                        <Badge className="absolute top-3 left-3 bg-yellow-500 text-yellow-950 text-xs">
-                                          VIP
-                                        </Badge>
-                                      )}
-
-                                      {/* Heart Button */}
-                                      {homestayId && (
-                                        <button
-                                          onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            toggleFavorite(homestayId, e);
-                                          }}
-                                          disabled={isTogglingThis}
-                                          className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white hover:scale-110 transition-all disabled:opacity-50"
-                                        >
-                                          {isTogglingThis ? (
-                                            <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
-                                          ) : (
-                                            <Heart
-                                              className={cn(
-                                                "h-4 w-4 transition-colors",
-                                                favorited
-                                                  ? "text-red-500 fill-red-500"
-                                                  : "text-gray-600 hover:text-red-500"
-                                              )}
-                                            />
-                                          )}
-                                        </button>
-                                      )}
-                                    </div>
-
-                                    <div className="flex-1 p-5 flex flex-col">
-                                      <div className="flex items-start justify-between gap-4 mb-2">
-                                        <div>
-                                          <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
-                                            {homestay.name}
-                                          </h3>
-                                          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                                            <MapPin className="h-3.5 w-3.5" />
-                                            {homestay.address}
-                                          </div>
-                                        </div>
-                                        {homestay.rating > 0 && (
-                                          <div className="flex items-center gap-1 bg-primary/10 text-primary rounded px-2 py-1">
-                                            <Star className="h-3.5 w-3.5 fill-current" />
-                                            <span className="text-sm font-semibold">{homestay.rating.toFixed(1)}</span>
-                                          </div>
-                                        )}
-                                      </div>
-
-                                      <div className="mt-auto pt-4 border-t border-border flex items-end justify-between">
-                                        <div>
-                                          <p className="text-xs text-muted-foreground">Starting from</p>
-                                          <p className="text-xl font-bold text-foreground">
-                                            NPR {price.toLocaleString()}
-                                            <span className="text-sm font-normal text-muted-foreground">
-                                              {" "}/ night
-                                            </span>
-                                          </p>
-                                        </div>
-                                        <span className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg group-hover:bg-primary/90 transition-colors">
-                                          View Details
                                         </span>
                                       </div>
+                                      <p className="text-xs text-gray-500">per night</p>
+                                      {nightsCount > 1 && (
+                                        <p className="text-sm text-gray-600 mt-1">
+                                          NPR {totalPrice.toLocaleString()} total
+                                        </p>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
-                              )}
-                            </Link>
-                          </motion.div>
-                        );
-                      })}
-                    </motion.div>
-                  </AnimatePresence>
+                              </div>
+                            </div>
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
 
                   {/* Pagination */}
                   {totalPages > 1 && (
-                    <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <p className="text-sm text-muted-foreground">
-                        Page {currentPage} of {totalPages}
-                      </p>
+                    <div className="mt-8 flex items-center justify-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="border-gray-300"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
 
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                        >
-                          <ChevronLeft className="h-4 w-4 mr-1" />
-                          Previous
-                        </Button>
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum;
+                        if (totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={currentPage === pageNum ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePageChange(pageNum)}
+                            className={cn(
+                              "min-w-10",
+                              currentPage === pageNum
+                                ? "bg-blue-600 hover:bg-blue-700"
+                                : "border-gray-300"
+                            )}
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      })}
 
-                        <div className="hidden sm:flex items-center gap-1">
-                          {getPageNumbers().map((page, index) =>
-                            page === "..." ? (
-                              <span key={`ellipsis-${index}`} className="px-2 text-muted-foreground">
-                                ...
-                              </span>
-                            ) : (
-                              <button
-                                key={page}
-                                onClick={() => handlePageChange(page as number)}
-                                className={cn(
-                                  "w-9 h-9 rounded-lg text-sm font-medium transition-all",
-                                  currentPage === page
-                                    ? "bg-primary text-primary-foreground"
-                                    : "text-foreground hover:bg-muted"
-                                )}
-                              >
-                                {page}
-                              </button>
-                            )
-                          )}
-                        </div>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                        >
-                          Next
-                          <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="border-gray-300"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
                     </div>
                   )}
                 </>
               ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="bg-card rounded-xl border border-border p-12 text-center"
-                >
-                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Home className="h-8 w-8 text-muted-foreground" />
+                <div className="bg-white rounded-xl p-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Home className="h-8 w-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">No homestays found</h3>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    {searchQuery || activeFiltersCount > 0
-                      ? "Try adjusting your search or filters to find more results."
-                      : "No homestays available for your selected dates and location."}
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No properties found</h3>
+                  <p className="text-gray-600 mb-6">
+                    Try adjusting your filters or search criteria.
                   </p>
-                  {(searchQuery || activeFiltersCount > 0) && (
-                    <Button variant="outline" onClick={handleResetFilters}>
-                      Clear All Filters
+                  {activeFiltersCount > 0 && (
+                    <Button variant="outline" onClick={handleResetFilters} className="border-blue-600 text-blue-600">
+                      Clear all filters
                     </Button>
                   )}
-                </motion.div>
+                </div>
               )}
             </main>
           </div>
