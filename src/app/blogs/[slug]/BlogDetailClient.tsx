@@ -112,7 +112,8 @@ export default function BlogDetailClient({
       />
 
       {/* Hero Section */}
-      <div className="relative w-full h-[50vh] sm:h-[60vh] lg:h-[70vh]">
+      <div className="relative w-full pt-16 sm:pt-20">
+        <div className="relative h-[50vh] sm:h-[60vh] lg:h-[70vh]">
         <SafeBlogImage
           src={mainImage}
           alt={blog.title}
@@ -123,7 +124,7 @@ export default function BlogDetailClient({
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
 
         {/* Back Button */}
-        <div className="absolute top-20 sm:top-24 left-4 sm:left-8 z-10">
+        <div className="absolute top-4 sm:top-6 left-4 sm:left-8 z-10">
           <Link href="/blogs">
             <Button
               variant="ghost"
@@ -181,6 +182,7 @@ export default function BlogDetailClient({
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
 
