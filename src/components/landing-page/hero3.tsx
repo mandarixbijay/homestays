@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Star } from "lucide-react";
+import { Star, Heart } from "lucide-react";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import { useRouter } from "next/navigation";
+import { useFavorite } from "@/hooks/useFavorite";
 
 interface TopHomestay {
   id: number;
@@ -27,6 +28,7 @@ export default function Hero3() {
   const router = useRouter();
   const [homestays, setHomestays] = useState<TopHomestay[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isFavorite, toggleFavorite, isToggling } = useFavorite();
 
   useEffect(() => {
     const fetchTopHomestays = async () => {
@@ -144,10 +146,30 @@ export default function Hero3() {
                           onError={(e) => (e.currentTarget.src = "/images/fallback-image.png")}
                         />
                         {homestay.originalPrice && homestay.originalPrice > homestay.nightlyPrice && (
-                          <span className="absolute top-2 right-2 px-2 py-1 rounded-full text-xs bg-red-600 text-white font-semibold">
+                          <span className="absolute top-2 left-2 px-2 py-1 rounded-full text-xs bg-red-600 text-white font-semibold">
                             {Math.round(((homestay.originalPrice - homestay.nightlyPrice) / homestay.originalPrice) * 100)}% OFF
                           </span>
                         )}
+                        {/* Favorite Heart Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(homestay.id, e);
+                          }}
+                          disabled={isToggling === homestay.id}
+                          className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-200 disabled:opacity-50 z-10"
+                          aria-label={isFavorite(homestay.id) ? "Remove from favorites" : "Add to favorites"}
+                        >
+                          {isToggling === homestay.id ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+                          ) : (
+                            <Heart
+                              className={`h-4 w-4 transition-colors ${
+                                isFavorite(homestay.id) ? "text-red-500 fill-red-500" : "text-gray-600 hover:text-red-500"
+                              }`}
+                            />
+                          )}
+                        </button>
                       </div>
                       <div className="p-4 flex flex-col flex-grow rounded-b-xl">
                         <h3 className="text-base font-bold text-white truncate" title={homestay.name}>

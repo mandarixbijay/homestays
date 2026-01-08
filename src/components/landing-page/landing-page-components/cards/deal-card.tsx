@@ -5,6 +5,8 @@ import React from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import { Heart } from "lucide-react";
+import { useFavorite } from "@/hooks/useFavorite";
 
 const FALLBACK_IMAGE = "https://via.placeholder.com/350x208?text=No+Image+Available";
 
@@ -23,6 +25,7 @@ interface DealCardProps {
   vipAccess?: boolean;
   discount?: string;
   onClick?: () => void;
+  homestayId?: number;
 }
 
 const DealCard: React.FC<DealCardProps> = ({
@@ -40,7 +43,12 @@ const DealCard: React.FC<DealCardProps> = ({
   vipAccess,
   discount,
   onClick,
+  homestayId,
 }) => {
+  const { isFavorite, toggleFavorite, isToggling } = useFavorite();
+  const favorited = homestayId ? isFavorite(homestayId) : false;
+  const isTogglingThis = homestayId ? isToggling === homestayId : false;
+
   return (
     <Card
       className="w-full rounded-xl border-none shadow-sm hover:shadow-md transition-shadow"
@@ -63,9 +71,28 @@ const DealCard: React.FC<DealCardProps> = ({
           </Badge>
         )}
         {discount && (
-          <Badge className="absolute top-3 right-3 bg-green-600 text-white font-semibold px-3 py-1 rounded-full text-xs">
+          <Badge className="absolute top-3 right-12 bg-green-600 text-white font-semibold px-3 py-1 rounded-full text-xs">
             {discount}
           </Badge>
+        )}
+        {/* Favorite Heart Button */}
+        {homestayId && (
+          <button
+            onClick={(e) => toggleFavorite(homestayId, e)}
+            disabled={isTogglingThis}
+            className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-200 disabled:opacity-50 z-10"
+            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+          >
+            {isTogglingThis ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+            ) : (
+              <Heart
+                className={`h-4 w-4 transition-colors ${
+                  favorited ? "text-red-500 fill-red-500" : "text-gray-600 hover:text-red-500"
+                }`}
+              />
+            )}
+          </button>
         )}
       </div>
       <CardContent className="p-4">

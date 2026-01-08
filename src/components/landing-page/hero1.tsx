@@ -240,6 +240,7 @@ export default function Hero1() {
                       slug={`deal-${deal.id}`}
                       features={deal.homestay?.facilities || []}
                       discount={deal.discountType === 'PERCENTAGE' ? `${deal.discount}% off` : `NPR ${deal.discount} off`}
+                      homestayId={deal.homestay?.id || deal.id}
                     />
                   </motion.div>
                 );
