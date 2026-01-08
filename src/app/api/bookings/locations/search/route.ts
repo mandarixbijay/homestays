@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://13.61.8.56";
+const API_BASE_URL = process.env.API_BASE_URL || "http://13.61.8.56:3001";
 
 /**
  * GET /api/bookings/locations/search
