@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import {
   Star, MapPin, Wifi, Car, Coffee, ChevronLeft, ChevronRight,
-  Search as SearchIcon, SlidersHorizontal, X, Users
+  Search as SearchIcon, SlidersHorizontal, X, Users, Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/navbar/navbar";
 import Footer from "@/components/footer/footer";
+import { useFavorite } from "@/hooks/useFavorite";
 
 interface Destination {
   id: number;
@@ -220,6 +221,9 @@ export default function DestinationsPage() {
     return `${slugified}-id-${id}`;
   };
 
+  // Favorites hook
+  const { isFavorite, toggleFavorite, isToggling } = useFavorite();
+
   const HomestayCard = ({ homestay }: { homestay: Homestay }) => {
     const slug = generateProfileSlug(homestay.name, homestay.address, homestay.id);
     const displayRating = homestay.rating || 0;
@@ -229,6 +233,8 @@ export default function DestinationsPage() {
             ((homestay.originalPrice - homestay.nightlyPrice) / homestay.originalPrice) * 100
           )
         : null;
+    const favorited = isFavorite(homestay.id);
+    const isTogglingThis = isToggling === homestay.id;
 
     return (
       <Card
@@ -250,10 +256,28 @@ export default function DestinationsPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
 
           {discount && (
-            <Badge className="absolute top-3 right-3 bg-red-500 text-white font-semibold px-3 py-1 rounded-full text-xs">
+            <Badge className="absolute top-3 right-12 bg-red-500 text-white font-semibold px-3 py-1 rounded-full text-xs">
               {discount}% OFF
             </Badge>
           )}
+
+          {/* Favorite Heart Button */}
+          <button
+            onClick={(e) => toggleFavorite(homestay.id, e)}
+            disabled={isTogglingThis}
+            className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all duration-200 disabled:opacity-50 z-10"
+            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+          >
+            {isTogglingThis ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+            ) : (
+              <Heart
+                className={`h-4 w-4 transition-colors ${
+                  favorited ? "text-red-500 fill-red-500" : "text-gray-600 hover:text-red-500"
+                }`}
+              />
+            )}
+          </button>
         </div>
 
         <CardContent className="p-4">
