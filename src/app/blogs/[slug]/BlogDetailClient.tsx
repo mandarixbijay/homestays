@@ -45,10 +45,10 @@ function BlogContent({ content }: { content: string }) {
     // Process HTML to wrap images in centered containers
     let processed = content;
 
-    // Match img tags and wrap them in centered divs with minimal spacing
+    // Match img tags and wrap them in centered divs with negative top margin to reduce spacing
     processed = processed.replace(
       /<img([^>]+)>/gi,
-      '<div class="blog-image-wrapper" style="display:flex;justify-content:center;margin:0.5rem auto;max-width:100%;clear:both;"><img$1 style="max-width:min(100%, 900px);height:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);background:white;display:block;"/></div>'
+      '<div class="blog-image-wrapper" style="display:flex;justify-content:center;margin:-0.5rem auto 0.5rem auto;max-width:100%;clear:both;"><img$1 style="max-width:min(100%, 900px);height:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.08);background:white;display:block;"/></div>'
     );
 
     // Remove any double spacing or extra line breaks around images
@@ -81,7 +81,7 @@ function BlogContent({ content }: { content: string }) {
         prose-table:my-6 prose-table:border-collapse
         prose-th:bg-gray-50 prose-th:p-3 prose-th:text-left prose-th:font-semibold
         prose-td:p-3 prose-td:border prose-td:border-gray-200
-        [&_.blog-image-wrapper]:my-2
+        [&_.blog-image-wrapper]:-mt-2 [&_.blog-image-wrapper]:mb-2
       "
       dangerouslySetInnerHTML={{ __html: processedContent }}
     />
@@ -259,7 +259,7 @@ export default function BlogDetailClient({
       </div>
 
       {/* Hero Section - Modern Magazine Style */}
-      <section className="relative min-h-[60vh] sm:min-h-[70vh] lg:min-h-[75vh] flex items-center justify-center overflow-hidden pt-16">
+      <section className="relative min-h-[60vh] sm:min-h-[70vh] lg:min-h-[75vh] flex items-center justify-center overflow-hidden pt-20 sm:pt-24">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <div className="relative w-full h-full">
