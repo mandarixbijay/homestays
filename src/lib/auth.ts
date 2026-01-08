@@ -2,7 +2,8 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-const API_BASE_URL = process.env.NEXTAUTH_URL || "http://13.61.8.56";
+// Use API_BASE_URL for backend calls, NOT NEXTAUTH_URL (which is the frontend URL)
+const API_BASE_URL = process.env.API_BASE_URL || "http://13.61.8.56:3001";
 
 // Helper function to refresh token
 async function refreshAccessToken(token: any) {

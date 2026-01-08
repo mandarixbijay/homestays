@@ -2,7 +2,8 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { getSession } from 'next-auth/react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.61.8.56';
+// Use the backend API URL with correct port
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.61.8.56:3001';
 
 // Define custom request config type
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {
