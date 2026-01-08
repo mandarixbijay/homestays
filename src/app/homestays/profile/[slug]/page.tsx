@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   MapPin, Star, Users, Calendar as CalendarIcon, Plus, Minus, X, Search, Phone, Mail,
-  Clock, Check, Shield, AlertCircle, Bed, Wifi, Car, Coffee, Home, ChevronRight
+  Clock, Check, Shield, AlertCircle, Bed, Wifi, Car, Coffee, Home, ChevronRight, Heart
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { DateRange } from "react-day-picker";
@@ -25,6 +25,7 @@ import AboutProperty from "@/components/homestay/components/details/about-proper
 import Policies from "@/components/homestay/components/details/policies";
 import PaymentOptionsDialog from "@/components/homestay/components/dialogs/payment-options-dialog";
 import { useHomestayStore } from "@/store/homestayStore";
+import { useFavorite } from "@/hooks/useFavorite";
 
 interface Room {
   adults: number;
@@ -165,6 +166,11 @@ export default function HomestayProfilePage() {
   const [availabilityData, setAvailabilityData] = useState<AvailabilityResponse | null>(null);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+
+  // Favorites
+  const { isFavorite, toggleFavorite, isToggling } = useFavorite();
+  const favorited = homestayId ? isFavorite(homestayId) : false;
+  const isTogglingFavorite = homestayId ? isToggling === homestayId : false;
 
   // Fetch homestay data from API
   useEffect(() => {
@@ -543,6 +549,27 @@ export default function HomestayProfilePage() {
                 <Shield className="h-4 w-4 text-green-600" />
                 <span className="text-sm font-semibold text-green-700">Verified Property</span>
               </div>
+
+              {/* Favorite Button */}
+              <button
+                onClick={(e) => homestayId && toggleFavorite(homestayId, e)}
+                disabled={isTogglingFavorite || !homestayId}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-semibold transition-all duration-200 ${
+                  favorited
+                    ? "bg-red-50 text-red-600 border border-red-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600 border border-gray-200 hover:border-red-200"
+                } disabled:opacity-50`}
+                aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+              >
+                {isTogglingFavorite ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+                ) : (
+                  <Heart
+                    className={`h-4 w-4 ${favorited ? "fill-red-500 text-red-500" : ""}`}
+                  />
+                )}
+                <span className="text-sm">{favorited ? "Saved" : "Save"}</span>
+              </button>
             </div>
 
             {/* Key Features */}
