@@ -217,21 +217,12 @@ export default function BlogListClient({ searchParams: initialSearchParams }: Bl
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section - Glassmorphic Design */}
-      <section className="relative pt-24 pb-20 overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2574')" }}
-          />
-          <div className="absolute inset-0 bg-[#214B3F]/70" />
-          <div className="absolute inset-0 backdrop-blur-[2px]" />
-        </div>
-
+      <section className="relative pt-24 pb-20 overflow-hidden bg-gradient-to-br from-[#214B3F] via-[#2d6654] to-[#214B3F]">
         {/* Decorative Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#D1AA5A]/20 rounded-full blur-3xl" />
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#D1AA5A]/30 rounded-full blur-3xl" />
           <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D1AA5A]/10 rounded-full blur-3xl" />
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
