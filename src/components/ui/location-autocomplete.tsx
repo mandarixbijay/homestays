@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown, MapPin } from "lucide-react";
+import { Check, ChevronsUpDown, MapPin, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useDebounce } from "@/hooks/useDebounce";
+
+interface LocationSuggestion {
+  location: string;
+  homestayCount: number;
+}
 
 interface LocationAutocompleteProps {
   value: string;
@@ -32,49 +38,42 @@ export function LocationAutocomplete({
   className,
 }: LocationAutocompleteProps) {
   const [open, setOpen] = React.useState(false);
-  const [locations, setLocations] = React.useState<string[]>([]);
+  const [suggestions, setSuggestions] = React.useState<LocationSuggestion[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const debouncedQuery = useDebounce(searchQuery, 300);
 
-  // Fetch locations on mount
+  // Fetch location suggestions from the new search API
   React.useEffect(() => {
-    const fetchLocations = async () => {
+    const fetchSuggestions = async () => {
+      // Only search when we have at least 2 characters
+      if (debouncedQuery.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
       try {
         setLoading(true);
-        const response = await fetch('/api/homestays/locations');
-        if (!response.ok) throw new Error("Failed to fetch locations");
-        const data = await response.json();
-
-        // Clean and deduplicate locations
-        const cleanLocations = Array.from(
-          new Set(
-            data.locations
-              .map((loc: string) => loc.trim())
-              .filter((loc: string) => loc && loc.length > 2)
-              .sort()
-          )
+        const response = await fetch(
+          `/api/bookings/locations/search?query=${encodeURIComponent(debouncedQuery)}&limit=10`
         );
 
-        setLocations(cleanLocations as string[]);
+        if (!response.ok) {
+          throw new Error("Failed to fetch locations");
+        }
+
+        const data = await response.json();
+        setSuggestions(data.suggestions || []);
       } catch (error) {
-        console.error("Error fetching locations:", error);
+        console.error("Error fetching location suggestions:", error);
+        setSuggestions([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchLocations();
-  }, []);
-
-  // Filter locations based on search query
-  const filteredLocations = React.useMemo(() => {
-    if (!searchQuery) return locations.slice(0, 50); // Show top 50 by default
-
-    const query = searchQuery.toLowerCase();
-    return locations
-      .filter((location) => location.toLowerCase().includes(query))
-      .slice(0, 50); // Limit to 50 results for performance
-  }, [locations, searchQuery]);
+    fetchSuggestions();
+  }, [debouncedQuery]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -106,31 +105,47 @@ export function LocationAutocomplete({
             onValueChange={setSearchQuery}
           />
           <CommandList>
-            <CommandEmpty>
-              {loading ? "Loading locations..." : "No location found."}
-            </CommandEmpty>
-            <CommandGroup>
-              {filteredLocations.map((location) => (
-                <CommandItem
-                  key={location}
-                  value={location}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === location ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  <MapPin className="mr-2 h-4 w-4 opacity-50" />
-                  <span className="truncate">{location}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {loading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span className="text-sm text-muted-foreground">Searching...</span>
+              </div>
+            ) : searchQuery.length < 2 ? (
+              <div className="py-6 text-center text-sm text-muted-foreground">
+                Type at least 2 characters to search
+              </div>
+            ) : suggestions.length === 0 ? (
+              <CommandEmpty>No location found.</CommandEmpty>
+            ) : (
+              <CommandGroup>
+                {suggestions.map((item, index) => (
+                  <CommandItem
+                    key={`${item.location}-${index}`}
+                    value={item.location}
+                    onSelect={(currentValue) => {
+                      onChange(currentValue === value ? "" : currentValue);
+                      setSearchQuery(currentValue);
+                      setOpen(false);
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === item.location ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <MapPin className="mr-2 h-4 w-4 opacity-50" />
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <span className="truncate">{item.location}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {item.homestayCount} homestay{item.homestayCount !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
