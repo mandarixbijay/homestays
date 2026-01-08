@@ -8,13 +8,14 @@ import {
   MapPin, ArrowLeft, Edit, Trash2, Save, X, Plus, Search, Filter,
   Home, Star, TrendingUp, Calendar, Users, DollarSign, Activity,
   Image as ImageIcon, Upload, ExternalLink, MapPinned, Building,
-  Tag, SlidersHorizontal, Grid, List, Link as LinkIcon, Unlink
+  Tag, SlidersHorizontal, Grid, List, Link as LinkIcon, Unlink,
+  CheckSquare, Square, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from 'lodash';
 import Image from 'next/image';
 import {
-  useDestinations, useHomestays
+  useDestinations
 } from '@/hooks/useAdminApi';
 import {
   LoadingSpinner, Alert, ActionButton, Input, useToast
@@ -24,18 +25,28 @@ interface DestinationDetailProps {
   destinationId: number;
 }
 
+interface SearchedHomestay {
+  id: number;
+  name: string;
+  address: string;
+  status: string;
+  mainImage?: string;
+  images?: { url: string; isMain: boolean }[];
+  rooms?: { price: number; currency: string }[];
+  facilities?: { facility?: { name: string }; name?: string }[];
+  owner?: { name: string; email: string };
+  rating?: number;
+  _count?: { rooms: number };
+}
+
 export default function DestinationDetail({ destinationId }: DestinationDetailProps) {
   const router = useRouter();
   const { data: session } = useSession();
   const { toasts, addToast } = useToast();
 
   // Destination data
-  const { destinations, loadDestinations, updateDestination, deleteDestination,
-    addHomestayToDestination, removeHomestayFromDestination } = useDestinations();
-  const destination = destinations.find(d => d.id === destinationId);
-
-  // Homestays data for selection
-  const { homestays, totalPages, total, loading: homestaysLoading, loadHomestays } = useHomestays();
+  const { destination, loadDestination, updateDestination, deleteDestination,
+    addHomestayToDestination, removeHomestayFromDestination, loading: destinationLoading } = useDestinations();
 
   // UI State
   const [activeTab, setActiveTab] = useState<'overview' | 'homestays' | 'analytics'>('overview');
@@ -52,18 +63,21 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
     priority: undefined as number | undefined
   });
 
-  // Homestay search and filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedHomestays, setSelectedHomestays] = useState<number[]>([]);
+  // Location search state
+  const [locationSearchQuery, setLocationSearchQuery] = useState('');
+  const [searchedHomestays, setSearchedHomestays] = useState<SearchedHomestay[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchTotal, setSearchTotal] = useState(0);
+  const [searchTotalPages, setSearchTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageLimit, setPageLimit] = useState(10);
+  const [pageLimit, setPageLimit] = useState(20);
+  const [selectedHomestays, setSelectedHomestays] = useState<number[]>([]);
+  const [isAddingHomestays, setIsAddingHomestays] = useState(false);
 
-  // Load destination data
+  // Load destination data by ID
   useEffect(() => {
-    loadDestinations({ page: 1, limit: 100 });
-  }, []);
+    loadDestination(destinationId);
+  }, [destinationId, loadDestination]);
 
   // Update form when destination loads
   useEffect(() => {
@@ -75,54 +89,76 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
         isTopDestination: destination.isTopDestination || false,
         priority: destination.priority
       });
+      // Set initial location search to destination name
+      if (!locationSearchQuery && destination.name) {
+        setLocationSearchQuery(destination.name);
+      }
     }
   }, [destination]);
 
-  // Load homestays when destination is loaded or filters change
-  useEffect(() => {
-    if (destination && showAddHomestay) {
-      const params: any = {
-        page: currentPage,
-        limit: pageLimit,
-        address: destination.name // Filter by destination name
-      };
-
-      if (searchQuery) {
-        params.search = searchQuery;
-      }
-
-      if (statusFilter && statusFilter !== 'all') {
-        params.status = statusFilter;
-      }
-
-      loadHomestays(params);
+  // Search homestays by location
+  const searchHomestaysByLocation = useCallback(async (location: string, page: number = 1) => {
+    if (!location.trim()) {
+      setSearchedHomestays([]);
+      setSearchTotal(0);
+      setSearchTotalPages(1);
+      return;
     }
-  }, [destination, showAddHomestay, currentPage, pageLimit, statusFilter, searchQuery]);
 
-  // Filter available homestays (not already associated) - now filtered server-side
+    setSearchLoading(true);
+    try {
+      const params = new URLSearchParams({
+        location: location.trim(),
+        page: page.toString(),
+        limit: pageLimit.toString(),
+      });
+
+      const response = await fetch(`/api/homestays/search?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error('Failed to search homestays');
+      }
+
+      const data = await response.json();
+      setSearchedHomestays(data.data || []);
+      setSearchTotal(data.total || 0);
+      setSearchTotalPages(data.totalPages || 1);
+    } catch (error) {
+      console.error('Error searching homestays:', error);
+      addToast({ type: 'error', title: 'Error', message: 'Failed to search homestays' });
+    } finally {
+      setSearchLoading(false);
+    }
+  }, [pageLimit, addToast]);
+
+  // Debounced search
+  const debouncedSearch = useMemo(
+    () => debounce((value: string) => {
+      setCurrentPage(1);
+      searchHomestaysByLocation(value, 1);
+    }, 500),
+    [searchHomestaysByLocation]
+  );
+
+  // Trigger search when location changes
+  useEffect(() => {
+    if (showAddHomestay && locationSearchQuery) {
+      debouncedSearch(locationSearchQuery);
+    }
+    return () => debouncedSearch.cancel();
+  }, [locationSearchQuery, showAddHomestay, debouncedSearch]);
+
+  // Filter out already associated homestays
   const availableHomestays = useMemo(() => {
     const associatedIds = new Set((destination?.homestays || []).map((h: any) => h.id));
-    return homestays.filter(h => !associatedIds.has(h.id));
-  }, [homestays, destination?.homestays]);
-
-  // Pagination: compute total pages for the available homestays list
-  const availablePageCount = Math.max(1, Math.ceil((availableHomestays?.length || 0) / pageLimit));
-  
-  // Debounced search handler
-  const debouncedSearch = useCallback(
-    debounce((value: string) => {
-      setSearchQuery(value);
-      setCurrentPage(1); // Reset to first page on search
-    }, 500),
-    []
-  );
+    return searchedHomestays.filter(h => !associatedIds.has(h.id));
+  }, [searchedHomestays, destination?.homestays]);
 
   const handleSave = async () => {
     try {
       await updateDestination(destinationId, formData);
       setIsEditing(false);
       addToast({ type: 'success', title: 'Success', message: 'Destination updated successfully' });
-      loadDestinations({ page: 1, limit: 100 });
+      loadDestination(destinationId);
     } catch (error) {
       addToast({ type: 'error', title: 'Error', message: 'Failed to update destination' });
     }
@@ -145,16 +181,39 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
   const handleAddHomestays = async () => {
     if (selectedHomestays.length === 0) return;
 
+    setIsAddingHomestays(true);
     try {
+      let successCount = 0;
+      let errorCount = 0;
+
       for (const homestayId of selectedHomestays) {
-        await addHomestayToDestination(homestayId, destinationId);
+        try {
+          await addHomestayToDestination(homestayId, destinationId);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to add homestay ${homestayId}:`, error);
+          errorCount++;
+        }
       }
-      addToast({ type: 'success', title: 'Success', message: `Added ${selectedHomestays.length} homestay(s)` });
+
+      if (successCount > 0) {
+        addToast({
+          type: 'success',
+          title: 'Success',
+          message: `Added ${successCount} homestay(s)${errorCount > 0 ? `, ${errorCount} failed` : ''}`
+        });
+      }
+      if (errorCount > 0 && successCount === 0) {
+        addToast({ type: 'error', title: 'Error', message: 'Failed to add homestays' });
+      }
+
       setSelectedHomestays([]);
       setShowAddHomestay(false);
-      loadDestinations({ page: 1, limit: 100 });
+      loadDestination(destinationId);
     } catch (error) {
       addToast({ type: 'error', title: 'Error', message: 'Failed to add homestays' });
+    } finally {
+      setIsAddingHomestays(false);
     }
   };
 
@@ -164,7 +223,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
     try {
       await removeHomestayFromDestination(homestayId, destinationId);
       addToast({ type: 'success', title: 'Success', message: 'Homestay removed successfully' });
-      loadDestinations({ page: 1, limit: 100 });
+      loadDestination(destinationId);
     } catch (error) {
       addToast({ type: 'error', title: 'Error', message: 'Failed to remove homestay' });
     }
@@ -178,10 +237,42 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
     );
   };
 
-  if (!destination) {
+  const handleSelectAll = () => {
+    if (selectedHomestays.length === availableHomestays.length) {
+      setSelectedHomestays([]);
+    } else {
+      setSelectedHomestays(availableHomestays.map(h => h.id));
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    searchHomestaysByLocation(locationSearchQuery, newPage);
+  };
+
+  if (destinationLoading && !destination) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" text="Loading destination..." />
+      </div>
+    );
+  }
+
+  if (!destination) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Destination not found</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">The destination you're looking for doesn't exist.</p>
+          <ActionButton
+            onClick={() => router.push('/admin/destinations')}
+            variant="primary"
+            icon={<ArrowLeft className="h-4 w-4" />}
+          >
+            Back to Destinations
+          </ActionButton>
+        </div>
       </div>
     );
   }
@@ -294,7 +385,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Homestays</p>
                 <p className="text-3xl font-bold text-[#224240] dark:text-[#2a5350]">
-                  {destination._count?.homestays || 0}
+                  {destination._count?.homestays || destination.homestays?.length || 0}
                 </p>
               </div>
               <Home className="h-12 w-12 text-[#224240]/20" />
@@ -360,7 +451,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
-                Homestays ({destination._count?.homestays || 0})
+                Homestays ({destination._count?.homestays || destination.homestays?.length || 0})
               </button>
               <button
                 onClick={() => setActiveTab('analytics')}
@@ -465,12 +556,12 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                   variant="primary"
                   icon={<Plus className="h-4 w-4" />}
                 >
-                  Add Homestays
+                  {showAddHomestay ? 'Close' : 'Add Homestays'}
                 </ActionButton>
               </div>
             </div>
 
-            {/* Add Homestays Section */}
+            {/* Add Homestays Section - Location Search */}
             <AnimatePresence>
               {showAddHomestay && (
                 <motion.div
@@ -480,7 +571,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                   className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 overflow-hidden"
                 >
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Add Homestays to Destination
+                    Search Homestays by Location
                   </h3>
 
                   {/* Search and Filters */}
@@ -490,25 +581,12 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <input
                           type="text"
-                          onChange={(e) => debouncedSearch(e.target.value)}
-                          placeholder="Search homestays..."
+                          value={locationSearchQuery}
+                          onChange={(e) => setLocationSearchQuery(e.target.value)}
+                          placeholder="Search by location (e.g., Pokhara, Kathmandu)..."
                           className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700"
                         />
                       </div>
-
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => {
-                          setStatusFilter(e.target.value);
-                          setCurrentPage(1); // Reset to first page
-                        }}
-                        className="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700"
-                      >
-                        <option value="all">All Status</option>
-                        <option value="APPROVED">Approved</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="REJECTED">Rejected</option>
-                      </select>
 
                       {/* View Mode Toggle */}
                       <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
@@ -536,17 +614,38 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {selectedHomestays.length} selected • {availableHomestays.length} of {total} available • Showing {destination?.name} homestays
-                      </p>
+                      <div className="flex items-center gap-4">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {searchLoading ? 'Searching...' : `${availableHomestays.length} available of ${searchTotal} found`}
+                        </p>
+                        {availableHomestays.length > 0 && (
+                          <button
+                            onClick={handleSelectAll}
+                            className="flex items-center gap-2 text-sm text-[#224240] dark:text-[#2a5350] hover:underline"
+                          >
+                            {selectedHomestays.length === availableHomestays.length ? (
+                              <>
+                                <CheckSquare className="h-4 w-4" />
+                                Deselect All
+                              </>
+                            ) : (
+                              <>
+                                <Square className="h-4 w-4" />
+                                Select All ({availableHomestays.length})
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
                       {selectedHomestays.length > 0 && (
                         <ActionButton
                           onClick={handleAddHomestays}
                           variant="primary"
                           size="sm"
-                          icon={<Plus className="h-4 w-4" />}
+                          icon={isAddingHomestays ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                          disabled={isAddingHomestays}
                         >
-                          Add {selectedHomestays.length} Homestay{selectedHomestays.length !== 1 ? 's' : ''}
+                          {isAddingHomestays ? 'Adding...' : `Add ${selectedHomestays.length} Homestay${selectedHomestays.length !== 1 ? 's' : ''}`}
                         </ActionButton>
                       )}
                     </div>
@@ -554,19 +653,23 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
 
                   {/* Available Homestays */}
                   <div className="space-y-4">
-                    {homestaysLoading ? (
+                    {searchLoading ? (
                       <div className="flex justify-center py-12">
-                        <LoadingSpinner />
+                        <LoadingSpinner text="Searching homestays..." />
                       </div>
                     ) : availableHomestays.length === 0 ? (
                       <div className="text-center py-12">
                         <Home className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600 dark:text-gray-400">No homestays available for {destination?.name}</p>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          {locationSearchQuery
+                            ? `No available homestays found for "${locationSearchQuery}"`
+                            : 'Enter a location to search for homestays'}
+                        </p>
                       </div>
                     ) : viewMode === 'grid' ? (
                       /* Grid View - Compact Cards */
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto">
-                        {availableHomestays.map((homestay: any) => (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[600px] overflow-y-auto">
+                        {availableHomestays.map((homestay) => (
                           <div
                             key={homestay.id}
                             onClick={() => toggleHomestaySelection(homestay.id)}
@@ -585,9 +688,9 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                             )}
 
                             {/* Compact Image */}
-                            {homestay.images?.[0]?.url ? (
+                            {homestay.mainImage || homestay.images?.[0]?.url ? (
                               <img
-                                src={homestay.images[0].url}
+                                src={homestay.mainImage || homestay.images?.[0]?.url}
                                 alt={homestay.name}
                                 className="w-full h-24 object-cover"
                               />
@@ -612,19 +715,19 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                                 </span>
                               </div>
 
-                              {homestay.owner && (
-                                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                                  {homestay.owner.name}
-                                </p>
-                              )}
+                              <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                {homestay.address}
+                              </p>
 
                               <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-200 dark:border-gray-700">
                                 <span className="text-gray-600 dark:text-gray-400">
-                                  {homestay.rooms?.length || 0} rooms
+                                  {homestay._count?.rooms || homestay.rooms?.length || 0} rooms
                                 </span>
-                                <span className="font-semibold text-[#224240] dark:text-[#2a5350]">
-                                  {homestay.rooms?.[0]?.currency || 'NPR'} {homestay.rooms?.length > 0 ? Math.min(...homestay.rooms.map((r: any) => r.price || 0)) : 0}
-                                </span>
+                                {homestay.rooms && homestay.rooms.length > 0 && (
+                                  <span className="font-semibold text-[#224240] dark:text-[#2a5350]">
+                                    {homestay.rooms[0]?.currency || 'NPR'} {Math.min(...homestay.rooms.map(r => r.price || 0))}
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -638,15 +741,14 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                             <tr>
                               <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Select</th>
                               <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Homestay</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Owner</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Facilities</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Location</th>
                               <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Rooms</th>
                               <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Price</th>
                               <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400">Status</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {availableHomestays.map((homestay: any) => (
+                            {availableHomestays.map((homestay) => (
                               <tr
                                 key={homestay.id}
                                 className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer ${
@@ -664,9 +766,9 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                                 </td>
                                 <td className="px-3 py-2">
                                   <div className="flex items-center gap-2">
-                                    {homestay.images?.[0]?.url ? (
+                                    {homestay.mainImage || homestay.images?.[0]?.url ? (
                                       <img
-                                        src={homestay.images[0].url}
+                                        src={homestay.mainImage || homestay.images?.[0]?.url}
                                         alt={homestay.name}
                                         className="w-12 h-12 rounded object-cover"
                                       />
@@ -675,47 +777,23 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                                         <Home className="h-5 w-5 text-gray-400" />
                                       </div>
                                     )}
-                                    <div>
-                                      <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">
-                                        {homestay.name}
-                                      </p>
-                                      <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
-                                        {homestay.address}
-                                      </p>
-                                    </div>
+                                    <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">
+                                      {homestay.name}
+                                    </p>
                                   </div>
                                 </td>
                                 <td className="px-3 py-2">
-                                  {homestay.owner && (
-                                    <div>
-                                      <p className="text-xs font-medium text-gray-900 dark:text-white">
-                                        {homestay.owner.name}
-                                      </p>
-                                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-[150px]">
-                                        {homestay.owner.email}
-                                      </p>
-                                    </div>
-                                  )}
-                                </td>
-                                <td className="px-3 py-2">
-                                  <div className="flex flex-wrap gap-1">
-                                    {homestay.facilities?.slice(0, 2).map((f: any, idx: number) => (
-                                      <span key={idx} className="text-xs px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded">
-                                        {f.facility?.name || f.name}
-                                      </span>
-                                    ))}
-                                    {homestay.facilities && homestay.facilities.length > 2 && (
-                                      <span className="text-xs text-gray-600 dark:text-gray-400">
-                                        +{homestay.facilities.length - 2}
-                                      </span>
-                                    )}
-                                  </div>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
+                                    {homestay.address}
+                                  </p>
                                 </td>
                                 <td className="px-3 py-2 text-xs text-gray-900 dark:text-white">
-                                  {homestay.rooms?.length || 0}
+                                  {homestay._count?.rooms || homestay.rooms?.length || 0}
                                 </td>
                                 <td className="px-3 py-2 text-xs font-semibold text-[#224240] dark:text-[#2a5350]">
-                                  {homestay.rooms?.[0]?.currency || 'NPR'} {homestay.rooms?.length > 0 ? Math.min(...homestay.rooms.map((r: any) => r.price || 0)) : 0}
+                                  {homestay.rooms && homestay.rooms.length > 0
+                                    ? `${homestay.rooms[0]?.currency || 'NPR'} ${Math.min(...homestay.rooms.map(r => r.price || 0))}`
+                                    : '-'}
                                 </td>
                                 <td className="px-3 py-2">
                                   <span className={`text-xs px-2 py-0.5 rounded-full ${
@@ -734,11 +812,11 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                     )}
 
                     {/* Pagination Controls */}
-                    {total > 0 && (
+                    {searchTotal > 0 && (
                       <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-4">
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Showing {((currentPage - 1) * pageLimit) + 1} to {Math.min(currentPage * pageLimit, total)} of {total}
+                            Page {currentPage} of {searchTotalPages} ({searchTotal} total)
                           </p>
                           <div className="flex items-center gap-2">
                             <label className="text-sm text-gray-600 dark:text-gray-400">Per page:</label>
@@ -746,7 +824,8 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                               value={pageLimit}
                               onChange={(e) => {
                                 setPageLimit(Number(e.target.value));
-                                setCurrentPage(1); // Reset to first page
+                                setCurrentPage(1);
+                                searchHomestaysByLocation(locationSearchQuery, 1);
                               }}
                               className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700"
                             >
@@ -758,27 +837,22 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
-                            Page {currentPage} of {availablePageCount}
-                          </span>
-                          <div className="flex gap-1">
-                            <ActionButton
-                              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                              variant="secondary"
-                              size="sm"
-                              disabled={currentPage === 1}
-                            >
-                              Previous
-                            </ActionButton>
-                            <ActionButton
-                              onClick={() => setCurrentPage(prev => Math.min(availablePageCount, prev + 1))}
-                              variant="secondary"
-                              size="sm"
-                              disabled={currentPage === availablePageCount}
-                            >
-                              Next
-                            </ActionButton>
-                          </div>
+                          <ActionButton
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            variant="secondary"
+                            size="sm"
+                            disabled={currentPage === 1}
+                          >
+                            Previous
+                          </ActionButton>
+                          <ActionButton
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            variant="secondary"
+                            size="sm"
+                            disabled={currentPage === searchTotalPages}
+                          >
+                            Next
+                          </ActionButton>
                         </div>
                       </div>
                     )}
@@ -820,7 +894,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
 
                       <div className="p-4">
                         <h4 className="font-medium text-gray-900 dark:text-white mb-1">{homestay.name}</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{homestay.location || 'No location'}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{homestay.location || homestay.address || 'No location'}</p>
 
                         <div className="flex items-center space-x-2">
                           <ActionButton

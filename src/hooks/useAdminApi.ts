@@ -1092,6 +1092,7 @@ export function useFormState<T>(initialState: T) {
 
 export function useDestinations() {
   const [destinations, setDestinations] = useState<any[]>([]);
+  const [destination, setDestination] = useState<any>(null);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const { loading, error, execute, clearError } = useAsyncOperation<any>();
@@ -1118,6 +1119,24 @@ export function useDestinations() {
       setDestinations([]);
       setTotalPages(1);
       setTotal(0);
+      throw error;
+    }
+  }, [execute]);
+
+  const loadDestination = useCallback(async (id: number) => {
+    try {
+      const result = await execute(async () => {
+        const response = await adminApi.getDestination(id);
+        return response;
+      });
+
+      if (result) {
+        setDestination(result);
+      }
+      return result;
+    } catch (error) {
+      console.error('Error loading destination:', error);
+      setDestination(null);
       throw error;
     }
   }, [execute]);
@@ -1184,12 +1203,15 @@ export function useDestinations() {
 
   return {
     destinations,
+    destination,
     setDestinations,
+    setDestination,
     totalPages,
     total,
     loading,
     error,
     loadDestinations,
+    loadDestination,
     createDestination,
     updateDestination,
     deleteDestination,
