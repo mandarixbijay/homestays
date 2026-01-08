@@ -499,9 +499,9 @@ export function SearchHomestayContent({
       <Navbar />
 
       {/* Search Header */}
-      <div className="bg-brand pt-20 pb-6">
+      <div className="bg-white pt-20 pb-6 border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-xl p-3 shadow-lg">
+          <div className="bg-gray-50 rounded-xl p-3 border border-gray-200">
             <DateGuestLocationPicker
               className="w-full"
               onSearch={handleSearch}
@@ -530,11 +530,11 @@ export function SearchHomestayContent({
           <div className="flex gap-6">
             {/* Desktop Sidebar */}
             <aside className="hidden lg:block w-72 flex-shrink-0">
-              <div className="bg-white rounded-xl p-5 shadow-sm sticky top-24">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">Filter by</h2>
+              <div className="bg-white rounded-xl p-5 shadow-sm sticky top-24 border border-gray-100">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                  <h2 className="text-lg font-bold text-brand">Filter by</h2>
                   {activeFiltersCount > 0 && (
-                    <span className="text-sm text-brand">{activeFiltersCount} active</span>
+                    <Badge className="bg-brand/10 text-brand border-0">{activeFiltersCount} active</Badge>
                   )}
                 </div>
                 <FilterContent />
@@ -544,15 +544,19 @@ export function SearchHomestayContent({
             {/* Main Content */}
             <main className="flex-1 min-w-0">
               {/* Results Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">
-                    {searchLocation || "All"} homestays
+                  <h1 className="text-2xl font-bold text-brand">
+                    {searchLocation || "All"} Homestays
                   </h1>
-                  <p className="text-sm text-gray-600">
-                    {filteredHomestays.length} properties found
-                    {searchCheckIn && searchCheckOut && ` • ${nightsCount} night${nightsCount !== 1 ? "s" : ""}`}
-                    {totalGuests > 0 && ` • ${totalGuests} guest${totalGuests !== 1 ? "s" : ""}`}
+                  <p className="text-sm text-gray-700 mt-1">
+                    <span className="font-medium text-gray-900">{filteredHomestays.length}</span> properties found
+                    {searchCheckIn && searchCheckOut && (
+                      <> • <span className="font-medium">{nightsCount}</span> night{nightsCount !== 1 ? "s" : ""}</>
+                    )}
+                    {totalGuests > 0 && (
+                      <> • <span className="font-medium">{totalGuests}</span> guest{totalGuests !== 1 ? "s" : ""}</>
+                    )}
                   </p>
                 </div>
 
@@ -628,7 +632,7 @@ export function SearchHomestayContent({
                           transition={{ delay: index * 0.02 }}
                         >
                           <Link href={`/homestays/profile/${slug}`}>
-                            <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 group">
+                            <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group border border-gray-100 hover:border-brand/20">
                               <div className="flex flex-col md:flex-row">
                                 {/* Image Section */}
                                 <div className="relative w-full md:w-80 h-52 md:h-auto flex-shrink-0">
@@ -685,11 +689,11 @@ export function SearchHomestayContent({
                                     {/* Title and Location */}
                                     <div className="flex items-start justify-between gap-4">
                                       <div className="flex-1 min-w-0">
-                                        <h3 className="text-lg font-bold text-brand group-hover:underline line-clamp-1">
+                                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-brand transition-colors line-clamp-1">
                                           {homestay.name}
                                         </h3>
-                                        <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
-                                          <MapPin className="h-4 w-4 flex-shrink-0" />
+                                        <div className="flex items-center gap-1.5 text-sm text-gray-600 mt-1">
+                                          <MapPin className="h-4 w-4 flex-shrink-0 text-brand" />
                                           <span className="line-clamp-1">{homestay.address}</span>
                                         </div>
                                       </div>
@@ -720,9 +724,9 @@ export function SearchHomestayContent({
                                         {homestay.features.slice(0, 4).map((feature, idx) => (
                                           <span
                                             key={idx}
-                                            className="inline-flex items-center gap-1 text-xs text-gray-600 bg-brand/5 px-2 py-1 rounded"
+                                            className="inline-flex items-center gap-1 text-xs font-medium text-brand bg-brand/5 px-2.5 py-1 rounded-full"
                                           >
-                                            <Check className="h-3 w-3 text-gradient-3" />
+                                            <Check className="h-3 w-3 text-brand" />
                                             {feature}
                                           </span>
                                         ))}
@@ -730,14 +734,14 @@ export function SearchHomestayContent({
                                     )}
 
                                     {/* Room Info */}
-                                    <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
-                                      <span className="flex items-center gap-1">
-                                        <BedDouble className="h-4 w-4" />
-                                        {homestay.rooms.length} room{homestay.rooms.length !== 1 ? "s" : ""} available
+                                    <div className="flex items-center gap-4 mt-3 text-sm text-gray-700">
+                                      <span className="flex items-center gap-1.5">
+                                        <BedDouble className="h-4 w-4 text-gray-500" />
+                                        <span className="font-medium">{homestay.rooms.length}</span> room{homestay.rooms.length !== 1 ? "s" : ""} available
                                       </span>
                                       {homestay.rooms[0]?.bedType && (
-                                        <span className="flex items-center gap-1">
-                                          <Users className="h-4 w-4" />
+                                        <span className="flex items-center gap-1.5">
+                                          <Users className="h-4 w-4 text-gray-500" />
                                           {homestay.rooms[0].bedType}
                                         </span>
                                       )}
@@ -746,7 +750,7 @@ export function SearchHomestayContent({
 
                                   {/* Price Section */}
                                   <div className="flex items-end justify-between mt-4 pt-4 border-t border-gray-100">
-                                    <div className="text-sm text-gray-500">
+                                    <div className="text-sm text-gray-600">
                                       {nightsCount} night{nightsCount !== 1 ? "s" : ""}, {totalGuests} guest{totalGuests !== 1 ? "s" : ""}
                                     </div>
                                     <div className="text-right">
@@ -756,13 +760,13 @@ export function SearchHomestayContent({
                                             NPR {homestay.rooms[0].originalPrice.toLocaleString()}
                                           </span>
                                         )}
-                                        <span className="text-xl font-bold text-gray-900">
+                                        <span className="text-xl font-bold text-brand">
                                           NPR {price.toLocaleString()}
                                         </span>
                                       </div>
                                       <p className="text-xs text-gray-500">per night</p>
                                       {nightsCount > 1 && (
-                                        <p className="text-sm text-gray-600 mt-1">
+                                        <p className="text-sm font-medium text-gray-700 mt-1">
                                           NPR {totalPrice.toLocaleString()} total
                                         </p>
                                       )}
