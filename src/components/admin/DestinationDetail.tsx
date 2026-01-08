@@ -74,6 +74,11 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
   const [selectedHomestays, setSelectedHomestays] = useState<number[]>([]);
   const [isAddingHomestays, setIsAddingHomestays] = useState(false);
 
+  // Bulk remove state
+  const [selectedForRemoval, setSelectedForRemoval] = useState<number[]>([]);
+  const [isRemovingHomestays, setIsRemovingHomestays] = useState(false);
+  const [showRemoveSelection, setShowRemoveSelection] = useState(false);
+
   // Load destination data by ID
   useEffect(() => {
     loadDestination(destinationId);
@@ -248,6 +253,82 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     searchHomestaysByLocation(locationSearchQuery, newPage);
+  };
+
+  // Helper function to get homestay image from various possible sources
+  const getHomestayImage = (homestay: any): string | null => {
+    // Check mainImage first
+    if (homestay.mainImage) return homestay.mainImage;
+    // Check images array for main image
+    if (homestay.images?.length > 0) {
+      const mainImg = homestay.images.find((img: any) => img.isMain);
+      if (mainImg?.url) return mainImg.url;
+      if (homestay.images[0]?.url) return homestay.images[0].url;
+    }
+    // Check image field
+    if (homestay.image) return homestay.image;
+    return null;
+  };
+
+  // Bulk remove handlers
+  const toggleRemovalSelection = (homestayId: number) => {
+    setSelectedForRemoval(prev =>
+      prev.includes(homestayId)
+        ? prev.filter(id => id !== homestayId)
+        : [...prev, homestayId]
+    );
+  };
+
+  const handleSelectAllForRemoval = () => {
+    const allHomestayIds = (destination?.homestays || []).map((h: any) => h.id);
+    if (selectedForRemoval.length === allHomestayIds.length) {
+      setSelectedForRemoval([]);
+    } else {
+      setSelectedForRemoval(allHomestayIds);
+    }
+  };
+
+  const handleBulkRemove = async () => {
+    if (selectedForRemoval.length === 0) return;
+
+    if (!confirm(`Are you sure you want to remove ${selectedForRemoval.length} homestay(s) from this destination?`)) {
+      return;
+    }
+
+    setIsRemovingHomestays(true);
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const homestayId of selectedForRemoval) {
+        try {
+          await removeHomestayFromDestination(homestayId, destinationId);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to remove homestay ${homestayId}:`, error);
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        addToast({
+          type: 'success',
+          title: 'Success',
+          message: `Removed ${successCount} homestay(s)${errorCount > 0 ? `, ${errorCount} failed` : ''}`
+        });
+      }
+      if (errorCount > 0 && successCount === 0) {
+        addToast({ type: 'error', title: 'Error', message: 'Failed to remove homestays' });
+      }
+
+      setSelectedForRemoval([]);
+      setShowRemoveSelection(false);
+      loadDestination(destinationId);
+    } catch (error) {
+      addToast({ type: 'error', title: 'Error', message: 'Failed to remove homestays' });
+    } finally {
+      setIsRemovingHomestays(false);
+    }
   };
 
   if (destinationLoading && !destination) {
@@ -877,46 +958,149 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
               </div>
             ) : (
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {(destination.homestays || []).map((homestay: any) => (
-                    <div key={homestay.id} className="relative border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-lg transition-all">
-                      {homestay.mainImage ? (
-                        <img
-                          src={homestay.mainImage}
-                          alt={homestay.name}
-                          className="w-full h-48 object-cover"
-                        />
+                {/* Bulk Remove Toolbar */}
+                <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => {
+                        setShowRemoveSelection(!showRemoveSelection);
+                        if (showRemoveSelection) {
+                          setSelectedForRemoval([]);
+                        }
+                      }}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        showRemoveSelection
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                          : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      {showRemoveSelection ? (
+                        <>
+                          <X className="h-4 w-4" />
+                          Cancel Selection
+                        </>
                       ) : (
-                        <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                          <Home className="h-16 w-16 text-gray-400" />
-                        </div>
+                        <>
+                          <CheckSquare className="h-4 w-4" />
+                          Select to Remove
+                        </>
                       )}
+                    </button>
 
-                      <div className="p-4">
-                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">{homestay.name}</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{homestay.location || homestay.address || 'No location'}</p>
+                    {showRemoveSelection && (
+                      <>
+                        <button
+                          onClick={handleSelectAllForRemoval}
+                          className="flex items-center gap-2 text-sm text-[#224240] dark:text-[#2a5350] hover:underline"
+                        >
+                          {selectedForRemoval.length === (destination.homestays?.length || 0) ? (
+                            <>
+                              <CheckSquare className="h-4 w-4" />
+                              Deselect All
+                            </>
+                          ) : (
+                            <>
+                              <Square className="h-4 w-4" />
+                              Select All ({destination.homestays?.length || 0})
+                            </>
+                          )}
+                        </button>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          {selectedForRemoval.length} selected
+                        </span>
+                      </>
+                    )}
+                  </div>
 
-                        <div className="flex items-center space-x-2">
-                          <ActionButton
-                            onClick={() => window.open(`/admin/homestays/${homestay.id}`, '_blank')}
-                            variant="secondary"
-                            size="xs"
-                            icon={<ExternalLink className="h-3 w-3" />}
-                          >
-                            View
-                          </ActionButton>
-                          <ActionButton
-                            onClick={() => handleRemoveHomestay(homestay.id)}
-                            variant="danger"
-                            size="xs"
-                            icon={<Unlink className="h-3 w-3" />}
-                          >
-                            Remove
-                          </ActionButton>
+                  {showRemoveSelection && selectedForRemoval.length > 0 && (
+                    <ActionButton
+                      onClick={handleBulkRemove}
+                      variant="danger"
+                      size="sm"
+                      icon={isRemovingHomestays ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      disabled={isRemovingHomestays}
+                    >
+                      {isRemovingHomestays ? 'Removing...' : `Remove ${selectedForRemoval.length} Homestay${selectedForRemoval.length !== 1 ? 's' : ''}`}
+                    </ActionButton>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {(destination.homestays || []).map((homestay: any) => {
+                    const homestayImage = getHomestayImage(homestay);
+                    const isSelected = selectedForRemoval.includes(homestay.id);
+
+                    return (
+                      <div
+                        key={homestay.id}
+                        className={`relative border-2 rounded-lg overflow-hidden transition-all ${
+                          showRemoveSelection
+                            ? isSelected
+                              ? 'border-red-500 bg-red-50 dark:bg-red-900/10'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 cursor-pointer'
+                            : 'border-gray-200 dark:border-gray-700 hover:shadow-lg'
+                        }`}
+                        onClick={showRemoveSelection ? () => toggleRemovalSelection(homestay.id) : undefined}
+                      >
+                        {/* Selection checkbox overlay */}
+                        {showRemoveSelection && (
+                          <div className={`absolute top-2 left-2 z-10 w-6 h-6 rounded-full flex items-center justify-center ${
+                            isSelected ? 'bg-red-500' : 'bg-white/80 border-2 border-gray-300'
+                          }`}>
+                            {isSelected && (
+                              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </div>
+                        )}
+
+                        {homestayImage ? (
+                          <img
+                            src={homestayImage}
+                            alt={homestay.name}
+                            className="w-full h-48 object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                            <Home className="h-16 w-16 text-gray-400" />
+                          </div>
+                        )}
+
+                        <div className="p-4">
+                          <h4 className="font-medium text-gray-900 dark:text-white mb-1">{homestay.name}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{homestay.location || homestay.address || 'No location'}</p>
+
+                          {!showRemoveSelection && (
+                            <div className="flex items-center space-x-2">
+                              <ActionButton
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(`/admin/homestays/${homestay.id}`, '_blank');
+                                }}
+                                variant="secondary"
+                                size="xs"
+                                icon={<ExternalLink className="h-3 w-3" />}
+                              >
+                                View
+                              </ActionButton>
+                              <ActionButton
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveHomestay(homestay.id);
+                                }}
+                                variant="danger"
+                                size="xs"
+                                icon={<Unlink className="h-3 w-3" />}
+                              >
+                                Remove
+                              </ActionButton>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
