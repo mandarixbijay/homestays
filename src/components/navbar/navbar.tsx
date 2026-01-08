@@ -198,41 +198,19 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
   // };
 
   return (
-    <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md fixed top-0 left-0 right-0 z-[100] border-b border-gray-100 dark:border-gray-800 shadow-sm">
+    <nav className="bg-white backdrop-blur-sm fixed top-0 left-0 right-0 z-[100] border-b border-gray-200 shadow-sm">
       <div className="flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 h-18">
         {/* Logo */}
         <Link href="/" className="flex items-center" onClick={closeMenu}>
           <div className="p-2">
-            {mounted && (
-              <>
-                <Image
-                  src="/images/logo/logo.png"
-                  alt="Homestay Nepal Logo"
-                  width={120}
-                  height={120}
-                  priority
-                  className="w-auto h-14 sm:h-16 dark:hidden"
-                />
-                <Image
-                  src="/images/logo/darkmode_logo.png"
-                  alt="Homestay Nepal Logo"
-                  width={120}
-                  height={120}
-                  priority
-                  className="w-auto h-14 sm:h-16 hidden dark:block"
-                />
-              </>
-            )}
-            {!mounted && (
-              <Image
-                src="/images/logo/logo.png"
-                alt="Homestay Nepal Logo"
-                width={120}
-                height={120}
-                priority
-                className="w-auto h-14 sm:h-16"
-              />
-            )}
+            <Image
+              src="/images/logo/logo.png"
+              alt="Homestay Nepal Logo"
+              width={120}
+              height={120}
+              priority
+              className="w-auto h-14 sm:h-16"
+            />
           </div>
         </Link>
 
@@ -325,13 +303,13 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
                 <Menu className="h-7 w-7" />
               </Button>
             </DrawerTrigger>
-            <DrawerContent className="h-[80vh] w-full fixed bottom-0 left-0 bg-white/95 dark:bg-gray-900/95 z-[110] rounded-t-2xl shadow-lg flex flex-col">
+            <DrawerContent className="h-[80vh] w-full fixed bottom-0 left-0 bg-white z-[110] rounded-t-2xl shadow-lg flex flex-col">
               <VisuallyHidden>
                 <DrawerTitle>Navigation Menu</DrawerTitle>
               </VisuallyHidden>
 
               {/* Logo - Centered at Top */}
-              <div className="flex justify-center py-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex justify-center py-4 border-b border-gray-200">
                 <Image
                   src="/images/logo/logo.png"
                   alt="Homestay Nepal Logo"
@@ -359,7 +337,7 @@ function Navbar({ hideUserCircle = false }: NavbarProps) {
 
               {/* User Actions - Fixed Bottom */}
               {!hideUserCircle && (
-                <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-3">
+                <div className="border-t border-gray-200 p-4 space-y-3">
                   {/* Notification Button - Commented out for later use */}
                   {/* <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-all duration-200">
                     <div className="relative">
