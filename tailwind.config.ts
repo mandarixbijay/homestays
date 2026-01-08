@@ -2,8 +2,6 @@ import type { Config } from "tailwindcss";
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ["class"],
-  
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -12,6 +10,29 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Brand color palette
+        brand: {
+          DEFAULT: '#1A403D',
+          50: '#f0f7f6',
+          100: '#daf0ec',
+          200: '#b8e0db',
+          300: '#8ac9c2',
+          400: '#5aaba3',
+          500: '#458c64',
+          600: '#266555',
+          700: '#1A403D',
+          800: '#153330',
+          900: '#112826',
+        },
+        // Gradient palette colors for easy access
+        gradient: {
+          1: '#1A403D',
+          2: '#266555',
+          3: '#458c64',
+          4: '#74b26b',
+          5: '#b1d76e',
+          6: '#f9f871',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -43,8 +64,8 @@ export default {
           foreground: 'hsl(var(--accent-foreground))',
         },
         discount: {
-          DEFAULT: '#A9CBB7',
-          foreground: '#1A4A46',
+          DEFAULT: '#74b26b',
+          foreground: '#ffffff',
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
@@ -54,11 +75,11 @@ export default {
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         chart: {
-          '1': 'hsl(var(--chart-1))',
-          '2': 'hsl(var(--chart-2))',
-          '3': 'hsl(var(--chart-3))',
-          '4': 'hsl(var(--chart-4))',
-          '5': 'hsl(var(--chart-5))',
+          '1': '#1A403D',
+          '2': '#266555',
+          '3': '#458c64',
+          '4': '#74b26b',
+          '5': '#b1d76e',
         },
         sidebar: {
           DEFAULT: 'hsl(var(--sidebar-background))',
@@ -78,18 +99,18 @@ export default {
       },
       fontFamily: {
         sora: ['Sora', 'sans-serif'],
-        manrope: ['Manrope', 'sans-serif'], // Keep for backwards compatibility
+        manrope: ['Manrope', 'sans-serif'],
       },
       fontSize: {
-        xs: ['0.75rem', { lineHeight: '1rem' }], // 12px
-        sm: ['0.875rem', { lineHeight: '1.25rem' }], // 14px
-        base: ['1rem', { lineHeight: '1.5rem' }], // 16px
-        lg: ['1.125rem', { lineHeight: '1.75rem' }], // 18px
-        xl: ['1.25rem', { lineHeight: '1.75rem' }], // 20px
-        '2xl': ['1.5rem', { lineHeight: '2rem' }], // 24px
-        '3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
-        '4xl': ['2.25rem', { lineHeight: '2.5rem' }], // 36px
-        '5xl': ['3rem', { lineHeight: '1' }], // 48px
+        xs: ['0.75rem', { lineHeight: '1rem' }],
+        sm: ['0.875rem', { lineHeight: '1.25rem' }],
+        base: ['1rem', { lineHeight: '1.5rem' }],
+        lg: ['1.125rem', { lineHeight: '1.75rem' }],
+        xl: ['1.25rem', { lineHeight: '1.75rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],
+        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+        '5xl': ['3rem', { lineHeight: '1' }],
       },
       boxShadow: {
         sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
@@ -110,10 +131,7 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
-
     },
   },
   plugins: [require("tailwindcss-animate")],
-
-  
 } satisfies Config;

@@ -10,58 +10,36 @@
     --card-foreground: 0 0% 15%; /* Darker card text */
     --popover: 0 0% 100%; /* White popover */
     --popover-foreground: 0 0% 20%; /* Dark popover text */
-    --primary: 180 42% 20%; /* #1A403D */
+    --primary: 170 42% 17%; /* #1A403D - Brand main color */
     --primary-foreground: 0 0% 100%; /* White text on primary */
     --secondary: 0 0% 95%; /* Light gray */
     --secondary-foreground: 0 0% 20%; /* Dark text on secondary */
-    --muted: 0 0% 90%; /* Light gray muted */
-    --muted-foreground: 0 0% 40%; /* Medium gray muted text */
-    --accent: 43 80% 40%; /* #D4A017 */
-    --accent-foreground: 0 0% 15%; /* Dark text on accent */
+    --muted: 0 0% 96%; /* Light gray muted */
+    --muted-foreground: 0 0% 45%; /* Medium gray muted text */
+    --accent: 80 70% 70%; /* #b1d76e - Lime green accent */
+    --accent-foreground: 170 42% 17%; /* Brand color text on accent */
     --destructive: 0 80% 50%; /* Red */
     --destructive-foreground: 0 0% 100%; /* White text on destructive */
-    --border: 0 0% 85%; /* Light gray border */
-    --input: 0 0% 85%; /* Light gray input */
-    --ring: 180 42% 20%; /* #1A403D for ring */
+    --border: 0 0% 90%; /* Light gray border */
+    --input: 0 0% 90%; /* Light gray input */
+    --ring: 170 42% 17%; /* #1A403D for ring */
     --radius: 0.5rem;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 180 42% 20%; /* #1A403D */
+    --sidebar-primary: 170 42% 17%; /* #1A403D */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 95%;
     --sidebar-accent-foreground: 0 0% 20%;
     --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 180 42% 20%;
-  }
+    --sidebar-ring: 170 42% 17%;
 
-  .dark {
-    --background: 222 47% 11%; /* Rich dark blue-gray background (#0f172a) */
-    --foreground: 210 40% 98%; /* Almost white text for excellent readability */
-    --card: 222 47% 15%; /* Slightly lighter card background */
-    --card-foreground: 210 40% 98%; /* Light card text */
-    --popover: 222 47% 15%; /* Dark popover */
-    --popover-foreground: 210 40% 98%; /* Light popover text */
-    --primary: 180 42% 40%; /* Brighter primary for dark mode visibility */
-    --primary-foreground: 0 0% 100%; /* White text on primary */
-    --secondary: 217 33% 17%; /* Dark slate secondary */
-    --secondary-foreground: 210 40% 98%; /* Light text on secondary */
-    --muted: 215 28% 17%; /* Dark muted with slight blue tint */
-    --muted-foreground: 215 20% 65%; /* Lighter muted text */
-    --accent: 43 85% 60%; /* Bright gold accent */
-    --accent-foreground: 222 47% 11%; /* Dark text on bright accent */
-    --destructive: 0 85% 65%; /* Brighter red for visibility */
-    --destructive-foreground: 0 0% 100%; /* White text on destructive */
-    --border: 215 28% 25%; /* Visible borders */
-    --input: 217 33% 17%; /* Dark input background */
-    --ring: 180 42% 50%; /* Bright ring for focus states */
-    --sidebar-background: 222 47% 13%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 180 42% 40%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 215 28% 25%;
-    --sidebar-ring: 180 42% 50%;
+    /* Brand gradient colors as CSS variables */
+    --brand-1: #1A403D;
+    --brand-2: #266555;
+    --brand-3: #458c64;
+    --brand-4: #74b26b;
+    --brand-5: #b1d76e;
+    --brand-6: #f9f871;
   }
 
   * {
@@ -110,11 +88,25 @@
     @apply text-xs text-destructive bg-destructive/5 px-2 py-1 rounded flex items-center gap-1;
   }
   .navbar {
-    @apply bg-white dark:bg-gray-900 fixed top-0 left-0 right-0 z-[100] h-16 shadow-md;
+    @apply bg-white fixed top-0 left-0 right-0 z-[100] h-16 shadow-md;
   }
   .hero-overlay::before {
     content: '';
     @apply absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/30 to-transparent;
+  }
+
+  /* Brand gradient utilities */
+  .bg-brand-gradient {
+    background: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-3) 50%, var(--brand-5) 100%);
+  }
+  .bg-brand-gradient-light {
+    background: linear-gradient(135deg, var(--brand-4) 0%, var(--brand-5) 50%, var(--brand-6) 100%);
+  }
+  .text-brand-gradient {
+    background: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 
@@ -177,7 +169,7 @@
 
 .room-card {
   width: 100%;
-  max-width: 32rem; /* 512px */
+  max-width: 32rem;
   margin: 0 auto;
   border-radius: 0.75rem;
   overflow: hidden;
@@ -189,12 +181,12 @@
 }
 @media (min-width: 768px) {
   .room-card {
-    max-width: 48rem; /* 768px */
+    max-width: 48rem;
   }
 }
 .room-card img {
   width: 100%;
-  height: 12rem; /* 192px */
+  height: 12rem;
   object-fit: cover;
   border-top-left-radius: 0.75rem;
   border-top-right-radius: 0.75rem;

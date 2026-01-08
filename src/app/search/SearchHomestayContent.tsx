@@ -86,11 +86,11 @@ const ITEMS_PER_PAGE = 15;
 
 // Rating label helper - using brand gradient colors
 const getRatingLabel = (rating: number) => {
-  if (rating >= 4.5) return { label: "Exceptional", color: "bg-[#1A403D]" };
-  if (rating >= 4.0) return { label: "Wonderful", color: "bg-[#266555]" };
-  if (rating >= 3.5) return { label: "Very Good", color: "bg-[#458c64]" };
-  if (rating >= 3.0) return { label: "Good", color: "bg-[#74b26b]" };
-  return { label: "Pleasant", color: "bg-[#b1d76e] text-gray-800" };
+  if (rating >= 4.5) return { label: "Exceptional", color: "bg-gradient-1" };
+  if (rating >= 4.0) return { label: "Wonderful", color: "bg-gradient-2" };
+  if (rating >= 3.5) return { label: "Very Good", color: "bg-gradient-3" };
+  if (rating >= 3.0) return { label: "Good", color: "bg-gradient-4" };
+  return { label: "Pleasant", color: "bg-gradient-5 text-gray-800" };
 };
 
 export function SearchHomestayContent({
@@ -374,7 +374,7 @@ export function SearchHomestayContent({
             <Checkbox
               checked={filters.vipOnly}
               onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, vipOnly: checked as boolean }))}
-              className="border-gray-400 data-[state=checked]:bg-[#1A403D] data-[state=checked]:border-[#1A403D]"
+              className="border-gray-400 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
             />
             <span className="text-sm text-gray-700 group-hover:text-gray-900">VIP Access</span>
           </label>
@@ -383,7 +383,7 @@ export function SearchHomestayContent({
               <Checkbox
                 checked={filters.minRating >= 4}
                 onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, minRating: checked ? 4 : 0 }))}
-                className="border-gray-400 data-[state=checked]:bg-[#1A403D] data-[state=checked]:border-[#1A403D]"
+                className="border-gray-400 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
               />
               <span className="text-sm text-gray-700 group-hover:text-gray-900">Highly rated (4+)</span>
             </label>
@@ -429,7 +429,7 @@ export function SearchHomestayContent({
               <Checkbox
                 checked={filters.minRating === value}
                 onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, minRating: checked ? value : 0 }))}
-                className="border-gray-400 data-[state=checked]:bg-[#1A403D] data-[state=checked]:border-[#1A403D]"
+                className="border-gray-400 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
               />
               <span className="text-sm text-gray-700 group-hover:text-gray-900">{label}</span>
             </label>
@@ -451,7 +451,7 @@ export function SearchHomestayContent({
                       cities: checked ? [...prev.cities, city] : prev.cities.filter((c) => c !== city),
                     }));
                   }}
-                  className="border-gray-400 data-[state=checked]:bg-[#1A403D] data-[state=checked]:border-[#1A403D]"
+                  className="border-gray-400 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
                 />
                 <span className="text-sm text-gray-700 group-hover:text-gray-900">{city}</span>
               </label>
@@ -474,7 +474,7 @@ export function SearchHomestayContent({
                       amenities: checked ? [...prev.amenities, amenity] : prev.amenities.filter((a) => a !== amenity),
                     }));
                   }}
-                  className="border-gray-400 data-[state=checked]:bg-[#1A403D] data-[state=checked]:border-[#1A403D]"
+                  className="border-gray-400 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
                 />
                 <span className="text-sm text-gray-700 group-hover:text-gray-900">{amenity}</span>
               </label>
@@ -486,7 +486,7 @@ export function SearchHomestayContent({
       {/* Clear Filters */}
       {activeFiltersCount > 0 && (
         <div className="pt-4">
-          <Button variant="outline" className="w-full border-[#1A403D] text-[#1A403D] hover:bg-[#1A403D]/10" onClick={handleResetFilters}>
+          <Button variant="outline" className="w-full border-brand text-brand hover:bg-brand/10" onClick={handleResetFilters}>
             Clear all filters
           </Button>
         </div>
@@ -499,7 +499,7 @@ export function SearchHomestayContent({
       <Navbar />
 
       {/* Search Header */}
-      <div className="bg-[#1A403D] pt-20 pb-6">
+      <div className="bg-brand pt-20 pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-xl p-3 shadow-lg">
             <DateGuestLocationPicker
@@ -522,7 +522,7 @@ export function SearchHomestayContent({
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h3>
             <p className="text-gray-600 mb-6">{fetchError}</p>
-            <Button onClick={() => window.location.reload()} className="bg-[#1A403D] hover:bg-[#153330]">
+            <Button onClick={() => window.location.reload()} className="bg-brand hover:bg-brand-800">
               Try Again
             </Button>
           </div>
@@ -534,7 +534,7 @@ export function SearchHomestayContent({
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-bold text-gray-900">Filter by</h2>
                   {activeFiltersCount > 0 && (
-                    <span className="text-sm text-[#1A403D]">{activeFiltersCount} active</span>
+                    <span className="text-sm text-brand">{activeFiltersCount} active</span>
                   )}
                 </div>
                 <FilterContent />
@@ -564,7 +564,7 @@ export function SearchHomestayContent({
                         <SlidersHorizontal className="h-4 w-4" />
                         Filters
                         {activeFiltersCount > 0 && (
-                          <Badge className="bg-[#1A403D] text-white ml-1">{activeFiltersCount}</Badge>
+                          <Badge className="bg-brand text-white ml-1">{activeFiltersCount}</Badge>
                         )}
                       </Button>
                     </DrawerTrigger>
@@ -577,7 +577,7 @@ export function SearchHomestayContent({
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t">
                         <DrawerClose asChild>
-                          <Button className="w-full bg-[#1A403D] hover:bg-[#153330]">
+                          <Button className="w-full bg-brand hover:bg-brand-800">
                             Show {filteredHomestays.length} properties
                           </Button>
                         </DrawerClose>
@@ -667,12 +667,12 @@ export function SearchHomestayContent({
                                   {/* Badges */}
                                   <div className="absolute top-3 left-3 flex flex-col gap-2">
                                     {homestay.vipAccess && (
-                                      <Badge className="bg-[#f9f871] text-[#1A403D] font-semibold">
+                                      <Badge className="bg-gradient-6 text-brand font-semibold">
                                         VIP Access
                                       </Badge>
                                     )}
                                     {discount && discount > 0 && (
-                                      <Badge className="bg-[#74b26b] text-white font-semibold">
+                                      <Badge className="bg-gradient-4 text-white font-semibold">
                                         {discount}% off
                                       </Badge>
                                     )}
@@ -685,7 +685,7 @@ export function SearchHomestayContent({
                                     {/* Title and Location */}
                                     <div className="flex items-start justify-between gap-4">
                                       <div className="flex-1 min-w-0">
-                                        <h3 className="text-lg font-bold text-[#1A403D] group-hover:underline line-clamp-1">
+                                        <h3 className="text-lg font-bold text-brand group-hover:underline line-clamp-1">
                                           {homestay.name}
                                         </h3>
                                         <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
@@ -720,9 +720,9 @@ export function SearchHomestayContent({
                                         {homestay.features.slice(0, 4).map((feature, idx) => (
                                           <span
                                             key={idx}
-                                            className="inline-flex items-center gap-1 text-xs text-gray-600 bg-[#1A403D]/5 px-2 py-1 rounded"
+                                            className="inline-flex items-center gap-1 text-xs text-gray-600 bg-brand/5 px-2 py-1 rounded"
                                           >
-                                            <Check className="h-3 w-3 text-[#458c64]" />
+                                            <Check className="h-3 w-3 text-gradient-3" />
                                             {feature}
                                           </span>
                                         ))}
@@ -810,7 +810,7 @@ export function SearchHomestayContent({
                             className={cn(
                               "min-w-10",
                               currentPage === pageNum
-                                ? "bg-[#1A403D] hover:bg-[#153330]"
+                                ? "bg-brand hover:bg-brand-800"
                                 : "border-gray-300"
                             )}
                           >
@@ -841,7 +841,7 @@ export function SearchHomestayContent({
                     Try adjusting your filters or search criteria.
                   </p>
                   {activeFiltersCount > 0 && (
-                    <Button variant="outline" onClick={handleResetFilters} className="border-[#1A403D] text-[#1A403D]">
+                    <Button variant="outline" onClick={handleResetFilters} className="border-brand text-brand">
                       Clear all filters
                     </Button>
                   )}
