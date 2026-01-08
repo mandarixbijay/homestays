@@ -1,12 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import CategoryCard from "./landing-page-components/cards/category-card";
 import { useRouter } from "next/navigation";
 
-const categoryCardsData = [
+interface Destination {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  isTopDestination: boolean;
+  priority: number | null;
+  createdAt: string;
+  updatedAt: string;
+  _count: {
+    homestays: number;
+  };
+}
+
+// Fallback static data in case API fails
+const fallbackData = [
   { imageSrc: "/images/location/bhaktapur.avif", categoryName: "Bhaktapur" },
   { imageSrc: "/images/location/pokhara.avif", categoryName: "Pokhara" },
   { imageSrc: "/images/location/chitwan.avif", categoryName: "Chitwan" },
@@ -53,6 +67,38 @@ const cardVariants = {
 
 export default function Hero2() {
   const router = useRouter();
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchDestinations = async () => {
+      try {
+        const response = await fetch("/api/homestays/destinations/top");
+        if (!response.ok) {
+          throw new Error("Failed to fetch destinations");
+        }
+        const data = await response.json();
+        setDestinations(data);
+      } catch (err) {
+        console.error("[Hero2] Error fetching destinations:", err);
+        setError("Failed to load destinations");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDestinations();
+  }, []);
+
+  // Transform API data to card format
+  const categoryCardsData = destinations.length > 0
+    ? destinations.map((dest) => ({
+        imageSrc: dest.imageUrl,
+        categoryName: dest.name,
+        homestayCount: dest._count.homestays,
+      }))
+    : fallbackData.map((item) => ({ ...item, homestayCount: undefined }));
 
   return (
     <motion.section
@@ -72,51 +118,58 @@ export default function Hero2() {
               Top Destinations
             </h2>
             <p className="mt-2 text-sm sm:text-base text-muted-foreground font-medium">
-              Discover Nepal’s most enchanting homestay locations
+              Discover Nepal's most enchanting homestay locations
             </p>
           </div>
-          {/* <div>
-            <Button
-              variant="default"
-              className="bg-primary text-white px-8 py-3 rounded-lg"
-              onClick={() => router.push("/search")}
-              aria-label="Explore all destinations"
-            >
-              Explore All Destinations
-            </Button>
-          </div> */}
         </motion.div>
 
-        <motion.div
-          variants={cardContainerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          className="flex gap-6 sm:gap-8 overflow-x-auto scrollbar-hide snap-x snap-mandatory min-h-[300px] sm:min-h-[360px] md:min-h-[400px] touch-pan-x"
-          role="region"
-          aria-label="Top destinations carousel"
-        >
-          {categoryCardsData.map((card, index) => (
-            <motion.div
-              key={index}
-              variants={cardVariants}
-              whileHover={{ y: -8, scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-              className="snap-start w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0 cursor-pointer"
-              onClick={() => router.push(`/search?destination=${card.categoryName.toLowerCase()}`)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  router.push(`/search?destination=${card.categoryName.toLowerCase()}`);
-                }
-              }}
-              aria-label={`View homestays in ${card.categoryName}`}
-            >
-              <CategoryCard {...card} />
-            </motion.div>
-          ))}
-        </motion.div>
+        {isLoading ? (
+          <div className="flex gap-6 sm:gap-8 overflow-x-auto scrollbar-hide snap-x snap-mandatory min-h-[300px] sm:min-h-[360px] md:min-h-[400px]">
+            {[...Array(5)].map((_, index) => (
+              <div
+                key={index}
+                className="snap-start w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0"
+              >
+                <div className="animate-pulse bg-gray-200 rounded-2xl h-[280px] sm:h-[320px] md:h-[360px]" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            variants={cardContainerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            className="flex gap-6 sm:gap-8 overflow-x-auto scrollbar-hide snap-x snap-mandatory min-h-[300px] sm:min-h-[360px] md:min-h-[400px] touch-pan-x"
+            role="region"
+            aria-label="Top destinations carousel"
+          >
+            {categoryCardsData.map((card, index) => (
+              <motion.div
+                key={index}
+                variants={cardVariants}
+                whileHover={{ y: -8, scale: 1.02 }}
+                transition={{ duration: 0.3 }}
+                className="snap-start w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0 cursor-pointer"
+                onClick={() => router.push(`/search?destination=${card.categoryName.toLowerCase()}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    router.push(`/search?destination=${card.categoryName.toLowerCase()}`);
+                  }
+                }}
+                aria-label={`View homestays in ${card.categoryName}`}
+              >
+                <CategoryCard
+                  imageSrc={card.imageSrc}
+                  categoryName={card.categoryName}
+                  homestayCount={card.homestayCount}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
     </motion.section>
   );
