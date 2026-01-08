@@ -735,10 +735,10 @@ export function SearchHomestayContent({
                                         <BedDouble className="h-4 w-4" />
                                         {homestay.rooms.length} room{homestay.rooms.length !== 1 ? "s" : ""} available
                                       </span>
-                                      {homestay.rooms[0]?.maxGuests && (
+                                      {homestay.rooms[0]?.bedType && (
                                         <span className="flex items-center gap-1">
                                           <Users className="h-4 w-4" />
-                                          Up to {homestay.rooms[0].maxGuests} guests
+                                          {homestay.rooms[0].bedType}
                                         </span>
                                       )}
                                     </div>
