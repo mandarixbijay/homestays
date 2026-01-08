@@ -1127,7 +1127,8 @@ export function useDestinations() {
     try {
       const result = await execute(async () => {
         const response = await adminApi.getDestination(id);
-        return response;
+        // Handle both direct response and nested data response
+        return response?.data || response;
       });
 
       if (result) {
