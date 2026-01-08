@@ -20,7 +20,7 @@ import { BlogThumbnail } from '@/types/blogs';
 import SafeBlogImage from "@/components/blog/SafeBlogImage";
 import { BlogCardSkeleton, FeaturedBlogSkeleton } from "@/components/blog/BlogSkeletons";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface BlogClientProps {
   searchParams: {
@@ -58,8 +58,16 @@ const categoryIcons: { [key: string]: any } = {
   default: Map
 };
 
-export default function BlogListClient({ searchParams }: BlogClientProps) {
+export default function BlogListClient({ searchParams: initialSearchParams }: BlogClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get current values from URL search params (syncs with browser history)
+  const urlPage = searchParams.get('page') || '1';
+  const urlCategory = searchParams.get('category') || '';
+  const urlSearch = searchParams.get('search') || '';
+  const urlTag = searchParams.get('tag') || '';
+
   const [blogs, setBlogs] = useState<BlogThumbnail[]>([]);
   const [featuredBlogs, setFeaturedBlogs] = useState<BlogThumbnail[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -72,28 +80,41 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
   const [showAllTags, setShowAllTags] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
 
-  const [localSearch, setLocalSearch] = useState(searchParams.search || "");
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.category || "");
-  const [selectedTag, setSelectedTag] = useState(searchParams.tag || "");
-  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.page || "1"));
+  // Local state for form inputs (controlled components)
+  const [localSearch, setLocalSearch] = useState(urlSearch);
+  const [selectedCategory, setSelectedCategory] = useState(urlCategory);
+  const [selectedTag, setSelectedTag] = useState(urlTag);
+  const [currentPage, setCurrentPage] = useState(parseInt(urlPage));
+
+  // Sync local state with URL params when they change (browser back/forward)
+  useEffect(() => {
+    setCurrentPage(parseInt(urlPage));
+    setSelectedCategory(urlCategory);
+    setSelectedTag(urlTag);
+    setLocalSearch(urlSearch);
+  }, [urlPage, urlCategory, urlTag, urlSearch]);
 
   useEffect(() => {
     loadInitialData();
   }, []);
 
+  // Load blogs when URL params change
   useEffect(() => {
-    loadBlogs();
-  }, [selectedCategory, selectedTag, currentPage]);
+    if (!loading) {
+      loadBlogs();
+    }
+  }, [urlPage, urlCategory, urlTag]);
 
   const loadInitialData = async () => {
     try {
       setLoading(true);
       const [blogsResponse, featuredResponse, categoriesResponse, tagsResponse] = await Promise.all([
-        // ✅ Using optimized thumbnails endpoint (80-90% faster)
         publicBlogApi.getThumbnails({
-          page: currentPage,
+          page: parseInt(urlPage),
           limit: 12,
-          search: localSearch || undefined,
+          search: urlSearch || undefined,
+          category: urlCategory || undefined,
+          tag: urlTag || undefined,
         }),
         publicBlogApi.getFeaturedBlogs(3),
         publicBlogApi.getCategories(),
@@ -116,21 +137,17 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
   const loadBlogs = async () => {
     try {
       setSearchLoading(true);
-      // ✅ Using optimized thumbnails endpoint (80-90% faster)
       const response = await publicBlogApi.getThumbnails({
-        page: currentPage,
+        page: parseInt(urlPage),
         limit: 12,
-        category: selectedCategory || undefined,
-        search: localSearch || undefined,
-        tag: selectedTag || undefined,
+        category: urlCategory || undefined,
+        search: urlSearch || undefined,
+        tag: urlTag || undefined,
       });
 
       setBlogs(response.data);
       setTotalPages(response.totalPages);
       setTotal(response.total);
-      router.push(
-        `/blogs?page=${currentPage}${localSearch ? `&search=${localSearch}` : ''}${selectedCategory ? `&category=${selectedCategory}` : ''}${selectedTag ? `&tag=${selectedTag}` : ''}`
-      );
     } catch (error) {
       console.error('Error loading blogs:', error);
     } finally {
@@ -138,21 +155,48 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
     }
   };
 
+  // Build URL with current filters
+  const buildUrl = (overrides: { page?: number; search?: string; category?: string; tag?: string } = {}) => {
+    const params = new URLSearchParams();
+    const page = overrides.page ?? currentPage;
+    const search = overrides.search ?? localSearch;
+    const category = overrides.category ?? selectedCategory;
+    const tag = overrides.tag ?? selectedTag;
+
+    if (page > 1) params.set('page', page.toString());
+    if (search) params.set('search', search);
+    if (category) params.set('category', category);
+    if (tag) params.set('tag', tag);
+
+    const queryString = params.toString();
+    return `/blogs${queryString ? `?${queryString}` : ''}`;
+  };
+
   const handleSearch = () => {
-    setCurrentPage(1);
-    loadBlogs();
+    const newPage = 1;
+    setCurrentPage(newPage);
+    router.push(buildUrl({ page: newPage, search: localSearch }));
   };
 
   const handleCategorySelect = (categorySlug: string) => {
-    setSelectedCategory(categorySlug === selectedCategory ? "" : categorySlug);
+    const newCategory = categorySlug === selectedCategory ? "" : categorySlug;
+    setSelectedCategory(newCategory);
     setCurrentPage(1);
-    loadBlogs();
+    router.push(buildUrl({ page: 1, category: newCategory }));
   };
 
   const handleTagSelect = (tagSlug: string) => {
-    setSelectedTag(tagSlug === selectedTag ? "" : tagSlug);
+    const newTag = tagSlug === selectedTag ? "" : tagSlug;
+    setSelectedTag(newTag);
     setCurrentPage(1);
-    loadBlogs();
+    router.push(buildUrl({ page: 1, tag: newTag }));
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    router.push(buildUrl({ page }));
+    // Scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const clearFilters = () => {
@@ -160,7 +204,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
     setSelectedCategory("");
     setSelectedTag("");
     setCurrentPage(1);
-    loadBlogs();
+    router.push('/blogs');
   };
 
   const hasActiveFilters = localSearch || selectedCategory || selectedTag;
@@ -679,7 +723,7 @@ export default function BlogListClient({ searchParams }: BlogClientProps) {
                       <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChange={setCurrentPage}
+                        onPageChange={handlePageChange}
                       />
                     </div>
                   )}

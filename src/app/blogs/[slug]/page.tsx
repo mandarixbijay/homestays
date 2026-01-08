@@ -248,6 +248,94 @@ export default async function BlogDetailPage({ params }: Props) {
       ],
     };
 
+    // WebPage Schema for better entity clarity
+    const webPageSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': `${baseUrl}/blogs/${blog.slug}#webpage`,
+      url: `${baseUrl}/blogs/${blog.slug}`,
+      name: blog.seoTitle || blog.title,
+      description: blog.seoDescription || blog.excerpt,
+      isPartOf: {
+        '@id': `${baseUrl}#website`,
+      },
+      primaryImageOfPage: {
+        '@id': `${baseUrl}/blogs/${blog.slug}#primaryimage`,
+      },
+      datePublished: blog.publishedAt,
+      dateModified: blog.publishedAt,
+      breadcrumb: {
+        '@id': `${baseUrl}/blogs/${blog.slug}#breadcrumb`,
+      },
+      inLanguage: 'en-US',
+      potentialAction: [
+        {
+          '@type': 'ReadAction',
+          target: [`${baseUrl}/blogs/${blog.slug}`],
+        },
+      ],
+    };
+
+    // FAQ Schema - Generate contextual FAQs based on blog content
+    const generateFAQs = () => {
+      const faqs = [];
+      const categoryName = blog.categories[0]?.name || 'Travel';
+      const location = blog.tags.find(tag =>
+        ['kathmandu', 'pokhara', 'chitwan', 'everest', 'annapurna', 'mustang', 'langtang'].some(
+          loc => tag.name.toLowerCase().includes(loc)
+        )
+      )?.name || 'Nepal';
+
+      // FAQ 1: About the destination/topic
+      faqs.push({
+        '@type': 'Question',
+        name: `What is the best time to explore ${location}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `The best time to visit ${location} depends on your planned activities. For trekking and outdoor adventures, October to November (autumn) and March to May (spring) offer clear skies and comfortable temperatures. Winter (December to February) is ideal for cultural exploration with fewer tourists.`,
+        },
+      });
+
+      // FAQ 2: About homestays
+      faqs.push({
+        '@type': 'Question',
+        name: `Why should I choose a homestay in ${location}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `Staying at a homestay in ${location} offers an authentic cultural experience. You'll enjoy home-cooked traditional meals, learn about local customs directly from families, and contribute to sustainable tourism that benefits local communities. Homestays provide a more intimate and meaningful travel experience compared to hotels.`,
+        },
+      });
+
+      // FAQ 3: About the blog category
+      faqs.push({
+        '@type': 'Question',
+        name: `What can I learn from ${categoryName.toLowerCase()} guides on Nepal Homestays?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `Our ${categoryName.toLowerCase()} guides provide insider tips, hidden gems, and practical advice from experienced travelers and local experts. You'll discover off-the-beaten-path destinations, authentic cultural experiences, and helpful planning tips to make your Nepal journey memorable and hassle-free.`,
+        },
+      });
+
+      // FAQ 4: Practical travel question
+      faqs.push({
+        '@type': 'Question',
+        name: 'How do I book a homestay experience in Nepal?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'You can browse and book homestays directly through Nepal Homestays website. Simply search for your preferred destination, view available homestays with photos and reviews, and book online. Our platform connects you directly with verified host families across Nepal for safe and authentic stays.',
+        },
+      });
+
+      return faqs;
+    };
+
+    const faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      '@id': `${baseUrl}/blogs/${blog.slug}#faq`,
+      mainEntity: generateFAQs(),
+    };
+
     return (
       <>
         {/* Enhanced Structured Data */}
@@ -262,6 +350,14 @@ export default async function BlogDetailPage({ params }: Props) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
         <div className="bg-background min-h-screen font-manrope">
           <Navbar />
