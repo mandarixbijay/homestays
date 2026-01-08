@@ -216,57 +216,75 @@ export default function BlogListClient({ searchParams: initialSearchParams }: Bl
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section - Clean & Modern */}
-      <section className="bg-gradient-to-b from-[#214B3F] to-[#2d6654] pt-32 pb-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Hero Section - Glassmorphic Design */}
+      <section className="relative pt-24 pb-20 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2574')" }}
+          />
+          <div className="absolute inset-0 bg-[#214B3F]/70" />
+          <div className="absolute inset-0 backdrop-blur-[2px]" />
+        </div>
+
+        {/* Decorative Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#D1AA5A]/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-lg">
               Travel Stories & Guides
             </h1>
-            <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto">
+            <p className="text-lg text-white/90 mb-10 max-w-2xl mx-auto drop-shadow">
               Discover authentic experiences, local wisdom, and breathtaking journeys through Nepal
             </p>
 
-            {/* Search Bar */}
+            {/* Glassmorphic Search Bar */}
             <div className="max-w-2xl mx-auto mb-10">
-              <div className="relative bg-white rounded-xl shadow-lg p-1.5 flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search articles..."
-                    value={localSearch}
-                    onChange={(e) => setLocalSearch(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    className="pl-12 h-12 border-0 focus-visible:ring-0 bg-transparent text-base"
-                  />
+              <div className="relative bg-white/20 backdrop-blur-xl rounded-2xl p-2 border border-white/30 shadow-2xl">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/70" />
+                    <Input
+                      type="text"
+                      placeholder="Search articles..."
+                      value={localSearch}
+                      onChange={(e) => setLocalSearch(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                      className="pl-12 h-12 border-0 focus-visible:ring-0 bg-white/10 text-white placeholder:text-white/60 text-base rounded-xl"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleSearch}
+                    disabled={searchLoading}
+                    className="h-12 px-6 bg-white text-[#214B3F] hover:bg-white/90 rounded-xl font-semibold shadow-lg"
+                  >
+                    {searchLoading ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#214B3F] border-t-transparent" />
+                    ) : (
+                      "Search"
+                    )}
+                  </Button>
                 </div>
-                <Button
-                  onClick={handleSearch}
-                  disabled={searchLoading}
-                  className="h-12 px-6 bg-[#214B3F] hover:bg-[#1a3d33] rounded-lg"
-                >
-                  {searchLoading ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                  ) : (
-                    "Search"
-                  )}
-                </Button>
               </div>
             </div>
 
-            {/* Category Pills */}
+            {/* Glassmorphic Category Pills */}
             <div className="flex flex-wrap justify-center gap-2">
               <button
                 onClick={() => handleCategorySelect("")}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all backdrop-blur-md border ${
                   !selectedCategory
-                    ? 'bg-white text-[#214B3F]'
-                    : 'bg-white/10 text-white hover:bg-white/20'
+                    ? 'bg-white text-[#214B3F] border-white shadow-lg'
+                    : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/40'
                 }`}
               >
                 All
@@ -275,10 +293,10 @@ export default function BlogListClient({ searchParams: initialSearchParams }: Bl
                 <button
                   key={category.id}
                   onClick={() => handleCategorySelect(category.slug)}
-                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                  className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all backdrop-blur-md border ${
                     selectedCategory === category.slug
-                      ? 'bg-white text-[#214B3F]'
-                      : 'bg-white/10 text-white hover:bg-white/20'
+                      ? 'bg-white text-[#214B3F] border-white shadow-lg'
+                      : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/40'
                   }`}
                 >
                   {category.name}
@@ -293,19 +311,25 @@ export default function BlogListClient({ searchParams: initialSearchParams }: Bl
       </section>
 
       {/* Stats Bar */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-center gap-8 text-sm">
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="flex items-center justify-center gap-8 sm:gap-12 text-sm">
             <div className="flex items-center gap-2 text-gray-600">
-              <Book className="h-4 w-4 text-[#214B3F]" />
+              <div className="p-2 bg-[#214B3F]/10 rounded-lg">
+                <Book className="h-4 w-4 text-[#214B3F]" />
+              </div>
               <span><strong className="text-gray-900">{total}</strong> Articles</span>
             </div>
             <div className="flex items-center gap-2 text-gray-600">
-              <MapPin className="h-4 w-4 text-[#214B3F]" />
+              <div className="p-2 bg-[#214B3F]/10 rounded-lg">
+                <MapPin className="h-4 w-4 text-[#214B3F]" />
+              </div>
               <span><strong className="text-gray-900">50+</strong> Destinations</span>
             </div>
             <div className="flex items-center gap-2 text-gray-600">
-              <Heart className="h-4 w-4 text-[#214B3F]" />
+              <div className="p-2 bg-[#214B3F]/10 rounded-lg">
+                <Heart className="h-4 w-4 text-[#214B3F]" />
+              </div>
               <span><strong className="text-gray-900">10K+</strong> Readers</span>
             </div>
           </div>
