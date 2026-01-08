@@ -119,6 +119,8 @@ export function OtpDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-[420px] max-w-[92vw] p-6 sm:p-8 rounded-2xl bg-background shadow-2xl border border-border"
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader className="text-center space-y-2">
           <DialogTitle className="text-2xl font-bold text-foreground tracking-tight">

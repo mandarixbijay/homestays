@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, Mail, Phone } from "lucide-react";
 
 import {
   Form,
@@ -16,18 +18,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { OtpDialog } from "@/components/dialog/otp-dialog";
 import { useErrorBlock } from "@/hooks/block-hook/useErrorBlock";
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import Navbar from "@/components/navbar/navbar";
 
 const formSchema = z.object({
   identifier: z
@@ -63,23 +59,19 @@ export default function ForgotPasswordPage() {
   const isEmail = (identifier: string) => z.string().email().safeParse(identifier).success;
 
   const handleOtpChange = (value: string) => {
-    console.log("[handleOtpChange] OTP changed to:", value);
     setOtp(value);
     if (otpError) setOtpError("");
   };
 
   const handleOtpSubmit = async () => {
-    console.log("[handleOtpSubmit] Starting OTP submission:", { otp, isBlocked: isBlocked("otp") });
     setOtpError("");
     if (isBlocked("otp")) {
-      console.log("[handleOtpSubmit] OTP blocked:", getBlockedMessage("otp"));
       toast.error(getBlockedMessage("otp") || "Too many attempts.");
       setOtp("");
       return { status: "error", message: getBlockedMessage("otp") || "Too many attempts." };
     }
 
     if (otp.length !== 6) {
-      console.log("[handleOtpSubmit] Invalid OTP length:", otp.length);
       setOtpError("OTP must be 6 digits.");
       toast.error("OTP must be 6 digits.");
       setOtp("");
@@ -92,21 +84,17 @@ export default function ForgotPasswordPage() {
         [isEmail(identifier) ? "email" : "mobileNumber"]: identifier,
         code: otp,
       };
-      console.log("[handleOtpSubmit] OTP validation payload:", payload);
       const response = await fetch("/api/auth/validate-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      console.log("[handleOtpSubmit] HTTP status:", response.status);
       const text = await response.text();
       let result;
       try {
         result = JSON.parse(text);
-        console.log("[handleOtpSubmit] OTP validation response:", result);
       } catch (e) {
-        console.error("[handleOtpSubmit] Failed to parse response:", text);
         setOtpError("Invalid response from server. Please try again.");
         toast.error("Invalid response from server.");
         setOtp("");
@@ -115,7 +103,6 @@ export default function ForgotPasswordPage() {
       }
 
       if (result.status !== "success") {
-        console.log("[handleOtpSubmit] Validation failed:", result.message);
         setOtpError(result.message || "Invalid OTP. Please try again.");
         toast.error(result.message || "Invalid OTP.");
         setOtp("");
@@ -123,7 +110,6 @@ export default function ForgotPasswordPage() {
         return { status: "error", message: result.message || "Invalid OTP." };
       }
 
-      console.log("[handleOtpSubmit] Validation successful:", result.message);
       // Store identifier and code for reset password
       sessionStorage.setItem(
         "resetPasswordIdentifier",
@@ -132,7 +118,6 @@ export default function ForgotPasswordPage() {
       sessionStorage.setItem("resetPasswordCode", otp);
       return { status: "success", message: result.message || "OTP verified successfully." };
     } catch (error) {
-      console.error("[handleOtpSubmit] OTP validation error:", error);
       setOtpError("Failed to verify OTP.");
       toast.error("Failed to verify OTP.");
       setOtp("");
@@ -142,9 +127,7 @@ export default function ForgotPasswordPage() {
   };
 
   const handleResendOtp = async () => {
-    console.log("[handleResendOtp] Starting resend OTP for:", form.getValues("identifier"));
     if (isBlocked("otp") || isResending || countdown > 0) {
-      console.log("[handleResendOtp] Blocked or resending:", getBlockedMessage("otp"));
       toast.error(getBlockedMessage("otp") || "Please wait before resending OTP.");
       return;
     }
@@ -157,37 +140,30 @@ export default function ForgotPasswordPage() {
       const payload = {
         [isEmail(identifier) ? "email" : "mobileNumber"]: identifier,
       };
-      console.log("[handleResendOtp] Resend OTP payload:", payload);
       const response = await fetch("/api/verification/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      console.log("[handleResendOtp] HTTP status:", response.status);
       const text = await response.text();
       let result;
       try {
         result = JSON.parse(text);
-        console.log("[handleResendOtp] Resend OTP response:", result);
       } catch (e) {
-        console.error("[handleResendOtp] Failed to parse response:", text);
         throw new Error("Invalid response from server");
       }
 
       if (result.status !== "success") {
-        console.log("[handleResendOtp] Resend failed:", result.message);
         throw new Error(result.message || "Failed to resend OTP");
       }
 
-      console.log("[handleResendOtp] Resend successful");
       toast.success(
         isEmail(identifier)
           ? "New OTP sent to your email."
           : "New OTP sent to your mobile number."
       );
     } catch (error) {
-      console.error("[handleResendOtp] Resend OTP error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to resend OTP.");
       handleFailedAttempt("otp");
     } finally {
@@ -196,9 +172,7 @@ export default function ForgotPasswordPage() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("[onSubmit] Form submitted with values:", values);
     if (isBlocked("identifier")) {
-      console.log("[onSubmit] Blocked:", getBlockedMessage("identifier"));
       toast.error(getBlockedMessage("identifier") || "Too many attempts.");
       return;
     }
@@ -207,40 +181,34 @@ export default function ForgotPasswordPage() {
       const payload = {
         [isEmail(values.identifier) ? "email" : "mobileNumber"]: values.identifier,
       };
-      console.log("[onSubmit] Sending reset code with payload:", payload);
       const response = await fetch("/api/verification/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      console.log("[onSubmit] HTTP status:", response.status);
       const text = await response.text();
       let result;
       try {
         result = JSON.parse(text);
-        console.log("[onSubmit] Forgot password response:", result);
       } catch (e) {
-        console.error("[onSubmit] Failed to parse response:", text);
         throw new Error("Invalid response from server");
       }
 
       if (result.status !== "success") {
-        console.log("[onSubmit] Failed to send reset code:", result.message);
         handleFailedAttempt("identifier");
         throw new Error(result.message || "Failed to send password reset code");
       }
 
-      console.log("[onSubmit] Reset code sent successfully");
+      // Only show one toast - the success message
       toast.success(
         isEmail(values.identifier)
-          ? "Password reset email sent. Please check your inbox."
+          ? "Password reset code sent to your email."
           : "Password reset code sent to your mobile number."
       );
       setShowOtpDialog(true);
-      await handleResendOtp();
+      setCountdown(60); // Start countdown without calling handleResendOtp (which shows another toast)
     } catch (error) {
-      console.error("[onSubmit] Error sending password reset code:", error);
       handleFailedAttempt("identifier");
       toast.error(error instanceof Error ? error.message : "Failed to send password reset code. Please try again.");
     }
@@ -257,64 +225,123 @@ export default function ForgotPasswordPage() {
   }, [countdown]);
 
   return (
-    <div className="flex min-h-[40vh] h-full w-full items-center justify-center px-4 mt-60">
-      <Card className="border-none max-w-md p-4 sm:p-8 space-y-8 rounded-xl shadow-lg mx-2">
-        <div className="flex justify-center mb-4">
-          <Image
-            src={
-              theme === "dark"
-                ? "/images/logo/darkmode_logo.png"
-                : "/images/logo/logo.png"
-            }
-            alt="Homestay Nepal Logo"
-            width={80}
-            height={80}
-          />
-        </div>
-        <CardHeader>
-          <CardTitle className="text-2xl justify-center text-center">
-            Forgot Password
-          </CardTitle>
-          <CardDescription className="justify-center text-center">
-            Enter your email address or mobile number to receive a password reset code.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30 pt-20 pb-8 px-4">
+      <Navbar hideUserCircle />
+
+      <div className="w-full max-w-md">
+        {/* Back Button */}
+        <Link
+          href="/signin"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 group"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          Back to Sign In
+        </Link>
+
+        {/* Card */}
+        <div className="bg-card rounded-2xl shadow-xl border border-border p-6 sm:p-8 space-y-6">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <Image
+              src={
+                theme === "dark"
+                  ? "/images/logo/darkmode_logo.png"
+                  : "/images/logo/logo.png"
+              }
+              alt="Nepal Homestays Logo"
+              width={72}
+              height={72}
+              className="rounded-full"
+            />
+          </div>
+
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-bold text-foreground">
+              Forgot Password?
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              No worries! Enter your email or mobile number and we&apos;ll send you a reset code.
+            </p>
+          </div>
+
+          {/* Form */}
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="grid gap-4">
-                <FormField
-                  control={form.control}
-                  name="identifier"
-                  render={({ field }) => (
-                    <FormItem className="grid gap-2">
-                      <FormLabel htmlFor="identifier">Email or Mobile Number</FormLabel>
-                      <FormControl>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <FormField
+                control={form.control}
+                name="identifier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-foreground">
+                      Email or Mobile Number
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
                         <Input
-                          id="identifier"
-                          placeholder="Enter your email or mobile number (e.g., +1234567890)"
-                          type="text"
-                          autoComplete="email tel"
-                          disabled={isBlocked("identifier")}
+                          placeholder="Enter your email or mobile number"
+                          className="pl-10 h-11 bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary/30"
+                          disabled={isBlocked("identifier") || form.formState.isSubmitting}
                           {...field}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={form.formState.isSubmitting || isBlocked("identifier")}
-                >
-                  Send Reset Code
-                </Button>
-              </div>
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          {field.value && isEmail(field.value) ? (
+                            <Mail className="h-4 w-4" />
+                          ) : (
+                            <Phone className="h-4 w-4" />
+                          )}
+                        </div>
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                className="w-full h-11 font-medium"
+                disabled={form.formState.isSubmitting || isBlocked("identifier")}
+              >
+                {form.formState.isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Sending...
+                  </span>
+                ) : (
+                  "Send Reset Code"
+                )}
+              </Button>
             </form>
           </Form>
-        </CardContent>
-      </Card>
+
+          {/* Footer Links */}
+          <div className="text-center space-y-3 pt-2">
+            <p className="text-sm text-muted-foreground">
+              Remember your password?{" "}
+              <Link
+                href="/signin"
+                className="font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Sign in
+              </Link>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/signup"
+                className="font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Create account
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+
       <OtpDialog
         open={showOtpDialog}
         isBlocked={isBlocked("otp")}
@@ -325,11 +352,11 @@ export default function ForgotPasswordPage() {
         onSubmitOtp={handleOtpSubmit}
         isResending={isResending}
         onResend={handleResendOtp}
-        title="Verify Your Account"
+        title="Verify Your Identity"
         description={
           isEmail(form.getValues("identifier"))
-            ? "Enter the 6-digit code sent to your email address to verify your account."
-            : "Enter the 6-digit code sent to your mobile number to verify your account."
+            ? "Enter the 6-digit code sent to your email address."
+            : "Enter the 6-digit code sent to your mobile number."
         }
       />
     </div>

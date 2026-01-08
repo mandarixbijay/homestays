@@ -17,7 +17,7 @@ import { z } from "zod";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Phone, Lock } from "lucide-react";
 import { signinPasswordSchema } from "@/hooks/password-hook/password-utils";
 import { useErrorBlock } from "@/hooks/block-hook/useErrorBlock";
 import { toast } from "sonner";
@@ -68,20 +68,17 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (status === "loading") {
-      console.log("[LoginPage] Session loading");
       setIsCheckingSession(true);
       return;
     }
     setIsCheckingSession(false);
     if (status === "authenticated") {
       if (session?.user?.isEmailVerified || session?.user?.isMobileVerified) {
-        console.log("[LoginPage] User authenticated and verified, redirecting");
         toast.success("Successfully logged in!");
         const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/";
         sessionStorage.removeItem("redirectAfterLogin");
         router.push(redirectPath);
       } else {
-        console.log("[LoginPage] User authenticated but unverified, opening OTP dialog");
         setIsOtpDialogOpen(true);
         handleResendOtp();
       }
@@ -89,9 +86,7 @@ const LoginPage = () => {
   }, [status, session, router]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log("[onSubmit] Form submitted with values:", data);
     if (isBlocked("identifier") || isBlocked("password")) {
-      console.log("[onSubmit] Blocked:", getBlockedMessage("identifier") || getBlockedMessage("password"));
       toast.error(getBlockedMessage("identifier") || getBlockedMessage("password") || "Too many attempts.");
       return;
     }
@@ -103,24 +98,18 @@ const LoginPage = () => {
         [isEmail(data.identifier) ? "email" : "mobileNumber"]: data.identifier,
         password: data.password,
       };
-      console.log("[onSubmit] Calling signIn with:", payload);
       const response = await signIn("credentials", {
         redirect: false,
         ...payload,
       });
-      console.log("[onSubmit] signIn response:", response);
 
       if (response?.error) {
-        console.error("[onSubmit] signIn error:", response.error);
         handleFailedAttempt("identifier");
         handleFailedAttempt("password");
         toast.error(response.error);
         return;
       }
-
-      console.log("[onSubmit] Login successful, awaiting session update");
     } catch (error) {
-      console.error("[onSubmit] Login error:", error);
       handleFailedAttempt("identifier");
       handleFailedAttempt("password");
       toast.error("Failed to login. Please try again.");
@@ -130,7 +119,6 @@ const LoginPage = () => {
   };
 
   const handleOtpOpenChange = (open: boolean) => {
-    console.log("[handleOtpOpenChange] OTP dialog open state:", open);
     setIsOtpDialogOpen(open);
     if (!open) {
       setOtpValue("");
@@ -139,23 +127,19 @@ const LoginPage = () => {
   };
 
   const handleOtpChange = (value: string) => {
-    console.log("[handleOtpChange] OTP changed to:", value);
     setOtpValue(value);
     if (otpError) setOtpError("");
   };
 
   const handleSubmitOtp = async () => {
-    console.log("[handleSubmitOtp] Starting OTP submission:", { otp: otpValue, isBlocked: isBlocked("otp") });
     setOtpError("");
     if (isBlocked("otp")) {
-      console.log("[handleSubmitOtp] OTP blocked:", getBlockedMessage("otp"));
       toast.error(getBlockedMessage("otp") || "Too many attempts.");
       setOtpValue("");
       return { status: "error", message: getBlockedMessage("otp") || "Too many attempts." };
     }
 
     if (otpValue.length !== 6) {
-      console.log("[handleSubmitOtp] Invalid OTP length:", otpValue.length);
       setOtpError("OTP must be 6 digits.");
       toast.error("OTP must be 6 digits.");
       setOtpValue("");
@@ -168,21 +152,17 @@ const LoginPage = () => {
         [isEmail(identifier) ? "email" : "mobileNumber"]: identifier,
         code: otpValue,
       };
-      console.log("[handleSubmitOtp] OTP verification payload:", payload);
       const response = await fetch("/api/verification/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      console.log("[handleSubmitOtp] HTTP status:", response.status);
       const text = await response.text();
       let result;
       try {
         result = JSON.parse(text);
-        console.log("[handleSubmitOtp] OTP verification response:", result);
       } catch (e) {
-        console.error("[handleSubmitOtp] Failed to parse response:", text);
         setOtpError("Invalid response from server. Please try again.");
         toast.error("Invalid response from server.");
         setOtpValue("");
@@ -191,7 +171,6 @@ const LoginPage = () => {
       }
 
       if (result.status !== "success") {
-        console.log("[handleSubmitOtp] Verification failed:", result.message);
         setOtpError(result.message || "Invalid OTP. Please try again.");
         toast.error(result.message || "Invalid OTP.");
         setOtpValue("");
@@ -199,7 +178,6 @@ const LoginPage = () => {
         return { status: "error", message: result.message || "Invalid OTP." };
       }
 
-      console.log("[handleSubmitOtp] Verification successful:", result.message);
       // Re-authenticate after OTP verification
       const loginResponse = await signIn("credentials", {
         redirect: false,
@@ -209,18 +187,15 @@ const LoginPage = () => {
       });
 
       if (loginResponse?.error) {
-        console.error("[handleSubmitOtp] Re-authentication failed:", loginResponse.error);
         toast.error("Failed to authenticate after verification.");
         setOtpValue("");
         return { status: "error", message: "Failed to authenticate after verification." };
       }
 
-      console.log("[handleSubmitOtp] Re-authentication successful");
       toast.success(result.message || "Account verified successfully!");
       setIsOtpDialogOpen(false);
       return { status: "success", message: result.message || "Account verified successfully." };
     } catch (error) {
-      console.error("[handleSubmitOtp] OTP verification error:", error);
       setOtpError("Failed to verify OTP.");
       toast.error("Failed to verify OTP.");
       setOtpValue("");
@@ -230,9 +205,7 @@ const LoginPage = () => {
   };
 
   const handleResendOtp = async () => {
-    console.log("[handleResendOtp] Starting resend OTP for:", form.getValues("identifier"));
     if (isBlocked("otp") || isResendingOtp || countdown > 0) {
-      console.log("[handleResendOtp] Blocked or resending:", getBlockedMessage("otp"));
       toast.error(getBlockedMessage("otp") || "Please wait before resending OTP.");
       return;
     }
@@ -245,37 +218,30 @@ const LoginPage = () => {
       const payload = {
         [isEmail(identifier) ? "email" : "mobileNumber"]: identifier,
       };
-      console.log("[handleResendOtp] Resend OTP payload:", payload);
       const response = await fetch("/api/verification/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      console.log("[handleResendOtp] HTTP status:", response.status);
       const text = await response.text();
       let result;
       try {
         result = JSON.parse(text);
-        console.log("[handleResendOtp] Resend OTP response:", result);
       } catch (e) {
-        console.error("[handleResendOtp] Failed to parse response:", text);
         throw new Error("Invalid response from server");
       }
 
       if (result.status !== "success") {
-        console.log("[handleResendOtp] Resend failed:", result.message);
         throw new Error(result.message || "Failed to resend OTP");
       }
 
-      console.log("[handleResendOtp] Resend successful");
       toast.success(
         isEmail(identifier)
           ? "New OTP sent to your email."
           : "New OTP sent to your mobile number."
       );
     } catch (error) {
-      console.error("[handleResendOtp] Resend OTP error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to resend OTP.");
       handleFailedAttempt("otp");
     } finally {
@@ -294,104 +260,156 @@ const LoginPage = () => {
   }, [countdown]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br overflow-auto mt-20">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30 pt-20 pb-8 px-4">
       <LoginRedirect />
       <Navbar hideUserCircle />
-      <div className="w-full max-w-md p-4 sm:p-8 space-y-8 rounded-xl shadow-lg mx-2 bg-background">
-        <div className="flex justify-center mb-4">
-          <Image
-            src={theme === "dark" ? "/images/logo/darkmode_logo.png" : "/images/logo/logo.png"}
-            alt="Homestay Nepal Logo"
-            width={80}
-            height={80}
-          />
-        </div>
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Welcome Back</h1>
-          <p>Please login to your account</p>
-        </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="identifier"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Email or Mobile Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Enter your email or mobile number (e.g., +1234567890)"
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                      disabled={isBlocked("identifier") || isCheckingSession}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-500 text-sm" />
-                </FormItem>
-              )}
+      <div className="w-full max-w-md">
+        {/* Card */}
+        <div className="bg-card rounded-2xl shadow-xl border border-border p-6 sm:p-8 space-y-6">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <Image
+              src={theme === "dark" ? "/images/logo/darkmode_logo.png" : "/images/logo/logo.png"}
+              alt="Nepal Homestays Logo"
+              width={72}
+              height={72}
+              className="rounded-full"
             />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Password</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="********"
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent pr-10"
-                        disabled={isBlocked("password") || isCheckingSession}
-                        {...field}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                  </FormControl>
-                  <FormMessage className="text-red-500 text-sm" />
-                </FormItem>
-              )}
-            />
-            <Button
-              type="submit"
-              className="w-full py-2 px-4 font-medium rounded-lg transition-colors duration-200"
-              disabled={form.formState.isSubmitting || isBlocked("identifier") || isBlocked("password") || isCheckingSession}
-            >
-              {isCheckingSession ? "Processing..." : form.formState.isSubmitting ? "Signing In..." : "Sign In"}
-            </Button>
-          </form>
-        </Form>
+          </div>
 
-        <div className="space-y-4">
-          <Link
-            href="/forgot-password"
-            className="block text-sm text-center text-primary hover:text-primary-hover transition-colors duration-200"
-          >
-            Forgot password?
-          </Link>
-          <div className="text-center">
-            <p className="text-sm">
-              <span>
-                Don&apos;t have an account?{" "}
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-bold text-foreground">
+              Welcome Back
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Sign in to continue your journey
+            </p>
+          </div>
+
+          {/* Form */}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <FormField
+                control={form.control}
+                name="identifier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-foreground">
+                      Email or Mobile Number
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="Enter your email or mobile number"
+                          className="pl-10 h-11 bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary/30"
+                          disabled={isBlocked("identifier") || isCheckingSession}
+                          {...field}
+                        />
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          {field.value && isEmail(field.value) ? (
+                            <Mail className="h-4 w-4" />
+                          ) : (
+                            <Phone className="h-4 w-4" />
+                          )}
+                        </div>
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-foreground">
+                      Password
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          className="pl-10 pr-10 h-11 bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary/30"
+                          disabled={isBlocked("password") || isCheckingSession}
+                          {...field}
+                        />
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          <Lock className="h-4 w-4" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          tabIndex={-1}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+
+              {/* Forgot Password Link */}
+              <div className="flex justify-end">
                 <Link
-                  href="/signup"
-                  className="font-medium text-primary hover:text-primary-hover transition-colors duration-200"
+                  href="/forgot-password"
+                  className="text-sm text-primary hover:text-primary/80 transition-colors"
                 >
-                  Create account
+                  Forgot password?
                 </Link>
-              </span>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-11 font-medium"
+                disabled={form.formState.isSubmitting || isBlocked("identifier") || isBlocked("password") || isCheckingSession}
+              >
+                {isCheckingSession ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Processing...
+                  </span>
+                ) : form.formState.isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Signing In...
+                  </span>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </form>
+          </Form>
+
+          {/* Footer Links */}
+          <div className="text-center pt-2">
+            <p className="text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/signup"
+                className="font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Create account
+              </Link>
             </p>
           </div>
         </div>
       </div>
+
       <OtpDialog
         open={isOtpDialogOpen}
         onOpenChange={handleOtpOpenChange}
