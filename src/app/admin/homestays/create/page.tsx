@@ -77,17 +77,17 @@ const ProgressIndicator: React.FC<{
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <span className="text-sm font-medium text-gray-700">
           Form Progress
         </span>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-sm text-gray-500">
           {current}/{total} completed
         </span>
       </div>
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-        <div 
+      <div className="w-full bg-gray-200 rounded-full h-2">
+        <div
           className={`h-2 rounded-full transition-all duration-300 ${
-            hasErrors ? 'bg-red-500' : 'bg-blue-600'
+            hasErrors ? 'bg-red-500' : 'bg-[#1A403D]'
           }`}
           style={{ width: `${percentage}%` }}
         />
@@ -123,7 +123,7 @@ const ValidationSummary: React.FC<{
           </li>
         ))}
         {errors.length > 5 && (
-          <li className="text-gray-600 dark:text-gray-400">
+          <li className="text-gray-600">
             ... and {errors.length - 5} more errors
           </li>
         )}
@@ -199,13 +199,13 @@ const RoomCard: React.FC<{
               placeholder="0"
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Unit
               </label>
               <select
                 value={room.areaUnit}
                 onChange={(e) => onUpdate('areaUnit', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
               >
                 {areaUnits.map((unit: any) => (
                   <option key={unit.id} value={unit.name}>{unit.name}</option>
@@ -226,13 +226,13 @@ const RoomCard: React.FC<{
             required
           />
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Currency
             </label>
             <select
               value={room.price.currency}
               onChange={(e) => onUpdate('price', { ...room.price, currency: e.target.value })}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
             >
               {currencies.map((currency: any) => (
                 <option key={currency.id} value={currency.code}>{currency.code}</option>
@@ -244,7 +244,7 @@ const RoomCard: React.FC<{
         {/* Occupancy */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Max Occupancy
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -272,7 +272,7 @@ const RoomCard: React.FC<{
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Min Occupancy
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -316,15 +316,15 @@ const RoomCard: React.FC<{
               type="checkbox"
               checked={room.includeBreakfast}
               onChange={(e) => onUpdate('includeBreakfast', e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+              className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
             />
-            <span className="text-sm text-gray-700 dark:text-gray-300">Include Breakfast</span>
+            <span className="text-sm text-gray-700">Include Breakfast</span>
           </label>
         </div>
 
         {/* Images */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
             Room Images *
           </label>
           <ImageUpload
@@ -342,7 +342,7 @@ const RoomCard: React.FC<{
         {/* Beds */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700">
               Beds
             </label>
             <ActionButton
@@ -357,15 +357,15 @@ const RoomCard: React.FC<{
           </div>
 
           {room.beds.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400 italic">No beds added yet</p>
+            <p className="text-sm text-gray-500 italic">No beds added yet</p>
           ) : (
             <div className="space-y-3">
               {room.beds.map((bed, bedIndex) => (
-                <div key={bedIndex} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div key={bedIndex} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                   <select
                     value={bed.bedTypeId}
                     onChange={(e) => onUpdateBed(bedIndex, 'bedTypeId', parseInt(e.target.value))}
-                    className="flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900"
                   >
                     {bedTypes.map((bedType: any) => (
                       <option key={bedType.id} value={bedType.id}>{bedType.name}</option>
@@ -375,7 +375,7 @@ const RoomCard: React.FC<{
                     type="number"
                     value={bed.quantity}
                     onChange={(e) => onUpdateBed(bedIndex, 'quantity', parseInt(e.target.value) || 1)}
-                    className="w-20 border border-gray-300 dark:border-gray-600 rounded-md px-2 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-20 border border-gray-300 rounded-md px-2 py-2 text-sm bg-white text-gray-900"
                     min="1"
                   />
                   <ActionButton
@@ -648,9 +648,9 @@ export default function ImprovedHomestayCreate() {
   const progress = getProgress();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -662,14 +662,14 @@ export default function ImprovedHomestayCreate() {
                 Back
               </ActionButton>
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                  <Home className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="p-2 bg-[#1A403D]/10 rounded-lg">
+                  <Home className="h-5 w-5 text-[#1A403D]" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="text-xl font-bold text-gray-900">
                     Create New Homestay
                   </h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-gray-500">
                     Add a new homestay property to the platform
                   </p>
                 </div>
@@ -782,12 +782,12 @@ export default function ImprovedHomestayCreate() {
           <Card title="Facilities" subtitle="Select amenities and services">
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
                   Available Facilities
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {facilities.map((facility: any) => (
-                    <label key={facility.id} className="flex items-center space-x-2 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer border border-gray-200 dark:border-gray-600">
+                    <label key={facility.id} className="flex items-center space-x-2 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-200">
                       <input
                         type="checkbox"
                         checked={formData.facilityIds.includes(facility.id)}
@@ -797,9 +797,9 @@ export default function ImprovedHomestayCreate() {
                             : formData.facilityIds.filter(id => id !== facility.id);
                           updateField('facilityIds', updatedIds);
                         }}
-                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                        className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
                       />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                      <span className="text-sm text-gray-700">
                         {facility.name}
                       </span>
                     </label>
@@ -822,11 +822,11 @@ export default function ImprovedHomestayCreate() {
                 {formData.customFacilities.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {formData.customFacilities.map((facility, index) => (
-                      <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                      <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#1A403D]/10 text-[#1A403D]">
                         {facility.name}
                         <button
                           onClick={() => removeCustomFacility(index)}
-                          className="ml-2 hover:text-blue-600 dark:hover:text-blue-400"
+                          className="ml-2 hover:text-[#214B3F]"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -854,9 +854,9 @@ export default function ImprovedHomestayCreate() {
             }
           >
             {formData.rooms.length === 0 ? (
-              <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+              <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
                 <Bed className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                <p className="text-gray-500 dark:text-gray-400 mb-4">No rooms added yet</p>
+                <p className="text-gray-500 mb-4">No rooms added yet</p>
                 <ActionButton
                   onClick={addRoom}
                   variant="primary"
@@ -931,13 +931,13 @@ export default function ImprovedHomestayCreate() {
           <Card title="Settings" subtitle="Additional property settings">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Status
                 </label>
                 <select
                   value={formData.status}
                   onChange={(e) => updateField('status', e.target.value)}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
                 >
                   <option value="PENDING">Pending</option>
                   <option value="APPROVED">Approved</option>
@@ -960,9 +960,9 @@ export default function ImprovedHomestayCreate() {
                     type="checkbox"
                     checked={formData.vipAccess}
                     onChange={(e) => updateField('vipAccess', e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">VIP Access</span>
+                  <span className="text-sm text-gray-700">VIP Access</span>
                 </label>
               </div>
             </div>
@@ -970,7 +970,7 @@ export default function ImprovedHomestayCreate() {
         </div>
 
         {/* Bottom Summary */}
-        <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
@@ -979,20 +979,20 @@ export default function ImprovedHomestayCreate() {
                 ) : progress.completed === progress.total ? (
                   <CheckCircle className="h-5 w-5 text-green-500" />
                 ) : (
-                  <Info className="h-5 w-5 text-blue-500" />
+                  <Info className="h-5 w-5 text-[#1A403D]" />
                 )}
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {progress.hasErrors 
+                <span className="text-sm font-medium text-gray-900">
+                  {progress.hasErrors
                     ? `${validationErrors.length} error${validationErrors.length !== 1 ? 's' : ''} to fix`
-                    : progress.completed === progress.total 
-                      ? 'Ready to create' 
+                    : progress.completed === progress.total
+                      ? 'Ready to create'
                       : 'In progress'
                   }
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <Info className="h-5 w-5 text-blue-500" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <Info className="h-5 w-5 text-[#1A403D]" />
+                <span className="text-sm text-gray-600">
                   {formData.rooms.length} room{formData.rooms.length !== 1 ? 's' : ''} • {formData.imageMetadata.length + formData.rooms.reduce((sum, room) => sum + room.images.length, 0)} image{(formData.imageMetadata.length + formData.rooms.reduce((sum, room) => sum + room.images.length, 0)) !== 1 ? 's' : ''}
                 </span>
               </div>

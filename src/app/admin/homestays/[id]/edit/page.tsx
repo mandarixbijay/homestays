@@ -135,7 +135,7 @@ const ImageUploadSection: React.FC<{
     <Card title={`${title} (${images.length}/${maxImages})`}>
       <div className="space-y-4">
         {/* Upload Area */}
-        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#1A403D]/40 transition-colors">
           <input
             type="file"
             multiple
@@ -150,10 +150,10 @@ const ImageUploadSection: React.FC<{
             className="cursor-pointer block"
           >
             <Camera className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <p className="text-lg font-medium text-gray-900 mb-2">
               Upload Images
             </p>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-gray-500">
               Drag and drop or click to browse
             </p>
             <p className="text-xs text-gray-400 mt-2">
@@ -167,7 +167,7 @@ const ImageUploadSection: React.FC<{
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {images.map((image, index) => (
               <div key={index} className="relative group">
-                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600">
+                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
                   <img
                     src={image.preview || image.url}
                     alt={`${title} ${index + 1}`}
@@ -198,7 +198,7 @@ const ImageUploadSection: React.FC<{
                 {/* Main Badge */}
                 {image.isMain && (
                   <div className="absolute top-2 left-2">
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white shadow-lg">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#1A403D] text-white shadow-lg">
                       ★ Main
                     </span>
                   </div>
@@ -253,23 +253,23 @@ const FacilitiesSection: React.FC<{
       <div className="space-y-6">
         {/* Standard Facilities */}
         <div>
-          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+          <h4 className="text-sm font-medium text-gray-900 mb-3">
             Standard Facilities
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {facilities.map((facility) => (
               <label
                 key={facility.id}
-                className="flex items-center p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
               >
                 <input
                   type="checkbox"
                   checked={selectedFacilities.includes(facility.id)}
                   onChange={() => toggleFacility(facility.id)}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
                 />
                 <Wifi className="h-4 w-4 text-gray-400 ml-3 mr-2" />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
+                <span className="text-sm text-gray-700">
                   {facility.name}
                 </span>
               </label>
@@ -279,7 +279,7 @@ const FacilitiesSection: React.FC<{
 
         {/* Custom Facilities */}
         <div>
-          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+          <h4 className="text-sm font-medium text-gray-900 mb-3">
             Custom Facilities
           </h4>
 
@@ -305,12 +305,12 @@ const FacilitiesSection: React.FC<{
               {customFacilities.map((facility, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300"
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#1A403D]/10 text-[#1A403D]"
                 >
                   {facility}
                   <button
                     onClick={() => removeCustomFacility(index)}
-                    className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                    className="ml-2 text-[#1A403D] hover:text-[#214B3F]"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -432,13 +432,13 @@ const RoomEditor: React.FC<{
               placeholder="Area"
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Unit
               </label>
               <select
                 value={room.areaUnit}
                 onChange={(e) => updateRoom('areaUnit', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
               >
                 {areaUnits.map((unit) => (
                   <option key={unit.id} value={unit.name}>
@@ -460,7 +460,7 @@ const RoomEditor: React.FC<{
 
         {/* Occupancy */}
         <div>
-          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Occupancy</h4>
+          <h4 className="text-sm font-medium text-gray-900 mb-3">Occupancy</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Input
               label="Min Adults"
@@ -495,7 +495,7 @@ const RoomEditor: React.FC<{
 
         {/* Price */}
         <div>
-          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Price</h4>
+          <h4 className="text-sm font-medium text-gray-900 mb-3">Price</h4>
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Price"
@@ -507,13 +507,13 @@ const RoomEditor: React.FC<{
               required
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Currency
               </label>
               <select
                 value={room.price.currency}
                 onChange={(e) => updateNestedField('price', 'currency', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
               >
                 {currencies.map((currency) => (
                   <option key={currency.id} value={currency.code}>
@@ -530,9 +530,9 @@ const RoomEditor: React.FC<{
                 type="checkbox"
                 checked={room.includeBreakfast}
                 onChange={(e) => updateRoom('includeBreakfast', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
               />
-              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+              <span className="ml-2 text-sm text-gray-700">
                 Include Breakfast
               </span>
             </label>
@@ -542,7 +542,7 @@ const RoomEditor: React.FC<{
         {/* Beds */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white">Beds</h4>
+            <h4 className="text-sm font-medium text-gray-900">Beds</h4>
             <ActionButton
               onClick={addBed}
               variant="secondary"
@@ -555,11 +555,11 @@ const RoomEditor: React.FC<{
 
           <div className="space-y-3">
             {room.beds.map((bed, index) => (
-              <div key={index} className="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+              <div key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
                 <select
                   value={bed.bedTypeId}
                   onChange={(e) => updateBed(index, 'bedTypeId', Number(e.target.value))}
-                  className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
                 >
                   {bedTypes.map((bedType) => (
                     <option key={bedType.id} value={bedType.id}>
@@ -573,7 +573,7 @@ const RoomEditor: React.FC<{
                   min="1"
                   value={bed.quantity}
                   onChange={(e) => updateBed(index, 'quantity', Number(e.target.value))}
-                  className="w-20 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
                 />
 
                 <ActionButton
@@ -589,9 +589,9 @@ const RoomEditor: React.FC<{
 
         {/* Room Images */}
         <div>
-          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Room Images</h4>
+          <h4 className="text-sm font-medium text-gray-900 mb-3">Room Images</h4>
 
-          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center mb-4">
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center mb-4">
             <input
               type="file"
               multiple
@@ -603,7 +603,7 @@ const RoomEditor: React.FC<{
             />
             <label htmlFor={`room-upload-${room.id || 'new'}`} className="cursor-pointer block">
               <ImageIcon className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-600 dark:text-gray-400">Upload room images</p>
+              <p className="text-sm text-gray-600">Upload room images</p>
             </label>
           </div>
 
@@ -611,7 +611,7 @@ const RoomEditor: React.FC<{
             <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
               {room.images.map((image, index) => (
                 <div key={index} className="relative group">
-                  <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
+                  <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                     <img
                       src={image.preview || image.url}
                       alt={`Room ${index + 1}`}
@@ -638,7 +638,7 @@ const RoomEditor: React.FC<{
 
                   {image.isMain && (
                     <div className="absolute top-1 left-1">
-                      <span className="inline-flex items-center px-1 py-0.5 rounded-full text-xs font-medium bg-blue-600 text-white">
+                      <span className="inline-flex items-center px-1 py-0.5 rounded-full text-xs font-medium bg-[#1A403D] text-white">
                         ★
                       </span>
                     </div>
@@ -969,9 +969,9 @@ export default function HomestayEditPage({ params }: HomestayEditPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -983,10 +983,10 @@ export default function HomestayEditPage({ params }: HomestayEditPageProps) {
                 Back
               </ActionButton>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-xl font-bold text-gray-900">
                   Edit Homestay
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500">
                   {homestay.name}
                 </p>
               </div>
@@ -1072,13 +1072,13 @@ export default function HomestayEditPage({ params }: HomestayEditPageProps) {
             <Card title="Settings">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Status
                   </label>
                   <select
                     value={formData.status}
                     onChange={(e) => updateField('status', e.target.value)}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
                   >
                     <option value="PENDING">Pending</option>
                     <option value="APPROVED">Approved</option>
@@ -1102,9 +1102,9 @@ export default function HomestayEditPage({ params }: HomestayEditPageProps) {
                       type="checkbox"
                       checked={formData.vipAccess}
                       onChange={(e) => updateField('vipAccess', e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
                     />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span className="ml-2 text-sm text-gray-700">
                       VIP Access
                     </span>
                   </label>
@@ -1156,8 +1156,8 @@ export default function HomestayEditPage({ params }: HomestayEditPageProps) {
             {formData.rooms.length === 0 ? (
               <div className="text-center py-8">
                 <Bed className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">No rooms added</h3>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">
+                <h3 className="text-lg font-medium text-gray-900">No rooms added</h3>
+                <p className="text-gray-500 mt-1">
                   Add rooms to complete your homestay listing
                 </p>
                 <ActionButton
