@@ -72,10 +72,10 @@ const StatCard: React.FC<{
   };
 
   const textColorClasses = {
-    teal: 'text-[#224240] dark:text-[#2a5350]',
-    green: 'text-green-600 dark:text-green-400',
-    yellow: 'text-yellow-600 dark:text-yellow-400',
-    purple: 'text-purple-600 dark:text-purple-400'
+    teal: 'text-[#224240]
+    green: 'text-green-600
+    yellow: 'text-yellow-600
+    purple: 'text-purple-600
   };
 
   const iconBgClasses = {
@@ -89,18 +89,18 @@ const StatCard: React.FC<{
     <motion.div whileHover={{ y: -4, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} backdrop-blur-sm border ${borderColorClasses[color]} rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}>
-      <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent dark:from-white/5 pointer-events-none"></div>
-      <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10 dark:bg-white/5 blur-2xl"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent pointer-events-none"></div>
+      <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10 blur-2xl"></div>
       <div className="relative p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{title}</p>
+            <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
             {loading ? (
-              <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+              <div className="h-10 w-24 bg-gray-200 rounded-lg animate-pulse"></div>
             ) : (
               <p className={`text-4xl font-bold ${textColorClasses[color]}`}>{value}</p>
             )}
-            {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{subtitle}</p>}
+            {subtitle && <p className="text-xs text-gray-500 mt-2">{subtitle}</p>}
           </div>
           {icon && (
             <div className={`p-3 rounded-xl ${iconBgClasses[color]} shadow-lg`}>
@@ -128,7 +128,7 @@ const TopHomestayCard: React.FC<{
   if (viewMode === 'grid') {
     return (
       <motion.div layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-        className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden">
+        className="group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-200 overflow-hidden">
         <div className="absolute top-4 right-4 z-10 flex flex-col items-end space-y-2">
           <div className="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center space-x-1 shadow-lg">
             <Crown className="h-3 w-3 text-white fill-white" /><span className="text-xs font-bold text-white">Top</span>
@@ -138,7 +138,7 @@ const TopHomestayCard: React.FC<{
           )}
         </div>
 
-        <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 overflow-hidden">
+        <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           {topHomestay.homestay?.images?.[0]?.url ? (
             <img src={topHomestay.homestay.images[0].url} alt={topHomestay.homestay.name}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -149,10 +149,10 @@ const TopHomestayCard: React.FC<{
         </div>
 
         <div className="p-5">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-1">{topHomestay.homestay?.name || 'Unnamed'}</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">{topHomestay.homestay?.name || 'Unnamed'}</h3>
 
           {topHomestay.homestay?.address && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center mb-2">
+            <p className="text-sm text-gray-500 flex items-center mb-2">
               <MapPin className="h-3.5 w-3.5 mr-1" />
               {topHomestay.homestay.address}
             </p>
@@ -161,10 +161,10 @@ const TopHomestayCard: React.FC<{
           {topHomestay.homestay?.rating && (
             <div className="flex items-center mb-3">
               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-              <span className="text-sm font-semibold text-gray-900 dark:text-white mr-1">
+              <span className="text-sm font-semibold text-gray-900 mr-1">
                 {topHomestay.homestay.rating}
               </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-gray-500">
                 ({topHomestay.homestay.reviews || 0} reviews)
               </span>
             </div>
@@ -173,9 +173,9 @@ const TopHomestayCard: React.FC<{
           {(() => {
             const priceRange = getPriceRange(topHomestay.homestay);
             return priceRange ? (
-              <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Price Range</p>
-                <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+              <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-xs text-gray-500 mb-1">Price Range</p>
+                <p className="text-lg font-bold text-[#1A403D]">
                   {priceRange.min === priceRange.max
                     ? `NPR ${priceRange.min.toLocaleString()}`
                     : `NPR ${priceRange.min.toLocaleString()} - ${priceRange.max.toLocaleString()}`}
@@ -186,15 +186,15 @@ const TopHomestayCard: React.FC<{
 
           {topHomestay.homestay?.facilities && topHomestay.homestay.facilities.length > 0 && (
             <div className="mb-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Facilities</p>
+              <p className="text-xs text-gray-500 mb-2">Facilities</p>
               <div className="flex flex-wrap gap-1">
                 {topHomestay.homestay.facilities.slice(0, 3).map((f: any, idx: number) => (
-                  <span key={idx} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                  <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
                     {f.facility?.name || 'N/A'}
                   </span>
                 ))}
                 {topHomestay.homestay.facilities.length > 3 && (
-                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded text-xs font-semibold">
+                  <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs font-semibold">
                     +{topHomestay.homestay.facilities.length - 3}
                   </span>
                 )}
@@ -203,16 +203,16 @@ const TopHomestayCard: React.FC<{
           )}
 
           <div className="flex flex-wrap gap-2 mb-3">
-            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">
+            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
               {topHomestay.strategy === 'MANUAL' ? 'Manual' : 'Insight Based'}
             </span>
             {topHomestay.category && (
-              <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-xs font-medium">
+              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
                 {getCategoryBadge(topHomestay.category)}
               </span>
             )}
             {topHomestay.priority && (
-              <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium">
+              <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
                 Priority: {topHomestay.priority}
               </span>
             )}
@@ -229,13 +229,13 @@ const TopHomestayCard: React.FC<{
 
   return (
     <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-      className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-4">
+      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 p-4">
       <div className="flex items-center space-x-4">
         <div className="flex-shrink-0">
           {topHomestay.homestay?.images?.[0]?.url ? (
             <img src={topHomestay.homestay.images[0].url} alt={topHomestay.homestay.name} className="w-24 h-24 rounded-xl object-cover" />
           ) : (
-            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center">
+            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
               <Star className="h-10 w-10 text-yellow-500" />
             </div>
           )}
@@ -245,16 +245,16 @@ const TopHomestayCard: React.FC<{
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{topHomestay.homestay?.name || 'Unnamed'}</h3>
+                <h3 className="text-lg font-bold text-gray-900">{topHomestay.homestay?.name || 'Unnamed'}</h3>
                 <Crown className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                 {!topHomestay.isActive && <span className="px-2 py-0.5 bg-gray-500 rounded-full text-xs font-bold text-white">Inactive</span>}
               </div>
-              <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-xs font-medium">
+              <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">
                   {topHomestay.strategy === 'MANUAL' ? 'Manual' : 'Insight Based'}
                 </span>
                 {topHomestay.category && (
-                  <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded text-xs font-medium">
+                  <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-medium">
                     {getCategoryBadge(topHomestay.category)}
                   </span>
                 )}
@@ -341,8 +341,8 @@ const TopHomestayFormModal: React.FC<{
       <ActionButton onClick={handleSubmit} variant="primary" loading={loading}>{topHomestay ? 'Update' : 'Continue to Select Homestays'}</ActionButton></>}>
       <div className="space-y-4">
         {!topHomestay && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <p className="text-sm text-blue-800 dark:text-blue-300">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
               <strong>Step 1:</strong> Configure your top homestay settings below. In the next step, you&apos;ll select which homestays to feature with these settings.
             </p>
           </div>
@@ -350,9 +350,9 @@ const TopHomestayFormModal: React.FC<{
 
         {topHomestay && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Homestay *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Homestay *</label>
             <select value={formData.homestayId} onChange={(e) => setFormData({ ...formData, homestayId: parseInt(e.target.value) })}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900"
               required disabled={!!topHomestay}>
               <option value="0">Select homestay...</option>
               {homestays.map((h: any) => (<option key={h.id} value={h.id}>{h.name}</option>))}
@@ -361,18 +361,18 @@ const TopHomestayFormModal: React.FC<{
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Strategy *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Strategy *</label>
           <select value={formData.strategy} onChange={(e) => setFormData({ ...formData, strategy: e.target.value as 'MANUAL' | 'INSIGHT_BASED' })}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900">
             <option value="MANUAL">Manual Selection</option>
             <option value="INSIGHT_BASED">Insight Based</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category (optional)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Category (optional)</label>
           <select value={formData.category || ''} onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900">
             <option value="">Select category...</option>
             {CATEGORIES.map(cat => (<option key={cat.value} value={cat.value}>{cat.label}</option>))}
           </select>
@@ -384,7 +384,7 @@ const TopHomestayFormModal: React.FC<{
         <label className="flex items-center space-x-2 cursor-pointer">
           <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
             className="w-4 h-4 text-[#224240] border-gray-300 rounded" />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
+          <span className="text-sm font-medium text-gray-700">Active</span>
         </label>
 
         {error && <Alert type="error" title="Error" message={error} onClose={clearError} />}
@@ -528,8 +528,8 @@ export default function TopHomestaysManagement() {
   const hasFilters = strategyFilter || categoryFilter || activeFilter !== undefined;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] dark:from-[#1a332f] dark:via-[#224240] dark:to-[#2a5350] shadow-2xl">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] shadow-2xl">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
         </div>
@@ -559,15 +559,15 @@ export default function TopHomestaysManagement() {
 
         {/* Tabs */}
         <div className="mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-2">
             <div className="flex space-x-2">
-              <button onClick={() => setActiveTab('overview')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'overview' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+              <button onClick={() => setActiveTab('overview')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'overview' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100
                 <div className="flex items-center justify-center space-x-2">
                   <Star className="h-4 w-4" />
                   <span>Overview</span>
                 </div>
               </button>
-              <button onClick={() => setActiveTab('analytics')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'analytics' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+              <button onClick={() => setActiveTab('analytics')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'analytics' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100
                 <div className="flex items-center justify-center space-x-2">
                   <BarChart3 className="h-4 w-4" />
                   <span>Analytics</span>
@@ -583,28 +583,28 @@ export default function TopHomestaysManagement() {
             {/* Strategy & Category Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Strategy Distribution */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                   <Target className="h-5 w-5 mr-2 text-[#224240]" />
                   Strategy Distribution
                 </h3>
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Manual Selection</span>
-                      <span className="text-lg font-bold text-[#224240] dark:text-[#2a5350]">{analyticsData.manualCount}</span>
+                      <span className="text-sm font-medium text-gray-700">Manual Selection</span>
+                      <span className="text-lg font-bold text-[#224240]">{analyticsData.manualCount}</span>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
                       <motion.div initial={{ width: 0 }} animate={{ width: `${(analyticsData.manualCount / Math.max(topHomestays.length, 1)) * 100}%` }} transition={{ duration: 0.5 }}
                         className="h-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-full" />
                     </div>
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Insight Based</span>
-                      <span className="text-lg font-bold text-[#224240] dark:text-[#2a5350]">{analyticsData.insightCount}</span>
+                      <span className="text-sm font-medium text-gray-700">Insight Based</span>
+                      <span className="text-lg font-bold text-[#224240]">{analyticsData.insightCount}</span>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
                       <motion.div initial={{ width: 0 }} animate={{ width: `${(analyticsData.insightCount / Math.max(topHomestays.length, 1)) * 100}%` }} transition={{ duration: 0.5, delay: 0.1 }}
                         className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" />
                     </div>
@@ -613,16 +613,16 @@ export default function TopHomestaysManagement() {
               </div>
 
               {/* Category Distribution */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                   <Tag className="h-5 w-5 mr-2 text-[#224240]" />
                   Category Distribution
                 </h3>
                 <div className="space-y-3">
                   {analyticsData.categoryStats.map((cat, idx) => (
                     <div key={cat.value} className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{cat.label}</span>
-                      <span className="px-3 py-1 rounded-full bg-[#224240]/10 text-[#224240] dark:bg-[#224240]/20 dark:text-[#2a5350] text-sm font-bold">{cat.count}</span>
+                      <span className="text-sm font-medium text-gray-700">{cat.label}</span>
+                      <span className="px-3 py-1 rounded-full bg-[#224240]/10 text-[#224240] text-sm font-bold">{cat.count}</span>
                     </div>
                   ))}
                 </div>
@@ -630,8 +630,8 @@ export default function TopHomestaysManagement() {
             </div>
 
             {/* Top Homestays by Priority */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
                 <Crown className="h-5 w-5 mr-2 text-yellow-500" />
                 Top Priority Homestays
               </h3>
@@ -640,17 +640,17 @@ export default function TopHomestaysManagement() {
                   <div key={item.id} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${idx === 0 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : idx === 1 ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' : idx === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' : 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${idx === 0 ? 'bg-yellow-100 text-yellow-700 : idx === 1 ? 'bg-gray-100 text-gray-700 : idx === 2 ? 'bg-orange-100 text-orange-700 : 'bg-gray-50 text-gray-600
                           <span className="text-sm font-bold">#{item.priority}</span>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 dark:text-white">{item.homestay?.name || 'Unknown'}</p>
-                          <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
-                            <span className={`px-2 py-0.5 rounded-full ${item.strategy === 'MANUAL' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}`}>
+                          <p className="font-medium text-gray-900">{item.homestay?.name || 'Unknown'}</p>
+                          <div className="flex items-center space-x-2 text-xs text-gray-500">
+                            <span className={`px-2 py-0.5 rounded-full ${item.strategy === 'MANUAL' ? 'bg-purple-100 text-purple-700 : 'bg-blue-100 text-blue-700
                               {item.strategy === 'MANUAL' ? 'Manual' : 'Insight Based'}
                             </span>
                             {item.category && (
-                              <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                              <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
                                 {CATEGORIES.find(c => c.value === item.category)?.label || item.category}
                               </span>
                             )}
@@ -662,7 +662,7 @@ export default function TopHomestaysManagement() {
                   </div>
                 ))}
                 {analyticsData.topByPriority.length === 0 && (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">No priority data available</div>
+                  <div className="text-center py-8 text-gray-500">No priority data available</div>
                 )}
               </div>
             </div>
@@ -671,23 +671,23 @@ export default function TopHomestaysManagement() {
 
         {activeTab === 'overview' && (
           <>
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <button onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-700
                 <SlidersHorizontal className="h-4 w-4" /><span>Filters</span>
                 {hasFilters && <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">Active</span>}
               </button>
             </div>
             <div className="flex items-center space-x-2">
-              <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
+              <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
                 <Grid className="h-5 w-5" /></button>
-              <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
+              <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
                 <List className="h-5 w-5" /></button>
-              <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
+              <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
                 <Table className="h-5 w-5" /></button>
-              <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 hover:bg-gray-200 transition-colors">
+              <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
                 <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
             </div>
           </div>
@@ -695,18 +695,18 @@ export default function TopHomestaysManagement() {
           <AnimatePresence>
             {showFilters && (
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
                   <select value={strategyFilter} onChange={(e) => { setStrategyFilter(e.target.value); setCurrentPage(1); }}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white text-gray-900">
                     <option value="">All Strategies</option><option value="MANUAL">Manual</option><option value="INSIGHT_BASED">Insight Based</option>
                   </select>
                   <select value={categoryFilter} onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white text-gray-900">
                     <option value="">All Categories</option>
                     {CATEGORIES.map(cat => (<option key={cat.value} value={cat.value}>{cat.label}</option>))}
                   </select>
                   <select value={activeFilter === undefined ? '' : activeFilter.toString()} onChange={(e) => { setActiveFilter(e.target.value === '' ? undefined : e.target.value === 'true'); setCurrentPage(1); }}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white text-gray-900">
                     <option value="">All Status</option><option value="true">Active Only</option><option value="false">Inactive Only</option>
                   </select>
                 </div>
@@ -719,28 +719,28 @@ export default function TopHomestaysManagement() {
         </div>
 
         {loading && topHomestays.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12">
             <LoadingSpinner size="lg" text="Loading..." /></div>
         ) : topHomestays.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12">
             <EmptyState icon={<Star className="h-16 w-16" />} title="No top homestays" description={hasFilters ? "No results" : "Add your first top homestay"}
               action={{ label: hasFilters ? 'Clear' : 'Add', onClick: hasFilters ? handleClearFilters : () => setShowFormModal(true), icon: <Plus className="h-4 w-4" />, variant: 'primary' }} /></div>
         ) : viewMode === 'table' ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Homestay</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Price Range</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Strategy</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Category</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Priority</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Homestay</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Price Range</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Strategy</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Category</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Priority</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="divide-y divide-gray-200">
                   {topHomestays.map((topHomestay: any) => {
                     const priceRange = getPriceRange(topHomestay.homestay);
                     const homestayImage = getHomestayImage(topHomestay.homestay);
@@ -751,10 +751,10 @@ export default function TopHomestaysManagement() {
                     };
 
                     return (
-                      <tr key={topHomestay.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <tr key={topHomestay.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-4">
-                            <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
+                            <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                               {homestayImage ? (
                                 <img src={homestayImage} alt={topHomestay.homestay?.name || 'Homestay'} className="w-full h-full object-cover" />
                               ) : (
@@ -767,9 +767,9 @@ export default function TopHomestaysManagement() {
                               </div>
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-gray-900 dark:text-white truncate">{topHomestay.homestay?.name || 'N/A'}</p>
+                              <p className="font-semibold text-gray-900 truncate">{topHomestay.homestay?.name || 'N/A'}</p>
                               {topHomestay.homestay?.address && (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+                                <p className="text-sm text-gray-500 flex items-center mt-1">
                                   <MapPin className="h-3 w-3 mr-1" />
                                   {topHomestay.homestay.address}
                                 </p>
@@ -777,7 +777,7 @@ export default function TopHomestaysManagement() {
                               {topHomestay.homestay?.rating && (
                                 <div className="flex items-center mt-1">
                                   <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
-                                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                                  <span className="text-sm text-gray-600">
                                     {topHomestay.homestay.rating} ({topHomestay.homestay.reviews || 0})
                                   </span>
                                 </div>
@@ -788,49 +788,49 @@ export default function TopHomestaysManagement() {
                         <td className="px-6 py-4">
                           {priceRange ? (
                             <div>
-                              <p className="font-semibold text-gray-900 dark:text-white">
+                              <p className="font-semibold text-gray-900">
                                 {priceRange.min === priceRange.max
                                   ? `NPR ${priceRange.min.toLocaleString()}`
                                   : `NPR ${priceRange.min.toLocaleString()}`}
                               </p>
                               {priceRange.min !== priceRange.max && (
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                <p className="text-sm text-gray-500">
                                   to NPR {priceRange.max.toLocaleString()}
                                 </p>
                               )}
                             </div>
                           ) : (
-                            <span className="text-gray-400 dark:text-gray-500 text-sm">N/A</span>
+                            <span className="text-gray-400 text-sm">N/A</span>
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                          <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
                             {topHomestay.strategy === 'MANUAL' ? 'Manual' : 'Insight Based'}
                           </span>
                         </td>
                         <td className="px-6 py-4">
                           {topHomestay.category ? (
-                            <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                            <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
                               {getCategoryBadge(topHomestay.category)}
                             </span>
                           ) : (
-                            <span className="text-gray-400 dark:text-gray-500 text-sm">-</span>
+                            <span className="text-gray-400 text-sm">-</span>
                           )}
                         </td>
                         <td className="px-6 py-4">
                           {topHomestay.priority ? (
-                            <span className="font-semibold text-gray-900 dark:text-white">
+                            <span className="font-semibold text-gray-900">
                               {topHomestay.priority}
                             </span>
                           ) : (
-                            <span className="text-gray-400 dark:text-gray-500 text-sm">-</span>
+                            <span className="text-gray-400 text-sm">-</span>
                           )}
                         </td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
                             topHomestay.isActive
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                              ? 'bg-green-100 text-green-800
+                              : 'bg-gray-100 text-gray-800
                           }`}>
                             {topHomestay.isActive ? 'Active' : 'Inactive'}
                           </span>
@@ -839,14 +839,14 @@ export default function TopHomestaysManagement() {
                           <div className="flex items-center justify-end space-x-2">
                             <button
                               onClick={() => setEditingItem(topHomestay)}
-                              className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                              className="p-2 text-[#1A403D] hover:bg-blue-50 rounded-lg transition-colors"
                               title="Edit"
                             >
                               <Edit className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => handleDelete(topHomestay.id)}
-                              className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -869,8 +869,8 @@ export default function TopHomestaysManagement() {
         )}
 
         {totalPages > 1 && (
-          <div className="mt-8 flex items-center justify-between bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">Page {currentPage} of {totalPages}</div>
+          <div className="mt-8 flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+            <div className="text-sm text-gray-600 font-medium">Page {currentPage} of {totalPages}</div>
             <div className="flex items-center space-x-2">
               <ActionButton onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} variant="secondary" size="sm">Previous</ActionButton>
               <ActionButton onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} variant="secondary" size="sm">Next</ActionButton>

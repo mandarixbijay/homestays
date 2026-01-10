@@ -140,23 +140,23 @@ const StatCard: React.FC<{
   trend?: { value: number; isPositive: boolean };
 }> = ({ title, value, icon, color, onClick, loading, trend }) => {
   const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
-    green: 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400',
-    yellow: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400',
-    red: 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400',
-    purple: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
-    indigo: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400',
-    pink: 'bg-pink-100 text-pink-600 dark:bg-pink-900/20 dark:text-pink-400'
+    blue: 'bg-blue-100 text-blue-600',
+    green: 'bg-emerald-100 text-emerald-600',
+    yellow: 'bg-amber-100 text-amber-600',
+    red: 'bg-red-100 text-red-600',
+    purple: 'bg-purple-100 text-purple-600',
+    indigo: 'bg-indigo-100 text-indigo-600',
+    pink: 'bg-pink-100 text-pink-600'
   };
 
   const bgGradients = {
-    blue: 'from-blue-50 via-blue-100 to-blue-50 dark:from-blue-900/10 dark:via-blue-800/20 dark:to-blue-900/10',
-    green: 'from-green-50 via-green-100 to-green-50 dark:from-green-900/10 dark:via-green-800/20 dark:to-green-900/10',
-    yellow: 'from-yellow-50 via-yellow-100 to-yellow-50 dark:from-yellow-900/10 dark:via-yellow-800/20 dark:to-yellow-900/10',
-    red: 'from-red-50 via-red-100 to-red-50 dark:from-red-900/10 dark:via-red-800/20 dark:to-red-900/10',
-    purple: 'from-purple-50 via-purple-100 to-purple-50 dark:from-purple-900/10 dark:via-purple-800/20 dark:to-purple-900/10',
-    indigo: 'from-indigo-50 via-indigo-100 to-indigo-50 dark:from-indigo-900/10 dark:via-indigo-800/20 dark:to-indigo-900/10',
-    pink: 'from-pink-50 via-pink-100 to-pink-50 dark:from-pink-900/10 dark:via-pink-800/20 dark:to-pink-900/10'
+    blue: 'from-blue-50 via-blue-100/50 to-white',
+    green: 'from-emerald-50 via-emerald-100/50 to-white',
+    yellow: 'from-amber-50 via-amber-100/50 to-white',
+    red: 'from-red-50 via-red-100/50 to-white',
+    purple: 'from-purple-50 via-purple-100/50 to-white',
+    indigo: 'from-indigo-50 via-indigo-100/50 to-white',
+    pink: 'from-pink-50 via-pink-100/50 to-white'
   };
 
   return (
@@ -165,8 +165,8 @@ const StatCard: React.FC<{
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyPress={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
-      className={`group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg transition-all duration-300 ${
-        onClick ? 'cursor-pointer hover:shadow-2xl hover:-translate-y-2 hover:border-opacity-0' : ''
+      className={`group relative overflow-hidden rounded-2xl bg-white border border-gray-200 shadow-lg transition-all duration-300 ${
+        onClick ? 'cursor-pointer hover:shadow-2xl hover:-translate-y-2 hover:border-[#1A403D]/20' : ''
       }`}
     >
       {/* Gradient Background */}
@@ -188,25 +188,25 @@ const StatCard: React.FC<{
           </div>
           {onClick && (
             <ChevronRight className={`h-5 w-5 text-gray-400 transition-all duration-300 ${
-              typeof onClick === 'function' ? 'group-hover:translate-x-1 group-hover:text-gray-600 dark:group-hover:text-gray-300' : ''
+              typeof onClick === 'function' ? 'group-hover:translate-x-1 group-hover:text-[#1A403D]' : ''
             }`} />
           )}
         </div>
 
         <div>
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+          <p className="text-sm font-medium text-gray-600 mb-1">
             {title}
           </p>
           {loading ? (
-            <div className="h-9 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"></div>
+            <div className="h-9 w-24 bg-gray-200 animate-pulse rounded-lg"></div>
           ) : (
-            <p className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <p className="text-3xl font-bold text-gray-900 mb-2">
               {value}
             </p>
           )}
           {trend && !loading && (
             <div className={`flex items-center text-sm font-medium ${
-              trend.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+              trend.isPositive ? 'text-emerald-600' : 'text-red-600'
             }`}>
               <TrendingUp className={`h-4 w-4 mr-1 ${!trend.isPositive ? 'rotate-180' : ''}`} />
               <span>{Math.abs(trend.value)}% from last month</span>
@@ -228,14 +228,14 @@ const QuickActionCard: React.FC<{
 }> = ({ title, description, icon, color, onClick, badge }) => {
   return (
     <div
-      className="group relative cursor-pointer overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl bg-white border border-gray-200 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:border-[#1A403D]/20"
       onClick={onClick}
       tabIndex={0}
       role="button"
       onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
     >
       {/* Gradient overlay on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-100 dark:to-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-[#1A403D]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
       <div className="relative p-6">
         <div className="flex items-start justify-between mb-3">
@@ -243,17 +243,17 @@ const QuickActionCard: React.FC<{
             {icon}
           </div>
           {badge && (
-            <span className="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-full">
+            <span className="px-2 py-1 text-xs font-semibold bg-[#1A403D]/10 text-[#1A403D] rounded-full">
               {badge}
             </span>
           )}
-          <ArrowRight className="h-5 w-5 text-gray-400 transition-all duration-300 group-hover:translate-x-1 group-hover:text-gray-600 dark:group-hover:text-gray-300" />
+          <ArrowRight className="h-5 w-5 text-gray-400 transition-all duration-300 group-hover:translate-x-1 group-hover:text-[#1A403D]" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-[#1A403D] transition-colors">
             {title}
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+          <p className="text-sm text-gray-600 leading-relaxed">
             {description}
           </p>
         </div>
@@ -270,17 +270,17 @@ const RecentHomestayCard: React.FC<{
   const mainImage = homestay.images?.find((img: any) => img.isMain) || homestay.images?.[0];
 
   return (
-    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow duration-200">
+    <div className="p-4 border border-gray-200 rounded-xl hover:shadow-md hover:border-[#1A403D]/20 transition-all duration-200 bg-white">
       <div className="flex space-x-4">
         <div className="flex-shrink-0">
           {mainImage ? (
             <img
               src={mainImage.url}
               alt={homestay.name}
-              className="w-16 h-16 rounded-lg object-cover border border-gray-200 dark:border-gray-600"
+              className="w-16 h-16 rounded-lg object-cover border border-gray-200"
             />
           ) : (
-            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-200 dark:border-gray-600">
+            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
               <Home className="h-6 w-6 text-gray-400" />
             </div>
           )}
@@ -289,24 +289,24 @@ const RecentHomestayCard: React.FC<{
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              <h4 className="text-sm font-medium text-gray-900 truncate">
                 {homestay.name || 'Unknown'}
               </h4>
-              
-              <div className="mt-1 flex items-center text-xs text-gray-500 dark:text-gray-400">
-                <MapPin className="h-3 w-3 mr-1" />
+
+              <div className="mt-1 flex items-center text-xs text-gray-500">
+                <MapPin className="h-3 w-3 mr-1 text-[#1A403D]" />
                 <span className="truncate">{homestay.address || 'No address'}</span>
               </div>
-              
+
               <div className="mt-1 flex items-center space-x-4">
                 <StatusBadge status={homestay.status || 'PENDING'} variant="small" />
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-500">
                   {homestay.rooms?.length || 0} rooms
                 </span>
                 {homestay.rating && (
                   <div className="flex items-center">
-                    <Star className="h-3 w-3 text-yellow-400 mr-1" />
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <Star className="h-3 w-3 text-amber-400 mr-1" />
+                    <span className="text-xs text-gray-500">
                       {homestay.rating}
                     </span>
                   </div>
@@ -345,10 +345,10 @@ const ActivityFeed: React.FC<{
       <div className="space-y-4">
         {[1, 2, 3].map(i => (
           <div key={i} className="flex items-start space-x-3">
-            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-              <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-3 w-24 bg-gray-200 rounded animate-pulse"></div>
             </div>
           </div>
         ))}
@@ -360,7 +360,7 @@ const ActivityFeed: React.FC<{
     return (
       <div className="text-center py-8">
         <Activity className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-        <p className="text-gray-500 dark:text-gray-400">No recent activity</p>
+        <p className="text-gray-500">No recent activity</p>
       </div>
     );
   }
@@ -370,15 +370,15 @@ const ActivityFeed: React.FC<{
       {activities.map((activity, index) => (
         <div key={index} className="flex items-start space-x-3">
           <div className="flex-shrink-0">
-            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
-              <Activity className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <div className="w-8 h-8 bg-[#1A403D]/10 rounded-full flex items-center justify-center">
+              <Activity className="h-4 w-4 text-[#1A403D]" />
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-900 dark:text-white">
+            <p className="text-sm text-gray-900">
               {activity.description}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500">
               {new Date(activity.timestamp).toLocaleString()}
             </p>
           </div>
@@ -542,9 +542,9 @@ export default function ImprovedAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-green-50/20 to-teal-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-[#1A403D]/5 to-emerald-50/30">
       {/* Enhanced Header with Welcome Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] dark:from-[#1a332f] dark:via-[#224240] dark:to-[#2a5350]">
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#1A403D] via-[#266555] to-[#2a7862]">
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
@@ -681,11 +681,11 @@ export default function ImprovedAdminDashboard() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
-                <Target className="h-6 w-6 text-[#224240]" />
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-2">
+                <Target className="h-6 w-6 text-[#1A403D]" />
                 <span>Quick Actions</span>
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-600 mt-1">
                 Jump to the most common administrative tasks
               </p>
             </div>
@@ -696,7 +696,7 @@ export default function ImprovedAdminDashboard() {
               title="Create Homestay"
               description="Add a new homestay property to your collection"
               icon={<Plus className="h-6 w-6" />}
-              color="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 dark:from-blue-900/20 dark:to-blue-800/30 dark:text-blue-400"
+              color="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600"
               onClick={() => handleQuickAction('create-homestay')}
             />
 
@@ -704,7 +704,7 @@ export default function ImprovedAdminDashboard() {
               title="Manage Blogs"
               description="Create and publish blog posts for marketing"
               icon={<PenTool className="h-6 w-6" />}
-              color="bg-gradient-to-br from-[#224240]/10 to-[#2a5350]/20 text-[#224240] dark:from-[#224240]/20 dark:to-[#2a5350]/30 dark:text-[#2a5350]"
+              color="bg-gradient-to-br from-[#1A403D]/10 to-[#1A403D]/20 text-[#1A403D]"
               onClick={() => router.push('/admin/blog')}
               badge="Popular"
             />
@@ -713,7 +713,7 @@ export default function ImprovedAdminDashboard() {
               title="Bulk Create"
               description="Import multiple homestays at once via CSV"
               icon={<Home className="h-6 w-6" />}
-              color="bg-gradient-to-br from-green-100 to-green-200 text-green-600 dark:from-green-900/20 dark:to-green-800/30 dark:text-green-400"
+              color="bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-600"
               onClick={() => handleQuickAction('bulk-create')}
             />
 
@@ -721,7 +721,7 @@ export default function ImprovedAdminDashboard() {
               title="Blog Analytics"
               description="Track performance and engagement metrics"
               icon={<BarChart3 className="h-6 w-6" />}
-              color="bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-600 dark:from-indigo-900/20 dark:to-indigo-800/30 dark:text-indigo-400"
+              color="bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-600"
               onClick={() => router.push('/admin/blog/analytics')}
             />
 
@@ -729,7 +729,7 @@ export default function ImprovedAdminDashboard() {
               title="Manage Users"
               description="Control user accounts and permissions"
               icon={<Users className="h-6 w-6" />}
-              color="bg-gradient-to-br from-pink-100 to-pink-200 text-pink-600 dark:from-pink-900/20 dark:to-pink-800/30 dark:text-pink-400"
+              color="bg-gradient-to-br from-pink-100 to-pink-200 text-pink-600"
               onClick={() => handleQuickAction('users')}
             />
 
@@ -737,7 +737,7 @@ export default function ImprovedAdminDashboard() {
               title="Master Data"
               description="Configure facilities, bed types, and currencies"
               icon={<Settings className="h-6 w-6" />}
-              color="bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-600 dark:from-yellow-900/20 dark:to-yellow-800/30 dark:text-yellow-400"
+              color="bg-gradient-to-br from-amber-100 to-amber-200 text-amber-600"
               onClick={() => handleQuickAction('master-data')}
             />
           </div>
@@ -747,8 +747,8 @@ export default function ImprovedAdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           {/* Blog Management */}
           <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] dark:from-[#1a332f] dark:via-[#224240] dark:to-[#2a5350] p-6">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-[#1A403D] via-[#266555] to-[#2a7862] p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
@@ -771,59 +771,59 @@ export default function ImprovedAdminDashboard() {
 
               <div className="p-6 grid grid-cols-2 gap-4">
                 <div
-                  className="p-4 bg-gradient-to-br from-[#224240]/5 to-[#224240]/10 dark:from-[#224240]/10 dark:to-[#224240]/20 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-[#224240]/10"
+                  className="p-4 bg-gradient-to-br from-[#1A403D]/5 to-[#1A403D]/10 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-[#1A403D]/10"
                   onClick={() => router.push('/admin/blog/create')}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-[#224240]/20 dark:bg-[#224240]/30 rounded-lg">
-                      <Plus className="h-5 w-5 text-[#224240] dark:text-[#2a5350]" />
+                    <div className="p-2 bg-[#1A403D]/20 rounded-lg">
+                      <Plus className="h-5 w-5 text-[#1A403D]" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-[#224240]" />
+                    <ChevronRight className="h-4 w-4 text-[#1A403D]" />
                   </div>
-                  <h4 className="font-bold text-gray-900 dark:text-white mb-1">New Blog Post</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Create fresh content</p>
+                  <h4 className="font-bold text-gray-900 mb-1">New Blog Post</h4>
+                  <p className="text-sm text-gray-600">Create fresh content</p>
                 </div>
 
                 <div
-                  className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-green-200/50 dark:border-green-700/50"
+                  className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-emerald-200/50"
                   onClick={() => router.push('/admin/blog/analytics')}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-green-200 dark:bg-green-800 rounded-lg">
-                      <TrendingUp className="h-5 w-5 text-green-700 dark:text-green-300" />
+                    <div className="p-2 bg-emerald-200 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-emerald-700" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-green-600" />
+                    <ChevronRight className="h-4 w-4 text-emerald-600" />
                   </div>
-                  <h4 className="font-bold text-gray-900 dark:text-white mb-1">Analytics</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Track performance</p>
+                  <h4 className="font-bold text-gray-900 mb-1">Analytics</h4>
+                  <p className="text-sm text-gray-600">Track performance</p>
                 </div>
 
                 <div
-                  className="p-4 bg-gradient-to-br from-[#224240]/5 to-[#2a5350]/10 dark:from-[#224240]/10 dark:to-[#2a5350]/20 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-[#224240]/10"
+                  className="p-4 bg-gradient-to-br from-[#1A403D]/5 to-[#266555]/10 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-[#1A403D]/10"
                   onClick={() => router.push('/admin/blog/tags')}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-[#224240]/20 dark:bg-[#224240]/30 rounded-lg">
-                      <Tag className="h-5 w-5 text-[#224240] dark:text-[#2a5350]" />
+                    <div className="p-2 bg-[#1A403D]/20 rounded-lg">
+                      <Tag className="h-5 w-5 text-[#1A403D]" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-[#224240]" />
+                    <ChevronRight className="h-4 w-4 text-[#1A403D]" />
                   </div>
-                  <h4 className="font-bold text-gray-900 dark:text-white mb-1">Tags</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Organize content</p>
+                  <h4 className="font-bold text-gray-900 mb-1">Tags</h4>
+                  <p className="text-sm text-gray-600">Organize content</p>
                 </div>
 
                 <div
-                  className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/30 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-amber-200/50 dark:border-amber-700/50"
+                  className="p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-1 border border-amber-200/50"
                   onClick={() => router.push('/admin/blog/categories')}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-amber-200 dark:bg-amber-800 rounded-lg">
-                      <Folder className="h-5 w-5 text-amber-700 dark:text-amber-300" />
+                    <div className="p-2 bg-amber-200 rounded-lg">
+                      <Folder className="h-5 w-5 text-amber-700" />
                     </div>
                     <ChevronRight className="h-4 w-4 text-amber-600" />
                   </div>
-                  <h4 className="font-bold text-gray-900 dark:text-white mb-1">Categories</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Group by topics</p>
+                  <h4 className="font-bold text-gray-900 mb-1">Categories</h4>
+                  <p className="text-sm text-gray-600">Group by topics</p>
                 </div>
               </div>
             </div>
@@ -892,12 +892,12 @@ export default function ImprovedAdminDashboard() {
           ) : (
             <div className="text-center py-8">
               <Home className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              <h3 className="text-lg font-medium text-gray-900">
                 {searchTerm ? 'No homestays found' : 'No homestays yet'}
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">
-                {searchTerm 
-                  ? 'Try adjusting your search terms.' 
+              <p className="text-gray-500 mt-1">
+                {searchTerm
+                  ? 'Try adjusting your search terms.'
                   : 'Get started by creating your first homestay.'
                 }
               </p>

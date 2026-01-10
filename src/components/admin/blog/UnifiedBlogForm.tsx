@@ -190,34 +190,34 @@ const RichTextEditor: React.FC<{
     ];
 
     return (
-        <div className={`border-2 border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800 transition-all duration-300 ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
+        <div className={`border-2 border-gray-200 rounded-xl overflow-hidden bg-white transition-all duration-300 ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
             {/* Enhanced Toolbar */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b-2 border-gray-200 dark:border-gray-600">
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
                 <div className="flex items-center justify-between p-3">
                     <div className="flex items-center gap-2 flex-wrap">
                         {/* Text Formatting */}
-                        <div className="flex items-center gap-1 bg-white dark:bg-gray-700 rounded-lg p-1 shadow-sm">
+                        <div className="flex items-center gap-1 bg-white rounded-lg p-1 shadow-sm">
                             {toolbarButtons.filter(b => b.group === 'text').map((btn, idx) => (
                                 <button
                                     key={idx}
                                     type="button"
                                     onClick={() => execCommand(btn.command, btn.value)}
-                                    className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-all hover:scale-110"
+                                    className="p-2 hover:bg-blue-50 rounded transition-all hover:scale-110"
                                     title={btn.title}
                                 >
-                                    <btn.icon className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                                    <btn.icon className="h-4 w-4 text-gray-700" />
                                 </button>
                             ))}
                         </div>
 
                         {/* Headings */}
-                        <div className="flex items-center gap-1 bg-white dark:bg-gray-700 rounded-lg p-1 shadow-sm">
+                        <div className="flex items-center gap-1 bg-white rounded-lg p-1 shadow-sm">
                             {headingButtons.map((btn, idx) => (
                                 <button
                                     key={idx}
                                     type="button"
                                     onClick={() => execCommand(btn.command, btn.value)}
-                                    className="px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded font-semibold text-sm transition-all hover:scale-105"
+                                    className="px-3 py-2 hover:bg-blue-50 rounded font-semibold text-sm transition-all hover:scale-105"
                                 >
                                     {btn.label}
                                 </button>
@@ -225,60 +225,60 @@ const RichTextEditor: React.FC<{
                         </div>
 
                         {/* Lists */}
-                        <div className="flex items-center gap-1 bg-white dark:bg-gray-700 rounded-lg p-1 shadow-sm">
+                        <div className="flex items-center gap-1 bg-white rounded-lg p-1 shadow-sm">
                             {toolbarButtons.filter(b => b.group === 'list').map((btn, idx) => (
                                 <button
                                     key={idx}
                                     type="button"
                                     onClick={() => execCommand(btn.command, btn.value)}
-                                    className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-all hover:scale-110"
+                                    className="p-2 hover:bg-blue-50 rounded transition-all hover:scale-110"
                                     title={btn.title}
                                 >
-                                    <btn.icon className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                                    <btn.icon className="h-4 w-4 text-gray-700" />
                                 </button>
                             ))}
                         </div>
 
                         {/* Alignment */}
-                        <div className="flex items-center gap-1 bg-white dark:bg-gray-700 rounded-lg p-1 shadow-sm">
+                        <div className="flex items-center gap-1 bg-white rounded-lg p-1 shadow-sm">
                             {toolbarButtons.filter(b => b.group === 'align').map((btn, idx) => (
                                 <button
                                     key={idx}
                                     type="button"
                                     onClick={() => execCommand(btn.command, btn.value)}
-                                    className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-all hover:scale-110"
+                                    className="p-2 hover:bg-blue-50 rounded transition-all hover:scale-110"
                                     title={btn.title}
                                 >
-                                    <btn.icon className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                                    <btn.icon className="h-4 w-4 text-gray-700" />
                                 </button>
                             ))}
                         </div>
 
                         {/* Special */}
-                        <div className="flex items-center gap-1 bg-white dark:bg-gray-700 rounded-lg p-1 shadow-sm">
+                        <div className="flex items-center gap-1 bg-white rounded-lg p-1 shadow-sm">
                             <button
                                 type="button"
                                 onClick={() => setShowLinkDialog(true)}
-                                className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-all hover:scale-110"
+                                className="p-2 hover:bg-blue-50 rounded transition-all hover:scale-110"
                                 title="Insert Link"
                             >
-                                <Link2 className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                                <Link2 className="h-4 w-4 text-gray-700" />
                             </button>
                             <button
                                 type="button"
                                 onClick={() => execCommand('formatBlock', 'blockquote')}
-                                className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-all hover:scale-110"
+                                className="p-2 hover:bg-blue-50 rounded transition-all hover:scale-110"
                                 title="Quote"
                             >
-                                <Quote className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                                <Quote className="h-4 w-4 text-gray-700" />
                             </button>
                             <button
                                 type="button"
                                 onClick={() => execCommand('insertHorizontalRule')}
-                                className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-all hover:scale-110"
+                                className="p-2 hover:bg-blue-50 rounded transition-all hover:scale-110"
                                 title="Horizontal Line"
                             >
-                                <Layers className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+                                <Layers className="h-4 w-4 text-gray-700" />
                             </button>
                         </div>
 
@@ -296,7 +296,7 @@ const RichTextEditor: React.FC<{
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-700 px-3 py-2 rounded-lg shadow-sm">
+                        <div className="text-xs text-gray-600 bg-white px-3 py-2 rounded-lg shadow-sm">
                             <span className="font-semibold">{wordCount}</span> words
                             <span className="mx-1">•</span>
                             <span className="font-semibold">{Math.ceil(wordCount / 200)}</span> min read
@@ -304,7 +304,7 @@ const RichTextEditor: React.FC<{
                         <button
                             type="button"
                             onClick={() => setIsFullscreen(!isFullscreen)}
-                            className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all"
+                            className="p-2 hover:bg-white rounded-lg transition-all"
                             title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                         >
                             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
@@ -318,7 +318,7 @@ const RichTextEditor: React.FC<{
                 ref={editorRef}
                 contentEditable
                 onInput={handleContentChange}
-                className="p-6 focus:outline-none prose prose-lg dark:prose-invert max-w-none"
+                className="p-6 focus:outline-none prose prose-lg max-w-none"
                 style={{
                     minHeight: isFullscreen ? 'calc(100vh - 200px)' : '500px',
                     lineHeight: 1.8,
@@ -330,7 +330,7 @@ const RichTextEditor: React.FC<{
             {/* Link Dialog */}
             {showLinkDialog && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-2xl max-w-md w-full mx-4">
+                    <div className="bg-white rounded-xl p-6 shadow-2xl max-w-md w-full mx-4">
                         <h3 className="text-lg font-semibold mb-4">Insert Link</h3>
                         <Input
                             value={linkUrl}
@@ -461,7 +461,7 @@ const PremiumImageGallery: React.FC<{
             {images.length > 0 && (
                 <div className="grid grid-cols-2 gap-4">
                     {images.map((img, index) => (
-                        <div key={index} className="group relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-xl">
+                        <div key={index} className="group relative bg-white rounded-xl overflow-hidden border-2 border-gray-200 hover:border-blue-400 transition-all duration-300 hover:shadow-xl">
                             <div className="aspect-video relative overflow-hidden">
                                 <img
                                     src={img.url}
@@ -477,7 +477,7 @@ const PremiumImageGallery: React.FC<{
                                             placeholder="Alt text..."
                                             value={img.alt}
                                             onChange={(e) => updateImageData(index, 'alt', e.target.value)}
-                                            className="w-full px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-sm border-0 focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-sm border-0 focus:ring-2 focus:ring-[#1A403D]/20"
                                             onClick={(e) => e.stopPropagation()}
                                         />
                                         <input
@@ -485,7 +485,7 @@ const PremiumImageGallery: React.FC<{
                                             placeholder="Caption..."
                                             value={img.caption}
                                             onChange={(e) => updateImageData(index, 'caption', e.target.value)}
-                                            className="w-full px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-sm border-0 focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-sm border-0 focus:ring-2 focus:ring-[#1A403D]/20"
                                             onClick={(e) => e.stopPropagation()}
                                         />
                                     </div>
@@ -533,8 +533,8 @@ const PremiumImageGallery: React.FC<{
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
                 className={`relative border-3 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer group ${dragOver
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105'
-                        : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10'
+                        ? 'border-blue-500 bg-blue-50 scale-105'
+                        : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/50'
                     }`}
                 onClick={() => fileInputRef.current?.click()}
             >
@@ -547,22 +547,22 @@ const PremiumImageGallery: React.FC<{
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">Uploading images...</p>
+                            <p className="text-lg font-semibold text-blue-600">Uploading images...</p>
                             <p className="text-sm text-gray-500">Please wait while we process your files</p>
                         </div>
                     </div>
                 ) : (
                     <>
                         <div className="relative mb-4">
-                            <ImageIcon className="h-20 w-20 text-gray-400 dark:text-gray-500 mx-auto group-hover:scale-110 transition-transform duration-300" />
+                            <ImageIcon className="h-20 w-20 text-gray-400 mx-auto group-hover:scale-110 transition-transform duration-300" />
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="h-24 w-24 bg-blue-500/10 rounded-full animate-pulse"></div>
                             </div>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
                             Drop images here or click to browse
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        <p className="text-sm text-gray-500 mb-4">
                             Support for PNG, JPG, GIF, WebP up to 10MB each
                         </p>
                         <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-medium">
@@ -582,8 +582,8 @@ const PremiumImageGallery: React.FC<{
             </div>
 
             {images.length > 0 && (
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                    <div className="flex items-center gap-2 text-blue-700">
                         <Info className="h-5 w-5" />
                         <span className="text-sm font-medium">
                             {images.length} image{images.length > 1 ? 's' : ''} •
@@ -672,18 +672,18 @@ const PremiumCategoryTagManager: React.FC<{
     return (
         <div className="space-y-6">
             {/* Categories */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-xl p-5 border-2 border-blue-200 dark:border-blue-800">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-200">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                         <div className="p-2 bg-blue-500 rounded-lg">
                             <Folder className="h-5 w-5 text-white" />
                         </div>
-                        <label className="text-lg font-bold text-gray-900 dark:text-white">Categories</label>
+                        <label className="text-lg font-bold text-gray-900">Categories</label>
                     </div>
                     <button
                         type="button"
                         onClick={() => setShowAddCategory(!showAddCategory)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all hover:scale-105 text-sm font-medium shadow-sm"
+                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 hover:bg-[#1A403D] text-white rounded-lg transition-all hover:scale-105 text-sm font-medium shadow-sm"
                     >
                         <Plus className="h-3 w-3" />
                         Add New
@@ -691,7 +691,7 @@ const PremiumCategoryTagManager: React.FC<{
                 </div>
 
                 {showAddCategory && (
-                    <div className="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border-2 border-blue-300 dark:border-blue-700 animate-in slide-in-from-top duration-300">
+                    <div className="mb-4 p-4 bg-white rounded-lg shadow-lg border-2 border-blue-300 animate-in slide-in-from-top duration-300">
                         <div className="flex gap-2">
                             <input
                                 type="text"
@@ -699,21 +699,21 @@ const PremiumCategoryTagManager: React.FC<{
                                 value={newCategoryName}
                                 onChange={(e) => setNewCategoryName(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
-                                className="flex-1 px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                                className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1A403D]/20"
                                 autoFocus
                             />
                             <button
                                 type="button"
                                 onClick={handleAddCategory}
                                 disabled={adding}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all hover:scale-105 disabled:opacity-50 shadow-sm"
+                                className="px-4 py-2 bg-[#1A403D] hover:bg-[#152f2d] text-white rounded-lg font-medium transition-all hover:scale-105 disabled:opacity-50 shadow-sm"
                             >
                                 {adding ? <Clock className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => { setShowAddCategory(false); setNewCategoryName(''); }}
-                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-all"
+                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-all"
                             >
                                 <X className="h-4 w-4" />
                             </button>
@@ -728,25 +728,25 @@ const PremiumCategoryTagManager: React.FC<{
                         placeholder="Search categories..."
                         value={categorySearch}
                         onChange={(e) => setCategorySearch(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 transition-all"
+                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1A403D]/20 transition-all"
                     />
                 </div>
 
-                <div className="max-h-64 overflow-y-auto bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 shadow-inner">
+                <div className="max-h-64 overflow-y-auto bg-white rounded-lg border-2 border-gray-200 shadow-inner">
                     {filteredCategories.length > 0 ? (
                         filteredCategories.map(cat => (
                             <label
                                 key={cat.id}
-                                className="flex items-center p-4 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-all group"
+                                className="flex items-center p-4 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all group"
                             >
                                 <input
                                     type="checkbox"
                                     checked={selectedCategories.includes(cat.id)}
                                     onChange={() => toggleCategory(cat.id)}
-                                    className="h-5 w-5 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 transition-all"
+                                    className="h-5 w-5 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-[#1A403D]/20 transition-all"
                                 />
                                 <Folder className="h-5 w-5 text-blue-500 mx-3 group-hover:scale-110 transition-transform" />
-                                <span className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                <span className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
                                     {cat.name}
                                 </span>
                             </label>
@@ -766,11 +766,11 @@ const PremiumCategoryTagManager: React.FC<{
                             return cat ? (
                                 <span
                                     key={id}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-blue-700 dark:text-blue-300 rounded-full font-medium border-2 border-blue-300 dark:border-blue-700 shadow-sm hover:shadow-md transition-all hover:scale-105"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-full font-medium border-2 border-blue-300 shadow-sm hover:shadow-md transition-all hover:scale-105"
                                 >
                                     <Folder className="h-4 w-4" />
                                     {cat.name}
-                                    <button type="button" onClick={() => toggleCategory(id)} className="hover:bg-blue-100 dark:hover:bg-blue-900 rounded-full p-1 transition-all">
+                                    <button type="button" onClick={() => toggleCategory(id)} className="hover:bg-blue-100 rounded-full p-1 transition-all">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -781,13 +781,13 @@ const PremiumCategoryTagManager: React.FC<{
             </div>
 
             {/* Tags */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 rounded-xl p-5 border-2 border-green-200 dark:border-green-800">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border-2 border-green-200">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                         <div className="p-2 bg-green-500 rounded-lg">
                             <TagIcon className="h-5 w-5 text-white" />
                         </div>
-                        <label className="text-lg font-bold text-gray-900 dark:text-white">Tags</label>
+                        <label className="text-lg font-bold text-gray-900">Tags</label>
                     </div>
                     <button
                         type="button"
@@ -800,7 +800,7 @@ const PremiumCategoryTagManager: React.FC<{
                 </div>
 
                 {showAddTag && (
-                    <div className="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border-2 border-green-300 dark:border-green-700 animate-in slide-in-from-top duration-300">
+                    <div className="mb-4 p-4 bg-white rounded-lg shadow-lg border-2 border-green-300 animate-in slide-in-from-top duration-300">
                         <div className="flex gap-2">
                             <input
                                 type="text"
@@ -808,7 +808,7 @@ const PremiumCategoryTagManager: React.FC<{
                                 value={newTagName}
                                 onChange={(e) => setNewTagName(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
-                                className="flex-1 px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700"
+                                className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                                 autoFocus
                             />
                             <button
@@ -822,7 +822,7 @@ const PremiumCategoryTagManager: React.FC<{
                             <button
                                 type="button"
                                 onClick={() => { setShowAddTag(false); setNewTagName(''); }}
-                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-all"
+                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-all"
                             >
                                 <X className="h-4 w-4" />
                             </button>
@@ -837,16 +837,16 @@ const PremiumCategoryTagManager: React.FC<{
                         placeholder="Search tags..."
                         value={tagSearch}
                         onChange={(e) => setTagSearch(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 transition-all"
+                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 transition-all"
                     />
                 </div>
 
-                <div className="max-h-64 overflow-y-auto bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 shadow-inner">
+                <div className="max-h-64 overflow-y-auto bg-white rounded-lg border-2 border-gray-200 shadow-inner">
                     {filteredTags.length > 0 ? (
                         filteredTags.map(tag => (
                             <label
                                 key={tag.id}
-                                className="flex items-center p-4 hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-all group"
+                                className="flex items-center p-4 hover:bg-green-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all group"
                             >
                                 <input
                                     type="checkbox"
@@ -855,7 +855,7 @@ const PremiumCategoryTagManager: React.FC<{
                                     className="h-5 w-5 rounded border-2 border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500 transition-all"
                                 />
                                 <TagIcon className="h-5 w-5 text-green-500 mx-3 group-hover:scale-110 transition-transform" />
-                                <span className="font-medium text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                                <span className="font-medium text-gray-900 group-hover:text-green-600 transition-colors">
                                     {tag.name}
                                 </span>
                             </label>
@@ -875,11 +875,11 @@ const PremiumCategoryTagManager: React.FC<{
                             return tag ? (
                                 <span
                                     key={id}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-green-700 dark:text-green-300 rounded-full font-medium border-2 border-green-300 dark:border-green-700 shadow-sm hover:shadow-md transition-all hover:scale-105"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white text-green-700 rounded-full font-medium border-2 border-green-300 shadow-sm hover:shadow-md transition-all hover:scale-105"
                                 >
                                     <TagIcon className="h-4 w-4" />
                                     {tag.name}
-                                    <button type="button" onClick={() => toggleTag(id)} className="hover:bg-green-100 dark:hover:bg-green-900 rounded-full p-1 transition-all">
+                                    <button type="button" onClick={() => toggleTag(id)} className="hover:bg-green-100 rounded-full p-1 transition-all">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -925,21 +925,21 @@ const SEOOptimizer: React.FC<{
     const descStatus = getDescStatus();
 
     return (
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10 rounded-xl p-6 border-2 border-purple-200 dark:border-purple-800 shadow-lg">
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
                     <Sparkles className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">SEO Optimization</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Boost your search rankings</p>
+                    <h3 className="text-xl font-bold text-gray-900">SEO Optimization</h3>
+                    <p className="text-sm text-gray-600">Boost your search rankings</p>
                 </div>
             </div>
 
             <div className="space-y-6">
                 <div>
                     <div className="flex items-center justify-between mb-2">
-                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">SEO Title</label>
+                        <label className="text-sm font-semibold text-gray-700">SEO Title</label>
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${titleStatus.bg} ${titleStatus.color}`}>
                             {titleStatus.message}
                         </span>
@@ -949,13 +949,13 @@ const SEOOptimizer: React.FC<{
                         value={seoTitle}
                         onChange={(e) => onSeoTitleChange(e.target.value)}
                         placeholder="Enter SEO-optimized title (30-60 chars)"
-                        className="w-full px-4 py-3 border-2 border-purple-200 dark:border-purple-700 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-800 font-medium transition-all"
+                        className="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 font-medium transition-all"
                         maxLength={70}
                     />
                     <div className="flex justify-between mt-2 text-xs font-medium">
                         <span className={titleStatus.color}>{titleLength}/60 characters</span>
                         <div className="flex items-center gap-1">
-                            <div className="w-32 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div
                                     className={`h-full transition-all duration-300 ${titleLength === 0 ? 'bg-gray-400' :
                                             titleLength < 30 ? 'bg-yellow-500' :
@@ -970,7 +970,7 @@ const SEOOptimizer: React.FC<{
 
                 <div>
                     <div className="flex items-center justify-between mb-2">
-                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Meta Description</label>
+                        <label className="text-sm font-semibold text-gray-700">Meta Description</label>
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${descStatus.bg} ${descStatus.color}`}>
                             {descStatus.message}
                         </span>
@@ -979,14 +979,14 @@ const SEOOptimizer: React.FC<{
                         value={seoDescription}
                         onChange={(e) => onSeoDescriptionChange(e.target.value)}
                         placeholder="Enter meta description (70-160 chars)"
-                        className="w-full px-4 py-3 border-2 border-purple-200 dark:border-purple-700 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-800 font-medium resize-none transition-all"
+                        className="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 font-medium resize-none transition-all"
                         rows={3}
                         maxLength={170}
                     />
                     <div className="flex justify-between mt-2 text-xs font-medium">
                         <span className={descStatus.color}>{descLength}/160 characters</span>
                         <div className="flex items-center gap-1">
-                            <div className="w-32 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div
                                     className={`h-full transition-all duration-300 ${descLength === 0 ? 'bg-gray-400' :
                                             descLength < 70 ? 'bg-yellow-500' :
@@ -999,12 +999,12 @@ const SEOOptimizer: React.FC<{
                     </div>
                 </div>
 
-                <div className="p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl border-2 border-purple-200 dark:border-purple-700">
-                    <h4 className="text-sm font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
+                <div className="p-4 bg-white/80/80 backdrop-blur-sm rounded-xl border-2 border-purple-200">
+                    <h4 className="text-sm font-bold text-purple-900 mb-3 flex items-center gap-2">
                         <TrendingUp className="h-4 w-4" />
                         SEO Best Practices
                     </h4>
-                    <ul className="space-y-2 text-xs text-gray-700 dark:text-gray-300">
+                    <ul className="space-y-2 text-xs text-gray-700">
                         <li className="flex items-start gap-2">
                             <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                             <span>Include primary keywords naturally in title</span>
@@ -1359,7 +1359,7 @@ const loadData = async () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
                 <div className="text-center">
                     <div className="relative mb-4">
                         <LoadingSpinner size="lg" />
@@ -1367,7 +1367,7 @@ const loadData = async () => {
                             <div className="h-20 w-20 bg-blue-500/20 rounded-full animate-ping"></div>
                         </div>
                     </div>
-                    <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                    <p className="text-lg font-semibold text-gray-700">
                         {isEditMode ? 'Loading your masterpiece...' : 'Preparing your canvas...'}
                     </p>
                 </div>
@@ -1379,15 +1379,15 @@ const loadData = async () => {
     const readTime = calculateReadTime(formData.content);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
             {/* Premium Header */}
-            <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b-2 border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-lg">
+            <header className="bg-white/80/80 backdrop-blur-xl border-b-2 border-gray-200 sticky top-0 z-50 shadow-lg">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => router.push('/admin/blog')}
-                                className="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all hover:scale-110 group"
+                                className="p-3 hover:bg-gray-100 rounded-xl transition-all hover:scale-110 group"
                             >
                                 <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
                             </button>
@@ -1396,7 +1396,7 @@ const loadData = async () => {
                                     {isEditMode ? '✏️ Edit Blog Post' : '✨ Create New Blog'}
                                 </h1>
                                 <div className="flex items-center gap-3 mt-1">
-                                    <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                    <span className="text-sm text-gray-600 font-medium">
                                         {wordCount} words • {readTime} min read
                                     </span>
                                     <div className={`px-3 py-1 rounded-full text-xs font-bold ${formData.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' :
@@ -1461,9 +1461,9 @@ const loadData = async () => {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {showPreview ? (
                     /* Preview Mode */
-                    <Card className="shadow-2xl border-2 border-gray-200 dark:border-gray-700 animate-in fade-in duration-500">
+                    <Card className="shadow-2xl border-2 border-gray-200 animate-in fade-in duration-500">
                         <div className="p-12">
-                            <article className="prose prose-xl dark:prose-invert max-w-none">
+                            <article className="prose prose-xl max-w-none">
                                 {formData.images.find(img => img.isMain) && (
                                     <div className="relative rounded-2xl overflow-hidden shadow-2xl mb-12 -mx-12 -mt-12">
                                         <img
@@ -1489,17 +1489,17 @@ const loadData = async () => {
                                     <h1 className="text-5xl font-bold mb-8">{formData.title}</h1>
                                 )}
                                 {formData.excerpt && (
-                                    <p className="text-2xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed mb-12 border-l-4 border-blue-500 pl-6">
+                                    <p className="text-2xl text-gray-600 font-medium leading-relaxed mb-12 border-l-4 border-blue-500 pl-6">
                                         {formData.excerpt}
                                     </p>
                                 )}
                                 <div dangerouslySetInnerHTML={{ __html: formData.content }} />
 
                                 {(formData.categoryIds.length > 0 || formData.tagIds.length > 0) && (
-                                    <div className="mt-16 pt-8 border-t-2 border-gray-200 dark:border-gray-700 not-prose">
+                                    <div className="mt-16 pt-8 border-t-2 border-gray-200 not-prose">
                                         {formData.categoryIds.length > 0 && (
                                             <div className="mb-6">
-                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
                                                     <Folder className="h-5 w-5 text-blue-500" />
                                                     Categories
                                                 </h3>
@@ -1507,7 +1507,7 @@ const loadData = async () => {
                                                     {formData.categoryIds.map(id => {
                                                         const cat = categories.find(c => c.id === id);
                                                         return cat ? (
-                                                            <span key={id} className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-xl font-semibold">
+                                                            <span key={id} className="px-4 py-2 bg-blue-100 text-blue-800 rounded-xl font-semibold">
                                                                 {cat.name}
                                                             </span>
                                                         ) : null;
@@ -1517,7 +1517,7 @@ const loadData = async () => {
                                         )}
                                         {formData.tagIds.length > 0 && (
                                             <div>
-                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
                                                     <TagIcon className="h-5 w-5 text-green-500" />
                                                     Tags
                                                 </h3>
@@ -1525,7 +1525,7 @@ const loadData = async () => {
                                                     {formData.tagIds.map(id => {
                                                         const tag = tags.find(t => t.id === id);
                                                         return tag ? (
-                                                            <span key={id} className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-lg text-sm font-medium">
+                                                            <span key={id} className="px-3 py-1.5 bg-green-100 text-green-800 rounded-lg text-sm font-medium">
                                                                 #{tag.name}
                                                             </span>
                                                         ) : null;
@@ -1544,7 +1544,7 @@ const loadData = async () => {
                         {/* Main Content Column (Left) */}
                         <div className="lg:col-span-8 space-y-6">
                             {/* Title & Slug Card */}
-                            <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
+                            <Card className="shadow-xl border border-gray-200 hover:shadow-2xl transition-all">
                                 <div className="p-10 space-y-8">
                                     <div>
                                         <Input
@@ -1589,24 +1589,24 @@ const loadData = async () => {
                             </Card>
 
                             {/* Content Editor Card */}
-                            <Card className="shadow-xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all">
+                            <Card className="shadow-xl border border-gray-200 hover:shadow-2xl transition-all">
                                 <div className="p-10">
                                     <div className="mb-6">
                                         <div className="flex items-center gap-3 mb-2">
                                             <FileText className="h-6 w-6 text-blue-500" />
-                                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Content</h2>
+                                            <h2 className="text-2xl font-bold text-gray-900">Content</h2>
                                             <span className="text-red-500 text-xl">*</span>
                                         </div>
                                         <div className="flex flex-wrap items-center gap-3 text-sm">
-                                            <span className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full font-medium flex items-center gap-2">
+                                            <span className="px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full font-medium flex items-center gap-2">
                                                 <Sparkles className="h-4 w-4" />
                                                 Paste from Google Docs
                                             </span>
-                                            <span className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-full font-medium flex items-center gap-2">
+                                            <span className="px-3 py-1.5 bg-green-100 text-green-800 rounded-full font-medium flex items-center gap-2">
                                                 <CheckCircle2 className="h-4 w-4" />
                                                 Auto image optimization
                                             </span>
-                                            <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 rounded-full font-medium flex items-center gap-2">
+                                            <span className="px-3 py-1.5 bg-purple-100 text-purple-800 rounded-full font-medium flex items-center gap-2">
                                                 <ImageIcon className="h-4 w-4" />
                                                 Alt text for all images
                                             </span>
@@ -1619,7 +1619,7 @@ const loadData = async () => {
                                         placeholder="Start writing your blog content here... Paste from Google Docs works perfectly!"
                                     />
                                     {errors.content && (
-                                        <p className="mt-3 text-sm text-red-600 dark:text-red-400 flex items-center gap-2 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+                                        <p className="mt-3 text-sm text-red-600 flex items-center gap-2 bg-red-50 p-3 rounded-lg">
                                             <AlertCircle className="h-4 w-4" />
                                             {errors.content}
                                         </p>
@@ -1632,11 +1632,11 @@ const loadData = async () => {
                         <div className="lg:col-span-4 space-y-6">
                             <div className="lg:sticky lg:top-24 space-y-6">
                                 {/* Publishing Card */}
-                                <Card className="shadow-lg border border-gray-200 dark:border-gray-700">
+                                <Card className="shadow-lg border border-gray-200">
                                     <div className="p-6">
                                         <div className="flex items-center gap-2 mb-4">
                                             <Settings className="h-5 w-5 text-blue-500" />
-                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Publishing</h3>
+                                            <h3 className="text-lg font-bold text-gray-900">Publishing</h3>
                                         </div>
                                         <div className="space-y-4">
                                             <Select
@@ -1649,26 +1649,26 @@ const loadData = async () => {
                                                 <option value="PUBLISHED">🌍 Published</option>
                                                 <option value="ARCHIVED">📦 Archived</option>
                                             </Select>
-                                            <label className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 cursor-pointer hover:border-yellow-300 transition-colors">
+                                            <label className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200 cursor-pointer hover:border-yellow-300 transition-colors">
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.featured}
                                                     onChange={(e) => handleChange('featured', e.target.checked)}
                                                     className="h-5 w-5 rounded"
                                                 />
-                                                <div className="flex items-center gap-2 font-medium text-yellow-900 dark:text-yellow-100">
+                                                <div className="flex items-center gap-2 font-medium text-yellow-900">
                                                     <Star className={`h-5 w-5 ${formData.featured ? 'fill-current text-yellow-500' : ''}`} />
                                                     Featured
                                                 </div>
                                             </label>
-                                            <div className="grid grid-cols-2 gap-3 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                                            <div className="grid grid-cols-2 gap-3 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                                                 <div className="text-center">
-                                                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{wordCount}</p>
-                                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">Words</p>
+                                                    <p className="text-2xl font-bold text-blue-600">{wordCount}</p>
+                                                    <p className="text-xs text-gray-600 font-medium mt-0.5">Words</p>
                                                 </div>
                                                 <div className="text-center">
-                                                    <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{readTime}</p>
-                                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">Min Read</p>
+                                                    <p className="text-2xl font-bold text-indigo-600">{readTime}</p>
+                                                    <p className="text-xs text-gray-600 font-medium mt-0.5">Min Read</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -1676,14 +1676,14 @@ const loadData = async () => {
                                 </Card>
 
                                 {/* Image Gallery Card */}
-                                <Card className="shadow-lg border border-gray-200 dark:border-gray-700">
+                                <Card className="shadow-lg border border-gray-200">
                                     <div className="p-6">
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-2">
                                                 <ImageIcon className="h-5 w-5 text-purple-500" />
-                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Images</h3>
+                                                <h3 className="text-lg font-bold text-gray-900">Images</h3>
                                             </div>
-                                            <span className="text-[10px] text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full font-semibold">
+                                            <span className="text-[10px] text-green-600 bg-green-50 px-2 py-1 rounded-full font-semibold">
                                                 Auto-optimized
                                             </span>
                                         </div>
@@ -1698,7 +1698,7 @@ const loadData = async () => {
                                 </Card>
 
                                 {/* Categories & Tags */}
-                                <Card className="shadow-lg border border-gray-200 dark:border-gray-700">
+                                <Card className="shadow-lg border border-gray-200">
                                     <div className="p-6">
                                         <PremiumCategoryTagManager
                                             selectedCategories={formData.categoryIds}
@@ -1714,7 +1714,7 @@ const loadData = async () => {
                                 </Card>
 
                                 {/* SEO Score Dashboard */}
-                                <Card className="shadow-lg border border-green-200 dark:border-green-700 bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-900/10 dark:to-emerald-900/10">
+                                <Card className="shadow-lg border border-green-200 bg-gradient-to-br from-green-50/50 to-emerald-50/50">
                                     <div className="p-6">
                                         <SEOScoreCard
                                             title={formData.title}
@@ -1756,9 +1756,9 @@ const loadData = async () => {
                             type="warning"
                             message="This action cannot be undone. All content, images, and metadata will be permanently deleted."
                         />
-                        <div className="p-6 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl border-2 border-red-200 dark:border-red-800">
-                            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{formData.title}</h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="p-6 bg-gradient-to-br from-red-50 to-orange-50 rounded-xl border-2 border-red-200">
+                            <h3 className="font-bold text-lg text-gray-900 mb-2">{formData.title}</h3>
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
                                 <span>{wordCount} words</span>
                                 <span>•</span>
                                 <span>{formData.images.length} images</span>

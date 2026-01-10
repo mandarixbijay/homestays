@@ -127,28 +127,28 @@ const Pagination: React.FC<{
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-gray-50 border-t border-gray-200">
       {/* Items per page selector */}
       <div className="flex items-center space-x-2">
-        <span className="text-sm text-gray-700 dark:text-gray-300">Show</span>
+        <span className="text-sm text-gray-700">Show</span>
         <select
           value={itemsPerPage}
           onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
           disabled={loading}
-          className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+          className="px-3 py-1.5 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D] disabled:opacity-50"
         >
           <option value={10}>10</option>
           <option value={20}>20</option>
           <option value={50}>50</option>
           <option value={100}>100</option>
         </select>
-        <span className="text-sm text-gray-700 dark:text-gray-300">
+        <span className="text-sm text-gray-700">
           per page
         </span>
       </div>
 
       {/* Page info */}
-      <div className="text-sm text-gray-700 dark:text-gray-300">
+      <div className="text-sm text-gray-700">
         Showing <span className="font-medium">{startItem}</span> to{' '}
         <span className="font-medium">{endItem}</span> of{' '}
         <span className="font-medium">{totalItems}</span> results
@@ -159,7 +159,7 @@ const Pagination: React.FC<{
         <button
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1 || loading}
-          className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           title="First page"
         >
           <ChevronsLeft className="h-4 w-4" />
@@ -168,7 +168,7 @@ const Pagination: React.FC<{
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1 || loading}
-          className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           title="Previous page"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -179,7 +179,7 @@ const Pagination: React.FC<{
           {getPageNumbers().map((page, index) => (
             <React.Fragment key={index}>
               {page === '...' ? (
-                <span className="px-3 py-1.5 text-gray-500 dark:text-gray-400">
+                <span className="px-3 py-1.5 text-gray-500">
                   ...
                 </span>
               ) : (
@@ -188,8 +188,8 @@ const Pagination: React.FC<{
                   disabled={loading}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     currentPage === page
-                      ? 'bg-blue-600 text-white'
-                      : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                      ? 'bg-[#1A403D] text-white'
+                      : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {page}
@@ -202,7 +202,7 @@ const Pagination: React.FC<{
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages || loading}
-          className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           title="Next page"
         >
           <ChevronRight className="h-4 w-4" />
@@ -211,7 +211,7 @@ const Pagination: React.FC<{
         <button
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages || loading}
-          className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           title="Last page"
         >
           <ChevronsRight className="h-4 w-4" />
@@ -238,21 +238,21 @@ const EnhancedStatCard: React.FC<{
   loading?: boolean;
 }> = ({ title, value, icon, color, trend, onClick, loading = false }) => {
   const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
-    green: 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400',
-    yellow: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400',
-    red: 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400',
-    purple: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
-    indigo: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'
+    blue: 'bg-blue-100 text-blue-600',
+    green: 'bg-green-100 text-green-600',
+    yellow: 'bg-yellow-100 text-yellow-600',
+    red: 'bg-red-100 text-red-600',
+    purple: 'bg-purple-100 text-purple-600',
+    indigo: 'bg-indigo-100 text-indigo-600'
   };
 
   const bgGradients = {
-    blue: 'from-blue-50 to-blue-100 dark:from-blue-900/10 dark:to-blue-800/20',
-    green: 'from-green-50 to-green-100 dark:from-green-900/10 dark:to-green-800/20',
-    yellow: 'from-yellow-50 to-yellow-100 dark:from-yellow-900/10 dark:to-yellow-800/20',
-    red: 'from-red-50 to-red-100 dark:from-red-900/10 dark:to-red-800/20',
-    purple: 'from-purple-50 to-purple-100 dark:from-purple-900/10 dark:to-purple-800/20',
-    indigo: 'from-indigo-50 to-indigo-100 dark:from-indigo-900/10 dark:to-indigo-800/20'
+    blue: 'from-blue-50 to-blue-100',
+    green: 'from-green-50 to-green-100',
+    yellow: 'from-yellow-50 to-yellow-100',
+    red: 'from-red-50 to-red-100',
+    purple: 'from-purple-50 to-purple-100',
+    indigo: 'from-indigo-50 to-indigo-100'
   };
 
   return (
@@ -270,19 +270,19 @@ const EnhancedStatCard: React.FC<{
         <div className="relative p-6">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+              <p className="text-sm font-medium text-gray-600 mb-1">
                 {title}
               </p>
               {loading ? (
-                <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                <div className="h-8 w-24 bg-gray-200 animate-pulse rounded"></div>
               ) : (
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                <p className="text-3xl font-bold text-gray-900">
                   {value}
                 </p>
               )}
               {trend && (
                 <div className={`flex items-center mt-2 text-sm ${
-                  trend.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                  trend.isPositive ? 'text-green-600' : 'text-red-600'
                 }`}>
                   {trend.isPositive ? (
                     <TrendingUp className="h-4 w-4 mr-1" />
@@ -290,7 +290,7 @@ const EnhancedStatCard: React.FC<{
                     <TrendingDown className="h-4 w-4 mr-1" />
                   )}
                   <span className="font-medium">{Math.abs(trend.value)}%</span>
-                  <span className="ml-1 text-gray-500 dark:text-gray-400">vs last month</span>
+                  <span className="ml-1 text-gray-500">vs last month</span>
                 </div>
               )}
             </div>
@@ -329,17 +329,17 @@ const FilterSidebar: React.FC<{
       ></div>
 
       {/* Sidebar */}
-      <div className="fixed inset-y-0 right-0 w-80 bg-white dark:bg-gray-800 shadow-2xl z-50 overflow-y-auto">
+      <div className="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-50 overflow-y-auto">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
               <Filter className="h-5 w-5 mr-2" />
               Advanced Filters
             </h3>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <X className="h-5 w-5 text-gray-500" />
             </button>
@@ -349,13 +349,13 @@ const FilterSidebar: React.FC<{
           <div className="space-y-6">
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Status
               </label>
               <select
                 value={filters.status || ''}
                 onChange={(e) => onFilterChange('status', e.target.value || undefined)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
               >
                 <option value="">All Status</option>
                 <option value="PUBLISHED">Published</option>
@@ -366,13 +366,13 @@ const FilterSidebar: React.FC<{
 
             {/* Featured Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Featured
               </label>
               <select
                 value={filters.featured === undefined ? '' : filters.featured.toString()}
                 onChange={(e) => onFilterChange('featured', e.target.value === '' ? undefined : e.target.value === 'true')}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
               >
                 <option value="">All Blogs</option>
                 <option value="true">Featured Only</option>
@@ -382,13 +382,13 @@ const FilterSidebar: React.FC<{
 
             {/* Category Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Category
               </label>
               <select
                 value={filters.categoryId || ''}
                 onChange={(e) => onFilterChange('categoryId', e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
               >
                 <option value="">All Categories</option>
                 {categories.map((cat) => (
@@ -401,13 +401,13 @@ const FilterSidebar: React.FC<{
 
             {/* Tag Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tag
               </label>
               <select
                 value={filters.tagId || ''}
                 onChange={(e) => onFilterChange('tagId', e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
               >
                 <option value="">All Tags</option>
                 {tags.map((tag) => (
@@ -420,7 +420,7 @@ const FilterSidebar: React.FC<{
 
             {/* Date Range */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Date Range
               </label>
               <div className="space-y-2">
@@ -428,14 +428,14 @@ const FilterSidebar: React.FC<{
                   type="date"
                   value={filters.dateFrom || ''}
                   onChange={(e) => onFilterChange('dateFrom', e.target.value || undefined)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
                   placeholder="From"
                 />
                 <input
                   type="date"
                   value={filters.dateTo || ''}
                   onChange={(e) => onFilterChange('dateTo', e.target.value || undefined)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
                   placeholder="To"
                 />
               </div>
@@ -446,7 +446,7 @@ const FilterSidebar: React.FC<{
           <div className="flex space-x-3 mt-8">
             <button
               onClick={onReset}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Reset
             </button>
@@ -455,7 +455,7 @@ const FilterSidebar: React.FC<{
                 onApply();
                 onClose();
               }}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex-1 px-4 py-2 bg-[#1A403D] text-white rounded-lg hover:bg-[#152f2d] transition-colors"
             >
               Apply
             </button>
@@ -479,14 +479,14 @@ const BulkActionsBar: React.FC<{
 
   return (
     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-      <Card className="shadow-2xl border-2 border-blue-500 dark:border-blue-600">
+      <Card className="shadow-2xl border-2 border-[#1A403D]">
         <div className="flex items-center space-x-4 px-6 py-4">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-gray-700">
             {selectedCount} selected
           </span>
-          
-          <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
-          
+
+          <div className="h-6 w-px bg-gray-300"></div>
+
           <div className="flex items-center space-x-2">
             <button
               onClick={() => onAction('publish')}
@@ -520,12 +520,12 @@ const BulkActionsBar: React.FC<{
               Delete
             </button>
           </div>
-          
-          <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
-          
+
+          <div className="h-6 w-px bg-gray-300"></div>
+
           <button
             onClick={onClearSelection}
-            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <X className="h-4 w-4 text-gray-500" />
           </button>
@@ -571,8 +571,8 @@ const BlogListItem: React.FC<{
   };
 
   return (
-    <div className={`group relative bg-white dark:bg-gray-800 border-2 rounded-xl transition-all duration-200 hover:shadow-lg ${
-      isSelected ? 'border-blue-500 dark:border-blue-600 shadow-md' : 'border-gray-200 dark:border-gray-700'
+    <div className={`group relative bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-lg ${
+      isSelected ? 'border-[#1A403D] shadow-md' : 'border-gray-200'
     }`}>
       <div className="flex items-center p-3 sm:p-4 space-x-2 sm:space-x-4">
         {/* Checkbox */}
@@ -581,12 +581,12 @@ const BlogListItem: React.FC<{
             type="checkbox"
             checked={isSelected}
             onChange={() => onSelect(blog.id)}
-            className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 cursor-pointer"
+            className="w-4 h-4 sm:w-5 sm:h-5 text-[#1A403D] border-gray-300 rounded focus:ring-[#1A403D]/20 cursor-pointer"
           />
         </div>
 
         {/* Image */}
-        <div className="hidden sm:block flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600">
+        <div className="hidden sm:block flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
           {mainImageUrl ? (
             <img
               src={mainImageUrl}
@@ -608,15 +608,15 @@ const BlogListItem: React.FC<{
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 sm:truncate mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-900 line-clamp-2 sm:truncate mb-1 group-hover:text-[#1A403D] transition-colors">
                 {blog.title}
               </h3>
 
-              <p className="hidden sm:block text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+              <p className="hidden sm:block text-sm text-gray-600 line-clamp-2 mb-2">
                 {blog.excerpt || 'No excerpt available'}
               </p>
 
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500">
                 <div className="flex items-center space-x-1">
                   <Users className="h-3 w-3 flex-shrink-0" />
                   <span className="truncate max-w-[100px]">{blog.author?.name || 'Unknown'}</span>
@@ -645,7 +645,7 @@ const BlogListItem: React.FC<{
             <div className="flex flex-col items-end space-y-1 sm:space-y-2 flex-shrink-0">
               <StatusBadge status={blog.status} />
               {blog.featured && (
-                <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
+                <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                   <Star className="h-3 w-3 sm:mr-1 fill-current" />
                   <span className="hidden sm:inline">Featured</span>
                 </span>
@@ -658,7 +658,7 @@ const BlogListItem: React.FC<{
         <div className="flex-shrink-0 relative">
           <button
             onClick={() => setShowActions(!showActions)}
-            className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <MoreVertical className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
           </button>
@@ -666,50 +666,50 @@ const BlogListItem: React.FC<{
           {/* Actions Dropdown */}
           {showActions && (
             <>
-              <div 
+              <div
                 className="fixed inset-0 z-10"
                 onClick={() => setShowActions(false)}
               ></div>
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-20">
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-20">
                 <button
                   onClick={() => {
                     onView(blog.id);
                     setShowActions(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   View
                 </button>
-                
+
                 <button
                   onClick={() => {
                     onEdit(blog.id);
                     setShowActions(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </button>
-                
+
                 <button
                   onClick={() => {
                     onDuplicate(blog.id);
                     setShowActions(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 >
                   <Copy className="h-4 w-4 mr-2" />
                   Duplicate
                 </button>
-                
+
                 <button
                   onClick={() => {
                     onToggleStatus(blog.id, getNextStatus(blog.status));
                     setShowActions(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 >
                   {blog.status === 'PUBLISHED' ? (
                     <>
@@ -723,15 +723,15 @@ const BlogListItem: React.FC<{
                     </>
                   )}
                 </button>
-                
-                <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
-                
+
+                <div className="border-t border-gray-200 my-1"></div>
+
                 <button
                   onClick={() => {
                     onDelete(blog.id);
                     setShowActions(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center"
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete
@@ -772,8 +772,8 @@ const BlogGridItem: React.FC<{
   };
 
   return (
-    <div className={`group relative bg-white dark:bg-gray-800 border-2 rounded-xl overflow-hidden transition-all duration-200 hover:shadow-xl hover:-translate-y-1 ${
-      isSelected ? 'border-blue-500 dark:border-blue-600 shadow-lg' : 'border-gray-200 dark:border-gray-700'
+    <div className={`group relative bg-white border-2 rounded-xl overflow-hidden transition-all duration-200 hover:shadow-xl hover:-translate-y-1 ${
+      isSelected ? 'border-[#1A403D] shadow-lg' : 'border-gray-200'
     }`}>
       {/* Selection Checkbox */}
       <div className="absolute top-3 left-3 z-10">
@@ -781,7 +781,7 @@ const BlogGridItem: React.FC<{
           type="checkbox"
           checked={isSelected}
           onChange={() => onSelect(blog.id)}
-          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 cursor-pointer shadow-lg"
+          className="w-5 h-5 text-[#1A403D] border-gray-300 rounded focus:ring-[#1A403D]/20 cursor-pointer shadow-lg"
         />
       </div>
 
@@ -789,59 +789,59 @@ const BlogGridItem: React.FC<{
       <div className="absolute top-3 right-3 z-10">
         <button
           onClick={() => setShowActions(!showActions)}
-          className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="p-2 rounded-lg bg-white shadow-lg hover:bg-gray-100 transition-colors"
         >
-          <MoreVertical className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+          <MoreVertical className="h-5 w-5 text-gray-700" />
         </button>
 
         {showActions && (
           <>
-            <div 
+            <div
               className="fixed inset-0 z-20"
               onClick={() => setShowActions(false)}
             ></div>
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-30">
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-30">
               <button
                 onClick={() => {
                   onView(blog.id);
                   setShowActions(false);
                 }}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 View
               </button>
-              
+
               <button
                 onClick={() => {
                   onEdit(blog.id);
                   setShowActions(false);
                 }}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </button>
-              
+
               <button
                 onClick={() => {
                   onDuplicate(blog.id);
                   setShowActions(false);
                 }}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
               >
                 <Copy className="h-4 w-4 mr-2" />
                 Duplicate
               </button>
-              
-              <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
-              
+
+              <div className="border-t border-gray-200 my-1"></div>
+
               <button
                 onClick={() => {
                   onDelete(blog.id);
                   setShowActions(false);
                 }}
-                className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center"
+                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
@@ -853,7 +853,7 @@ const BlogGridItem: React.FC<{
 
       {/* Image */}
       <div
-        className="relative h-40 sm:h-48 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 cursor-pointer overflow-hidden"
+        className="relative h-40 sm:h-48 bg-gradient-to-br from-gray-200 to-gray-300 cursor-pointer overflow-hidden"
         onClick={() => onView(blog.id)}
       >
         {mainImageUrl ? (
@@ -876,7 +876,7 @@ const BlogGridItem: React.FC<{
         <div className="absolute bottom-3 left-3 flex items-center space-x-2">
           <StatusBadge status={blog.status} />
           {blog.featured && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 shadow-lg">
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 shadow-lg">
               <Star className="h-3 w-3 mr-1 fill-current" />
               Featured
             </span>
@@ -887,18 +887,18 @@ const BlogGridItem: React.FC<{
       {/* Content */}
       <div className="p-4 sm:p-5">
         <h3
-          className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          className="text-base sm:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 cursor-pointer hover:text-[#1A403D] transition-colors"
           onClick={() => onView(blog.id)}
         >
           {blog.title}
         </h3>
 
-        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 sm:line-clamp-3 mb-3 sm:mb-4">
+        <p className="text-sm text-gray-600 line-clamp-2 sm:line-clamp-3 mb-3 sm:mb-4">
           {blog.excerpt || 'No excerpt available'}
         </p>
 
         {/* Meta Info */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3 sm:mb-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500 mb-3 sm:mb-4">
           <div className="flex items-center space-x-1">
             <Users className="h-3 w-3 flex-shrink-0" />
             <span className="truncate max-w-[100px]">{blog.author?.name || 'Unknown'}</span>
@@ -918,7 +918,7 @@ const BlogGridItem: React.FC<{
         </div>
 
         {/* Date */}
-        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center text-xs text-gray-500">
           <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
           <span>{formatDate(blog.publishedAt || blog.updatedAt || blog.createdAt)}</span>
         </div>
@@ -1227,7 +1227,7 @@ export default function EnhancedBlogDashboard() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner size="lg" text="Loading blog dashboard..." />
       </div>
     );
@@ -1238,20 +1238,20 @@ export default function EnhancedBlogDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg border-b border-gray-200 dark:border-gray-700">
+      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm shadow-lg border-b border-gray-200">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+              <div className="p-2.5 bg-gradient-to-br from-[#1A403D] to-[#152f2d] rounded-xl shadow-lg">
                 <FileText className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
                   Blog Management
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500">
                   {total} total blog{total !== 1 ? 's' : ''}
                 </p>
               </div>
@@ -1350,12 +1350,12 @@ export default function EnhancedBlogDashboard() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search blogs by title, excerpt, or author..."
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
                   />
                   {searchTerm && (
                     <button
                       onClick={() => setSearchTerm('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
                       <X className="h-5 w-5" />
                     </button>
@@ -1364,28 +1364,28 @@ export default function EnhancedBlogDashboard() {
               </div>
 
               {/* View Mode Toggle */}
-              <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+              <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-md transition-colors ${
                     viewMode === 'list'
-                      ? 'bg-white dark:bg-gray-600 shadow-sm'
-                      : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                      ? 'bg-white shadow-sm'
+                      : 'hover:bg-gray-200'
                   }`}
                   title="List view"
                 >
-                  <List className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  <List className="h-5 w-5 text-gray-700" />
                 </button>
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-colors ${
                     viewMode === 'grid'
-                      ? 'bg-white dark:bg-gray-600 shadow-sm'
-                      : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                      ? 'bg-white shadow-sm'
+                      : 'hover:bg-gray-200'
                   }`}
                   title="Grid view"
                 >
-                  <Grid className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  <Grid className="h-5 w-5 text-gray-700" />
                 </button>
               </div>
 
@@ -1417,20 +1417,20 @@ export default function EnhancedBlogDashboard() {
 
             {/* Select All */}
             {blogs.length > 0 && (
-              <div className="flex items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center mt-4 pt-4 border-t border-gray-200">
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={selectedBlogs.length === blogs.length && blogs.length > 0}
                     onChange={handleSelectAll}
-                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                    className="w-5 h-5 text-[#1A403D] border-gray-300 rounded focus:ring-[#1A403D]/20"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  <span className="ml-2 text-sm text-gray-700">
                     Select all on this page ({blogs.length})
                   </span>
                 </label>
                 {selectedBlogs.length > 0 && (
-                  <span className="ml-4 text-sm text-blue-600 dark:text-blue-400 font-medium">
+                  <span className="ml-4 text-sm text-[#1A403D] font-medium">
                     {selectedBlogs.length} selected
                   </span>
                 )}
