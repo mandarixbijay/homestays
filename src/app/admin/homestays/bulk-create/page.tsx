@@ -69,7 +69,7 @@ const BulkProgressSummary: React.FC<{
   const hasErrors = Object.keys(validationErrors).length > 0;
 
   return (
-    <Card className="sticky top-4 z-10 border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+    <Card className="sticky top-4 z-10 border-2 border-[#1A403D]/20 bg-[#1A403D]/5">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-2">
@@ -78,21 +78,21 @@ const BulkProgressSummary: React.FC<{
             ) : completedHomestays === totalHomestays ? (
               <CheckCircle className="h-5 w-5 text-green-500" />
             ) : (
-              <Info className="h-5 w-5 text-blue-500" />
+              <Info className="h-5 w-5 text-[#1A403D]" />
             )}
             <div>
-              <span className="text-sm font-medium text-gray-900 dark:text-white">
+              <span className="text-sm font-medium text-gray-900">
                 {completedHomestays} of {totalHomestays} homestays ready
               </span>
               {hasErrors && (
-                <p className="text-xs text-red-600 dark:text-red-400">
+                <p className="text-xs text-red-600">
                   {Object.keys(validationErrors).length} homestay{Object.keys(validationErrors).length !== 1 ? 's' : ''} with errors
                 </p>
               )}
             </div>
           </div>
-          
-          <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+
+          <div className="flex items-center space-x-4 text-sm text-gray-600">
             <span>{totalRooms} rooms</span>
             <span>{totalImages} images</span>
           </div>
@@ -120,14 +120,14 @@ const ValidationErrorsDisplay: React.FC<{
   if (errors.length === 0) return null;
 
   return (
-    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
       <div className="flex items-start space-x-2">
         <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
         <div>
-          <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-2">
+          <h4 className="text-sm font-medium text-red-800 mb-2">
             {title}
           </h4>
-          <ul className="text-sm text-red-700 dark:text-red-300 space-y-1 max-h-32 overflow-y-auto">
+          <ul className="text-sm text-red-700 space-y-1 max-h-32 overflow-y-auto">
             {errors.map((error, i) => (
               <li key={i} className="flex items-start">
                 <span className="mr-2">•</span>
@@ -247,31 +247,31 @@ const HomestayBulkCard: React.FC<{
   const hasErrors = errors.length > 0;
 
   return (
-    <Card className={`relative overflow-hidden transition-all duration-200 ${hasErrors ? 'border-red-200 dark:border-red-800' : 'border-gray-200 dark:border-gray-700'}`}>
+    <Card className={`relative overflow-hidden transition-all duration-200 ${hasErrors ? 'border-red-200' : 'border-gray-200'}`}>
       {/* Card Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center space-x-3">
           <input
             type="checkbox"
             checked={selected}
             onChange={(e) => onSelect(e.target.checked)}
-            className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+            className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
           />
-          
+
           <ActionButton
             onClick={onToggleExpansion}
             variant="secondary"
             size="xs"
             icon={expanded ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
           />
-          
+
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-gray-900">
               {homestay.propertyName || `Homestay ${index + 1}`}
             </h3>
             <div className="flex items-center space-x-2 mt-1">
               <StatusBadge status={hasErrors ? 'Errors' : 'Ready'} variant="small" />
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-xs text-gray-500">
                 {homestay.rooms.length} rooms • {homestay.imageMetadata.length} images
               </span>
             </div>
@@ -359,7 +359,7 @@ const HomestayBulkCard: React.FC<{
 
           {/* Images */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
               Homestay Images
             </label>
             <ImageUpload
@@ -375,12 +375,12 @@ const HomestayBulkCard: React.FC<{
 
           {/* Facilities */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
               Facilities
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {facilities.map((facility: any) => (
-                <label key={facility.id} className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                <label key={facility.id} className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={homestay.facilityIds?.includes(facility.id) || false}
@@ -391,9 +391,9 @@ const HomestayBulkCard: React.FC<{
                         : currentIds.filter(id => id !== facility.id);
                       onUpdate('facilityIds', updatedIds);
                     }}
-                    className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
                   />
-                  <span className="text-xs text-gray-700 dark:text-gray-300">{facility.name}</span>
+                  <span className="text-xs text-gray-700">{facility.name}</span>
                 </label>
               ))}
             </div>
@@ -402,13 +402,13 @@ const HomestayBulkCard: React.FC<{
           {/* Settings */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Status
               </label>
               <select
                 value={homestay.status}
                 onChange={(e) => onUpdate('status', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
               >
                 <option value="PENDING">Pending</option>
                 <option value="APPROVED">Approved</option>
@@ -431,9 +431,9 @@ const HomestayBulkCard: React.FC<{
                   type="checkbox"
                   checked={homestay.vipAccess || false}
                   onChange={(e) => onUpdate('vipAccess', e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">VIP Access</span>
+                <span className="text-sm text-gray-700">VIP Access</span>
               </label>
             </div>
           </div>
@@ -733,9 +733,9 @@ export default function ImprovedBulkHomestayCreate() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -747,14 +747,14 @@ export default function ImprovedBulkHomestayCreate() {
                 Back
               </ActionButton>
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                  <Home className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="p-2 bg-[#1A403D]/10 rounded-lg">
+                  <Home className="h-5 w-5 text-[#1A403D]" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="text-xl font-bold text-gray-900">
                     Create Bulk Homestays
                   </h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-gray-500">
                     Add multiple homestays to the platform efficiently
                   </p>
                 </div>
@@ -819,7 +819,7 @@ export default function ImprovedBulkHomestayCreate() {
             onClick={addHomestay}
             variant="primary"
             icon={<Plus className="h-4 w-4" />}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+            className="bg-gradient-to-r from-[#1A403D] to-[#214B3F] hover:from-[#214B3F] hover:to-[#2A5B4F]"
           >
             Add Homestay
           </ActionButton>
@@ -829,13 +829,13 @@ export default function ImprovedBulkHomestayCreate() {
         {homestays.length === 0 && (
           <Card>
             <div className="text-center py-12">
-              <div className="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+              <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <Home className="h-12 w-12 text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No homestays added yet
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">
+              <p className="text-gray-500 mb-6">
                 Start by adding your first homestay to create multiple properties at once.
               </p>
               <ActionButton
