@@ -15,7 +15,6 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Image from "next/image";
-import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Mail, Phone, Lock } from "lucide-react";
 import { signinPasswordSchema } from "@/hooks/password-hook/password-utils";
@@ -52,7 +51,6 @@ const LoginPage = () => {
     mode: "onBlur",
   });
 
-  const { theme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [isOtpDialogOpen, setIsOtpDialogOpen] = useState(false);
   const [otpValue, setOtpValue] = useState("");
@@ -292,30 +290,30 @@ const LoginPage = () => {
   }, [countdown]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30 pt-20 pb-8 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20 pb-8 px-4">
       <LoginRedirect />
       <Navbar hideUserCircle />
 
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-card rounded-2xl shadow-xl border border-border p-6 sm:p-8 space-y-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 space-y-6">
           {/* Logo */}
           <div className="flex justify-center">
             <Image
-              src={theme === "dark" ? "/images/logo/darkmode_logo.png" : "/images/logo/logo.png"}
+              src="/images/logo/logo.png"
               alt="Nepal Homestays Logo"
-              width={72}
-              height={72}
-              className="rounded-full"
+              width={100}
+              height={100}
+              className="h-20 w-auto"
             />
           </div>
 
           {/* Header */}
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-2xl font-bold text-gray-900">
               Welcome Back
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               Sign in to continue your journey
             </p>
           </div>
@@ -328,7 +326,7 @@ const LoginPage = () => {
                 name="identifier"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-foreground">
+                    <FormLabel className="text-sm font-medium text-gray-700">
                       Email or Mobile Number
                     </FormLabel>
                     <FormControl>
@@ -336,11 +334,11 @@ const LoginPage = () => {
                         <Input
                           type="text"
                           placeholder="Enter your email or mobile number"
-                          className="pl-10 h-11 bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary/30"
+                          className="pl-10 h-11 bg-white border-gray-300 focus:border-[#1A403D] focus:ring-1 focus:ring-[#1A403D]/30"
                           disabled={isBlocked("identifier") || isCheckingSession}
                           {...field}
                         />
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                           {field.value && isEmail(field.value) ? (
                             <Mail className="h-4 w-4" />
                           ) : (
@@ -359,7 +357,7 @@ const LoginPage = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-foreground">
+                    <FormLabel className="text-sm font-medium text-gray-700">
                       Password
                     </FormLabel>
                     <FormControl>
@@ -367,17 +365,17 @@ const LoginPage = () => {
                         <Input
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
-                          className="pl-10 pr-10 h-11 bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary/30"
+                          className="pl-10 pr-10 h-11 bg-white border-gray-300 focus:border-[#1A403D] focus:ring-1 focus:ring-[#1A403D]/30"
                           disabled={isBlocked("password") || isCheckingSession}
                           {...field}
                         />
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                           <Lock className="h-4 w-4" />
                         </div>
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                           tabIndex={-1}
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -393,7 +391,7 @@ const LoginPage = () => {
               <div className="flex justify-end">
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-primary hover:text-primary/80 transition-colors"
+                  className="text-sm text-[#1A403D] hover:text-[#1A403D]/80 font-medium transition-colors"
                 >
                   Forgot password?
                 </Link>
@@ -401,7 +399,7 @@ const LoginPage = () => {
 
               <Button
                 type="submit"
-                className="w-full h-11 font-medium"
+                className="w-full h-11 font-medium bg-[#1A403D] hover:bg-[#1A403D]/90 text-white"
                 disabled={form.formState.isSubmitting || isBlocked("identifier") || isBlocked("password") || isCheckingSession}
               >
                 {isCheckingSession ? (
@@ -429,11 +427,11 @@ const LoginPage = () => {
 
           {/* Footer Links */}
           <div className="text-center pt-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               Don&apos;t have an account?{" "}
               <Link
                 href="/signup"
-                className="font-medium text-primary hover:text-primary/80 transition-colors"
+                className="font-medium text-[#1A403D] hover:text-[#1A403D]/80 transition-colors"
               >
                 Create account
               </Link>
