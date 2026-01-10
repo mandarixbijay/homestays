@@ -22,7 +22,6 @@ import { Input } from "@/components/ui/input";
 import { OtpDialog } from "@/components/dialog/otp-dialog";
 import { useErrorBlock } from "@/hooks/block-hook/useErrorBlock";
 import Image from "next/image";
-import { useTheme } from "next-themes";
 import Navbar from "@/components/navbar/navbar";
 
 const formSchema = z.object({
@@ -52,7 +51,6 @@ export default function ForgotPasswordPage() {
   const [otpError, setOtpError] = useState("");
   const [isResending, setIsResending] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const { theme } = useTheme();
   const { handleFailedAttempt, isBlocked, getBlockedMessage } = useErrorBlock();
   const router = useRouter();
 
@@ -225,42 +223,38 @@ export default function ForgotPasswordPage() {
   }, [countdown]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30 pt-20 pb-8 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20 pb-8 px-4">
       <Navbar hideUserCircle />
 
       <div className="w-full max-w-md">
         {/* Back Button */}
         <Link
           href="/signin"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 group"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors mb-6 group"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back to Sign In
         </Link>
 
         {/* Card */}
-        <div className="bg-card rounded-2xl shadow-xl border border-border p-6 sm:p-8 space-y-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 space-y-6">
           {/* Logo */}
           <div className="flex justify-center">
             <Image
-              src={
-                theme === "dark"
-                  ? "/images/logo/darkmode_logo.png"
-                  : "/images/logo/logo.png"
-              }
+              src="/images/logo/logo.png"
               alt="Nepal Homestays Logo"
-              width={72}
-              height={72}
-              className="rounded-full"
+              width={100}
+              height={100}
+              className="h-20 w-auto"
             />
           </div>
 
           {/* Header */}
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-2xl font-bold text-gray-900">
               Forgot Password?
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               No worries! Enter your email or mobile number and we&apos;ll send you a reset code.
             </p>
           </div>
@@ -273,18 +267,18 @@ export default function ForgotPasswordPage() {
                 name="identifier"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-foreground">
+                    <FormLabel className="text-sm font-medium text-gray-700">
                       Email or Mobile Number
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
                           placeholder="Enter your email or mobile number"
-                          className="pl-10 h-11 bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary/30"
+                          className="pl-10 h-11 bg-white border-gray-300 focus:border-[#1A403D] focus:ring-1 focus:ring-[#1A403D]/30"
                           disabled={isBlocked("identifier") || form.formState.isSubmitting}
                           {...field}
                         />
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                           {field.value && isEmail(field.value) ? (
                             <Mail className="h-4 w-4" />
                           ) : (
@@ -300,7 +294,7 @@ export default function ForgotPasswordPage() {
 
               <Button
                 type="submit"
-                className="w-full h-11 font-medium"
+                className="w-full h-11 font-medium bg-[#1A403D] hover:bg-[#1A403D]/90 text-white"
                 disabled={form.formState.isSubmitting || isBlocked("identifier")}
               >
                 {form.formState.isSubmitting ? (
@@ -320,20 +314,20 @@ export default function ForgotPasswordPage() {
 
           {/* Footer Links */}
           <div className="text-center space-y-3 pt-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               Remember your password?{" "}
               <Link
                 href="/signin"
-                className="font-medium text-primary hover:text-primary/80 transition-colors"
+                className="font-medium text-[#1A403D] hover:text-[#1A403D]/80 transition-colors"
               >
                 Sign in
               </Link>
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               Don&apos;t have an account?{" "}
               <Link
                 href="/signup"
-                className="font-medium text-primary hover:text-primary/80 transition-colors"
+                className="font-medium text-[#1A403D] hover:text-[#1A403D]/80 transition-colors"
               >
                 Create account
               </Link>

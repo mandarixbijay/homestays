@@ -15,7 +15,6 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Image from "next/image";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, Mail, Phone, Lock, User } from "lucide-react";
 import {
@@ -66,7 +65,6 @@ const SignupPage = () => {
     mode: "onBlur",
   });
 
-  const { theme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -243,29 +241,29 @@ const SignupPage = () => {
   }, [countdown]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30 pt-20 pb-8 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20 pb-8 px-4">
       <Navbar hideUserCircle />
 
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-card rounded-2xl shadow-xl border border-border p-6 sm:p-8 space-y-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 space-y-6">
           {/* Logo */}
           <div className="flex justify-center">
             <Image
-              src={theme === "dark" ? "/images/logo/darkmode_logo.png" : "/images/logo/logo.png"}
+              src="/images/logo/logo.png"
               alt="Nepal Homestays Logo"
-              width={72}
-              height={72}
-              className="rounded-full"
+              width={100}
+              height={100}
+              className="h-20 w-auto"
             />
           </div>
 
           {/* Header */}
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-2xl font-bold text-gray-900">
               Create Account
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               Join Nepal Homestays and start your journey
             </p>
           </div>
@@ -278,7 +276,7 @@ const SignupPage = () => {
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-foreground">
+                    <FormLabel className="text-sm font-medium text-gray-700">
                       Full Name
                     </FormLabel>
                     <FormControl>
@@ -286,11 +284,11 @@ const SignupPage = () => {
                         <Input
                           type="text"
                           placeholder="Enter your full name"
-                          className="pl-10 h-11 bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary/30"
+                          className="pl-10 h-11 bg-white border-gray-300 focus:border-[#1A403D] focus:ring-1 focus:ring-[#1A403D]/30"
                           disabled={form.formState.isSubmitting || isBlocked("register")}
                           {...field}
                         />
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                           <User className="h-4 w-4" />
                         </div>
                       </div>
@@ -305,7 +303,7 @@ const SignupPage = () => {
                 name="identifier"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-foreground">
+                    <FormLabel className="text-sm font-medium text-gray-700">
                       Email or Mobile Number
                     </FormLabel>
                     <FormControl>
@@ -313,11 +311,11 @@ const SignupPage = () => {
                         <Input
                           type="text"
                           placeholder="Enter your email or mobile number"
-                          className="pl-10 h-11 bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary/30"
+                          className="pl-10 h-11 bg-white border-gray-300 focus:border-[#1A403D] focus:ring-1 focus:ring-[#1A403D]/30"
                           disabled={form.formState.isSubmitting || isBlocked("register")}
                           {...field}
                         />
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                           {field.value && isEmail(field.value) ? (
                             <Mail className="h-4 w-4" />
                           ) : (
@@ -336,7 +334,7 @@ const SignupPage = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-foreground">
+                    <FormLabel className="text-sm font-medium text-gray-700">
                       Password
                     </FormLabel>
                     <FormControl>
@@ -344,7 +342,7 @@ const SignupPage = () => {
                         <Input
                           type={showPassword ? "text" : "password"}
                           placeholder="Create a strong password"
-                          className="pl-10 pr-10 h-11 bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary/30"
+                          className="pl-10 pr-10 h-11 bg-white border-gray-300 focus:border-[#1A403D] focus:ring-1 focus:ring-[#1A403D]/30"
                           disabled={form.formState.isSubmitting || isBlocked("register")}
                           {...field}
                           onChange={(e) => {
@@ -352,14 +350,14 @@ const SignupPage = () => {
                             handlePasswordChange(e);
                           }}
                         />
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                           <Lock className="h-4 w-4" />
                         </div>
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           disabled={form.formState.isSubmitting || isBlocked("register")}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
                           tabIndex={-1}
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -368,13 +366,13 @@ const SignupPage = () => {
                     </FormControl>
                     {/* Password Strength Indicator */}
                     <div className="mt-2 space-y-1">
-                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                      <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                         <div
                           className={`h-full transition-all duration-300 ${getStrengthColor(passwordStrength)}`}
                           style={{ width: `${(passwordStrength / 5) * 100}%` }}
                         />
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-gray-500">
                         {getStrengthText(passwordStrength)}
                       </p>
                     </div>
@@ -388,7 +386,7 @@ const SignupPage = () => {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-foreground">
+                    <FormLabel className="text-sm font-medium text-gray-700">
                       Confirm Password
                     </FormLabel>
                     <FormControl>
@@ -396,18 +394,18 @@ const SignupPage = () => {
                         <Input
                           type={showConfirmPassword ? "text" : "password"}
                           placeholder="Confirm your password"
-                          className="pl-10 pr-10 h-11 bg-background border-input focus:border-primary focus:ring-1 focus:ring-primary/30"
+                          className="pl-10 pr-10 h-11 bg-white border-gray-300 focus:border-[#1A403D] focus:ring-1 focus:ring-[#1A403D]/30"
                           disabled={form.formState.isSubmitting || isBlocked("register")}
                           {...field}
                         />
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                           <Lock className="h-4 w-4" />
                         </div>
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           disabled={form.formState.isSubmitting || isBlocked("register")}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
                           tabIndex={-1}
                         >
                           {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -421,7 +419,7 @@ const SignupPage = () => {
 
               <Button
                 type="submit"
-                className="w-full h-11 font-medium"
+                className="w-full h-11 font-medium bg-[#1A403D] hover:bg-[#1A403D]/90 text-white"
                 disabled={form.formState.isSubmitting || isBlocked("register")}
               >
                 {form.formState.isSubmitting ? (
@@ -441,11 +439,11 @@ const SignupPage = () => {
 
           {/* Footer Links */}
           <div className="text-center pt-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               Already have an account?{" "}
               <Link
                 href="/signin"
-                className="font-medium text-primary hover:text-primary/80 transition-colors"
+                className="font-medium text-[#1A403D] hover:text-[#1A403D]/80 transition-colors"
               >
                 Sign in
               </Link>

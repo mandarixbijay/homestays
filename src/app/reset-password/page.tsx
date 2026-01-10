@@ -40,7 +40,8 @@ const formSchema = z
   });
 
 export default function ResetPasswordPage() {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const { handleFailedAttempt, isBlocked, getBlockedMessage } = useErrorBlock();
   const router = useRouter();
@@ -132,133 +133,138 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br pt-10 overflow-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md p-4 sm:p-6 md:p-8 space-y-6 rounded-xl shadow-lg mx-2 bg-background"
-      >
-        <div className="flex justify-center mb-4">
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-20 pb-8 px-4">
+      <div className="w-full max-w-md">
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 space-y-6">
+          {/* Logo */}
+          <div className="flex justify-center">
             <Image
               src="/images/logo/logo.png"
-              alt="Homestay Nepal Logo"
-              width={80}
-              height={80}
-              className="rounded-full"
+              alt="Nepal Homestays Logo"
+              width={100}
+              height={100}
+              className="h-20 w-auto"
             />
-          </motion.div>
-        </div>
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Reset Password</h1>
-          <p className="text-sm text-muted-foreground">Enter your new password below</p>
-        </div>
+          </div>
 
-        <Form {...form}>
-          <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              control={form.control}
-              name="newPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">New Password</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter new password"
-                        className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent pr-10"
-                        disabled={form.formState.isSubmitting || isBlocked("reset-password")}
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handlePasswordChange(e);
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-bold text-gray-900">Reset Password</h1>
+            <p className="text-sm text-gray-600">Enter your new password below</p>
+          </div>
+
+          <Form {...form}>
+            <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+              <FormField
+                control={form.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-gray-700">New Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showNewPassword ? "text" : "password"}
+                          placeholder="Enter new password"
+                          className="h-11 bg-white border-gray-300 focus:border-[#1A403D] focus:ring-1 focus:ring-[#1A403D]/30 pr-10"
+                          disabled={form.formState.isSubmitting || isBlocked("reset-password")}
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            handlePasswordChange(e);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                          aria-label={showNewPassword ? "Hide password" : "Show password"}
+                          tabIndex={-1}
+                        >
+                          {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    {/* Password Strength Indicator */}
+                    <div className="mt-2 space-y-1">
+                      <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-300 ${getStrengthColor(passwordStrength)}`}
+                          style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500">{getStrengthText(passwordStrength)}</p>
                     </div>
-                  </FormControl>
-                  <div className="mt-2">
-                    <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-300 ${getStrengthColor(passwordStrength)}`}
-                        style={{ width: `${(passwordStrength / 5) * 100}%` }}
-                      />
-                    </div>
-                    <p className="text-xs mt-1 text-gray-500">{getStrengthText(passwordStrength)}</p>
-                  </div>
-                  <FormMessage className="text-red-500 text-xs" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Confirm Password</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Retype new password"
-                        className="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent pr-10"
-                        disabled={form.formState.isSubmitting || isBlocked("reset-password")}
-                        {...field}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                  </FormControl>
-                  <FormMessage className="text-red-500 text-xs" />
-                </FormItem>
-              )}
-            />
-            {/* FormField for code is intentionally omitted as per request */}
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-gray-700">Confirm Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Retype new password"
+                          className="h-11 bg-white border-gray-300 focus:border-[#1A403D] focus:ring-1 focus:ring-[#1A403D]/30 pr-10"
+                          disabled={form.formState.isSubmitting || isBlocked("reset-password")}
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                          aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                          tabIndex={-1}
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+
               <Button
                 type="submit"
-                className="w-full py-2 px-4 font-medium rounded-lg transition-colors duration-200"
+                className="w-full h-11 font-medium bg-[#1A403D] hover:bg-[#1A403D]/90 text-white"
                 disabled={form.formState.isSubmitting || isBlocked("reset-password")}
               >
-                {form.formState.isSubmitting ? "Resetting Password..." : "Reset Password"}
+                {form.formState.isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Resetting Password...
+                  </span>
+                ) : (
+                  "Reset Password"
+                )}
               </Button>
-            </motion.div>
-          </form>
-        </Form>
+            </form>
+          </Form>
 
-        <div className="text-center">
-          <p className="text-sm">
-            Remember your password?{" "}
-            <Link
-              href="/signin"
-              className="font-medium text-primary hover:text-primary-hover transition-colors duration-200"
-            >
-              Sign in
-            </Link>
-          </p>
+          {/* Footer Links */}
+          <div className="text-center pt-2">
+            <p className="text-sm text-gray-600">
+              Remember your password?{" "}
+              <Link
+                href="/signin"
+                className="font-medium text-[#1A403D] hover:text-[#1A403D]/80 transition-colors"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
