@@ -160,10 +160,10 @@ const StatCard: React.FC<{
   };
 
   const textColorClasses = {
-    teal: 'text-[#224240] dark:text-[#2a5350]',
-    green: 'text-green-600 dark:text-green-400',
-    yellow: 'text-yellow-600 dark:text-yellow-400',
-    red: 'text-red-600 dark:text-red-400'
+    teal: 'text-[#224240]
+    green: 'text-green-600
+    yellow: 'text-yellow-600
+    red: 'text-red-600
   };
 
   const iconBgClasses = {
@@ -180,19 +180,19 @@ const StatCard: React.FC<{
       className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} backdrop-blur-sm border ${borderColorClasses[color]} rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent dark:from-white/5 pointer-events-none"></div>
-      <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10 dark:bg-white/5 blur-2xl"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent pointer-events-none"></div>
+      <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10 blur-2xl"></div>
 
       <div className="relative p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{title}</p>
+            <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
             {loading ? (
-              <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+              <div className="h-10 w-24 bg-gray-200 rounded-lg animate-pulse"></div>
             ) : (
               <p className={`text-4xl font-bold ${textColorClasses[color]}`}>{value}</p>
             )}
-            {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{subtitle}</p>}
+            {subtitle && <p className="text-xs text-gray-500 mt-2">{subtitle}</p>}
           </div>
           {icon && (
             <div className={`p-3 rounded-xl ${iconBgClasses[color]} shadow-lg`}>
@@ -283,8 +283,8 @@ const DealFormModal: React.FC<{
       <ActionButton onClick={handleSubmit} variant="primary" loading={loading}>{deal ? 'Update' : 'Continue to Select Homestays'}</ActionButton></>}>
       <div className="space-y-4">
         {!deal && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <p className="text-sm text-blue-800 dark:text-blue-300">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
               <strong>Step 1:</strong> Configure your deal details below. In the next step, you&apos;ll select which homestays to apply this deal to.
             </p>
           </div>
@@ -294,9 +294,9 @@ const DealFormModal: React.FC<{
           <Input label="Discount Amount *" type="number" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value ? parseFloat(e.target.value) : 0 })}
             placeholder="20" min="0" required />
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Type *</label>
             <select value={formData.discountType} onChange={(e) => setFormData({ ...formData, discountType: e.target.value as 'PERCENTAGE' | 'FLAT' })}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900">
               <option value="PERCENTAGE">Percentage (%)</option>
               <option value="FLAT">Flat Amount</option>
             </select>
@@ -309,16 +309,16 @@ const DealFormModal: React.FC<{
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
           <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Limited time offer..." rows={3}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900" />
         </div>
 
         <label className="flex items-center space-x-2 cursor-pointer">
           <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
             className="w-4 h-4 text-[#224240] border-gray-300 rounded" />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
+          <span className="text-sm font-medium text-gray-700">Active</span>
         </label>
 
         {error && <Alert type="error" title="Error" message={error} onClose={clearError} />}
@@ -460,8 +460,8 @@ export default function LastMinuteDealsManagement() {
   if (session?.user?.role !== 'ADMIN') return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] dark:from-[#1a332f] dark:via-[#224240] dark:to-[#2a5350] shadow-2xl">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] shadow-2xl">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
         </div>
@@ -491,15 +491,15 @@ export default function LastMinuteDealsManagement() {
 
         {/* Tabs */}
         <div className="mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-2">
             <div className="flex space-x-2">
-              <button onClick={() => setActiveTab('overview')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'overview' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+              <button onClick={() => setActiveTab('overview')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'overview' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100
                 <div className="flex items-center justify-center space-x-2">
                   <Zap className="h-4 w-4" />
                   <span>Overview</span>
                 </div>
               </button>
-              <button onClick={() => setActiveTab('analytics')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'analytics' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+              <button onClick={() => setActiveTab('analytics')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'analytics' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100
                 <div className="flex items-center justify-center space-x-2">
                   <BarChart3 className="h-4 w-4" />
                   <span>Analytics</span>
@@ -521,8 +521,8 @@ export default function LastMinuteDealsManagement() {
             </div>
 
             {/* Top Active Deals */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
                 <Zap className="h-5 w-5 mr-2 text-[#224240]" />
                 Top Active Deals
               </h3>
@@ -533,30 +533,30 @@ export default function LastMinuteDealsManagement() {
                     <div key={deal.id} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${idx === 0 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : idx === 1 ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' : idx === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' : 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${idx === 0 ? 'bg-yellow-100 text-yellow-700 : idx === 1 ? 'bg-gray-100 text-gray-700 : idx === 2 ? 'bg-orange-100 text-orange-700 : 'bg-gray-50 text-gray-600
                             <span className="text-sm font-bold">#{idx + 1}</span>
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900 dark:text-white">{deal.homestay?.name || 'Unknown Homestay'}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="font-medium text-gray-900">{deal.homestay?.name || 'Unknown Homestay'}</p>
+                            <p className="text-xs text-gray-500">
                               {daysRemaining} days remaining
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className={`inline-flex items-center px-3 py-1.5 rounded-lg ${deal.discountType === 'PERCENTAGE' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
+                          <div className={`inline-flex items-center px-3 py-1.5 rounded-lg ${deal.discountType === 'PERCENTAGE' ? 'bg-yellow-100 text-yellow-700 : 'bg-orange-100 text-orange-700
                             {deal.discountType === 'PERCENTAGE' ? <Percent className="h-4 w-4 mr-1" /> : <DollarSign className="h-4 w-4 mr-1" />}
                             <span className="text-lg font-bold">{deal.discount}{deal.discountType === 'PERCENTAGE' ? '%' : ''}</span>
                           </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">OFF</p>
+                          <p className="text-xs text-gray-500 mt-1">OFF</p>
                         </div>
                       </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">{deal.description || 'No description'}</div>
+                      <div className="text-xs text-gray-600">{deal.description || 'No description'}</div>
                     </div>
                   );
                 })}
                 {analyticsData.topDeals.length === 0 && (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">No active deals available</div>
+                  <div className="text-center py-8 text-gray-500">No active deals available</div>
                 )}
               </div>
             </div>
@@ -565,23 +565,23 @@ export default function LastMinuteDealsManagement() {
 
         {activeTab === 'overview' && (
           <>
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <button onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}>
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-700
                 <SlidersHorizontal className="h-4 w-4" /><span>Filters</span>
                 {activeFilter !== undefined && <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">Active</span>}
               </button>
             </div>
             <div className="flex items-center space-x-2">
-              <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
+              <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
                 <Grid className="h-5 w-5" /></button>
-              <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
+              <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
                 <List className="h-5 w-5" /></button>
-              <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}>
+              <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
                 <Table className="h-5 w-5" /></button>
-              <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 hover:bg-gray-200 transition-colors">
+              <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
                 <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
             </div>
           </div>
@@ -589,10 +589,10 @@ export default function LastMinuteDealsManagement() {
           <AnimatePresence>
             {showFilters && (
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="pt-4 border-t border-gray-200">
                   <select value={activeFilter === undefined ? '' : activeFilter.toString()}
                     onChange={(e) => { setActiveFilter(e.target.value === '' ? undefined : e.target.value === 'true'); setCurrentPage(1); }}
-                    className="w-full md:w-64 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    className="w-full md:w-64 border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white text-gray-900">
                     <option value="">All Deals</option><option value="true">Active Only</option><option value="false">Inactive Only</option>
                   </select>
                   {activeFilter !== undefined && (
@@ -605,29 +605,29 @@ export default function LastMinuteDealsManagement() {
         </div>
 
         {loading && deals.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12">
             <LoadingSpinner size="lg" text="Loading deals..." /></div>
         ) : deals.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12">
             <EmptyState icon={<Zap className="h-16 w-16" />} title="No deals found" description="Create your first last minute deal"
               action={{ label: 'Create Deal', onClick: () => setShowFormModal(true), icon: <Plus className="h-4 w-4" />, variant: 'primary' }} /></div>
         ) : viewMode === 'table' ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Homestay</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Discount</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Original Price</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Deal Price</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Savings</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Period</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Homestay</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Discount</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Original Price</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Deal Price</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Savings</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Period</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="divide-y divide-gray-200">
                   {deals.map((deal: any) => {
                     const originalPrice = calculateOriginalPrice(deal.homestay);
                     const discountedPrice = originalPrice ? calculateDiscountedPrice(originalPrice, deal.discount, deal.discountType) : null;
@@ -637,10 +637,10 @@ export default function LastMinuteDealsManagement() {
                     const isActive = deal.isActive && !isExpired;
 
                     return (
-                      <tr key={deal.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <tr key={deal.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-4">
-                            <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
+                            <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                               {homestayImage ? (
                                 <img src={homestayImage} alt={deal.homestay?.name || 'Homestay'} className="w-full h-full object-cover" />
                               ) : (
@@ -650,9 +650,9 @@ export default function LastMinuteDealsManagement() {
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-gray-900 dark:text-white truncate">{deal.homestay?.name || 'N/A'}</p>
+                              <p className="font-semibold text-gray-900 truncate">{deal.homestay?.name || 'N/A'}</p>
                               {deal.homestay?.address && (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+                                <p className="text-sm text-gray-500 flex items-center mt-1">
                                   <MapPin className="h-3 w-3 mr-1" />
                                   {deal.homestay.address}
                                 </p>
@@ -660,7 +660,7 @@ export default function LastMinuteDealsManagement() {
                               {deal.homestay?.rating && (
                                 <div className="flex items-center mt-1">
                                   <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 mr-1" />
-                                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                                  <span className="text-sm text-gray-600">
                                     {deal.homestay.rating} ({deal.homestay.reviews || 0})
                                   </span>
                                 </div>
@@ -671,55 +671,55 @@ export default function LastMinuteDealsManagement() {
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-2">
                             {deal.discountType === 'PERCENTAGE' ? (
-                              <Percent className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                              <Percent className="h-4 w-4 text-yellow-600" />
                             ) : (
-                              <DollarSign className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                              <DollarSign className="h-4 w-4 text-orange-600" />
                             )}
-                            <span className="font-semibold text-gray-900 dark:text-white">
+                            <span className="font-semibold text-gray-900">
                               {deal.discountType === 'PERCENTAGE' ? `${deal.discount}%` : `NPR ${deal.discount}`}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
                           {originalPrice ? (
-                            <span className="text-gray-500 dark:text-gray-400 line-through">
+                            <span className="text-gray-500 line-through">
                               NPR {originalPrice.toLocaleString()}
                             </span>
                           ) : (
-                            <span className="text-gray-400 dark:text-gray-500 text-sm">N/A</span>
+                            <span className="text-gray-400 text-sm">N/A</span>
                           )}
                         </td>
                         <td className="px-6 py-4">
                           {discountedPrice ? (
-                            <span className="font-bold text-green-600 dark:text-green-400">
+                            <span className="font-bold text-green-600">
                               NPR {Math.round(discountedPrice).toLocaleString()}
                             </span>
                           ) : (
-                            <span className="text-gray-400 dark:text-gray-500 text-sm">N/A</span>
+                            <span className="text-gray-400 text-sm">N/A</span>
                           )}
                         </td>
                         <td className="px-6 py-4">
                           {savings ? (
-                            <span className="font-semibold text-green-600 dark:text-green-400">
+                            <span className="font-semibold text-green-600">
                               NPR {Math.round(savings).toLocaleString()}
                             </span>
                           ) : (
-                            <span className="text-gray-400 dark:text-gray-500 text-sm">-</span>
+                            <span className="text-gray-400 text-sm">-</span>
                           )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm">
-                            <p className="text-gray-900 dark:text-white">{new Date(deal.startDate).toLocaleDateString()}</p>
-                            <p className="text-gray-500 dark:text-gray-400">to {new Date(deal.endDate).toLocaleDateString()}</p>
+                            <p className="text-gray-900">{new Date(deal.startDate).toLocaleDateString()}</p>
+                            <p className="text-gray-500">to {new Date(deal.endDate).toLocaleDateString()}</p>
                           </div>
                         </td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
                             isActive
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                              ? 'bg-green-100 text-green-800
                               : isExpired
-                              ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                              ? 'bg-red-100 text-red-800
+                              : 'bg-gray-100 text-gray-800
                           }`}>
                             {isActive ? 'Active' : isExpired ? 'Expired' : 'Inactive'}
                           </span>
@@ -728,14 +728,14 @@ export default function LastMinuteDealsManagement() {
                           <div className="flex items-center justify-end space-x-2">
                             <button
                               onClick={() => setEditingDeal(deal)}
-                              className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                              className="p-2 text-[#1A403D] hover:bg-blue-50 rounded-lg transition-colors"
                               title="Edit"
                             >
                               <Edit className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => handleDelete(deal.id)}
-                              className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -774,8 +774,8 @@ export default function LastMinuteDealsManagement() {
                       <div key={timeLabel} className="space-y-3">
                         <div className="flex items-center gap-2 px-4">
                           <Clock className="h-4 w-4 text-[#224240]" />
-                          <h4 className="text-md font-semibold text-gray-700 dark:text-gray-300">{timeLabel}</h4>
-                          <span className="text-sm text-gray-500 dark:text-gray-400">({timeDeals.length})</span>
+                          <h4 className="text-md font-semibold text-gray-700">{timeLabel}</h4>
+                          <span className="text-sm text-gray-500">({timeDeals.length})</span>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
@@ -815,7 +815,7 @@ export default function LastMinuteDealsManagement() {
                                   <div className="flex gap-2">
                                     <button
                                       onClick={() => setEditingDeal(deal)}
-                                      className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-colors"
+                                      className="p-2 bg-[#1A403D] hover:bg-[#224240] text-white rounded-lg shadow-lg transition-colors"
                                       title="Edit"
                                     >
                                       <Edit className="h-4 w-4" />
@@ -863,14 +863,14 @@ export default function LastMinuteDealsManagement() {
                     layout
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-4"
+                    className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 p-4"
                   >
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0 relative">
                         {getHomestayImage(d.homestay) ? (
                           <img src={getHomestayImage(d.homestay)} alt={d.homestay?.name} className="w-32 h-32 rounded-xl object-cover" />
                         ) : (
-                          <div className="w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center">
+                          <div className="w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
                             <Home className="h-12 w-12 text-gray-400" />
                           </div>
                         )}
@@ -884,9 +884,9 @@ export default function LastMinuteDealsManagement() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{d.homestay?.name || 'Unnamed'}</h3>
+                            <h3 className="text-lg font-bold text-gray-900">{d.homestay?.name || 'Unnamed'}</h3>
                             {d.homestay?.address && (
-                              <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+                              <p className="text-sm text-gray-500 flex items-center mt-1">
                                 <MapPin className="h-3.5 w-3.5 mr-1" />
                                 {d.homestay.address}
                               </p>
@@ -894,8 +894,8 @@ export default function LastMinuteDealsManagement() {
                             {rating && (
                               <div className="flex items-center mt-1">
                                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                                <span className="text-sm font-semibold text-gray-900 dark:text-white mr-1">{rating.toFixed(1)}</span>
-                                <span className="text-sm text-gray-500 dark:text-gray-400">({reviews} reviews)</span>
+                                <span className="text-sm font-semibold text-gray-900 mr-1">{rating.toFixed(1)}</span>
+                                <span className="text-sm text-gray-500">({reviews} reviews)</span>
                               </div>
                             )}
                           </div>
@@ -923,8 +923,8 @@ export default function LastMinuteDealsManagement() {
         )}
 
         {totalPages > 1 && (
-          <div className="mt-8 flex items-center justify-between bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">Page {currentPage} of {totalPages}</div>
+          <div className="mt-8 flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+            <div className="text-sm text-gray-600 font-medium">Page {currentPage} of {totalPages}</div>
             <div className="flex items-center space-x-2">
               <ActionButton onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} variant="secondary" size="sm">Previous</ActionButton>
               <ActionButton onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} variant="secondary" size="sm">Next</ActionButton>

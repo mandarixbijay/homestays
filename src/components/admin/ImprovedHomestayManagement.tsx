@@ -71,18 +71,18 @@ const StatCard: React.FC<{
 
   const borderColorClasses = {
     teal: 'border-[#224240]/20 hover:border-[#224240]/40',
-    green: 'border-green-200 hover:border-green-300 dark:border-green-800 dark:hover:border-green-700',
-    yellow: 'border-yellow-200 hover:border-yellow-300 dark:border-yellow-800 dark:hover:border-yellow-700',
-    red: 'border-red-200 hover:border-red-300 dark:border-red-800 dark:hover:border-red-700',
-    purple: 'border-purple-200 hover:border-purple-300 dark:border-purple-800 dark:hover:border-purple-700'
+    green: 'border-green-200 hover:border-green-300
+    yellow: 'border-yellow-200 hover:border-yellow-300
+    red: 'border-red-200 hover:border-red-300
+    purple: 'border-purple-200 hover:border-purple-300
   };
 
   const textColorClasses = {
-    teal: 'text-[#224240] dark:text-[#2a5350]',
-    green: 'text-green-600 dark:text-green-400',
-    yellow: 'text-yellow-600 dark:text-yellow-400',
-    red: 'text-red-600 dark:text-red-400',
-    purple: 'text-purple-600 dark:text-purple-400'
+    teal: 'text-[#224240]
+    green: 'text-green-600
+    yellow: 'text-yellow-600
+    red: 'text-red-600
+    purple: 'text-purple-600
   };
 
   const iconBgClasses = {
@@ -103,30 +103,30 @@ const StatCard: React.FC<{
       tabIndex={onClick ? 0 : undefined}
     >
       {/* Decorative gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent dark:from-white/5 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent pointer-events-none"></div>
 
       {/* Decorative circles */}
-      <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10 dark:bg-white/5 blur-2xl"></div>
-      <div className="absolute -left-4 -bottom-4 w-20 h-20 rounded-full bg-white/10 dark:bg-white/5 blur-xl"></div>
+      <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10 blur-2xl"></div>
+      <div className="absolute -left-4 -bottom-4 w-20 h-20 rounded-full bg-white/10 blur-xl"></div>
 
       <div className="relative p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{title}</p>
+            <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
             {loading ? (
-              <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+              <div className="h-10 w-24 bg-gray-200 rounded-lg animate-pulse"></div>
             ) : (
               <div className="flex items-baseline space-x-2">
                 <p className={`text-4xl font-bold ${textColorClasses[color]}`}>{value}</p>
                 {trend && (
-                  <div className={`flex items-center text-sm font-semibold ${trend.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  <div className={`flex items-center text-sm font-semibold ${trend.isPositive ? 'text-green-600 : 'text-red-600
                     {trend.isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                     <span className="ml-1">{Math.abs(trend.value)}%</span>
                   </div>
                 )}
               </div>
             )}
-            {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{subtitle}</p>}
+            {subtitle && <p className="text-xs text-gray-500 mt-2">{subtitle}</p>}
           </div>
           {icon && (
             <div className={`p-3 rounded-xl ${iconBgClasses[color]} shadow-lg`}>
@@ -158,7 +158,7 @@ const HomestayCard: React.FC<{
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden"
+        className="group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-200 overflow-hidden"
       >
         {onSelect && (
           <div className="absolute top-4 left-4 z-10">
@@ -167,7 +167,7 @@ const HomestayCard: React.FC<{
                 e.stopPropagation();
                 onSelect(homestay.id);
               }}
-              className="p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-lg"
+              className="p-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-white transition-colors shadow-lg"
             >
               {isSelected ? (
                 <CheckSquare className="h-5 w-5 text-[#224240]" />
@@ -179,7 +179,7 @@ const HomestayCard: React.FC<{
         )}
 
         {/* Image */}
-        <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 overflow-hidden">
+        <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           {mainImage ? (
             <img
               src={mainImage.url}
@@ -197,14 +197,14 @@ const HomestayCard: React.FC<{
         {/* Content */}
         <div className="p-5">
           <div className="mb-3">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-[#224240] dark:group-hover:text-[#2a5350] transition-colors">
+            <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-[#224240] transition-colors">
               {homestay.name || homestay.propertyName || 'Unnamed Homestay'}
             </h3>
-            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-1">
+            <div className="flex items-center text-sm text-gray-500 mb-1">
               <MapPin className="h-4 w-4 mr-1.5 flex-shrink-0" />
               <span className="line-clamp-1">{homestay.address || homestay.propertyAddress || 'No address'}</span>
             </div>
-            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center text-sm text-gray-500">
               <User className="h-4 w-4 mr-1.5 flex-shrink-0" />
               <span className="line-clamp-1">{homestay.owner?.name || 'Unknown'}</span>
             </div>
@@ -212,7 +212,7 @@ const HomestayCard: React.FC<{
 
           <div className="flex items-center justify-between mb-4">
             <StatusBadge status={homestay.status || 'PENDING'} variant="small" />
-            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+            <span className="text-sm text-gray-600 font-medium">
               {homestay.rooms?.length || 0} rooms
             </span>
           </div>
@@ -270,13 +270,13 @@ const HomestayCard: React.FC<{
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-4"
+      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 p-4"
     >
       <div className="flex items-center space-x-4">
         {onSelect && (
           <button
             onClick={() => onSelect(homestay.id)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             {isSelected ? (
               <CheckSquare className="h-5 w-5 text-[#224240]" />
@@ -288,9 +288,9 @@ const HomestayCard: React.FC<{
 
         <div className="flex-shrink-0">
           {mainImage ? (
-            <img src={mainImage.url} alt={homestay.name || 'Homestay'} className="w-24 h-24 rounded-xl object-cover border border-gray-200 dark:border-gray-600" />
+            <img src={mainImage.url} alt={homestay.name || 'Homestay'} className="w-24 h-24 rounded-xl object-cover border border-gray-200" />
           ) : (
-            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center">
+            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
               <Home className="h-10 w-10 text-gray-400" />
             </div>
           )}
@@ -299,20 +299,20 @@ const HomestayCard: React.FC<{
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate group-hover:text-[#224240] dark:group-hover:text-[#2a5350] transition-colors">
+              <h3 className="text-lg font-bold text-gray-900 truncate group-hover:text-[#224240] transition-colors">
                 {homestay.name || homestay.propertyName || 'Unnamed Homestay'}
               </h3>
-              <div className="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+              <div className="mt-1 flex items-center text-sm text-gray-500">
                 <MapPin className="h-4 w-4 mr-1.5 flex-shrink-0" />
                 <span className="truncate">{homestay.address || homestay.propertyAddress || 'No address'}</span>
               </div>
-              <div className="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+              <div className="mt-1 flex items-center text-sm text-gray-500">
                 <User className="h-4 w-4 mr-1.5 flex-shrink-0" />
                 <span>{homestay.owner?.name || 'Unknown'} {homestay.ownerId && `(ID: ${homestay.ownerId})`}</span>
               </div>
               <div className="mt-2 flex items-center space-x-4">
                 <StatusBadge status={homestay.status || 'PENDING'} variant="small" />
-                <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">{homestay.rooms?.length || 0} rooms</span>
+                <span className="text-sm text-gray-600 font-medium">{homestay.rooms?.length || 0} rooms</span>
               </div>
             </div>
 
@@ -373,7 +373,7 @@ const ApprovalModal: React.FC<{
       }
     >
       <div className="space-y-4">
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600">
           Are you sure you want to {formData.status.toLowerCase()} &quot;{formData.homestayName}&quot;?
         </p>
         {formData.status === 'REJECTED' && (
@@ -623,9 +623,9 @@ export default function ImprovedHomestayManagement() {
   const hasFilters = search || statusFilter || ownerIdFilter || addressFilter;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       {/* Enhanced Header */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] dark:from-[#1a332f] dark:via-[#224240] dark:to-[#2a5350] shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] shadow-2xl">
         {/* Decorative background pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
@@ -714,7 +714,7 @@ export default function ImprovedHomestayManagement() {
         </div>
 
         {/* Filters & Actions Bar */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <button
@@ -722,7 +722,7 @@ export default function ImprovedHomestayManagement() {
                 className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${
                   showFilters
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200
                 }`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
@@ -732,7 +732,7 @@ export default function ImprovedHomestayManagement() {
 
               {selectedIds.size > 0 && (
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                  <span className="text-sm text-gray-600 font-medium">
                     {selectedIds.size} selected
                   </span>
                   <ActionButton onClick={handleBulkApprove} variant="success" size="sm" icon={<Check className="h-4 w-4" />}>
@@ -751,7 +751,7 @@ export default function ImprovedHomestayManagement() {
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'grid'
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200
                 }`}
               >
                 <Grid className="h-5 w-5" />
@@ -761,7 +761,7 @@ export default function ImprovedHomestayManagement() {
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'list'
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200
                 }`}
               >
                 <List className="h-5 w-5" />
@@ -769,7 +769,7 @@ export default function ImprovedHomestayManagement() {
               <button
                 onClick={() => loadData()}
                 disabled={loading}
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
               >
                 <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
               </button>
@@ -786,7 +786,7 @@ export default function ImprovedHomestayManagement() {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
                   <ErrorBoundary>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -796,14 +796,14 @@ export default function ImprovedHomestayManagement() {
                         onChange={handleSearchChange}
                         placeholder="Search by name..."
                         autoComplete="off"
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#224240] focus:border-transparent transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm bg-white text-gray-900 focus:ring-2 focus:ring-[#224240] focus:border-transparent transition-all"
                       />
                     </div>
                   </ErrorBoundary>
                   <select
                     value={statusFilter}
                     onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#224240] focus:border-transparent transition-all"
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white text-gray-900 focus:ring-2 focus:ring-[#224240] focus:border-transparent transition-all"
                   >
                     <option value="">All Status</option>
                     <option value="PENDING">Pending</option>
@@ -841,11 +841,11 @@ export default function ImprovedHomestayManagement() {
 
         {/* Homestays List */}
         {loading && homestays.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12">
             <LoadingSpinner size="lg" text="Loading homestays..." />
           </div>
         ) : homestays.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12">
             <EmptyState
               icon={<Home className="h-16 w-16" />}
               title="No homestays found"
@@ -865,17 +865,17 @@ export default function ImprovedHomestayManagement() {
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={handleSelectAll}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors"
                   >
                     {selectedIds.size === homestays.length ? (
                       <CheckSquare className="h-5 w-5 text-[#224240]" />
                     ) : (
                       <Square className="h-5 w-5 text-gray-400" />
                     )}
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Select All</span>
+                    <span className="text-sm font-medium text-gray-700">Select All</span>
                   </button>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600">
                   Showing {homestays.length} of {total} homestays
                 </p>
               </div>
@@ -903,8 +903,8 @@ export default function ImprovedHomestayManagement() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-8 flex items-center justify-between bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+          <div className="mt-8 flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+            <div className="text-sm text-gray-600 font-medium">
               Page {currentPage} of {totalPages}
             </div>
             <div className="flex items-center space-x-2">
@@ -935,7 +935,7 @@ export default function ImprovedHomestayManagement() {
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                         currentPage === pageNum
                           ? 'bg-[#224240] text-white shadow-lg'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200
                       }`}
                     >
                       {pageNum}

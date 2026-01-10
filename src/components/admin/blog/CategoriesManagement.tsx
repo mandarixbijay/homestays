@@ -160,13 +160,13 @@ const CategoryForm: React.FC<{
       />
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Parent Category
         </label>
         <select
           value={formData.parentId || ''}
           onChange={(e) => updateField('parentId', e.target.value ? parseInt(e.target.value) : undefined)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#1A403D]/20 focus:border-transparent"
         >
           <option value="">No parent (top level)</option>
           {availableParents.map(cat => (
@@ -176,12 +176,12 @@ const CategoryForm: React.FC<{
           ))}
         </select>
         {errors.parentId && (
-          <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.parentId}</p>
+          <p className="text-sm text-red-600 mt-1">{errors.parentId}</p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Color
         </label>
         <div className="flex flex-wrap gap-2">
@@ -192,8 +192,8 @@ const CategoryForm: React.FC<{
               onClick={() => updateField('color', color)}
               className={`w-8 h-8 rounded-full border-2 ${
                 formData.color === color 
-                  ? 'border-gray-900 dark:border-white' 
-                  : 'border-gray-300 dark:border-gray-600'
+                  ? 'border-gray-900' 
+                  : 'border-gray-300'
               }`}
               style={{ backgroundColor: color }}
             />
@@ -243,14 +243,14 @@ const CategoryTreeNode: React.FC<{
   return (
     <div className="w-full">
       <div 
-        className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg group"
+        className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg group"
         style={{ marginLeft: `${level * 24}px` }}
       >
         <div className="flex items-center space-x-3 flex-1 min-w-0">
           {hasChildren ? (
             <button
               onClick={() => onToggleExpand(category.id)}
-              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+              className="p-1 hover:bg-gray-200 rounded"
             >
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4 text-gray-500" />
@@ -260,7 +260,7 @@ const CategoryTreeNode: React.FC<{
             </button>
           ) : (
             <div className="w-6 h-6 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600" />
+              <div className="w-2 h-2 rounded-full bg-gray-300" />
             </div>
           )}
           
@@ -271,25 +271,25 @@ const CategoryTreeNode: React.FC<{
           
           <div className="min-w-0 flex-1">
             <div className="flex items-center space-x-2">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              <h3 className="text-sm font-medium text-gray-900 truncate">
                 {category.name}
               </h3>
               {hasChildren && (
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-500">
                   ({category.children?.length})
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500">
               /{category.slug}
             </p>
             {category.description && (
-              <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 line-clamp-1">
+              <p className="text-xs text-gray-600 mt-1 line-clamp-1">
                 {category.description}
               </p>
             )}
             {category._count && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 {category._count.blogs} blog{category._count.blogs !== 1 ? 's' : ''}
               </p>
             )}
@@ -309,7 +309,7 @@ const CategoryTreeNode: React.FC<{
             size="sm"
             variant="secondary"
             onClick={() => onDelete(category)}
-            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            className="text-red-600 hover:text-red-700"
           >
             <Trash2 className="h-4 w-4" />
           </ActionButton>
@@ -488,9 +488,9 @@ export default function CategoriesManagement() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -501,14 +501,14 @@ export default function CategoriesManagement() {
                 <ArrowLeft className="h-4 w-4" />
               </ActionButton>
               
-              <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                <Folder className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Folder className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-2xl font-bold text-gray-900">
                   Categories Management
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500">
                   Organize your blog content with hierarchical categories
                 </p>
               </div>
@@ -544,7 +544,7 @@ export default function CategoriesManagement() {
         {showForm && (
           <Card className="mb-6">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 {editingCategory ? 'Edit Category' : 'Create New Category'}
               </h2>
               
@@ -577,8 +577,8 @@ export default function CategoriesManagement() {
                     onClick={() => setViewMode('tree')}
                     className={`px-3 py-1 rounded text-sm ${
                       viewMode === 'tree'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'text-gray-600 hover:bg-gray-100'
                     }`}
                   >
                     Tree View
@@ -587,8 +587,8 @@ export default function CategoriesManagement() {
                     onClick={() => setViewMode('list')}
                     className={`px-3 py-1 rounded text-sm ${
                       viewMode === 'list'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'text-gray-600 hover:bg-gray-100'
                     }`}
                   >
                     List View
@@ -631,7 +631,7 @@ export default function CategoriesManagement() {
         <Card>
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-semibold text-gray-900">
                 {searchTerm ? `Search Results (${filteredCategories.length})` : 'All Categories'}
               </h2>
             </div>
@@ -650,17 +650,17 @@ export default function CategoriesManagement() {
               ) : (
                 <div className="space-y-2">
                   {filteredCategories.map((category) => (
-                    <div key={category.id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg group">
+                    <div key={category.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg group">
                       <div className="flex items-center space-x-3">
                         <div
                           className="w-4 h-4 rounded-full"
                           style={{ backgroundColor: category.color }}
                         />
                         <div>
-                          <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                          <h3 className="text-sm font-medium text-gray-900">
                             {category.name}
                           </h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-xs text-gray-500">
                             /{category.slug}
                             {category.parent && ` (under ${category.parent.name})`}
                           </p>
@@ -679,7 +679,7 @@ export default function CategoriesManagement() {
                           size="sm"
                           variant="secondary"
                           onClick={() => handleDeleteCategory(category)}
-                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                          className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="h-4 w-4" />
                         </ActionButton>
@@ -737,24 +737,24 @@ export default function CategoriesManagement() {
                               style={{ backgroundColor: category.color }}
                             />
                             <div className="min-w-0 flex-1">
-                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                              <h3 className="text-lg font-semibold text-gray-900 truncate">
                                 {category.name}
                               </h3>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                              <p className="text-sm text-gray-500">
                                 /{category.slug}
                               </p>
                               {category.parent && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                <p className="text-xs text-gray-500">
                                   Under: {category.parent.name}
                                 </p>
                               )}
                               {category.description && (
-                                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
+                                <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                                   {category.description}
                                 </p>
                               )}
                               {category._count && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                <p className="text-xs text-gray-500 mt-1">
                                   {category._count.blogs} blog{category._count.blogs !== 1 ? 's' : ''}
                                 </p>
                               )}
@@ -774,7 +774,7 @@ export default function CategoriesManagement() {
                               size="sm"
                               variant="secondary"
                               onClick={() => handleDeleteCategory(category)}
-                              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                              className="text-red-600 hover:text-red-700"
                             >
                               <Trash2 className="h-4 w-4" />
                             </ActionButton>

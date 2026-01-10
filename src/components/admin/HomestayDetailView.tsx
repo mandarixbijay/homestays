@@ -48,7 +48,7 @@ const ImageGallery: React.FC<{
       <Card title={title}>
         <div className="text-center py-8">
           <Camera className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-          <p className="text-gray-500 dark:text-gray-400">No images available</p>
+          <p className="text-gray-500">No images available</p>
         </div>
       </Card>
     );
@@ -59,7 +59,7 @@ const ImageGallery: React.FC<{
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {images.map((image: any, index: number) => (
           <div key={image.id || index} className="relative group">
-            <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 cursor-pointer hover:shadow-lg transition-all duration-200">
+            <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer hover:shadow-lg transition-all duration-200">
               <img
                 src={image.url}
                 alt={`${title} ${index + 1}`}
@@ -68,7 +68,7 @@ const ImageGallery: React.FC<{
               />
               {image.isMain && (
                 <div className="absolute top-2 left-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white shadow-lg">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#1A403D] text-white shadow-lg">
                     ★ Main
                   </span>
                 </div>
@@ -93,7 +93,7 @@ const PropertyInfo: React.FC<{ homestay: any }> = ({ homestay }) => {
     <Card title="Property Information" className="h-fit">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</span>
+          <span className="text-sm font-medium text-gray-500">Status</span>
           <StatusBadge status={homestay.status} />
         </div>
 
@@ -101,8 +101,8 @@ const PropertyInfo: React.FC<{ homestay: any }> = ({ homestay }) => {
           <div className="flex items-start space-x-3">
             <MapPin className="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
             <div className="min-w-0 flex-1">
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400 block">Address</span>
-              <p className="text-sm text-gray-900 dark:text-white mt-1 break-words">{homestay.address}</p>
+              <span className="text-sm font-medium text-gray-500 block">Address</span>
+              <p className="text-sm text-gray-900 mt-1 break-words">{homestay.address}</p>
               <ActionButton
                 onClick={() => copyToClipboard(homestay.address)}
                 variant="secondary"
@@ -118,9 +118,9 @@ const PropertyInfo: React.FC<{ homestay: any }> = ({ homestay }) => {
           <div className="flex items-center space-x-3">
             <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
             <div>
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400 block">Contact</span>
+              <span className="text-sm font-medium text-gray-500 block">Contact</span>
               <div className="flex items-center space-x-2 mt-1">
-                <p className="text-sm text-gray-900 dark:text-white">{homestay.contactNumber}</p>
+                <p className="text-sm text-gray-900">{homestay.contactNumber}</p>
                 <ActionButton
                   onClick={() => copyToClipboard(homestay.contactNumber)}
                   variant="secondary"
@@ -135,8 +135,8 @@ const PropertyInfo: React.FC<{ homestay: any }> = ({ homestay }) => {
             <div className="flex items-center space-x-3">
               <Star className="h-4 w-4 text-yellow-400 flex-shrink-0" />
               <div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 block">Rating</span>
-                <p className="text-sm text-gray-900 dark:text-white mt-1">
+                <span className="text-sm font-medium text-gray-500 block">Rating</span>
+                <p className="text-sm text-gray-900 mt-1">
                   {homestay.rating} ({homestay.reviews} reviews)
                 </p>
               </div>
@@ -145,13 +145,13 @@ const PropertyInfo: React.FC<{ homestay: any }> = ({ homestay }) => {
 
           {homestay.discount > 0 && (
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Discount</span>
-              <span className="text-sm font-medium text-green-600 dark:text-green-400">{homestay.discount}%</span>
+              <span className="text-sm font-medium text-gray-500">Discount</span>
+              <span className="text-sm font-medium text-green-600">{homestay.discount}%</span>
             </div>
           )}
 
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">VIP Access</span>
+            <span className="text-sm font-medium text-gray-500">VIP Access</span>
             <StatusBadge status={homestay.vipAccess ? 'Yes' : 'No'} variant="small" />
           </div>
         </div>
@@ -165,30 +165,30 @@ const OwnerInfo: React.FC<{ owner: any }> = ({ owner }) => {
     <Card title="Owner Information">
       <div className="space-y-3">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
-            <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <User className="h-5 w-5 text-[#1A403D]" />
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white">{owner.name}</h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">ID: {owner.id}</p>
+            <h4 className="text-sm font-medium text-gray-900">{owner.name}</h4>
+            <p className="text-sm text-gray-500">ID: {owner.id}</p>
           </div>
         </div>
 
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-500 dark:text-gray-400">Email:</span>
-            <span className="text-gray-900 dark:text-white">{owner.email}</span>
+            <span className="text-gray-500">Email:</span>
+            <span className="text-gray-900">{owner.email}</span>
           </div>
 
           {owner.mobileNumber && (
             <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Mobile:</span>
-              <span className="text-gray-900 dark:text-white">{owner.mobileNumber}</span>
+              <span className="text-gray-500">Mobile:</span>
+              <span className="text-gray-900">{owner.mobileNumber}</span>
             </div>
           )}
 
           <div className="flex justify-between">
-            <span className="text-gray-500 dark:text-gray-400">Role:</span>
+            <span className="text-gray-500">Role:</span>
             <StatusBadge status={owner.role} variant="small" />
           </div>
         </div>
@@ -204,8 +204,8 @@ const TimestampInfo: React.FC<{ homestay: any }> = ({ homestay }) => {
         <div className="flex items-center space-x-3">
           <Calendar className="h-4 w-4 text-gray-400" />
           <div>
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400 block">Created</span>
-            <p className="text-sm text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-gray-500 block">Created</span>
+            <p className="text-sm text-gray-900">
               {new Date(homestay.createdAt).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -220,8 +220,8 @@ const TimestampInfo: React.FC<{ homestay: any }> = ({ homestay }) => {
         <div className="flex items-center space-x-3">
           <Calendar className="h-4 w-4 text-gray-400" />
           <div>
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400 block">Last Updated</span>
-            <p className="text-sm text-gray-900 dark:text-white">
+            <span className="text-sm font-medium text-gray-500 block">Last Updated</span>
+            <p className="text-sm text-gray-900">
               {new Date(homestay.updatedAt).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -241,7 +241,7 @@ const FacilitiesSection: React.FC<{ facilities: any[] }> = ({ facilities }) => {
   if (!facilities || facilities.length === 0) {
     return (
       <Card title="Facilities">
-        <p className="text-gray-500 dark:text-gray-400 text-sm">No facilities listed</p>
+        <p className="text-gray-500 text-sm">No facilities listed</p>
       </Card>
     );
   }
@@ -259,10 +259,10 @@ const FacilitiesSection: React.FC<{ facilities: any[] }> = ({ facilities }) => {
         {uniqueFacilities.map((homestayFacility: any, index: number) => (
           <div
             key={homestayFacility.id ?? `facility-${index}`} // Fallback to index if id is undefined
-            className="flex items-center space-x-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg"
+            className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg"
           >
             <Wifi className="h-4 w-4 text-gray-400 flex-shrink-0" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-gray-700">
               {homestayFacility.facility?.name ?? 'Unknown Facility'}
             </span>
           </div>
@@ -282,11 +282,11 @@ const RoomCard: React.FC<{
       <div className="space-y-4">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-gray-900">
               {room.name}
             </h3>
             {room.description && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-500 mt-1">
                 {room.description}
               </p>
             )}
@@ -296,21 +296,21 @@ const RoomCard: React.FC<{
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex items-center space-x-2">
             <Square className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-gray-700">
               {room.totalArea} {room.areaUnit}
             </span>
           </div>
 
           <div className="flex items-center space-x-2">
             <Users className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-gray-700">
               {room.minOccupancy}-{room.maxOccupancy} guests
             </span>
           </div>
 
           <div className="flex items-center space-x-2">
             <DollarSign className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-gray-700">
               {room.price} {room.currency}
             </span>
           </div>
@@ -326,10 +326,10 @@ const RoomCard: React.FC<{
         {/* Beds */}
         {room.beds && room.beds.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Beds</h4>
+            <h4 className="text-sm font-medium text-gray-900 mb-2">Beds</h4>
             <div className="flex flex-wrap gap-2">
               {room.beds.map((bed: any) => (
-                <span key={bed.id} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                <span key={bed.id} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   <Bed className="h-3 w-3 mr-1" />
                   {bed.quantity}x {bed.bedType.name}
                 </span>
@@ -342,7 +342,7 @@ const RoomCard: React.FC<{
         {room.images && room.images.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+              <h4 className="text-sm font-medium text-gray-900">
                 Room Images ({room.images.length})
               </h4>
               <ActionButton
@@ -373,8 +373,8 @@ const RoomCard: React.FC<{
                 </div>
               ))}
               {room.images.length > 4 && (
-                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
+                  <span className="text-xs text-gray-500">
                     +{room.images.length - 4}
                   </span>
                 </div>
@@ -429,7 +429,7 @@ const ApprovalModal: React.FC<{
       }
     >
       <div className="space-y-4">
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600">
           Are you sure you want to {status.toLowerCase()} &quot;{homestay?.name}&quot;?
         </p>
 
@@ -611,9 +611,9 @@ export default function ImprovedHomestayDetail({ homestayId }: HomestayDetailVie
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -625,10 +625,10 @@ export default function ImprovedHomestayDetail({ homestayId }: HomestayDetailVie
                 Back
               </ActionButton>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-xl font-bold text-gray-900">
                   {homestay.name}
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500">
                   Homestay Details
                 </p>
               </div>
@@ -715,11 +715,11 @@ export default function ImprovedHomestayDetail({ homestayId }: HomestayDetailVie
             {/* Description */}
             <Card title="Description">
               {homestay.description ? (
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
                   {homestay.description}
                 </p>
               ) : (
-                <p className="text-gray-500 dark:text-gray-400 italic">No description provided</p>
+                <p className="text-gray-500 italic">No description provided</p>
               )}
             </Card>
 
@@ -731,7 +731,7 @@ export default function ImprovedHomestayDetail({ homestayId }: HomestayDetailVie
               {!homestay.rooms || homestay.rooms.length === 0 ? (
                 <div className="text-center py-8">
                   <Bed className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                  <p className="text-gray-500 dark:text-gray-400">No rooms added yet</p>
+                  <p className="text-gray-500">No rooms added yet</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -791,7 +791,7 @@ export default function ImprovedHomestayDetail({ homestayId }: HomestayDetailVie
                 />
                 {image.isMain && (
                   <div className="absolute top-2 left-2">
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#1A403D] text-white">
                       ★ Main
                     </span>
                   </div>

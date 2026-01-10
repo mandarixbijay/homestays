@@ -129,7 +129,7 @@ const TagForm: React.FC<{
       />
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Color
         </label>
         <div className="flex flex-wrap gap-2">
@@ -140,8 +140,8 @@ const TagForm: React.FC<{
               onClick={() => updateField('color', color)}
               className={`w-8 h-8 rounded-full border-2 ${
                 formData.color === color 
-                  ? 'border-gray-900 dark:border-white' 
-                  : 'border-gray-300 dark:border-gray-600'
+                  ? 'border-gray-900' 
+                  : 'border-gray-300'
               }`}
               style={{ backgroundColor: color }}
             />
@@ -192,19 +192,19 @@ const TagCard: React.FC<{
               style={{ backgroundColor: tag.color }}
             />
             <div className="min-w-0 flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+              <h3 className="text-lg font-semibold text-gray-900 truncate">
                 {tag.name}
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500">
                 /{tag.slug}
               </p>
               {tag.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
+                <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                   {tag.description}
                 </p>
               )}
               {tag._count && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   {tag._count.blogs} blog{tag._count.blogs !== 1 ? 's' : ''}
                 </p>
               )}
@@ -224,7 +224,7 @@ const TagCard: React.FC<{
               size="sm"
               variant="secondary"
               onClick={onDelete}
-              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+              className="text-red-600 hover:text-red-700"
             >
               <Trash2 className="h-4 w-4" />
             </ActionButton>
@@ -338,9 +338,9 @@ export default function TagsManagement() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -351,14 +351,14 @@ export default function TagsManagement() {
                 <ArrowLeft className="h-4 w-4" />
               </ActionButton>
               
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                <TagIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <TagIcon className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-2xl font-bold text-gray-900">
                   Tags Management
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500">
                   Organize your blog content with tags
                 </p>
               </div>
@@ -394,7 +394,7 @@ export default function TagsManagement() {
         {showForm && (
           <Card className="mb-6">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 {editingTag ? 'Edit Tag' : 'Create New Tag'}
               </h2>
               
@@ -436,7 +436,7 @@ export default function TagsManagement() {
         <Card>
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-semibold text-gray-900">
                 All Tags ({filteredTags.length})
               </h2>
             </div>

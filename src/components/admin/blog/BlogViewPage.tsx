@@ -171,9 +171,9 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
   const mainImage = blog.images?.find((img: { isMain?: boolean }) => img.isMain) || blog.images?.[0];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -185,10 +185,10 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
               </ActionButton>
               
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white truncate">
+                <h1 className="text-xl font-bold text-gray-900 truncate">
                   {blog.title}
                 </h1>
-                <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex items-center space-x-4 text-sm text-gray-500">
                   <span>By {blog.author.name}</span>
                   <span>•</span>
                   <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
@@ -252,7 +252,7 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
                   />
                   {mainImage.caption && (
                     <div className="p-4">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                      <p className="text-sm text-gray-600 italic">
                         {mainImage.caption}
                       </p>
                     </div>
@@ -270,7 +270,7 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
                       status={blog.status} 
                     />
                     {blog.featured && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                         <Star className="h-3 w-3 mr-1" />
                         Featured
                       </span>
@@ -314,17 +314,17 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
                   </div>
                 </div>
 
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">
                   {blog.title}
                 </h1>
 
                 {blog.excerpt && (
-                  <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+                  <p className="text-lg text-gray-600 mb-6">
                     {blog.excerpt}
                   </p>
                 )}
 
-                <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex items-center justify-between text-sm text-gray-500">
                   <div className="flex items-center space-x-6">
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-1" />
@@ -356,12 +356,12 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
             {/* Blog Content */}
             <Card>
               <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Content
                 </h2>
                 
                 <div 
-                  className="prose prose-gray dark:prose-invert max-w-none"
+                  className="prose prose-gray max-w-none"
                   dangerouslySetInnerHTML={{ __html: blog.content }}
                 />
               </div>
@@ -371,7 +371,7 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
             {blog.images && blog.images.length > 1 && (
               <Card>
                 <div className="p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
                     Gallery
                   </h2>
                   
@@ -390,7 +390,7 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
                               className="w-full h-32 object-cover rounded-lg"
                             />
                             {image.caption && (
-                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                              <p className="text-xs text-gray-600 mt-1">
                                 {image.caption}
                               </p>
                             )}
@@ -408,7 +408,7 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
             {/* Quick Actions */}
             <Card>
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Quick Actions
                 </h3>
                 
@@ -447,67 +447,67 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
             {/* Blog Details */}
             <Card>
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Details
                 </h3>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Status:</span>
+                    <span className="text-sm text-gray-600">Status:</span>
                     <StatusBadge 
                       status={blog.status} 
                     />
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Author:</span>
-                    <span className="text-sm text-gray-900 dark:text-white">
+                    <span className="text-sm text-gray-600">Author:</span>
+                    <span className="text-sm text-gray-900">
                       {blog.author.name}
                     </span>
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Created:</span>
-                    <span className="text-sm text-gray-900 dark:text-white">
+                    <span className="text-sm text-gray-600">Created:</span>
+                    <span className="text-sm text-gray-900">
                       {new Date(blog.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Updated:</span>
-                    <span className="text-sm text-gray-900 dark:text-white">
+                    <span className="text-sm text-gray-600">Updated:</span>
+                    <span className="text-sm text-gray-900">
                       {new Date(blog.updatedAt).toLocaleDateString()}
                     </span>
                   </div>
                   
                   {blog.publishedAt && (
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Published:</span>
-                      <span className="text-sm text-gray-900 dark:text-white">
+                      <span className="text-sm text-gray-600">Published:</span>
+                      <span className="text-sm text-gray-900">
                         {new Date(blog.publishedAt).toLocaleDateString()}
                       </span>
                     </div>
                   )}
                   
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Views:</span>
-                    <span className="text-sm text-gray-900 dark:text-white">
+                    <span className="text-sm text-gray-600">Views:</span>
+                    <span className="text-sm text-gray-900">
                       {blog.viewCount || 0}
                     </span>
                   </div>
                   
                   {blog.readTime && (
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Read Time:</span>
-                      <span className="text-sm text-gray-900 dark:text-white">
+                      <span className="text-sm text-gray-600">Read Time:</span>
+                      <span className="text-sm text-gray-900">
                         {blog.readTime} minutes
                       </span>
                     </div>
                   )}
                   
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Featured:</span>
-                    <span className="text-sm text-gray-900 dark:text-white">
+                    <span className="text-sm text-gray-600">Featured:</span>
+                    <span className="text-sm text-gray-900">
                       {blog.featured ? 'Yes' : 'No'}
                     </span>
                   </div>
@@ -519,7 +519,7 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
             {blog.tags && blog.tags.length > 0 && (
               <Card>
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
                     Tags
                   </h3>
                   
@@ -527,7 +527,7 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
                     {blog.tags.map((tag: { id: number; name: string; color?: string }) => (
                       <span
                         key={tag.id}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                         style={{ backgroundColor: tag.color ? `${tag.color}20` : undefined }}
                       >
                         <Tag className="h-3 w-3 mr-1" />
@@ -543,7 +543,7 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
             {blog.categories && blog.categories.length > 0 && (
               <Card>
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
                     Categories
                   </h3>
                   
@@ -551,7 +551,7 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
                     {blog.categories.map((category: { id: number; name: string; color?: string }) => (
                       <span
                         key={category.id}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
                         style={{ backgroundColor: category.color ? `${category.color}20` : undefined }}
                       >
                         <Folder className="h-3 w-3 mr-1" />
@@ -567,15 +567,15 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
             {(blog.seoTitle || blog.seoDescription) && (
               <Card>
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
                     SEO Information
                   </h3>
                   
                   <div className="space-y-3">
                     {blog.seoTitle && (
                       <div>
-                        <label className="text-sm text-gray-600 dark:text-gray-400">SEO Title:</label>
-                        <p className="text-sm text-gray-900 dark:text-white mt-1">
+                        <label className="text-sm text-gray-600">SEO Title:</label>
+                        <p className="text-sm text-gray-900 mt-1">
                           {blog.seoTitle}
                         </p>
                       </div>
@@ -583,8 +583,8 @@ export default function BlogViewPage({ blogId }: BlogViewPageProps) {
                     
                     {blog.seoDescription && (
                       <div>
-                        <label className="text-sm text-gray-600 dark:text-gray-400">Meta Description:</label>
-                        <p className="text-sm text-gray-900 dark:text-white mt-1">
+                        <label className="text-sm text-gray-600">Meta Description:</label>
+                        <p className="text-sm text-gray-900 mt-1">
                           {blog.seoDescription}
                         </p>
                       </div>

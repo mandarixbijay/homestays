@@ -209,7 +209,7 @@ const MasterDataManagement = () => {
       case 'facilities':
         return (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Facility Name *
             </label>
             <input
@@ -217,7 +217,7 @@ const MasterDataManagement = () => {
               value={formData.name || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               placeholder="e.g., Free Wi-Fi"
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
               required
             />
           </div>
@@ -227,7 +227,7 @@ const MasterDataManagement = () => {
         return (
           <>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Bed Type Name *
               </label>
               <input
@@ -235,13 +235,13 @@ const MasterDataManagement = () => {
                 value={formData.name || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="e.g., Queen Bed"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
                 required
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Size
                 </label>
                 <input
@@ -249,11 +249,11 @@ const MasterDataManagement = () => {
                   value={formData.size || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, size: e.target.value ? parseFloat(e.target.value) : undefined }))}
                   placeholder="60"
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Size Unit
                 </label>
                 <input
@@ -261,7 +261,7 @@ const MasterDataManagement = () => {
                   value={formData.sizeUnit || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, sizeUnit: e.target.value }))}
                   placeholder="inches"
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
                 />
               </div>
             </div>
@@ -273,7 +273,7 @@ const MasterDataManagement = () => {
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Currency Code *
                 </label>
                 <input
@@ -282,12 +282,12 @@ const MasterDataManagement = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
                   placeholder="USD"
                   maxLength={3}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Currency Name *
                 </label>
                 <input
@@ -295,7 +295,7 @@ const MasterDataManagement = () => {
                   value={formData.name || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="US Dollar"
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
                   required
                 />
               </div>
@@ -306,9 +306,9 @@ const MasterDataManagement = () => {
                   type="checkbox"
                   checked={formData.isDefault || false}
                   onChange={(e) => setFormData(prev => ({ ...prev, isDefault: e.target.checked }))}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
                 />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Set as default currency</span>
+                <span className="ml-2 text-sm text-gray-700">Set as default currency</span>
               </label>
             </div>
           </>
@@ -318,7 +318,7 @@ const MasterDataManagement = () => {
         return (
           <>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Area Unit Name *
               </label>
               <input
@@ -326,7 +326,7 @@ const MasterDataManagement = () => {
                 value={formData.name || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="sqft"
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
                 required
               />
             </div>
@@ -336,9 +336,9 @@ const MasterDataManagement = () => {
                   type="checkbox"
                   checked={formData.isDefault || false}
                   onChange={(e) => setFormData(prev => ({ ...prev, isDefault: e.target.checked }))}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  className="rounded border-gray-300 text-[#1A403D] shadow-sm focus:border-[#1A403D] focus:ring focus:ring-[#1A403D]/20 focus:ring-opacity-50"
                 />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Set as default area unit</span>
+                <span className="ml-2 text-sm text-gray-700">Set as default area unit</span>
               </label>
             </div>
           </>
@@ -378,38 +378,38 @@ const MasterDataManagement = () => {
     }
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center">
             {icon}
-            <h3 className="ml-2 text-lg font-medium text-gray-900 dark:text-white">
+            <h3 className="ml-2 text-lg font-medium text-gray-900">
               {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
             </h3>
           </div>
           <button
             onClick={() => openCreateModal(type)}
-            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-[#1A403D] hover:bg-[#224240] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A403D]/20"
           >
             <Plus className="h-4 w-4 mr-1" />
             Add New
           </button>
         </div>
-        
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+
+        <div className="divide-y divide-gray-200">
           {data.length > 0 ? (
             data.map((item: any) => (
               <div key={item.id} className="px-6 py-4 flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                  <h4 className="text-sm font-medium text-gray-900">
                     {activeTab === 'currencies' ? `${item.code} - ${item.name}` : item.name}
                   </h4>
                   {activeTab === 'bedTypes' && (item.size || item.sizeUnit) && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-500">
                       {item.size} {item.sizeUnit}
                     </p>
                   )}
                   {(activeTab === 'currencies' || activeTab === 'areaUnits') && item.isDefault && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                       Default
                     </span>
                   )}
@@ -417,13 +417,13 @@ const MasterDataManagement = () => {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => openEditModal(type, item)}
-                    className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="p-2 text-[#1A403D] hover:text-[#224240]"
                   >
                     <Edit className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(type, item.id)}
-                    className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                    className="p-2 text-red-600 hover:text-red-800"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -433,16 +433,16 @@ const MasterDataManagement = () => {
           ) : (
             <div className="px-6 py-12 text-center">
               {icon}
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
                 No {activeTab} found
               </h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-sm text-gray-500">
                 Get started by creating a new {activeTab.slice(0, -1)}.
               </p>
               <div className="mt-6">
                 <button
                   onClick={() => openCreateModal(type)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#1A403D] hover:bg-[#224240]"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add {activeTab.slice(0, -1)}
@@ -458,7 +458,7 @@ const MasterDataManagement = () => {
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A403D]"></div>
       </div>
     );
   }
@@ -475,20 +475,20 @@ const MasterDataManagement = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <button
                 onClick={() => router.push('/admin')}
-                className="mr-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="mr-4 p-2 text-gray-400 hover:text-gray-600"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <Settings className="h-6 w-6 text-blue-600" />
-              <h1 className="ml-3 text-xl font-bold text-gray-900 dark:text-white">
+              <Settings className="h-6 w-6 text-[#1A403D]" />
+              <h1 className="ml-3 text-xl font-bold text-gray-900">
                 Master Data Management
               </h1>
             </div>
@@ -498,7 +498,7 @@ const MasterDataManagement = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+        <div className="border-b border-gray-200 mb-6">
           <nav className="-mb-px flex space-x-8">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -508,8 +508,8 @@ const MasterDataManagement = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+                      ? 'border-[#1A403D] text-[#1A403D]'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
                   <Icon className="h-4 w-4 mr-2" />
@@ -527,9 +527,9 @@ const MasterDataManagement = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {modalType === 'create' ? 'Create' : 'Edit'} {activeTab.slice(0, -1)}
               </h3>
               <div className="space-y-4">
@@ -545,7 +545,7 @@ const MasterDataManagement = () => {
                   <button
                     type="button"
                     onClick={handleSubmit}
-                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-4 py-2 bg-[#1A403D] text-white text-sm font-medium rounded-md shadow-sm hover:bg-[#224240] focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
                   >
                     {modalType === 'create' ? 'Create' : 'Update'}
                   </button>

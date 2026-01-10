@@ -29,17 +29,17 @@ const SimpleBarChart: React.FC<{
   height?: number;
 }> = ({ data, height = 200 }) => {
   const maxValue = Math.max(...data.map(d => d.value));
-  
+
   return (
     <div className="space-y-2">
       {data.map((item, index) => (
         <div key={index} className="flex items-center space-x-3">
-          <div className="w-20 text-sm text-gray-600 dark:text-gray-400 truncate">
+          <div className="w-20 text-sm text-gray-600 truncate">
             {item.name}
           </div>
-          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6">
+          <div className="flex-1 bg-gray-200 rounded-full h-6">
             <div
-              className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2"
+              className="bg-[#1A403D] h-6 rounded-full flex items-center justify-end pr-2"
               style={{ width: `${(item.value / maxValue) * 100}%` }}
             >
               <span className="text-xs text-white font-medium">
@@ -69,11 +69,11 @@ const StatCard: React.FC<{
       <div onClick={onClick} className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
+            <p className="text-sm font-medium text-gray-600">{title}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
             {trend && (
               <div className={`flex items-center mt-2 text-sm ${
-                trend.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                trend.isPositive ? 'text-green-600' : 'text-red-600'
               }`}>
                 <TrendingUp className={`h-4 w-4 mr-1 ${trend.isPositive ? '' : 'transform rotate-180'}`} />
                 {Math.abs(trend.value)}% {trend.isPositive ? 'increase' : 'decrease'}
@@ -202,9 +202,9 @@ export default function BlogAnalytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -214,15 +214,15 @@ export default function BlogAnalytics() {
               >
                 <ArrowLeft className="h-4 w-4" />
               </ActionButton>
-              
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-                <BarChart3 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <BarChart3 className="h-6 w-6 text-purple-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-2xl font-bold text-gray-900">
                   Blog Analytics
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500">
                   Track your blog performance and insights
                 </p>
               </div>
@@ -234,7 +234,7 @@ export default function BlogAnalytics() {
                 <select
                   value={timeRange}
                   onChange={(e) => setTimeRange(e.target.value as any)}
-                  className="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-4 py-2 pr-8 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm text-gray-900 focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
                 >
                   <option value="7d">Last 7 days</option>
                   <option value="30d">Last 30 days</option>
@@ -273,32 +273,32 @@ export default function BlogAnalytics() {
             title="Total Views"
             value={totalViews.toLocaleString()}
             icon={<Eye className="h-6 w-6" />}
-            color="bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+            color="bg-blue-100 text-blue-600"
             trend={viewsTrend}
           />
-          
+
           <StatCard
             title="Total Blogs"
             value={totalBlogs}
             icon={<FileText className="h-6 w-6" />}
-            color="bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400"
+            color="bg-green-100 text-green-600"
             trend={blogsTrend}
             onClick={() => router.push('/admin/blog')}
           />
-          
+
           <StatCard
             title="Published"
             value={publishedBlogs}
             icon={<Activity className="h-6 w-6" />}
-            color="bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400"
+            color="bg-purple-100 text-purple-600"
             trend={publishTrend}
           />
-          
+
           <StatCard
             title="Featured"
             value={featuredBlogs}
             icon={<Star className="h-6 w-6" />}
-            color="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400"
+            color="bg-yellow-100 text-yellow-600"
           />
         </div>
 
@@ -307,7 +307,7 @@ export default function BlogAnalytics() {
           <Card>
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-gray-900">
                   Top Performing Blogs
                 </h3>
                 <ActionButton
@@ -322,21 +322,21 @@ export default function BlogAnalytics() {
               {topBlogs.length > 0 ? (
                 <div className="space-y-3">
                   {topBlogs.map((blog, index) => (
-                    <div key={blog.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div key={blog.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-3">
-                        <div className="flex items-center justify-center w-6 h-6 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-xs font-medium">
+                        <div className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">
                           {index + 1}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          <p className="text-sm font-medium text-gray-900 truncate">
                             {blog.title}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-xs text-gray-500">
                             /{blog.slug}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Eye className="h-4 w-4" />
                         <span>{blog.viewCount}</span>
                       </div>
@@ -344,7 +344,7 @@ export default function BlogAnalytics() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-8 text-gray-500">
                   <Eye className="h-12 w-12 mx-auto mb-2 opacity-50" />
                   <p>No view data available</p>
                 </div>
@@ -355,14 +355,14 @@ export default function BlogAnalytics() {
           {/* Blog Status Distribution */}
           <Card>
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Blog Status Distribution
               </h3>
               
               {statusData.length > 0 ? (
                 <SimpleBarChart data={statusData} />
               ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-8 text-gray-500">
                   <PieChart className="h-12 w-12 mx-auto mb-2 opacity-50" />
                   <p>No blog data available</p>
                 </div>
@@ -376,7 +376,7 @@ export default function BlogAnalytics() {
           <Card>
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-gray-900">
                   Popular Tags
                 </h3>
                 <ActionButton
@@ -392,13 +392,13 @@ export default function BlogAnalytics() {
                 <div className="space-y-3">
                   {tagUsageData.map((tag, index) => (
                     <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-900 dark:text-white">{tag.name}</span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{tag.value}</span>
+                      <span className="text-sm text-gray-900">{tag.name}</span>
+                      <span className="text-sm text-gray-500">{tag.value}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-8 text-gray-500">
                   <Tag className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">No tags yet</p>
                 </div>
@@ -410,7 +410,7 @@ export default function BlogAnalytics() {
           <Card>
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-gray-900">
                   Popular Categories
                 </h3>
                 <ActionButton
@@ -426,13 +426,13 @@ export default function BlogAnalytics() {
                 <div className="space-y-3">
                   {categoryUsageData.map((category, index) => (
                     <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-900 dark:text-white">{category.name}</span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{category.value}</span>
+                      <span className="text-sm text-gray-900">{category.name}</span>
+                      <span className="text-sm text-gray-500">{category.value}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-8 text-gray-500">
                   <Folder className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">No categories yet</p>
                 </div>
@@ -443,7 +443,7 @@ export default function BlogAnalytics() {
           {/* Recent Activity */}
           <Card>
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Recent Activity
               </h3>
               
@@ -452,13 +452,13 @@ export default function BlogAnalytics() {
                   <div key={index} className="flex items-start space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      <p className="text-sm font-medium text-gray-900">
                         {activity.action}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                      <p className="text-sm text-gray-600 truncate">
                         {activity.title}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500">
                         {activity.time}
                       </p>
                     </div>
@@ -474,35 +474,35 @@ export default function BlogAnalytics() {
           {/* Monthly Performance */}
           <Card>
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Monthly Performance
               </h3>
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Average Read Time</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  <span className="text-sm text-gray-600">Average Read Time</span>
+                  <span className="text-sm font-medium text-gray-900">
                     {Math.round((blogs.reduce((acc, blog) => acc + (blog.readTime || 0), 0) / Math.max(blogs.length, 1)) * 10) / 10} min
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Total Authors</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  <span className="text-sm text-gray-600">Total Authors</span>
+                  <span className="text-sm font-medium text-gray-900">
                     {new Set(blogs.map(blog => blog.author?.id)).size}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Total Tags</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  <span className="text-sm text-gray-600">Total Tags</span>
+                  <span className="text-sm font-medium text-gray-900">
                     {tags.length}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Total Categories</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  <span className="text-sm text-gray-600">Total Categories</span>
+                  <span className="text-sm font-medium text-gray-900">
                     {categories.length}
                   </span>
                 </div>
@@ -513,7 +513,7 @@ export default function BlogAnalytics() {
           {/* Quick Actions */}
           <Card>
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Quick Actions
               </h3>
               

@@ -41,25 +41,25 @@ export const Select: React.FC<SelectProps> = ({
   return (
     <div className="space-y-1">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="block text-sm font-medium text-gray-700">
           {label}
           {props.required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
-      
+
       <div className="relative">
         <select
           className={`
-            block w-full rounded-lg border appearance-none bg-white dark:bg-gray-800 px-3 py-2 pr-10
-            text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400
+            block w-full rounded-lg border appearance-none bg-white px-3 py-2 pr-10
+            text-gray-900 placeholder-gray-500
             focus:outline-none focus:ring-2 transition-colors
-            ${error 
-              ? 'border-red-300 dark:border-red-600 focus:border-red-500 focus:ring-red-500' 
-              : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500'
+            ${error
+              ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-[#1A403D] focus:ring-[#1A403D]/20'
             }
-            ${props.disabled 
-              ? 'bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
-              : 'hover:border-gray-400 dark:hover:border-gray-500'
+            ${props.disabled
+              ? 'bg-gray-50 text-gray-500 cursor-not-allowed'
+              : 'hover:border-gray-400'
             }
             ${className}
           `}
@@ -67,28 +67,28 @@ export const Select: React.FC<SelectProps> = ({
         >
           {children}
         </select>
-        
+
         {/* Custom dropdown arrow */}
         <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
           <ChevronDown className={`h-4 w-4 ${
-            error 
-              ? 'text-red-400' 
-              : 'text-gray-400 dark:text-gray-500'
+            error
+              ? 'text-red-400'
+              : 'text-gray-400'
           }`} />
         </div>
       </div>
-      
+
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400 flex items-center mt-1">
+        <p className="text-sm text-red-600 flex items-center mt-1">
           <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
           </svg>
           {error}
         </p>
       )}
-      
+
       {helperText && !error && (
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-sm text-gray-500 mt-1">
           {helperText}
         </p>
       )}
@@ -114,14 +114,14 @@ export const LoadingSpinner: React.FC<{
 
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      <Loader2 className={`${sizeClasses[size]} animate-spin text-blue-600`} />
-      {text && <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">{text}</span>}
+      <Loader2 className={`${sizeClasses[size]} animate-spin text-[#1A403D]`} />
+      {text && <span className="ml-2 text-sm text-gray-600">{text}</span>}
     </div>
   );
 };
 
-export const LoadingOverlay: React.FC<{ 
-  children: React.ReactNode; 
+export const LoadingOverlay: React.FC<{
+  children: React.ReactNode;
   loading: boolean;
   text?: string;
 }> = ({ children, loading, text = 'Loading...' }) => {
@@ -129,7 +129,7 @@ export const LoadingOverlay: React.FC<{
     <div className="relative">
       {children}
       {loading && (
-        <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
           <LoadingSpinner size="lg" text={text} />
         </div>
       )}
@@ -137,14 +137,14 @@ export const LoadingOverlay: React.FC<{
   );
 };
 
-export const SkeletonLoader: React.FC<{ 
+export const SkeletonLoader: React.FC<{
   className?: string;
   lines?: number;
 }> = ({ className = '', lines = 1 }) => {
   return (
     <div className={`animate-pulse ${className}`}>
       {Array.from({ length: lines }).map((_, i) => (
-        <div key={i} className={`bg-gray-200 dark:bg-gray-700 rounded ${i > 0 ? 'mt-2' : ''} ${i === lines - 1 ? 'w-3/4' : 'w-full'}`}>
+        <div key={i} className={`bg-gray-200 rounded ${i > 0 ? 'mt-2' : ''} ${i === lines - 1 ? 'w-3/4' : 'w-full'}`}>
           <div className="h-4 rounded"></div>
         </div>
       ))}
@@ -166,19 +166,19 @@ interface AlertProps {
   children?: React.ReactNode; // Add this to allow children
 }
 
-export const Alert: React.FC<AlertProps> = ({ 
-  type, 
-  title, 
-  message, 
-  onClose, 
+export const Alert: React.FC<AlertProps> = ({
+  type,
+  title,
+  message,
+  onClose,
   className = '',
-  actions 
+  actions
 }) => {
   const styles = {
-    success: 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200',
-    error: 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200',
-    info: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200'
+    success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+    error: 'bg-red-50 border-red-200 text-red-800',
+    warning: 'bg-amber-50 border-amber-200 text-amber-800',
+    info: 'bg-blue-50 border-blue-200 text-blue-800'
   };
 
   const icons = {
@@ -269,11 +269,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
   ...props
 }, ref) => {
   const hasError = Boolean(error);
-  
+
   return (
     <div className="space-y-1">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="block text-sm font-medium text-gray-700">
           {label}
           {props.required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -288,16 +288,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
           ref={ref}
           className={`
             block w-full rounded-lg border transition-all duration-200
-            ${leftIcon ? 'pl-10' : 'pl-4'} 
-            ${rightIcon ? 'pr-10' : 'pr-4'} 
+            ${leftIcon ? 'pl-10' : 'pl-4'}
+            ${rightIcon ? 'pr-10' : 'pr-4'}
             py-2.5 text-sm
-            ${hasError 
-              ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-              : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500'
+            ${hasError
+              ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-[#1A403D] focus:ring-[#1A403D]/20'
             }
-            bg-white dark:bg-gray-700 
-            text-gray-900 dark:text-white 
-            placeholder-gray-500 dark:placeholder-gray-400
+            bg-white
+            text-gray-900
+            placeholder-gray-500
             focus:outline-none focus:ring-2 focus:ring-opacity-20
             disabled:opacity-50 disabled:cursor-not-allowed
             ${className}
@@ -311,10 +311,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
         )}
       </div>
       {hint && !error && (
-        <p className="text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+        <p className="text-xs text-gray-500">{hint}</p>
       )}
       {error && (
-        <p className="text-xs text-red-600 dark:text-red-400 flex items-center">
+        <p className="text-xs text-red-600 flex items-center">
           <AlertCircle className="h-3 w-3 mr-1" />
           {error}
         </p>
@@ -339,11 +339,11 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
   ...props
 }, ref) => {
   const hasError = Boolean(error);
-  
+
   return (
     <div className="space-y-1">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="block text-sm font-medium text-gray-700">
           {label}
           {props.required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -352,13 +352,13 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
         ref={ref}
         className={`
           block w-full rounded-lg border px-4 py-2.5 text-sm transition-all duration-200 resize-none
-          ${hasError 
-            ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-            : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500'
+          ${hasError
+            ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+            : 'border-gray-300 focus:border-[#1A403D] focus:ring-[#1A403D]/20'
           }
-          bg-white dark:bg-gray-700 
-          text-gray-900 dark:text-white 
-          placeholder-gray-500 dark:placeholder-gray-400
+          bg-white
+          text-gray-900
+          placeholder-gray-500
           focus:outline-none focus:ring-2 focus:ring-opacity-20
           disabled:opacity-50 disabled:cursor-not-allowed
           ${className}
@@ -366,10 +366,10 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
         {...props}
       />
       {hint && !error && (
-        <p className="text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+        <p className="text-xs text-gray-500">{hint}</p>
       )}
       {error && (
-        <p className="text-xs text-red-600 dark:text-red-400 flex items-center">
+        <p className="text-xs text-red-600 flex items-center">
           <AlertCircle className="h-3 w-3 mr-1" />
           {error}
         </p>
@@ -411,11 +411,11 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   fullWidth = false
 }) => {
   const variants = {
-    primary: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 text-white shadow-sm',
-    secondary: 'bg-white hover:bg-gray-50 focus:ring-gray-500 text-gray-700 border border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 dark:border-gray-600',
-    success: 'bg-green-600 hover:bg-green-700 focus:ring-green-500 text-white shadow-sm',
+    primary: 'bg-[#1A403D] hover:bg-[#1A403D]/90 focus:ring-[#1A403D] text-white shadow-sm',
+    secondary: 'bg-white hover:bg-gray-50 focus:ring-gray-500 text-gray-700 border border-gray-300',
+    success: 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 text-white shadow-sm',
     danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500 text-white shadow-sm',
-    warning: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500 text-white shadow-sm'
+    warning: 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500 text-white shadow-sm'
   };
 
   const sizes = {
@@ -505,9 +505,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         onClick={handleClick}
         className={`
           border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200
-          ${error 
-            ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20' 
-            : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+          ${error
+            ? 'border-red-300 bg-red-50'
+            : 'border-gray-300 hover:border-[#1A403D] hover:bg-[#1A403D]/5'
           }
           ${loading ? 'pointer-events-none opacity-50' : ''}
         `}
@@ -527,16 +527,16 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               >
                 Upload Images
               </ActionButton>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              <p className="text-xs text-gray-500 mt-2">
                 PNG, JPG, GIF, WebP up to 10MB each
               </p>
             </div>
           </div>
         )}
       </div>
-      
+
       {error && (
-        <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+        <p className="mt-2 text-sm text-red-600 flex items-center">
           <AlertCircle className="h-4 w-4 mr-1" />
           {error}
         </p>
@@ -575,7 +575,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
     <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`}>
       {images.map((image, index) => (
         <div key={index} className="relative group">
-          <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
+          <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
             <img
               src={image.preview || image.url}
               alt={`Image ${index + 1}`}
@@ -637,26 +637,26 @@ interface CardProps {
   error?: string;
 }
 
-export const Card: React.FC<CardProps> = ({ 
-  title, 
+export const Card: React.FC<CardProps> = ({
+  title,
   subtitle,
-  children, 
-  actions, 
+  children,
+  actions,
   className = '',
   loading = false,
-  error 
+  error
 }) => {
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden ${className}`}>
+    <div className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ${className}`}>
       {(title || subtitle || actions) && (
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between">
             <div>
               {title && (
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
               )}
               {subtitle && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>
+                <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
               )}
             </div>
             {actions && <div className="flex items-center space-x-2">{actions}</div>}
@@ -690,10 +690,10 @@ interface SearchInputProps {
   loading?: boolean;
 }
 
-export const SearchInput: React.FC<SearchInputProps> = ({ 
-  value, 
-  onChange, 
-  placeholder = 'Search...', 
+export const SearchInput: React.FC<SearchInputProps> = ({
+  value,
+  onChange,
+  placeholder = 'Search...',
   className = '',
   onClear,
   loading = false
@@ -702,7 +702,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     <div className={`relative ${className}`}>
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         {loading ? (
-          <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+          <Loader2 className="h-4 w-4 animate-spin text-[#1A403D]" />
         ) : (
           <Search className="h-4 w-4 text-gray-400" />
         )}
@@ -712,12 +712,12 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+        className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D] transition-all duration-200"
       />
       {value && onClear && (
         <button
           onClick={onClear}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition-colors"
         >
           <X className="h-4 w-4 text-gray-400" />
         </button>
@@ -736,26 +736,26 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ 
-  status, 
-  variant = 'default', 
-  className = '' 
+export const StatusBadge: React.FC<StatusBadgeProps> = ({
+  status,
+  variant = 'default',
+  className = ''
 }) => {
   const getStatusColor = (status: string | undefined | null) => {
     const normalizedStatus = status?.toUpperCase() ?? 'UNKNOWN';
     switch (normalizedStatus) {
       case 'APPROVED':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300 border-green-200 dark:border-green-700';
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
       case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700';
+        return 'bg-amber-100 text-amber-800 border-amber-200';
       case 'REJECTED':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300 border-red-200 dark:border-red-700';
+        return 'bg-red-100 text-red-800 border-red-200';
       case 'ACTIVE':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300 border-green-200 dark:border-green-700';
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
       case 'INACTIVE':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300 border-gray-200 dark:border-gray-700';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300 border-gray-200 dark:border-gray-700';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -804,24 +804,24 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm overflow-y-auto h-full w-full z-50 animate-in fade-in duration-200">
       <div className="relative min-h-screen flex items-center justify-center p-4">
-        <div 
-          className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full ${sizes[size]} animate-in slide-in-from-bottom-4 duration-300`}
+        <div
+          className={`relative bg-white rounded-xl shadow-2xl border border-gray-200 w-full ${sizes[size]} animate-in slide-in-from-bottom-4 duration-300`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
-          
+
           <div className="p-6 max-h-96 overflow-y-auto">{children}</div>
-          
+
           {footer && (
-            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl">
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
               <div className="flex justify-end space-x-3">
                 {footer}
               </div>
@@ -850,12 +850,12 @@ interface EmptyStateProps {
   className?: string;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ 
-  icon, 
-  title, 
-  description, 
-  action, 
-  className = '' 
+export const EmptyState: React.FC<EmptyStateProps> = ({
+  icon,
+  title,
+  description,
+  action,
+  className = ''
 }) => {
   return (
     <div className={`text-center py-12 ${className}`}>
@@ -864,8 +864,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           {icon}
         </div>
       )}
-      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{title}</h3>
-      <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">{description}</p>
+      <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
+      <p className="text-gray-500 mb-6 max-w-sm mx-auto">{description}</p>
       {action && (
         <ActionButton
           onClick={action.onClick}

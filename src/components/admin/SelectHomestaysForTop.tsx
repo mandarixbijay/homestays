@@ -138,9 +138,9 @@ export default function SelectHomestaysForTop() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -157,11 +157,11 @@ export default function SelectHomestaysForTop() {
                 Back
               </ActionButton>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
+                <h1 className="text-2xl font-bold text-gray-900 flex items-center space-x-2">
                   <Crown className="h-6 w-6 text-yellow-500" />
                   <span>Select Homestays to Feature</span>
                 </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600">
                   Step 2: Choose which homestays to add to top/featured section
                 </p>
               </div>
@@ -182,25 +182,25 @@ export default function SelectHomestaysForTop() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Configuration Summary */}
-        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-6 border border-yellow-200 dark:border-yellow-800 mb-8">
+        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200 mb-8">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <Star className="h-5 w-5 mr-2 text-yellow-500" />
                 Featured Configuration
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Strategy</p>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center mt-1">
+                  <p className="text-sm text-gray-600">Strategy</p>
+                  <p className="text-sm font-bold text-gray-900 flex items-center mt-1">
                     <Target className="h-4 w-4 mr-1" />
                     {topTemplate.strategy === 'MANUAL' ? 'Manual Selection' : 'Insight Based'}
                   </p>
                 </div>
                 {topTemplate.category && (
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Category</p>
-                    <p className="text-sm font-bold text-purple-600 dark:text-purple-400 flex items-center mt-1">
+                    <p className="text-sm text-gray-600">Category</p>
+                    <p className="text-sm font-bold text-purple-600 flex items-center mt-1">
                       <Tag className="h-4 w-4 mr-1" />
                       {getCategoryLabel(topTemplate.category)}
                     </p>
@@ -208,16 +208,16 @@ export default function SelectHomestaysForTop() {
                 )}
                 {topTemplate.priority && (
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Priority</p>
-                    <p className="text-sm font-bold text-blue-600 dark:text-blue-400 flex items-center mt-1">
+                    <p className="text-sm text-gray-600">Priority</p>
+                    <p className="text-sm font-bold text-[#1A403D] flex items-center mt-1">
                       <Award className="h-4 w-4 mr-1" />
                       {topTemplate.priority}
                     </p>
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
-                  <p className="text-sm font-bold text-green-600 dark:text-green-400 mt-1">
+                  <p className="text-sm text-gray-600">Status</p>
+                  <p className="text-sm font-bold text-green-600 mt-1">
                     {topTemplate.isActive ? 'Active' : 'Inactive'}
                   </p>
                 </div>
@@ -227,7 +227,7 @@ export default function SelectHomestaysForTop() {
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 mb-6">
+        <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -236,14 +236,14 @@ export default function SelectHomestaysForTop() {
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 placeholder="Search by name..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1A403D] focus:border-[#1A403D]"
               />
             </div>
 
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700"
+              className="border border-gray-300 rounded-lg px-4 py-2 text-sm bg-white focus:ring-2 focus:ring-[#1A403D] focus:border-[#1A403D]"
             >
               <option value="all">All Status</option>
               <option value="APPROVED">Approved</option>
@@ -256,19 +256,19 @@ export default function SelectHomestaysForTop() {
               value={addressFilter}
               onChange={(e) => { setAddressFilter(e.target.value); setCurrentPage(1); }}
               placeholder="Filter by address..."
-              className="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700"
+              className="border border-gray-300 rounded-lg px-4 py-2 text-sm bg-white focus:ring-2 focus:ring-[#1A403D] focus:border-[#1A403D]"
             />
 
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}
               >
                 <Grid className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600'}`}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}
               >
                 <List className="h-5 w-5" />
               </button>
@@ -276,14 +276,14 @@ export default function SelectHomestaysForTop() {
           </div>
 
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600">
               <strong>{selectedHomestays.length}</strong> selected • <strong>{total}</strong> total
             </p>
             <div className="flex items-center space-x-3">
               {selectedHomestays.length > 0 && (
                 <button
                   onClick={() => setSelectedHomestays([])}
-                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  className="text-sm text-gray-600 hover:text-gray-900"
                 >
                   Clear selection
                 </button>
@@ -291,7 +291,7 @@ export default function SelectHomestaysForTop() {
               {homestays.length > 0 && (
                 <button
                   onClick={toggleSelectAll}
-                  className="text-sm text-[#224240] dark:text-[#2a5350] hover:underline font-medium"
+                  className="text-sm text-[#224240] hover:underline font-medium"
                 >
                   {selectedHomestays.length === homestays.length ? 'Deselect All' : 'Select All on Page'}
                 </button>
@@ -306,9 +306,9 @@ export default function SelectHomestaysForTop() {
             <LoadingSpinner size="lg" />
           </div>
         ) : homestays.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-12 border border-gray-200 dark:border-gray-700 text-center">
+          <div className="bg-white rounded-xl p-12 border border-gray-200 text-center">
             <Home className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">No homestays found</p>
+            <p className="text-gray-600">No homestays found</p>
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -323,8 +323,8 @@ export default function SelectHomestaysForTop() {
                   onClick={() => toggleHomestaySelection(homestay.id)}
                   className={`relative cursor-pointer rounded-xl border-2 transition-all hover:shadow-lg overflow-hidden ${
                     isSelected
-                      ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10 shadow-lg'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      ? 'border-yellow-500 bg-yellow-50 shadow-lg'
+                      : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   {isSelected && (
@@ -347,36 +347,36 @@ export default function SelectHomestaysForTop() {
                       className="w-full h-48 object-cover"
                     />
                   ) : (
-                    <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
                       <Home className="h-16 w-16 text-gray-400" />
                     </div>
                   )}
 
                   <div className="p-4">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1 truncate">
+                    <h4 className="font-semibold text-gray-900 mb-1 truncate">
                       {homestay.name}
                     </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mb-2">
+                    <p className="text-sm text-gray-600 flex items-center mb-2">
                       <MapPin className="h-3 w-3 mr-1" />
                       {homestay.address || 'No address'}
                     </p>
 
                     {homestay.description && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
+                      <p className="text-xs text-gray-500 mb-3 line-clamp-2">
                         {homestay.description}
                       </p>
                     )}
 
                     <div className="flex items-center justify-between mb-3">
                       <span className={`text-xs px-2 py-1 rounded-full ${
-                        homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                        homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                        homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                        homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
                       }`}>
                         {homestay.status}
                       </span>
                       {lowestPrice && (
-                        <span className="text-sm font-bold text-[#224240] dark:text-[#2a5350]">
+                        <span className="text-sm font-bold text-[#224240]">
                           NPR {lowestPrice.toLocaleString()}
                         </span>
                       )}
@@ -385,19 +385,19 @@ export default function SelectHomestaysForTop() {
                     {homestay.facilities && homestay.facilities.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-2">
                         {homestay.facilities.slice(0, 3).map((f: any, idx: number) => (
-                          <span key={idx} className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                          <span key={idx} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
                             {f.facility?.name || f.name}
                           </span>
                         ))}
                         {homestay.facilities.length > 3 && (
-                          <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                          <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
                             +{homestay.facilities.length - 3}
                           </span>
                         )}
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center justify-between text-xs text-gray-500">
                       <span className="flex items-center">
                         <Users className="h-3 w-3 mr-1" />
                         {homestay.rooms?.length || 0} room{homestay.rooms?.length !== 1 ? 's' : ''}
@@ -411,7 +411,7 @@ export default function SelectHomestaysForTop() {
                     </div>
 
                     {homestay.owner && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center">
+                      <p className="text-xs text-gray-500 mt-2 flex items-center">
                         <User className="h-3 w-3 mr-1" />
                         {homestay.owner.name}
                       </p>
@@ -423,10 +423,10 @@ export default function SelectHomestaysForTop() {
           </div>
         ) : (
           // Table View
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-4 py-3 text-left">
                       <input
@@ -436,16 +436,16 @@ export default function SelectHomestaysForTop() {
                         className="w-4 h-4 text-yellow-500 rounded"
                       />
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Homestay</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Address</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Owner</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rooms</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Price</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Facilities</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Homestay</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Address</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rooms</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Facilities</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="divide-y divide-gray-200">
                   {homestays.map((homestay: any) => {
                     const image = getHomestayImage(homestay);
                     const lowestPrice = getLowestRoomPrice(homestay);
@@ -454,8 +454,8 @@ export default function SelectHomestaysForTop() {
                     return (
                       <tr
                         key={homestay.id}
-                        className={`hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors ${
-                          isSelected ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''
+                        className={`hover:bg-gray-50 cursor-pointer transition-colors ${
+                          isSelected ? 'bg-yellow-50' : ''
                         }`}
                         onClick={() => toggleHomestaySelection(homestay.id)}
                       >
@@ -475,14 +475,14 @@ export default function SelectHomestaysForTop() {
                             {image ? (
                               <img src={image} alt={homestay.name} className="w-12 h-12 rounded-lg object-cover" />
                             ) : (
-                              <div className="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                              <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center">
                                 <Home className="h-6 w-6 text-gray-400" />
                               </div>
                             )}
                             <div>
-                              <p className="font-medium text-gray-900 dark:text-white">{homestay.name}</p>
+                              <p className="font-medium text-gray-900">{homestay.name}</p>
                               {homestay.rating && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                                <p className="text-xs text-gray-500 flex items-center">
                                   <Star className="h-3 w-3 mr-1 text-yellow-500" />
                                   {homestay.rating} ({homestay.reviews || 0} reviews)
                                 </p>
@@ -490,39 +490,39 @@ export default function SelectHomestaysForTop() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                        <td className="px-4 py-3 text-sm text-gray-600">
                           <div className="flex items-center">
                             <MapPin className="h-3 w-3 mr-1" />
                             {homestay.address || '-'}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                        <td className="px-4 py-3 text-sm text-gray-600">
                           {homestay.owner?.name || '-'}
                         </td>
                         <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-1 rounded-full ${
-                            homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                            homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                            'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                            homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                            homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
                           }`}>
                             {homestay.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                        <td className="px-4 py-3 text-sm text-gray-600">
                           {homestay.rooms?.length || 0}
                         </td>
-                        <td className="px-4 py-3 text-sm font-medium text-[#224240] dark:text-[#2a5350]">
+                        <td className="px-4 py-3 text-sm font-medium text-[#224240]">
                           {lowestPrice ? `NPR ${lowestPrice.toLocaleString()}` : '-'}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex flex-wrap gap-1 max-w-xs">
                             {homestay.facilities?.slice(0, 2).map((f: any, idx: number) => (
-                              <span key={idx} className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                              <span key={idx} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
                                 {f.facility?.name || f.name}
                               </span>
                             ))}
                             {homestay.facilities && homestay.facilities.length > 2 && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                              <span className="text-xs text-gray-500">
                                 +{homestay.facilities.length - 2}
                               </span>
                             )}
@@ -539,8 +539,8 @@ export default function SelectHomestaysForTop() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="mt-6 flex items-center justify-between bg-white rounded-xl p-4 border border-gray-200">
+            <p className="text-sm text-gray-600">
               Page {currentPage} of {totalPages}
             </p>
             <div className="flex items-center space-x-2">

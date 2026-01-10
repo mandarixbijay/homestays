@@ -54,16 +54,16 @@ const StatCard: React.FC<{
 
   const borderColorClasses = {
     teal: 'border-[#224240]/20 hover:border-[#224240]/40',
-    green: 'border-green-200 hover:border-green-300 dark:border-green-800',
-    yellow: 'border-yellow-200 hover:border-yellow-300 dark:border-yellow-800',
-    purple: 'border-purple-200 hover:border-purple-300 dark:border-purple-800'
+    green: 'border-green-200 hover:border-green-300
+    yellow: 'border-yellow-200 hover:border-yellow-300
+    purple: 'border-purple-200 hover:border-purple-300
   };
 
   const textColorClasses = {
-    teal: 'text-[#224240] dark:text-[#2a5350]',
-    green: 'text-green-600 dark:text-green-400',
-    yellow: 'text-yellow-600 dark:text-yellow-400',
-    purple: 'text-purple-600 dark:text-purple-400'
+    teal: 'text-[#224240]
+    green: 'text-green-600
+    yellow: 'text-yellow-600
+    purple: 'text-purple-600
   };
 
   const iconBgClasses = {
@@ -82,20 +82,20 @@ const StatCard: React.FC<{
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent dark:from-white/5 pointer-events-none"></div>
-      <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10 dark:bg-white/5 blur-2xl"></div>
-      <div className="absolute -left-4 -bottom-4 w-20 h-20 rounded-full bg-white/10 dark:bg-white/5 blur-xl"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent pointer-events-none"></div>
+      <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10 blur-2xl"></div>
+      <div className="absolute -left-4 -bottom-4 w-20 h-20 rounded-full bg-white/10 blur-xl"></div>
 
       <div className="relative p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{title}</p>
+            <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
             {loading ? (
-              <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+              <div className="h-10 w-24 bg-gray-200 rounded-lg animate-pulse"></div>
             ) : (
               <p className={`text-4xl font-bold ${textColorClasses[color]}`}>{value}</p>
             )}
-            {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{subtitle}</p>}
+            {subtitle && <p className="text-xs text-gray-500 mt-2">{subtitle}</p>}
           </div>
           {icon && (
             <div className={`p-3 rounded-xl ${iconBgClasses[color]} shadow-lg`}>
@@ -122,7 +122,7 @@ const DestinationCard: React.FC<{
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden"
+        className="group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-200 overflow-hidden"
       >
         {destination.isTopDestination && (
           <div className="absolute top-4 right-4 z-10">
@@ -133,7 +133,7 @@ const DestinationCard: React.FC<{
           </div>
         )}
 
-        <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 overflow-hidden">
+        <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           {destination.imageUrl ? (
             <img
               src={destination.imageUrl}
@@ -150,20 +150,20 @@ const DestinationCard: React.FC<{
 
         <div className="p-5">
           <div className="mb-3">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-[#224240] dark:group-hover:text-[#2a5350] transition-colors">
+            <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-[#224240] transition-colors">
               {destination.name}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+            <p className="text-sm text-gray-600 line-clamp-2">
               {destination.description || 'No description'}
             </p>
           </div>
 
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+            <span className="text-sm text-gray-600 font-medium">
               {destination._count?.homestays || 0} homestays
             </span>
             {destination.priority && (
-              <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-400">
+              <span className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">
                 Priority: {destination.priority}
               </span>
             )}
@@ -207,7 +207,7 @@ const DestinationCard: React.FC<{
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-4"
+      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 p-4"
     >
       <div className="flex items-center space-x-4">
         <div className="flex-shrink-0">
@@ -215,10 +215,10 @@ const DestinationCard: React.FC<{
             <img
               src={destination.imageUrl}
               alt={destination.name}
-              className="w-24 h-24 rounded-xl object-cover border border-gray-200 dark:border-gray-600"
+              className="w-24 h-24 rounded-xl object-cover border border-gray-200"
             />
           ) : (
-            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center">
+            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
               <MapPin className="h-10 w-10 text-gray-400" />
             </div>
           )}
@@ -228,7 +228,7 @@ const DestinationCard: React.FC<{
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2 mb-1">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-[#224240] dark:group-hover:text-[#2a5350] transition-colors">
+                <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#224240] transition-colors">
                   {destination.name}
                 </h3>
                 {destination.isTopDestination && (
@@ -238,10 +238,10 @@ const DestinationCard: React.FC<{
                   </div>
                 )}
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1 mb-2">
+              <p className="text-sm text-gray-600 line-clamp-1 mb-2">
                 {destination.description || 'No description'}
               </p>
-              <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center space-x-4 text-sm text-gray-500">
                 <span>{destination._count?.homestays || 0} homestays</span>
                 {destination.priority && <span>Priority: {destination.priority}</span>}
               </div>
@@ -340,7 +340,7 @@ const DestinationFormModal: React.FC<{
         />
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Description
           </label>
           <textarea
@@ -348,7 +348,7 @@ const DestinationFormModal: React.FC<{
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Beautiful lakeside city..."
             rows={3}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#224240] focus:border-transparent transition-all"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:ring-2 focus:ring-[#224240] focus:border-transparent transition-all"
           />
         </div>
 
@@ -367,7 +367,7 @@ const DestinationFormModal: React.FC<{
               onChange={(e) => setFormData({ ...formData, isTopDestination: e.target.checked })}
               className="w-4 h-4 text-[#224240] border-gray-300 rounded focus:ring-[#224240]"
             />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <span className="text-sm font-medium text-gray-700">
               Mark as Top Destination
             </span>
           </label>
@@ -546,9 +546,9 @@ export default function DestinationsManagement() {
   const hasFilters = search || topDestinationsOnly !== undefined;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       {/* Enhanced Header */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] dark:from-[#1a332f] dark:via-[#224240] dark:to-[#2a5350] shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#224240] via-[#2a5350] to-[#336663] shadow-2xl">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
@@ -623,14 +623,14 @@ export default function DestinationsManagement() {
 
         {/* Tabs */}
         <div className="mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-2">
             <div className="flex space-x-2">
               <button
                 onClick={() => setActiveTab('overview')}
                 className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
                   activeTab === 'overview'
                     ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    : 'text-gray-600 hover:bg-gray-100
                 }`}
               >
                 <div className="flex items-center justify-center space-x-2">
@@ -643,7 +643,7 @@ export default function DestinationsManagement() {
                 className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
                   activeTab === 'analytics'
                     ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    : 'text-gray-600 hover:bg-gray-100
                 }`}
               >
                 <div className="flex items-center justify-center space-x-2">
@@ -684,8 +684,8 @@ export default function DestinationsManagement() {
             </div>
 
             {/* Top Destinations by Homestay Count */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
                 <Star className="h-5 w-5 mr-2 text-[#224240]" />
                 Top Destinations by Homestay Count
               </h3>
@@ -698,29 +698,29 @@ export default function DestinationsManagement() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${
-                            idx === 0 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                            idx === 1 ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' :
-                            idx === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                            'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                            idx === 0 ? 'bg-yellow-100 text-yellow-700 :
+                            idx === 1 ? 'bg-gray-100 text-gray-700 :
+                            idx === 2 ? 'bg-orange-100 text-orange-700 :
+                            'bg-gray-50 text-gray-600
                           }`}>
                             <span className="text-sm font-bold">#{idx + 1}</span>
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900 dark:text-white">{dest.name}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {dest.isTopDestination && <span className="text-yellow-600 dark:text-yellow-400">★ Top </span>}
+                            <p className="font-medium text-gray-900">{dest.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {dest.isTopDestination && <span className="text-yellow-600">★ Top </span>}
                               Priority: {dest.priority || 'N/A'}
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-2xl font-bold text-[#224240] dark:text-[#2a5350]">
+                          <p className="text-2xl font-bold text-[#224240]">
                             {dest._count?.homestays || 0}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">homestays</p>
+                          <p className="text-xs text-gray-500">homestays</p>
                         </div>
                       </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${percentage}%` }}
@@ -732,7 +732,7 @@ export default function DestinationsManagement() {
                   );
                 })}
                 {analyticsData.topByHomestays.length === 0 && (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <div className="text-center py-8 text-gray-500">
                     No destination data available
                   </div>
                 )}
@@ -744,7 +744,7 @@ export default function DestinationsManagement() {
         {activeTab === 'overview' && (
           <>
         {/* Filters & Actions Bar */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <button
@@ -752,7 +752,7 @@ export default function DestinationsManagement() {
                 className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${
                   showFilters
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200
                 }`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
@@ -767,7 +767,7 @@ export default function DestinationsManagement() {
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'grid'
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200
                 }`}
               >
                 <Grid className="h-5 w-5" />
@@ -777,7 +777,7 @@ export default function DestinationsManagement() {
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'list'
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200
                 }`}
               >
                 <List className="h-5 w-5" />
@@ -785,7 +785,7 @@ export default function DestinationsManagement() {
               <button
                 onClick={() => loadData()}
                 disabled={loading}
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
               >
                 <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
               </button>
@@ -802,7 +802,7 @@ export default function DestinationsManagement() {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <input
@@ -811,7 +811,7 @@ export default function DestinationsManagement() {
                       onChange={handleSearchChange}
                       placeholder="Search destinations..."
                       autoComplete="off"
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#224240] focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm bg-white text-gray-900 focus:ring-2 focus:ring-[#224240] focus:border-transparent transition-all"
                     />
                   </div>
                   <select
@@ -820,7 +820,7 @@ export default function DestinationsManagement() {
                       setTopDestinationsOnly(e.target.value === '' ? undefined : e.target.value === 'true');
                       setCurrentPage(1);
                     }}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#224240] focus:border-transparent transition-all"
+                    className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white text-gray-900 focus:ring-2 focus:ring-[#224240] focus:border-transparent transition-all"
                   >
                     <option value="">All Destinations</option>
                     <option value="true">Top Destinations Only</option>
@@ -846,11 +846,11 @@ export default function DestinationsManagement() {
 
         {/* Destinations List */}
         {loading && destinations.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12">
             <LoadingSpinner size="lg" text="Loading destinations..." />
           </div>
         ) : destinations.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12">
             <EmptyState
               icon={<MapPin className="h-16 w-16" />}
               title="No destinations found"
@@ -884,8 +884,8 @@ export default function DestinationsManagement() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-8 flex items-center justify-between bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+          <div className="mt-8 flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+            <div className="text-sm text-gray-600 font-medium">
               Page {currentPage} of {totalPages}
             </div>
             <div className="flex items-center space-x-2">
@@ -916,7 +916,7 @@ export default function DestinationsManagement() {
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                         currentPage === pageNum
                           ? 'bg-[#224240] text-white shadow-lg'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200
                       }`}
                     >
                       {pageNum}
