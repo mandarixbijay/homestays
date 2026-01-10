@@ -123,20 +123,20 @@ const HomestayManagement = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'APPROVED':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-green-100 text-green-800';
       case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+        return 'bg-yellow-100 text-yellow-800';
       case 'REJECTED':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+        return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A403D]"></div>
       </div>
     );
   }
@@ -146,26 +146,26 @@ const HomestayManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <button
                 onClick={() => router.push('/admin')}
-                className="mr-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="mr-4 p-2 text-gray-400 hover:text-gray-600"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <Home className="h-6 w-6 text-blue-600" />
-              <h1 className="ml-3 text-xl font-bold text-gray-900 dark:text-white">
+              <Home className="h-6 w-6 text-[#1A403D]" />
+              <h1 className="ml-3 text-xl font-bold text-gray-900">
                 Homestay Management
               </h1>
             </div>
             <button
               onClick={() => router.push('/admin/homestays/create')}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#1A403D] hover:bg-[#1A403D]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A403D]/20"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Homestay
@@ -176,11 +176,11 @@ const HomestayManagement = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
+        <div className="bg-white rounded-lg shadow mb-6">
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Search by name
                 </label>
                 <div className="relative">
@@ -190,19 +190,19 @@ const HomestayManagement = () => {
                     value={filters.search}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
                     placeholder="Search homestays..."
-                    className="pl-10 w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="pl-10 w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Status
                 </label>
                 <select
                   value={filters.status}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
                 >
                   <option value="">All Status</option>
                   <option value="PENDING">Pending</option>
@@ -212,7 +212,7 @@ const HomestayManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Owner ID
                 </label>
                 <input
@@ -220,12 +220,12 @@ const HomestayManagement = () => {
                   value={filters.ownerId}
                   onChange={(e) => handleFilterChange('ownerId', e.target.value)}
                   placeholder="Owner ID"
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Address
                 </label>
                 <input
@@ -233,7 +233,7 @@ const HomestayManagement = () => {
                   value={filters.address}
                   onChange={(e) => handleFilterChange('address', e.target.value)}
                   placeholder="Address"
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
                 />
               </div>
             </div>
@@ -241,12 +241,12 @@ const HomestayManagement = () => {
         </div>
 
         {/* Homestays List */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             {homestays.length > 0 ? (
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              <div className="divide-y divide-gray-200">
                 {homestays.map((homestay: any) => (
-                  <div key={homestay.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <div key={homestay.id} className="p-6 hover:bg-gray-50">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-start space-x-4">
@@ -259,7 +259,7 @@ const HomestayManagement = () => {
                                 className="w-16 h-16 rounded-lg object-cover"
                               />
                             ) : (
-                              <div className="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+                              <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
                                 <Home className="h-6 w-6 text-gray-400" />
                               </div>
                             )}
@@ -267,18 +267,18 @@ const HomestayManagement = () => {
 
                           {/* Homestay Details */}
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                            <h3 className="text-lg font-medium text-gray-900">
                               {homestay.name}
                             </h3>
-                            <div className="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <div className="mt-1 flex items-center text-sm text-gray-500">
                               <MapPin className="flex-shrink-0 mr-1.5 h-4 w-4" />
                               <span className="truncate">{homestay.address}</span>
                             </div>
-                            <div className="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <div className="mt-1 flex items-center text-sm text-gray-500">
                               <User className="flex-shrink-0 mr-1.5 h-4 w-4" />
                               <span>Owner: {homestay.owner?.name} (ID: {homestay.owner?.id})</span>
                             </div>
-                            <div className="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <div className="mt-1 flex items-center text-sm text-gray-500">
                               <Home className="flex-shrink-0 mr-1.5 h-4 w-4" />
                               <span>{homestay.rooms?.length || 0} rooms</span>
                               {homestay.rating && (
@@ -293,12 +293,12 @@ const HomestayManagement = () => {
                                 {homestay.status}
                               </span>
                               {homestay.discount > 0 && (
-                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#1A403D]/10 text-[#1A403D]">
                                   {homestay.discount}% OFF
                                 </span>
                               )}
                               {homestay.vipAccess && (
-                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                                   VIP
                                 </span>
                               )}
@@ -313,14 +313,14 @@ const HomestayManagement = () => {
                           <>
                             <button
                               onClick={() => handleApproval(homestay, 'APPROVED')}
-                              className="p-2 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+                              className="p-2 text-green-600 hover:text-green-800"
                               title="Approve"
                             >
                               <Check className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => handleApproval(homestay, 'REJECTED')}
-                              className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                              className="p-2 text-red-600 hover:text-red-800"
                               title="Reject"
                             >
                               <X className="h-4 w-4" />
@@ -329,21 +329,21 @@ const HomestayManagement = () => {
                         )}
                         <button
                           onClick={() => router.push(`/admin/homestays/${homestay.id}`)}
-                          className="p-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
+                          className="p-2 text-gray-600 hover:text-gray-800"
                           title="View Details"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => router.push(`/admin/homestays/${homestay.id}/edit`)}
-                          className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="p-2 text-[#1A403D] hover:text-[#1A403D]/80"
                           title="Edit"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(homestay.id)}
-                          className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                          className="p-2 text-red-600 hover:text-red-800"
                           title="Delete"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -356,14 +356,14 @@ const HomestayManagement = () => {
             ) : (
               <div className="p-12 text-center">
                 <Home className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No homestays</h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No homestays</h3>
+                <p className="mt-1 text-sm text-gray-500">
                   Get started by creating a new homestay.
                 </p>
                 <div className="mt-6">
                   <button
                     onClick={() => router.push('/admin/homestays/create')}
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#1A403D] hover:bg-[#1A403D]/90"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Create Homestay
@@ -375,26 +375,26 @@ const HomestayManagement = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div className="bg-white px-4 py-3 border-t border-gray-200 flex items-center justify-between">
               <div className="flex-1 flex justify-between sm:hidden">
                 <button
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
-                  className="relative ml-3 inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                  className="relative ml-3 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                 >
                   Next
                 </button>
               </div>
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <p className="text-sm text-gray-700">
                     Page <span className="font-medium">{currentPage}</span> of{' '}
                     <span className="font-medium">{totalPages}</span>
                   </p>
@@ -404,14 +404,14 @@ const HomestayManagement = () => {
                     <button
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
-                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
-                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </button>
@@ -426,19 +426,19 @@ const HomestayManagement = () => {
       {/* Approval Modal */}
       {showApprovalModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              <h3 className="text-lg font-medium text-gray-900">
                 {approvalData.status === 'APPROVED' ? 'Approve' : 'Reject'} Homestay
               </h3>
               <div className="mt-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500">
                   Are you sure you want to {approvalData.status.toLowerCase()} &quot;{selectedHomestay?.name}&quot;?
                 </p>
 
                 {approvalData.status === 'REJECTED' && (
                   <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Rejection Reason *
                     </label>
                     <textarea
@@ -446,7 +446,7 @@ const HomestayManagement = () => {
                       onChange={(e) => setApprovalData(prev => ({ ...prev, rejectionReason: e.target.value }))}
                       placeholder="Please provide a reason for rejection..."
                       rows={3}
-                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
                       required
                     />
                   </div>
