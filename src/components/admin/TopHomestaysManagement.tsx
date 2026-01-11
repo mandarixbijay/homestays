@@ -691,6 +691,7 @@ export default function TopHomestaysManagement() {
                 <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
             </div>
           </div>
+        </div>
 
           <AnimatePresence>
             {showFilters && (

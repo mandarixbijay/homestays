@@ -6,8 +6,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
   MapPin, Plus, Eye, Edit, Trash2, X, Search, Grid, List, RefreshCw,
-  SlidersHorizontal, FileDown, Star, Home, Link as LinkIcon, Unlink,
-  TrendingUp, Image as ImageIcon, BarChart3
+  SlidersHorizontal, FileDown, Star, Home,
+  TrendingUp, BarChart3
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from 'lodash';
@@ -15,7 +15,7 @@ import {
   useDestinations, useAsyncOperation
 } from '@/hooks/useAdminApi';
 import {
-  LoadingSpinner, Alert, ActionButton, Card, Modal, EmptyState, Input, useToast
+  LoadingSpinner, Alert, ActionButton, Modal, EmptyState, Input, useToast
 } from '@/components/admin/AdminComponents';
 
 // ============================================================================
@@ -412,7 +412,7 @@ export default function DestinationsManagement() {
 
   const debouncedLoadData = useMemo(
     () => debounce((params: any) => {
-      loadDestinations(params).catch(error => {
+      loadDestinations(params).catch(() => {
         addToast({ type: 'error', title: 'Error', message: 'Failed to load destinations' });
       });
     }, 500),

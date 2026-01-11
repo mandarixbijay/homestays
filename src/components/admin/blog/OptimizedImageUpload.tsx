@@ -2,172 +2,172 @@
 
 import React, { useState, useCallback } from 'react';
 import {
- Upload, X, Check, AlertCircle, Image as ImageIcon,
- Loader2, ZoomIn, AlertTriangle
+    Upload, X, Check, AlertCircle, Image as ImageIcon,
+    Loader2, ZoomIn, AlertTriangle
 } from 'lucide-react';
 import {
- optimizeImage,
- validateImageFile,
- formatBytes,
- suggestAltText,
- checkFeaturedImageDimensions,
- type OptimizedImageResult
+    optimizeImage,
+    validateImageFile,
+    formatBytes,
+    suggestAltText,
+    checkFeaturedImageDimensions,
+    type OptimizedImageResult
 } from '@/lib/utils/imageOptimization';
 
 interface ImageData {
- url?: string;
- alt?: string;
- caption?: string;
- isMain: boolean;
+    url?: string;
+    alt?: string;
+    caption?: string;
+    isMain: boolean;
 }
 
 interface OptimizedImageUploadProps {
- images: ImageData[];
- onImagesChange: (images: ImageData[]) => void;
- onFileUpload: (file: File) => Promise<string>;
- maxImages?: number;
- isFeaturedImage?: boolean;
+    images: ImageData[];
+    onImagesChange: (images: ImageData[]) => void;
+    onFileUpload: (file: File) => Promise<string>;
+    maxImages?: number;
+    isFeaturedImage?: boolean;
 }
 
 export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
- images,
- onImagesChange,
- onFileUpload,
- maxImages = 10,
- isFeaturedImage = false
+    images,
+    onImagesChange,
+    onFileUpload,
+    maxImages = 10,
+    isFeaturedImage = false
 }) => {
- const [isUploading, setIsUploading] = useState(false);
- const [uploadProgress, setUploadProgress] = useState<string>('');
- const [optimizationStats, setOptimizationStats] = useState<OptimizedImageResult | null>(null);
- const [error, setError] = useState<string>('');
- const [selectedImage, setSelectedImage] = useState<number | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState<string>('');
+    const [optimizationStats, setOptimizationStats] = useState<OptimizedImageResult | null>(null);
+    const [error, setError] = useState<string>('');
+    const [selectedImage, setSelectedImage] = useState<number | null>(null);
 
- const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
- const files = Array.from(e.target.files || []);
- if (!files.length) return;
+    const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (!files.length) return;
 
- setError('');
- setIsUploading(true);
- setOptimizationStats(null);
+        setError('');
+        setIsUploading(true);
+        setOptimizationStats(null);
 
- try {
- const newImages: ImageData[] = [];
+        try {
+            const newImages: ImageData[] = [];
 
- for (const file of files) {
- // Validate file
- const validation = validateImageFile(file, 10); // 10MB max
- if (!validation.valid) {
- setError(validation.error || 'Invalid file');
- continue;
- }
+            for (const file of files) {
+                // Validate file
+                const validation = validateImageFile(file, 10); // 10MB max
+                if (!validation.valid) {
+                    setError(validation.error || 'Invalid file');
+                    continue;
+                }
 
- setUploadProgress(`Optimizing ${file.name}...`);
+                setUploadProgress(`Optimizing ${file.name}...`);
 
- // Optimize image on client side
- const optimizationResult = await optimizeImage(file, {
- maxWidth: 1920,
- maxHeight: 1080,
- quality: 0.85,
- format: 'jpeg'
- });
+                // Optimize image on client side
+                const optimizationResult = await optimizeImage(file, {
+                    maxWidth: 1920,
+                    maxHeight: 1080,
+                    quality: 0.85,
+                    format: 'jpeg'
+                });
 
- setOptimizationStats(optimizationResult);
+                setOptimizationStats(optimizationResult);
 
- // Check featured image dimensions if needed
- if (isFeaturedImage) {
- const dimensionCheck = await checkFeaturedImageDimensions(optimizationResult.file);
- if (!dimensionCheck.suitable && dimensionCheck.recommendation) {
- setError(dimensionCheck.recommendation);
- // Still allow upload but show warning
- }
- }
+                // Check featured image dimensions if needed
+                if (isFeaturedImage) {
+                    const dimensionCheck = await checkFeaturedImageDimensions(optimizationResult.file);
+                    if (!dimensionCheck.suitable && dimensionCheck.recommendation) {
+                        setError(dimensionCheck.recommendation);
+                        // Still allow upload but show warning
+                    }
+                }
 
- setUploadProgress(`Uploading ${file.name}...`);
+                setUploadProgress(`Uploading ${file.name}...`);
 
- try {
- // Upload to server (will get blob URL immediately for preview)
- const url = await onFileUpload(optimizationResult.file);
+                try {
+                    // Upload to server (will get blob URL immediately for preview)
+                    const url = await onFileUpload(optimizationResult.file);
 
- // Create image data with suggested alt text
- newImages.push({
- url,
- alt: suggestAltText(file.name),
- caption: '',
- isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
- });
- } catch (uploadError) {
- console.error('Upload error:', uploadError);
- // Even if upload fails, create preview with blob URL for user to see
- const blobUrl = URL.createObjectURL(optimizationResult.file);
- newImages.push({
- url: blobUrl,
- alt: suggestAltText(file.name),
- caption: '',
- isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
- });
- setError(`Note: ${file.name} will upload when you save (backend image optimization pending)`);
- }
- }
+                    // Create image data with suggested alt text
+                    newImages.push({
+                        url,
+                        alt: suggestAltText(file.name),
+                        caption: '',
+                        isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
+                    });
+                } catch (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    // Even if upload fails, create preview with blob URL for user to see
+                    const blobUrl = URL.createObjectURL(optimizationResult.file);
+                    newImages.push({
+                        url: blobUrl,
+                        alt: suggestAltText(file.name),
+                        caption: '',
+                        isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
+                    });
+                    setError(`Note: ${file.name} will upload when you save (backend image optimization pending)`);
+                }
+            }
 
- // Update images
- onImagesChange([...images, ...newImages]);
+            // Update images
+            onImagesChange([...images, ...newImages]);
 
- } catch (err) {
- console.error('Image processing error:', err);
- setError(err instanceof Error ? err.message : 'Failed to process image');
- } finally {
- setIsUploading(false);
- setUploadProgress('');
+        } catch (err) {
+            console.error('Image processing error:', err);
+            setError(err instanceof Error ? err.message : 'Failed to process image');
+        } finally {
+            setIsUploading(false);
+            setUploadProgress('');
 
- // Clear file input
- e.target.value = '';
- }
- }, [images, onImagesChange, onFileUpload, isFeaturedImage]);
+            // Clear file input
+            e.target.value = '';
+        }
+    }, [images, onImagesChange, onFileUpload, isFeaturedImage]);
 
- const handleRemoveImage = (index: number) => {
- const updatedImages = images.filter((_, i) => i !== index);
- onImagesChange(updatedImages);
- };
+    const handleRemoveImage = (index: number) => {
+        const updatedImages = images.filter((_, i) => i !== index);
+        onImagesChange(updatedImages);
+    };
 
- const handleSetMainImage = (index: number) => {
- const updatedImages = images.map((img, i) => ({
- ...img,
- isMain: i === index
- }));
- onImagesChange(updatedImages);
- };
+    const handleSetMainImage = (index: number) => {
+        const updatedImages = images.map((img, i) => ({
+            ...img,
+            isMain: i === index
+        }));
+        onImagesChange(updatedImages);
+    };
 
- const handleUpdateAlt = (index: number, alt: string) => {
- const updatedImages = [...images];
- updatedImages[index] = { ...updatedImages[index], alt };
- onImagesChange(updatedImages);
- };
+    const handleUpdateAlt = (index: number, alt: string) => {
+        const updatedImages = [...images];
+        updatedImages[index] = { ...updatedImages[index], alt };
+        onImagesChange(updatedImages);
+    };
 
- const handleUpdateCaption = (index: number, caption: string) => {
- const updatedImages = [...images];
- updatedImages[index] = { ...updatedImages[index], caption };
- onImagesChange(updatedImages);
- };
+    const handleUpdateCaption = (index: number, caption: string) => {
+        const updatedImages = [...images];
+        updatedImages[index] = { ...updatedImages[index], caption };
+        onImagesChange(updatedImages);
+    };
 
- const canAddMore = images.length < maxImages;
+    const canAddMore = images.length < maxImages;
 
- return (
- <div className="space-y-4">
- {/* Upload Area */}
- {canAddMore && (
- <div className="relative">
- <input
- type="file"
- accept="image/*"
- multiple={!isFeaturedImage}
- onChange={handleFileSelect}
- disabled={isUploading}
- className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
- id="image-upload"
- />
- <label
- htmlFor="image-upload"
- className={`
+    return (
+        <div className="space-y-4">
+            {/* Upload Area */}
+            {canAddMore && (
+                <div className="relative">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        multiple={!isFeaturedImage}
+                        onChange={handleFileSelect}
+                        disabled={isUploading}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
+                        id="image-upload"
+                    />
+                    <label
+                        htmlFor="image-upload"
+                        className={`
  flex flex-col items-center justify-center w-full h-48
  border-2 border-dashed rounded-lg cursor-pointer transition-all
  ${isUploading

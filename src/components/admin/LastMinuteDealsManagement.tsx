@@ -529,6 +529,19 @@ export default function LastMinuteDealsManagement() {
               <div className="space-y-4">
                 {analyticsData.topDeals.map((deal: any, idx: number) => {
                   const daysRemaining = Math.ceil((new Date(deal.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+
+                  const rankBadgeClass = idx === 0
+                    ? 'bg-yellow-100 text-yellow-700'
+                    : idx === 1
+                      ? 'bg-gray-100 text-gray-700'
+                      : idx === 2
+                        ? 'bg-orange-100 text-orange-700'
+                        : 'bg-gray-50 text-gray-600';
+
+                  const discountPillClass = deal.discountType === 'PERCENTAGE'
+                    ? 'bg-yellow-100 text-yellow-700'
+                    : 'bg-orange-100 text-orange-700';
+
                   return (
                     <div key={deal.id} className="space-y-2">
                       <div className="flex items-center justify-between">
@@ -635,6 +648,12 @@ export default function LastMinuteDealsManagement() {
                     const homestayImage = getHomestayImage(deal.homestay);
                     const isExpired = new Date(deal.endDate) < new Date();
                     const isActive = deal.isActive && !isExpired;
+
+                    const statusClass = isActive
+                      ? 'bg-green-100 text-green-800'
+                      : isExpired
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-gray-100 text-gray-800';
 
                     return (
                       <tr key={deal.id} className="hover:bg-gray-50 transition-colors">
@@ -805,11 +824,7 @@ export default function LastMinuteDealsManagement() {
 
                                 {/* Admin actions overlay */}
                                 <div className="absolute top-2 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                    deal.isActive
-                                      ? 'bg-green-500 text-white'
-                                      : 'bg-gray-500 text-white'
-                                  }`}>
+                                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${deal.isActive ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'}`}>
                                     {deal.isActive ? 'Active' : 'Inactive'}
                                   </span>
                                   <div className="flex gap-2">
@@ -926,8 +941,8 @@ export default function LastMinuteDealsManagement() {
           <div className="mt-8 flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
             <div className="text-sm text-gray-600 font-medium">Page {currentPage} of {totalPages}</div>
             <div className="flex items-center space-x-2">
-              <ActionButton onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} variant="secondary" size="sm">Previous</ActionButton>
-              <ActionButton onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} variant="secondary" size="sm">Next</ActionButton>
+              <ActionButton onClick={() => setCurrentPage((p: number) => Math.max(1, p - 1))} disabled={currentPage === 1} variant="secondary" size="sm">Previous</ActionButton>
+              <ActionButton onClick={() => setCurrentPage((p: number) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} variant="secondary" size="sm">Next</ActionButton>
             </div>
           </div>
         )}
@@ -938,7 +953,7 @@ export default function LastMinuteDealsManagement() {
       <DealFormModal isOpen={showFormModal || editingDeal !== null} onClose={() => { setShowFormModal(false); setEditingDeal(null); }} deal={editingDeal} onSubmit={handleFormSubmit} />
 
       <div className="fixed bottom-4 right-4 z-50 space-y-2">
-        {toasts.map((t) => (<Alert key={t.id} type={t.type} title={t.title} message={t.message} className="min-w-80 shadow-lg" />))}
+        {toasts.map((t: any) => (<Alert key={t.id} type={t.type} title={t.title} message={t.message} className="min-w-80 shadow-lg" />))}
       </div>
     </div>
   );
