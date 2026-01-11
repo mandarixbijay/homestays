@@ -2,362 +2,355 @@
 
 import React, { useState, useCallback } from 'react';
 import {
-    Upload, X, Check, AlertCircle, Image as ImageIcon,
-    Loader2, ZoomIn, AlertTriangle
+  Upload, X, Check, AlertCircle, Image as ImageIcon,
+  Loader2, ZoomIn, AlertTriangle, Star, Edit2, ChevronDown, ChevronUp
 } from 'lucide-react';
 import {
-    optimizeImage,
-    validateImageFile,
-    formatBytes,
-    suggestAltText,
-    checkFeaturedImageDimensions,
-    type OptimizedImageResult
+  optimizeImage,
+  validateImageFile,
+  formatBytes,
+  suggestAltText,
+  checkFeaturedImageDimensions,
+  type OptimizedImageResult
 } from '@/lib/utils/imageOptimization';
 
 interface ImageData {
-    url?: string;
-    alt?: string;
-    caption?: string;
-    isMain: boolean;
+  url?: string;
+  alt?: string;
+  caption?: string;
+  isMain: boolean;
 }
 
 interface OptimizedImageUploadProps {
-    images: ImageData[];
-    onImagesChange: (images: ImageData[]) => void;
-    onFileUpload: (file: File) => Promise<string>;
-    maxImages?: number;
-    isFeaturedImage?: boolean;
+  images: ImageData[];
+  onImagesChange: (images: ImageData[]) => void;
+  onFileUpload: (file: File) => Promise<string>;
+  maxImages?: number;
+  isFeaturedImage?: boolean;
 }
 
 export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
-    images,
-    onImagesChange,
-    onFileUpload,
-    maxImages = 10,
-    isFeaturedImage = false
+  images,
+  onImagesChange,
+  onFileUpload,
+  maxImages = 10,
+  isFeaturedImage = false
 }) => {
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState<string>('');
-    const [optimizationStats, setOptimizationStats] = useState<OptimizedImageResult | null>(null);
-    const [error, setError] = useState<string>('');
-    const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
+  const [optimizationStats, setOptimizationStats] = useState<OptimizedImageResult | null>(null);
+  const [error, setError] = useState<string>('');
+  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [editingImage, setEditingImage] = useState<number | null>(null);
 
-    const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-        if (!files.length) return;
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
-        setError('');
-        setIsUploading(true);
-        setOptimizationStats(null);
+    setError('');
+    setIsUploading(true);
+    setOptimizationStats(null);
+
+    try {
+      const newImages: ImageData[] = [];
+
+      for (const file of files) {
+        const validation = validateImageFile(file, 10);
+        if (!validation.valid) {
+          setError(validation.error || 'Invalid file');
+          continue;
+        }
+
+        setUploadProgress(`Optimizing ${file.name}...`);
+
+        const optimizationResult = await optimizeImage(file, {
+          maxWidth: 1920,
+          maxHeight: 1080,
+          quality: 0.85,
+          format: 'jpeg'
+        });
+
+        setOptimizationStats(optimizationResult);
+
+        if (isFeaturedImage) {
+          const dimensionCheck = await checkFeaturedImageDimensions(optimizationResult.file);
+          if (!dimensionCheck.suitable && dimensionCheck.recommendation) {
+            setError(dimensionCheck.recommendation);
+          }
+        }
+
+        setUploadProgress(`Uploading ${file.name}...`);
 
         try {
-            const newImages: ImageData[] = [];
-
-            for (const file of files) {
-                // Validate file
-                const validation = validateImageFile(file, 10); // 10MB max
-                if (!validation.valid) {
-                    setError(validation.error || 'Invalid file');
-                    continue;
-                }
-
-                setUploadProgress(`Optimizing ${file.name}...`);
-
-                // Optimize image on client side
-                const optimizationResult = await optimizeImage(file, {
-                    maxWidth: 1920,
-                    maxHeight: 1080,
-                    quality: 0.85,
-                    format: 'jpeg'
-                });
-
-                setOptimizationStats(optimizationResult);
-
-                // Check featured image dimensions if needed
-                if (isFeaturedImage) {
-                    const dimensionCheck = await checkFeaturedImageDimensions(optimizationResult.file);
-                    if (!dimensionCheck.suitable && dimensionCheck.recommendation) {
-                        setError(dimensionCheck.recommendation);
-                        // Still allow upload but show warning
-                    }
-                }
-
-                setUploadProgress(`Uploading ${file.name}...`);
-
-                try {
-                    // Upload to server (will get blob URL immediately for preview)
-                    const url = await onFileUpload(optimizationResult.file);
-
-                    // Create image data with suggested alt text
-                    newImages.push({
-                        url,
-                        alt: suggestAltText(file.name),
-                        caption: '',
-                        isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
-                    });
-                } catch (uploadError) {
-                    console.error('Upload error:', uploadError);
-                    // Even if upload fails, create preview with blob URL for user to see
-                    const blobUrl = URL.createObjectURL(optimizationResult.file);
-                    newImages.push({
-                        url: blobUrl,
-                        alt: suggestAltText(file.name),
-                        caption: '',
-                        isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
-                    });
-                    setError(`Note: ${file.name} will upload when you save (backend image optimization pending)`);
-                }
-            }
-
-            // Update images
-            onImagesChange([...images, ...newImages]);
-
-        } catch (err) {
-            console.error('Image processing error:', err);
-            setError(err instanceof Error ? err.message : 'Failed to process image');
-        } finally {
-            setIsUploading(false);
-            setUploadProgress('');
-
-            // Clear file input
-            e.target.value = '';
+          const url = await onFileUpload(optimizationResult.file);
+          newImages.push({
+            url,
+            alt: suggestAltText(file.name),
+            caption: '',
+            isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
+          });
+        } catch (uploadError) {
+          console.error('Upload error:', uploadError);
+          const blobUrl = URL.createObjectURL(optimizationResult.file);
+          newImages.push({
+            url: blobUrl,
+            alt: suggestAltText(file.name),
+            caption: '',
+            isMain: isFeaturedImage || (images.length === 0 && newImages.length === 0)
+          });
+          setError(`Note: ${file.name} will upload when you save`);
         }
-    }, [images, onImagesChange, onFileUpload, isFeaturedImage]);
+      }
 
-    const handleRemoveImage = (index: number) => {
-        const updatedImages = images.filter((_, i) => i !== index);
-        onImagesChange(updatedImages);
-    };
+      onImagesChange([...images, ...newImages]);
 
-    const handleSetMainImage = (index: number) => {
-        const updatedImages = images.map((img, i) => ({
-            ...img,
-            isMain: i === index
-        }));
-        onImagesChange(updatedImages);
-    };
+    } catch (err) {
+      console.error('Image processing error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to process image');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress('');
+      e.target.value = '';
+    }
+  }, [images, onImagesChange, onFileUpload, isFeaturedImage]);
 
-    const handleUpdateAlt = (index: number, alt: string) => {
-        const updatedImages = [...images];
-        updatedImages[index] = { ...updatedImages[index], alt };
-        onImagesChange(updatedImages);
-    };
+  const handleRemoveImage = (index: number) => {
+    const updatedImages = images.filter((_, i) => i !== index);
+    onImagesChange(updatedImages);
+    if (editingImage === index) setEditingImage(null);
+  };
 
-    const handleUpdateCaption = (index: number, caption: string) => {
-        const updatedImages = [...images];
-        updatedImages[index] = { ...updatedImages[index], caption };
-        onImagesChange(updatedImages);
-    };
+  const handleSetMainImage = (index: number) => {
+    const updatedImages = images.map((img, i) => ({
+      ...img,
+      isMain: i === index
+    }));
+    onImagesChange(updatedImages);
+  };
 
-    const canAddMore = images.length < maxImages;
+  const handleUpdateAlt = (index: number, alt: string) => {
+    const updatedImages = [...images];
+    updatedImages[index] = { ...updatedImages[index], alt };
+    onImagesChange(updatedImages);
+  };
 
-    return (
-        <div className="space-y-4">
-            {/* Upload Area */}
-            {canAddMore && (
-                <div className="relative">
-                    <input
-                        type="file"
-                        accept="image/*"
-                        multiple={!isFeaturedImage}
-                        onChange={handleFileSelect}
-                        disabled={isUploading}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
-                        id="image-upload"
-                    />
-                    <label
-                        htmlFor="image-upload"
-                        className={`
- flex flex-col items-center justify-center w-full h-48
- border-2 border-dashed rounded-lg cursor-pointer transition-all
- ${isUploading
- ? 'border-[#1A403D] bg-blue-50'
- : 'border-gray-300 hover:border-[#1A403D] bg-gray-50 hover:bg-blue-50'
- }
- `}
- >
- {isUploading ? (
- <div className="flex flex-col items-center gap-3">
- <Loader2 className="h-12 w-12 text-[#1A403D] animate-spin" />
- <div className="text-center">
- <div className="text-sm font-medium text-gray-900 ">
- {uploadProgress}
- </div>
- {optimizationStats && (
- <div className="text-xs text-gray-600 mt-2">
- Compressed {formatBytes(optimizationStats.originalSize)} → {formatBytes(optimizationStats.optimizedSize)}
- <span className="text-green-600 ml-1">
- ({optimizationStats.compressionRatio.toFixed(1)}% savings)
- </span>
- </div>
- )}
- </div>
- </div>
- ) : (
- <>
- <Upload className="h-12 w-12 text-gray-400 mb-3" />
- <div className="text-center">
- <span className="text-sm font-medium text-gray-900 ">
- Click to upload {isFeaturedImage ? 'featured image' : 'images'}
- </span>
- <p className="text-xs text-gray-500 mt-1">
- PNG, JPG, WebP up to 10MB
- </p>
- <p className="text-xs text-[#1A403D] mt-1">
- Images will be automatically optimized
- </p>
- </div>
- </>
- )}
- </label>
- </div>
- )}
+  const handleUpdateCaption = (index: number, caption: string) => {
+    const updatedImages = [...images];
+    updatedImages[index] = { ...updatedImages[index], caption };
+    onImagesChange(updatedImages);
+  };
 
- {/* Error Message */}
- {error && (
- <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
- <AlertTriangle className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
- <div className="text-sm text-orange-700 ">{error}</div>
- </div>
- )}
+  const canAddMore = images.length < maxImages;
 
- {/* Image Grid */}
- {images.length > 0 && (
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
- {images.map((image, index) => (
- <div
- key={index}
- className={`relative group bg-white rounded-lg border-2 transition-all ${
- image.isMain
- ? 'border-[#1A403D] ring-2 ring-blue-200'
- : 'border-gray-200'
- }`}
- >
- {/* Image Preview */}
- <div className="relative aspect-video bg-gray-100 rounded-t-lg overflow-hidden">
- {image.url && (
- <img
- src={image.url}
- alt={image.alt || 'Preview'}
- className="w-full h-full object-cover"
- />
- )}
+  return (
+    <div className="space-y-2">
+      {/* Compact horizontal layout */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Image thumbnails */}
+        {images.map((image, index) => (
+          <div
+            key={index}
+            className={`relative group flex-shrink-0 ${editingImage === index ? 'ring-2 ring-[#1A403D]' : ''}`}
+          >
+            {/* Thumbnail */}
+            <div
+              className={`relative w-16 h-16 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
+                image.isMain ? 'border-[#1A403D]' : 'border-gray-200 hover:border-gray-300'
+              }`}
+              onClick={() => setEditingImage(editingImage === index ? null : index)}
+            >
+              {image.url && (
+                <img
+                  src={image.url}
+                  alt={image.alt || 'Preview'}
+                  className="w-full h-full object-cover"
+                />
+              )}
 
- {/* Main Badge */}
- {image.isMain && (
- <div className="absolute top-2 left-2 px-2 py-1 bg-[#1A403D] text-white text-xs font-medium rounded-full flex items-center gap-1">
- <Check className="h-3 w-3" />
- Featured
- </div>
- )}
+              {/* Featured badge */}
+              {image.isMain && (
+                <div className="absolute top-0.5 left-0.5">
+                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 drop-shadow" />
+                </div>
+              )}
 
- {/* Actions */}
- <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
- {!image.isMain && (
- <button
- type="button"
- onClick={() => handleSetMainImage(index)}
- className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"
- title="Set as featured image"
- >
- <ImageIcon className="h-4 w-4 text-gray-700 " />
- </button>
- )}
- <button
- type="button"
- onClick={() => setSelectedImage(index)}
- className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"
- title="Preview"
- >
- <ZoomIn className="h-4 w-4 text-gray-700 " />
- </button>
- <button
- type="button"
- onClick={() => handleRemoveImage(index)}
- className="p-2 bg-white rounded-full shadow-lg hover:bg-red-50 transition-colors"
- title="Remove"
- >
- <X className="h-4 w-4 text-red-600 " />
- </button>
- </div>
- </div>
+              {/* Alt text warning */}
+              {!image.alt && (
+                <div className="absolute bottom-0.5 right-0.5">
+                  <AlertCircle className="h-3 w-3 text-orange-500" />
+                </div>
+              )}
 
- {/* Image Details */}
- <div className="p-3 space-y-2">
- {/* Alt Text */}
- <div>
- <label className="block text-xs font-medium text-gray-700 mb-1">
- Alt Text (Required for SEO)
- </label>
- <input
- type="text"
- value={image.alt || ''}
- onChange={(e) => handleUpdateAlt(index, e.target.value)}
- className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-[#1A403D]"
- placeholder="Describe the image"
- />
- {!image.alt && (
- <div className="flex items-center gap-1 mt-1 text-xs text-orange-600 ">
- <AlertCircle className="h-3 w-3" />
- Alt text is missing
- </div>
- )}
- </div>
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Edit2 className="h-4 w-4 text-white" />
+              </div>
+            </div>
 
- {/* Caption (Optional) */}
- <div>
- <label className="block text-xs font-medium text-gray-700 mb-1">
- Caption (Optional)
- </label>
- <input
- type="text"
- value={image.caption || ''}
- onChange={(e) => handleUpdateCaption(index, e.target.value)}
- className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-[#1A403D]"
- placeholder="Optional caption"
- />
- </div>
- </div>
- </div>
- ))}
- </div>
- )}
+            {/* Quick remove button */}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }}
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-sm"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        ))}
 
- {/* Stats */}
- {images.length > 0 && (
- <div className="flex items-center justify-between text-sm text-gray-600 ">
- <span>{images.length} image{images.length !== 1 ? 's' : ''} uploaded</span>
- {!canAddMore && (
- <span className="text-orange-600 ">
- Maximum {maxImages} images reached
- </span>
- )}
- </div>
- )}
+        {/* Upload button - compact */}
+        {canAddMore && (
+          <div className="relative flex-shrink-0">
+            <input
+              type="file"
+              accept="image/*"
+              multiple={!isFeaturedImage}
+              onChange={handleFileSelect}
+              disabled={isUploading}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
+              id="image-upload-compact"
+            />
+            <label
+              htmlFor="image-upload-compact"
+              className={`
+                flex items-center justify-center w-16 h-16 rounded-lg cursor-pointer transition-all border-2 border-dashed
+                ${isUploading
+                  ? 'border-[#1A403D] bg-blue-50'
+                  : 'border-gray-300 hover:border-[#1A403D] bg-gray-50 hover:bg-blue-50'
+                }
+              `}
+            >
+              {isUploading ? (
+                <Loader2 className="h-5 w-5 text-[#1A403D] animate-spin" />
+              ) : (
+                <Upload className="h-5 w-5 text-gray-400" />
+              )}
+            </label>
+          </div>
+        )}
 
- {/* Image Preview Modal */}
- {selectedImage !== null && images[selectedImage] && (
- <div
- className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
- onClick={() => setSelectedImage(null)}
- >
- <div className="relative max-w-6xl max-h-screen">
- <img
- src={images[selectedImage].url}
- alt={images[selectedImage].alt || 'Preview'}
- className="max-w-full max-h-screen object-contain rounded-lg"
- />
- <button
- className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg"
- onClick={() => setSelectedImage(null)}
- >
- <X className="h-6 w-6" />
- </button>
- </div>
- </div>
- )}
- </div>
- );
+        {/* Empty state hint */}
+        {images.length === 0 && !isUploading && (
+          <span className="text-xs text-gray-500 ml-2">Click to add images</span>
+        )}
+      </div>
+
+      {/* Upload progress */}
+      {isUploading && uploadProgress && (
+        <div className="text-xs text-gray-600 flex items-center gap-2">
+          <span>{uploadProgress}</span>
+          {optimizationStats && (
+            <span className="text-green-600">
+              ({optimizationStats.compressionRatio.toFixed(0)}% smaller)
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Error Message - compact */}
+      {error && (
+        <div className="flex items-center gap-1.5 text-xs text-orange-600">
+          <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Expanded edit panel for selected image */}
+      {editingImage !== null && images[editingImage] && (
+        <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 space-y-2">
+          <div className="flex items-start gap-3">
+            {/* Larger preview */}
+            <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+              <img
+                src={images[editingImage].url}
+                alt={images[editingImage].alt || 'Preview'}
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={() => setSelectedImage(editingImage)}
+              />
+              <button
+                type="button"
+                onClick={() => setSelectedImage(editingImage)}
+                className="absolute bottom-1 right-1 p-1 bg-white/90 rounded shadow-sm"
+              >
+                <ZoomIn className="h-3 w-3 text-gray-600" />
+              </button>
+            </div>
+
+            {/* Edit fields */}
+            <div className="flex-1 space-y-2 min-w-0">
+              <div>
+                <label className="block text-[10px] font-medium text-gray-500 mb-0.5">
+                  Alt Text <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={images[editingImage].alt || ''}
+                  onChange={(e) => handleUpdateAlt(editingImage, e.target.value)}
+                  className="w-full px-2 py-1 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D]"
+                  placeholder="Describe the image for SEO"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium text-gray-500 mb-0.5">Caption</label>
+                <input
+                  type="text"
+                  value={images[editingImage].caption || ''}
+                  onChange={(e) => handleUpdateCaption(editingImage, e.target.value)}
+                  className="w-full px-2 py-1 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D]"
+                  placeholder="Optional caption"
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                {!images[editingImage].isMain && (
+                  <button
+                    type="button"
+                    onClick={() => handleSetMainImage(editingImage)}
+                    className="text-[10px] px-2 py-1 bg-[#1A403D] text-white rounded hover:bg-[#152f2d] transition-colors flex items-center gap-1"
+                  >
+                    <Star className="h-3 w-3" /> Set as featured
+                  </button>
+                )}
+                {images[editingImage].isMain && (
+                  <span className="text-[10px] px-2 py-1 bg-yellow-100 text-yellow-700 rounded flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-yellow-500" /> Featured image
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(editingImage)}
+                  className="text-[10px] px-2 py-1 text-red-600 hover:bg-red-50 rounded transition-colors flex items-center gap-1 ml-auto"
+                >
+                  <X className="h-3 w-3" /> Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      {selectedImage !== null && images[selectedImage] && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <img
+              src={images[selectedImage].url}
+              alt={images[selectedImage].alt || 'Preview'}
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            />
+            <button
+              className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-lg"
+              onClick={() => setSelectedImage(null)}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default OptimizedImageUpload;

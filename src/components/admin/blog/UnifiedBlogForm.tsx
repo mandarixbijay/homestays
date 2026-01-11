@@ -1645,18 +1645,18 @@ const loadData = async () => {
                                 </div>
                             </Card>
 
-                            {/* Featured Images - Horizontal Card */}
+                            {/* Featured Images - Compact Inline */}
                             <Card className="shadow-sm border border-gray-200">
-                                <div className="p-4">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <ImageIcon className="h-4 w-4 text-[#1A403D]" />
-                                            <h3 className="text-sm font-semibold text-gray-900">Featured Images</h3>
-                                            <span className="text-[10px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded font-medium">
-                                                Auto-optimized
-                                            </span>
-                                        </div>
-                                        <span className="text-xs text-gray-500">{formData.images.length} image{formData.images.length !== 1 ? 's' : ''}</span>
+                                <div className="p-3">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <ImageIcon className="h-3.5 w-3.5 text-gray-500" />
+                                        <span className="text-xs font-medium text-gray-700">Images</span>
+                                        {formData.images.length > 0 && (
+                                            <span className="text-[10px] text-gray-500">({formData.images.length})</span>
+                                        )}
+                                        <span className="text-[9px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded ml-auto">
+                                            Auto-optimized
+                                        </span>
                                     </div>
                                     <OptimizedImageUpload
                                         images={formData.images}
