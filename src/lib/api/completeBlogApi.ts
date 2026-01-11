@@ -745,6 +745,73 @@ async updateBlog(id: number, blogData: UpdateBlogData, imageFiles: File[] = []):
     return Promise.all(files.map(file => this.uploadImage(file)));
   }
 
+  /**
+   * Upload content image (for images pasted/embedded in blog content)
+   * Uses the dedicated content-image endpoint for optimized handling
+   */
+  async uploadContentImage(file: File): Promise<{ url: string }> {
+    try {
+      console.log('[uploadContentImage] Uploading content image:', file.name, file.size);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const session = await getSession();
+
+      if (!session?.user?.accessToken) {
+        throw new Error('No access token available. Please log in again.');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/blog/admin/blogs/upload-content-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.user.accessToken}`,
+          'Accept': 'application/json',
+        },
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[uploadContentImage] Upload failed:', errorText);
+        throw new Error(`Failed to upload content image: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('[uploadContentImage] Upload successful:', result);
+
+      // Handle different response formats
+      if (result.url) {
+        return { url: result.url };
+      }
+      if (typeof result === 'string') {
+        return { url: result };
+      }
+
+      return result;
+    } catch (error) {
+      console.error('[uploadContentImage] Error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert base64 data URL to File object
+   */
+  base64ToFile(base64: string, filename: string): File {
+    const arr = base64.split(',');
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+
   // ============================================================================
   // PUBLIC BLOG OPERATIONS (Fixed endpoints)
   // ============================================================================

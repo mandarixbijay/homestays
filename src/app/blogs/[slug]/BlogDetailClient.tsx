@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PublicBlog } from "@/lib/api/public-blog-api";
 import SafeBlogImage from "@/components/blog/SafeBlogImage";
+import OptimizedBlogContent from "@/components/blog/OptimizedBlogContent";
 import { motion, useScroll } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { TableOfContents } from "@/components/blog/TableOfContents";
@@ -274,8 +275,9 @@ export default function BlogDetailClient({
               </p>
             )}
 
-            {/* Blog Content */}
-            <article
+            {/* Blog Content - Optimized with lazy-loaded images */}
+            <OptimizedBlogContent
+              content={blog.content}
               className="prose prose-lg max-w-none
                 prose-headings:text-gray-900 prose-headings:font-bold prose-headings:scroll-mt-24
                 prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2
@@ -291,7 +293,6 @@ export default function BlogDetailClient({
                 [&_figure]:my-6 [&_figure]:text-center
                 [&_figcaption]:text-sm [&_figcaption]:text-gray-500 [&_figcaption]:mt-2
               "
-              dangerouslySetInnerHTML={{ __html: blog.content }}
             />
 
             {/* Tags */}
