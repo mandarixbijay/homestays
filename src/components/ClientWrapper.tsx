@@ -1,15 +1,28 @@
 // components/ClientWrapper.tsx
 "use client";
 
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, signOut } from "next-auth/react";
 import { ThemeProvider } from "@/hooks/theme-provider/theme-provider";
 import { Toaster } from "sonner";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { useSessionManager } from "@/hooks/useSessionManager";
 
 // Session management component that runs inside SessionProvider
 function SessionManager({ children }: { children: ReactNode }) {
   const { status, hasRefreshError, isRefreshing } = useSessionManager();
+  const hasRedirected = useRef(false);
+
+  // Redirect to sign in when refresh error occurs
+  useEffect(() => {
+    if (hasRefreshError && !hasRedirected.current) {
+      hasRedirected.current = true;
+      // Small delay to show the message, then redirect
+      const timer = setTimeout(() => {
+        signOut({ redirect: true, callbackUrl: '/signin?error=SessionExpired' });
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [hasRefreshError]);
 
   // Show loading state during session refresh
   if (isRefreshing) {
