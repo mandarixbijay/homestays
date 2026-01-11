@@ -1355,6 +1355,21 @@ const loadData = async () => {
         addToast({ type: 'success', title: 'Copied!', message: 'Blog URL copied to clipboard' });
     };
 
+    // Memoized SEO Score calculation - must be before any early returns (Rules of Hooks)
+    const seoAnalysis = useMemo(() => {
+        return analyzeSEO({
+            title: formData.title,
+            slug: formData.slug,
+            excerpt: formData.excerpt,
+            content: formData.content,
+            seoTitle: formData.seoTitle,
+            seoDescription: formData.seoDescription,
+            tags: tags.filter(t => formData.tagIds.includes(t.id)).map(t => t.name),
+            categories: categories.filter(c => formData.categoryIds.includes(c.id)).map(c => c.name),
+            images: formData.images
+        });
+    }, [formData, tags, categories]);
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -1375,21 +1390,6 @@ const loadData = async () => {
 
     const wordCount = formData.content.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(w => w).length;
     const readTime = calculateReadTime(formData.content);
-
-    // Memoized SEO Score calculation
-    const seoAnalysis = useMemo(() => {
-        return analyzeSEO({
-            title: formData.title,
-            slug: formData.slug,
-            excerpt: formData.excerpt,
-            content: formData.content,
-            seoTitle: formData.seoTitle,
-            seoDescription: formData.seoDescription,
-            tags: tags.filter(t => formData.tagIds.includes(t.id)).map(t => t.name),
-            categories: categories.filter(c => formData.categoryIds.includes(c.id)).map(c => c.name),
-            images: formData.images
-        });
-    }, [formData, tags, categories]);
 
     const getScoreColor = (score: number) => {
         if (score >= 80) return { bg: 'bg-green-500', text: 'text-green-600', light: 'bg-green-100' };
