@@ -47,10 +47,10 @@ function SessionManager({ children }: { children: ReactNode }) {
 export default function ClientWrapper({ children }: { children: ReactNode }) {
   return (
     <SessionProvider
-      // ✅ FIX: Disable automatic refetch on window focus
-      refetchInterval={0}
-      refetchOnWindowFocus={false}
-      // Only refetch when session is actually about to expire
+      // Refetch session every 5 minutes to keep it fresh
+      // This triggers the JWT callback which handles token refresh
+      refetchInterval={5 * 60}
+      refetchOnWindowFocus={true}
       refetchWhenOffline={false}
     >
       <ThemeProvider

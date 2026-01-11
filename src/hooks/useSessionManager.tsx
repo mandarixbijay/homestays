@@ -97,35 +97,67 @@ export function useSessionManager() {
   // ✅ Auto-refresh is now handled by NextAuth JWT callback
   // This effect monitors for near-expiry and triggers update()
   useEffect(() => {
-    if (status === 'authenticated' && typedSession?.user?.tokenExpiry) {
-      const timeUntilExpiry = typedSession.user.tokenExpiry - Date.now();
-      // Refresh 5 minutes before expiry, but at least 1 minute from now
-      const refreshTime = Math.max(timeUntilExpiry - (5 * 60 * 1000), 60000);
-
-      if (refreshTime > 0 && refreshTime < (50 * 60 * 1000)) {
-        const refreshTimer = setTimeout(async () => {
-          console.log('[SessionManager] Auto-refresh triggered, checking session validity...');
-
-          // First try to refresh via the API
-          try {
-            const refreshResult = await refreshTokens();
-            if (refreshResult?.status === 'success') {
-              console.log('[SessionManager] API refresh successful, updating NextAuth session...');
-              await update(); // Update NextAuth session with new tokens
-              refreshAttempts.current = 0; // Reset attempts on success
-            } else {
-              console.warn('[SessionManager] API refresh returned non-success, falling back to NextAuth update');
-              await update(); // Fallback to NextAuth update
-            }
-          } catch (error) {
-            console.error('[SessionManager] API refresh failed, falling back to NextAuth update:', error);
-            await update(); // Fallback to NextAuth update
-          }
-        }, refreshTime);
-
-        return () => clearTimeout(refreshTimer);
-      }
+    if (status !== 'authenticated' || !typedSession?.user?.tokenExpiry) {
+      return;
     }
+
+    const scheduleRefresh = () => {
+      const timeUntilExpiry = (typedSession.user?.tokenExpiry || 0) - Date.now();
+      // Refresh 10 minutes before expiry, but at least 30 seconds from now
+      const refreshTime = Math.max(timeUntilExpiry - (10 * 60 * 1000), 30000);
+
+      console.log('[SessionManager] Token expires in', Math.round(timeUntilExpiry / 1000), 'seconds, scheduling refresh in', Math.round(refreshTime / 1000), 'seconds');
+
+      // If token is already near expiry or expired, refresh immediately
+      if (timeUntilExpiry <= 10 * 60 * 1000) {
+        console.log('[SessionManager] Token near expiry, refreshing immediately...');
+        handleRefresh();
+        return undefined;
+      }
+
+      // Schedule refresh for later
+      const refreshTimer = setTimeout(handleRefresh, refreshTime);
+      return () => clearTimeout(refreshTimer);
+    };
+
+    const handleRefresh = async () => {
+      console.log('[SessionManager] Auto-refresh triggered...');
+      try {
+        const refreshResult = await refreshTokens();
+        if (refreshResult?.status === 'success') {
+          console.log('[SessionManager] API refresh successful, updating NextAuth session...');
+          await update();
+          refreshAttempts.current = 0;
+        } else {
+          console.warn('[SessionManager] API refresh returned non-success, falling back to NextAuth update');
+          await update();
+        }
+      } catch (error) {
+        console.error('[SessionManager] API refresh failed, falling back to NextAuth update:', error);
+        await update();
+      }
+    };
+
+    const cleanup = scheduleRefresh();
+
+    // Also handle page visibility changes - refresh when user returns to tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const timeUntilExpiry = (typedSession.user?.tokenExpiry || 0) - Date.now();
+        // If token is near expiry when user returns, refresh immediately
+        if (timeUntilExpiry <= 15 * 60 * 1000) {
+          console.log('[SessionManager] Page visible and token near expiry, refreshing...');
+          handleRefresh();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      cleanup?.();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [typedSession, status, update]);
 
   // Handle refresh errors with retry logic

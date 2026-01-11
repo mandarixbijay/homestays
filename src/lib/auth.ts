@@ -217,15 +217,19 @@ export const authOptions: NextAuthOptions = {
         };
       }
 
-      if (
-        token.tokenExpiry &&
-        Date.now() < Number(token.tokenExpiry) - (5 * 60 * 1000)
-      ) {
+      // Refresh token 10 minutes before expiry (increased buffer for safety)
+      const bufferTime = 10 * 60 * 1000; // 10 minutes
+      const tokenExpiry = Number(token.tokenExpiry) || 0;
+      const timeUntilExpiry = tokenExpiry - Date.now();
+
+      // If token is still valid with enough buffer time, return it as-is
+      if (tokenExpiry && timeUntilExpiry > bufferTime) {
         return token;
       }
 
+      // Token is near expiry or expired, attempt refresh
       if (token.refreshToken) {
-        console.log("[NextAuth] Token near expiry, attempting refresh");
+        console.log("[NextAuth] Token expiring in", Math.round(timeUntilExpiry / 1000), "seconds, attempting refresh");
         return refreshAccessToken(token);
       }
 
@@ -262,7 +266,9 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60,
-    updateAge: 24 * 60 * 60,
+    // Update session every 5 minutes to allow JWT callback to refresh tokens
+    // This is critical because access tokens expire in 1 hour
+    updateAge: 5 * 60, // 5 minutes in seconds
   },
   jwt: {
     maxAge: 7 * 24 * 60 * 60,
