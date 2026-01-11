@@ -29,6 +29,7 @@ import SEOScoreCard from './SEOScoreCard';
 import SmartSlugInput from './SmartSlugInput';
 import OptimizedImageUpload from './OptimizedImageUpload';
 import SimpleRichTextEditor from './SimpleRichTextEditor';
+import ContentImageManager from './ContentImageManager';
 
 // ============================================================================
 // TYPES
@@ -1626,6 +1627,18 @@ const loadData = async () => {
                                     )}
                                 </div>
                             </Card>
+
+                            {/* Content Image Manager - Detects and manages images in content */}
+                            {formData.content && (
+                                <Card className="shadow-xl border border-gray-200 hover:shadow-2xl transition-all">
+                                    <div className="p-6">
+                                        <ContentImageManager
+                                            content={formData.content}
+                                            onContentUpdate={(newContent) => handleChange('content', newContent)}
+                                        />
+                                    </div>
+                                </Card>
+                            )}
                         </div>
 
                         {/* Sticky Sidebar (Right) */}
