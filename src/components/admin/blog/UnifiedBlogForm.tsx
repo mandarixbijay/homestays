@@ -1490,91 +1490,161 @@ const loadData = async () => {
             </header>
 
             {/* Main Content */}
-            <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
+            <main className={`${showPreview ? '' : 'max-w-[1600px] mx-auto px-4 sm:px-6'} py-6`}>
                 {showPreview ? (
-                    /* Preview Mode */
-                    <Card className="shadow-2xl border-2 border-gray-200 animate-in fade-in duration-500">
-                        <div className="p-12">
-                            <article className="prose prose-xl max-w-none">
-                                {formData.images.find(img => img.isMain) && (
-                                    <div className="relative rounded-2xl overflow-hidden shadow-2xl mb-12 -mx-12 -mt-12">
-                                        <img
-                                            src={formData.images.find(img => img.isMain)?.url}
-                                            alt="Featured"
-                                            className="w-full h-[500px] object-cover"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                        <div className="absolute bottom-0 left-0 right-0 p-12">
-                                            <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">{formData.title}</h1>
-                                            <div className="flex items-center gap-6 text-white/90">
-                                                <span className="flex items-center gap-2">
-                                                    <Clock className="h-5 w-5" />
-                                                    {readTime} min read
-                                                </span>
-                                                <span>•</span>
-                                                <span>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                    /* Preview Mode - Matches BlogDetailClient exactly */
+                    <div className="bg-white min-h-screen -mx-4 sm:-mx-6 -mt-6 animate-in fade-in duration-500">
+                        {/* Hero Section */}
+                        <div className="relative w-full">
+                            <div className="relative h-[50vh] sm:h-[60vh]">
+                                {formData.images.find(img => img.isMain) ? (
+                                    <img
+                                        src={formData.images.find(img => img.isMain)?.url}
+                                        alt={formData.title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-[#214B3F] to-[#2d6654]" />
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+
+                                {/* Hero Content */}
+                                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 lg:p-12">
+                                    <div className="max-w-4xl mx-auto">
+                                        {/* Categories */}
+                                        {formData.categoryIds.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mb-3">
+                                                {formData.categoryIds.map(id => {
+                                                    const cat = categories.find(c => c.id === id);
+                                                    return cat ? (
+                                                        <span key={id} className="px-3 py-1 bg-[#D1AA5A] text-white text-xs font-medium rounded-full">
+                                                            {cat.name}
+                                                        </span>
+                                                    ) : null;
+                                                })}
+                                            </div>
+                                        )}
+
+                                        {/* Title */}
+                                        <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-4 leading-tight">
+                                            {formData.title || 'Untitled Post'}
+                                        </h1>
+
+                                        {/* Meta */}
+                                        <div className="flex flex-wrap items-center gap-4 text-white/80 text-sm">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 rounded-full bg-[#214B3F] flex items-center justify-center text-white text-sm font-bold">
+                                                    A
+                                                </div>
+                                                <span>Author</span>
+                                            </div>
+                                            <span className="hidden sm:inline">•</span>
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="h-4 w-4" />
+                                                <span>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="h-4 w-4" />
+                                                <span>{readTime} min read</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Eye className="h-4 w-4" />
+                                                <span>0 views</span>
                                             </div>
                                         </div>
                                     </div>
-                                )}
-                                {!formData.images.find(img => img.isMain) && (
-                                    <h1 className="text-5xl font-bold mb-8">{formData.title}</h1>
-                                )}
-                                {formData.excerpt && (
-                                    <p className="text-2xl text-gray-600 font-medium leading-relaxed mb-12 border-l-4 border-blue-500 pl-6">
-                                        {formData.excerpt}
-                                    </p>
-                                )}
-                                <div dangerouslySetInnerHTML={{ __html: formData.content }} />
-
-                                {(formData.categoryIds.length > 0 || formData.tagIds.length > 0) && (
-                                    <div className="mt-16 pt-8 border-t-2 border-gray-200 not-prose">
-                                        {formData.categoryIds.length > 0 && (
-                                            <div className="mb-6">
-                                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                                    <Folder className="h-5 w-5 text-blue-500" />
-                                                    Categories
-                                                </h3>
-                                                <div className="flex flex-wrap gap-3">
-                                                    {formData.categoryIds.map(id => {
-                                                        const cat = categories.find(c => c.id === id);
-                                                        return cat ? (
-                                                            <span key={id} className="px-4 py-2 bg-blue-100 text-blue-800 rounded-xl font-semibold">
-                                                                {cat.name}
-                                                            </span>
-                                                        ) : null;
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )}
-                                        {formData.tagIds.length > 0 && (
-                                            <div>
-                                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                                    <TagIcon className="h-5 w-5 text-green-500" />
-                                                    Tags
-                                                </h3>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {formData.tagIds.map(id => {
-                                                        const tag = tags.find(t => t.id === id);
-                                                        return tag ? (
-                                                            <span key={id} className="px-3 py-1.5 bg-green-100 text-green-800 rounded-lg text-sm font-medium">
-                                                                #{tag.name}
-                                                            </span>
-                                                        ) : null;
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </article>
+                                </div>
+                            </div>
                         </div>
-                    </Card>
+
+                        {/* Main Content Area */}
+                        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                            {/* Excerpt */}
+                            {formData.excerpt && (
+                                <p className="text-lg sm:text-xl text-gray-600 leading-relaxed mb-8 font-medium border-l-4 border-[#D1AA5A] pl-4">
+                                    {formData.excerpt}
+                                </p>
+                            )}
+
+                            {/* Blog Content */}
+                            <article className="prose prose-lg max-w-none
+                                prose-headings:text-gray-900 prose-headings:font-bold
+                                prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2
+                                prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+                                prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6
+                                prose-a:text-[#214B3F] prose-a:no-underline hover:prose-a:underline
+                                prose-strong:text-gray-900
+                                prose-ul:my-6 prose-ol:my-6
+                                prose-li:text-gray-700 prose-li:my-1
+                                prose-blockquote:border-l-4 prose-blockquote:border-[#D1AA5A] prose-blockquote:bg-gray-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:text-gray-700 prose-blockquote:rounded-r-lg
+                                prose-img:rounded-lg prose-img:shadow-md prose-img:my-4 prose-img:mx-auto prose-img:max-w-full
+                            ">
+                                <div dangerouslySetInnerHTML={{ __html: formData.content || '<p class="text-gray-400 italic">No content yet...</p>' }} />
+                            </article>
+
+                            {/* Tags */}
+                            {formData.tagIds.length > 0 && (
+                                <div className="mt-12 pt-8 border-t">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <TagIcon className="h-4 w-4 text-gray-400" />
+                                        {formData.tagIds.map(id => {
+                                            const tag = tags.find(t => t.id === id);
+                                            return tag ? (
+                                                <span key={id} className="px-3 py-1 border border-gray-200 text-gray-600 rounded-full text-sm hover:bg-gray-100 cursor-pointer">
+                                                    #{tag.name}
+                                                </span>
+                                            ) : null;
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Author Card */}
+                            <div className="mt-12 p-6 bg-gradient-to-r from-[#214B3F]/5 to-[#D1AA5A]/5 rounded-xl border">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#214B3F] to-[#2d6654] flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                                        A
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-900">Author Name</h3>
+                                        <p className="text-gray-600 text-sm mt-1">
+                                            Travel writer sharing authentic stories and experiences from Nepal&apos;s beautiful homestays.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 ) : (
                     /* Edit Mode - Reorganized Layout */
                     <div className="flex gap-4 lg:gap-5 relative pb-20">
                         {/* Main Content Column */}
                         <div className={`flex-1 min-w-0 space-y-4 transition-all duration-300 ${sidebarOpen ? '' : 'lg:max-w-none'}`}>
+                            {/* Cover Image Preview - Shows when there's a featured image */}
+                            {formData.images.find(img => img.isMain) && (
+                                <Card className="shadow-sm border border-gray-200 overflow-hidden">
+                                    <div className="relative h-48 sm:h-56">
+                                        <img
+                                            src={formData.images.find(img => img.isMain)?.url}
+                                            alt="Cover"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                                            <p className="text-white/80 text-xs mb-1">Cover Image Preview</p>
+                                            <h2 className="text-white font-bold text-lg sm:text-xl line-clamp-2">
+                                                {formData.title || 'Your Title Here'}
+                                            </h2>
+                                        </div>
+                                        <div className="absolute top-2 right-2">
+                                            <span className="px-2 py-1 bg-black/50 text-white text-[10px] rounded backdrop-blur-sm">
+                                                Featured Image
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Card>
+                            )}
+
                             {/* Title, Slug, Excerpt & SEO Meta - Combined Card */}
                             <Card className="shadow-sm border border-gray-200">
                                 <div className="p-4 space-y-4">
