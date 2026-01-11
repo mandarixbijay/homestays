@@ -473,6 +473,30 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
     }
   }, [content]);
 
+  // Sync content when switching to edit mode
+  useEffect(() => {
+    if ((viewMode === 'edit' || viewMode === 'split') && editorRef.current) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        if (editorRef.current && content) {
+          editorRef.current.innerHTML = content;
+        }
+      }, 0);
+    }
+  }, [viewMode]);
+
+  // Lock body scroll when fullscreen is active
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isFullscreen]);
+
   // Auto-save effect
   useEffect(() => {
     if (!onAutoSave || !hasChanges) return;
@@ -647,7 +671,12 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
   }, []);
 
   return (
-    <div className={`bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-gray-200 ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
+    <>
+      {/* Fullscreen backdrop */}
+      {isFullscreen && (
+        <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsFullscreen(false)} />
+      )}
+      <div className={`bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-gray-200 flex flex-col ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
       {/* Primary Toolbar */}
       <div className="bg-gray-50 border-b border-gray-200">
         <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100">
@@ -944,7 +973,8 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
           pointer-events: none;
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 };
 
