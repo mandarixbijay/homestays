@@ -171,8 +171,8 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
  flex flex-col items-center justify-center w-full h-48
  border-2 border-dashed rounded-lg cursor-pointer transition-all
  ${isUploading
- ? 'border-[#1A403D] bg-blue-50 
- : 'border-gray-300 hover:border-[#1A403D] bg-gray-50 hover:bg-blue-50 
+ ? 'border-[#1A403D] bg-blue-50'
+ : 'border-gray-300 hover:border-[#1A403D] bg-gray-50 hover:bg-blue-50'
  }
  `}
  >
@@ -229,8 +229,8 @@ export const OptimizedImageUpload: React.FC<OptimizedImageUploadProps> = ({
  key={index}
  className={`relative group bg-white rounded-lg border-2 transition-all ${
  image.isMain
- ? 'border-[#1A403D] ring-2 ring-blue-200 
- : 'border-gray-200 
+ ? 'border-[#1A403D] ring-2 ring-blue-200'
+ : 'border-gray-200'
  }`}
  >
  {/* Image Preview */}

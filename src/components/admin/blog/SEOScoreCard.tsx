@@ -41,9 +41,9 @@ export const SEOScoreCard: React.FC<SEOScoreCardProps> = (props) => {
  };
 
  const getScoreBgColor = (score: number) => {
- if (score >= 80) return 'bg-green-100 
- if (score >= 60) return 'bg-yellow-100 
- return 'bg-red-100 
+ if (score >= 80) return 'bg-green-100';
+ if (score >= 60) return 'bg-yellow-100';
+ return 'bg-red-100';
  };
 
  const getScoreLabel = (score: number) => {
@@ -150,9 +150,9 @@ export const SEOScoreCard: React.FC<SEOScoreCardProps> = (props) => {
  <div key={idx} className="flex items-start gap-2 text-sm">
  {getIcon(issue.type)}
  <span className={`flex-1 ${
- issue.type === 'error' ? 'text-red-700 :
- issue.type === 'warning' ? 'text-yellow-700 :
- 'text-gray-600 
+ issue.type === 'error' ? 'text-red-700' :
+ issue.type === 'warning' ? 'text-yellow-700' :
+ 'text-gray-600'
  }`}>
  {issue.message}
  </span>

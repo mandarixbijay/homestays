@@ -355,9 +355,9 @@ export default function SelectHomestaysForDeal() {
 
  <div className="flex items-center justify-between mb-3">
  <span className={`text-xs px-2 py-1 rounded-full ${
- homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 :
- homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 :
- 'bg-red-100 text-red-700 
+ homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+ homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+ 'bg-red-100 text-red-700'
  }`}>
  {homestay.status}
  </span>
@@ -441,7 +441,7 @@ export default function SelectHomestaysForDeal() {
  <tr
  key={homestay.id}
  className={`hover:bg-gray-50 cursor-pointer transition-colors ${
- isSelected ? 'bg-[#224240]/5 : ''
+ isSelected ? 'bg-[#224240]/5' : ''
  }`}
  onClick={() => toggleHomestaySelection(homestay.id)}
  >
@@ -487,9 +487,9 @@ export default function SelectHomestaysForDeal() {
  </td>
  <td className="px-4 py-3">
  <span className={`text-xs px-2 py-1 rounded-full ${
- homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 :
- homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 :
- 'bg-red-100 text-red-700 
+ homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+ homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+ 'bg-red-100 text-red-700'
  }`}>
  {homestay.status}
  </span>

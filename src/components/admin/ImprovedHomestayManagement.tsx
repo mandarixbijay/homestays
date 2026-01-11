@@ -71,18 +71,18 @@ const StatCard: React.FC<{
 
   const borderColorClasses = {
     teal: 'border-[#224240]/20 hover:border-[#224240]/40',
-    green: 'border-green-200 hover:border-green-300
-    yellow: 'border-yellow-200 hover:border-yellow-300
-    red: 'border-red-200 hover:border-red-300
-    purple: 'border-purple-200 hover:border-purple-300
+    green: 'border-green-200 hover:border-green-300',
+    yellow: 'border-yellow-200 hover:border-yellow-300',
+    red: 'border-red-200 hover:border-red-300',
+    purple: 'border-purple-200 hover:border-purple-300'
   };
 
   const textColorClasses = {
-    teal: 'text-[#224240]
-    green: 'text-green-600
-    yellow: 'text-yellow-600
-    red: 'text-red-600
-    purple: 'text-purple-600
+    teal: 'text-[#224240]',
+    green: 'text-green-600',
+    yellow: 'text-yellow-600',
+    red: 'text-red-600',
+    purple: 'text-purple-600'
   };
 
   const iconBgClasses = {
@@ -119,7 +119,7 @@ const StatCard: React.FC<{
               <div className="flex items-baseline space-x-2">
                 <p className={`text-4xl font-bold ${textColorClasses[color]}`}>{value}</p>
                 {trend && (
-                  <div className={`flex items-center text-sm font-semibold ${trend.isPositive ? 'text-green-600 : 'text-red-600
+                  <div className={`flex items-center text-sm font-semibold ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
                     {trend.isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                     <span className="ml-1">{Math.abs(trend.value)}%</span>
                   </div>
@@ -722,7 +722,7 @@ export default function ImprovedHomestayManagement() {
                 className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${
                   showFilters
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
@@ -751,7 +751,7 @@ export default function ImprovedHomestayManagement() {
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'grid'
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 <Grid className="h-5 w-5" />
@@ -761,7 +761,7 @@ export default function ImprovedHomestayManagement() {
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'list'
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 <List className="h-5 w-5" />
@@ -935,7 +935,7 @@ export default function ImprovedHomestayManagement() {
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                         currentPage === pageNum
                           ? 'bg-[#224240] text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
                       {pageNum}

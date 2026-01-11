@@ -165,19 +165,19 @@ export const SmartSlugInput: React.FC<SmartSlugInputProps> = ({
  {/* Character Count */}
  <div className="flex items-center justify-between text-xs">
  <span className={`${
- value.length > 60 ? 'text-orange-600 :
- value.length > 50 ? 'text-yellow-600 :
- 'text-gray-500 
+ value.length > 60 ? 'text-orange-600' :
+ value.length > 50 ? 'text-yellow-600' :
+ 'text-gray-500'
  }`}>
  {value.length}/60 characters
  </span>
  {getStatusText() && (
  <span className={`flex items-center gap-1 ${
  isAvailable === false || !validationResult.valid
- ? 'text-red-600 
+ ? 'text-red-600'
  : isAvailable === true
- ? 'text-green-600 
- : 'text-gray-500 
+ ? 'text-green-600'
+ : 'text-gray-500'
  }`}>
  {getStatusText()}
  </span>

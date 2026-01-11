@@ -54,16 +54,16 @@ const StatCard: React.FC<{
 
   const borderColorClasses = {
     teal: 'border-[#224240]/20 hover:border-[#224240]/40',
-    green: 'border-green-200 hover:border-green-300
-    yellow: 'border-yellow-200 hover:border-yellow-300
-    purple: 'border-purple-200 hover:border-purple-300
+    green: 'border-green-200 hover:border-green-300',
+    yellow: 'border-yellow-200 hover:border-yellow-300',
+    purple: 'border-purple-200 hover:border-purple-300'
   };
 
   const textColorClasses = {
-    teal: 'text-[#224240]
-    green: 'text-green-600
-    yellow: 'text-yellow-600
-    purple: 'text-purple-600
+    teal: 'text-[#224240]',
+    green: 'text-green-600',
+    yellow: 'text-yellow-600',
+    purple: 'text-purple-600'
   };
 
   const iconBgClasses = {
@@ -630,7 +630,7 @@ export default function DestinationsManagement() {
                 className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
                   activeTab === 'overview'
                     ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg'
-                    : 'text-gray-600 hover:bg-gray-100
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 <div className="flex items-center justify-center space-x-2">
@@ -643,7 +643,7 @@ export default function DestinationsManagement() {
                 className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
                   activeTab === 'analytics'
                     ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg'
-                    : 'text-gray-600 hover:bg-gray-100
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 <div className="flex items-center justify-center space-x-2">
@@ -698,10 +698,10 @@ export default function DestinationsManagement() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${
-                            idx === 0 ? 'bg-yellow-100 text-yellow-700 :
-                            idx === 1 ? 'bg-gray-100 text-gray-700 :
-                            idx === 2 ? 'bg-orange-100 text-orange-700 :
-                            'bg-gray-50 text-gray-600
+                            idx === 0 ? 'bg-yellow-100 text-yellow-700' :
+                            idx === 1 ? 'bg-gray-100 text-gray-700' :
+                            idx === 2 ? 'bg-orange-100 text-orange-700' :
+                            'bg-gray-50 text-gray-600'
                           }`}>
                             <span className="text-sm font-bold">#{idx + 1}</span>
                           </div>
@@ -752,7 +752,7 @@ export default function DestinationsManagement() {
                 className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${
                   showFilters
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
@@ -767,7 +767,7 @@ export default function DestinationsManagement() {
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'grid'
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 <Grid className="h-5 w-5" />
@@ -777,7 +777,7 @@ export default function DestinationsManagement() {
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'list'
                     ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 <List className="h-5 w-5" />
@@ -916,7 +916,7 @@ export default function DestinationsManagement() {
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                         currentPage === pageNum
                           ? 'bg-[#224240] text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
                       {pageNum}
