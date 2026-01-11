@@ -7,7 +7,8 @@ import {
   AlertCircle, CheckCircle, Underline as UnderlineIcon, Eye, Edit3,
   SplitSquareHorizontal, Save, Clock, Undo, Redo, Search, Replace,
   Heading1, Heading2, Heading3, Heading4, ListOrdered, Minus, ChevronDown,
-  FileText, PanelLeftClose, PanelLeftOpen
+  FileText, PanelLeftClose, PanelLeftOpen, Target, Settings, TrendingUp,
+  Zap, BookOpen, BarChart3, Info
 } from 'lucide-react';
 import { optimizeImage } from '@/lib/utils/imageOptimization';
 
@@ -16,6 +17,7 @@ import { optimizeImage } from '@/lib/utils/imageOptimization';
 // ============================================================================
 
 type ViewMode = 'edit' | 'preview' | 'split';
+type PanelTab = 'outline' | 'seo' | 'settings';
 
 interface HistoryState {
   content: string;
@@ -426,6 +428,379 @@ const DocumentOutline: React.FC<{
 };
 
 // ============================================================================
+// SEO SCORE PANEL
+// ============================================================================
+
+interface SEOAnalysis {
+  score: number;
+  issues: { type: 'error' | 'warning' | 'info'; message: string }[];
+  passed: string[];
+}
+
+const SEOScorePanel: React.FC<{
+  content: string;
+  title?: string;
+  metaDescription?: string;
+}> = ({ content, title = '', metaDescription = '' }) => {
+  const analysis = useMemo((): SEOAnalysis => {
+    let score = 0;
+    const issues: { type: 'error' | 'warning' | 'info'; message: string }[] = [];
+    const passed: string[] = [];
+
+    // Extract text content
+    const textContent = content.replace(/<[^>]*>/g, '');
+    const words = textContent.split(/\s+/).filter(w => w.length > 0);
+    const wordCount = words.length;
+
+    // Count headings
+    const h1Count = (content.match(/<h1|^# [^#]/gm) || []).length;
+    const h2Count = (content.match(/<h2|^## [^#]/gm) || []).length;
+    const h3Count = (content.match(/<h3|^### [^#]/gm) || []).length;
+
+    // Count images and check alt text
+    const imgMatches = content.match(/<img[^>]*>/g) || [];
+    const imagesWithoutAlt = imgMatches.filter(img => !img.includes('alt=') || img.includes('alt=""')).length;
+    const totalImages = imgMatches.length;
+
+    // Count links
+    const linkMatches = content.match(/<a[^>]*href[^>]*>/g) || [];
+    const totalLinks = linkMatches.length;
+
+    // 1. Word count analysis (20 points max)
+    if (wordCount >= 1500) {
+      score += 20;
+      passed.push(`Excellent content length (${wordCount.toLocaleString()} words)`);
+    } else if (wordCount >= 1000) {
+      score += 15;
+      passed.push(`Good content length (${wordCount.toLocaleString()} words)`);
+    } else if (wordCount >= 500) {
+      score += 10;
+      issues.push({ type: 'warning', message: `Content is ${wordCount} words. Aim for 1000+ words for better SEO.` });
+    } else {
+      score += 5;
+      issues.push({ type: 'error', message: `Content is too short (${wordCount} words). Write at least 500 words.` });
+    }
+
+    // 2. Heading structure (20 points max)
+    if (h2Count >= 3) {
+      score += 10;
+      passed.push(`Good H2 heading structure (${h2Count} headings)`);
+    } else if (h2Count >= 1) {
+      score += 5;
+      issues.push({ type: 'warning', message: `Add more H2 headings for better structure (currently ${h2Count})` });
+    } else {
+      issues.push({ type: 'error', message: 'No H2 headings found. Add section headings for better SEO.' });
+    }
+
+    if (h3Count >= 2) {
+      score += 10;
+      passed.push(`Good H3 subheading structure (${h3Count} headings)`);
+    } else if (h3Count >= 1) {
+      score += 5;
+      issues.push({ type: 'info', message: 'Consider adding more H3 subheadings for detailed structure' });
+    }
+
+    // 3. Images (15 points max)
+    if (totalImages > 0) {
+      if (imagesWithoutAlt === 0) {
+        score += 15;
+        passed.push(`All ${totalImages} images have alt text`);
+      } else {
+        score += 5;
+        issues.push({ type: 'warning', message: `${imagesWithoutAlt} of ${totalImages} images missing alt text` });
+      }
+    } else {
+      issues.push({ type: 'info', message: 'Consider adding images to improve engagement' });
+    }
+
+    // 4. Links (10 points max)
+    if (totalLinks >= 3) {
+      score += 10;
+      passed.push(`Good link diversity (${totalLinks} links)`);
+    } else if (totalLinks >= 1) {
+      score += 5;
+      issues.push({ type: 'info', message: 'Consider adding more internal/external links' });
+    } else {
+      issues.push({ type: 'info', message: 'Add links to improve SEO and user navigation' });
+    }
+
+    // 5. Paragraph structure (10 points max)
+    const paragraphs = content.split(/\n\n+|<\/p>/g).filter(p => p.trim().length > 0);
+    if (paragraphs.length >= 5) {
+      score += 10;
+      passed.push('Good paragraph structure');
+    } else {
+      score += 5;
+      issues.push({ type: 'info', message: 'Break content into more paragraphs for readability' });
+    }
+
+    // 6. Lists (5 points max)
+    const hasList = content.includes('<ul') || content.includes('<ol') || content.includes('- ') || content.match(/^\d+\./m);
+    if (hasList) {
+      score += 5;
+      passed.push('Contains lists for better readability');
+    } else {
+      issues.push({ type: 'info', message: 'Consider adding bullet or numbered lists' });
+    }
+
+    // 7. Blockquotes/highlights (5 points max)
+    const hasQuotes = content.includes('<blockquote') || content.includes('> ');
+    if (hasQuotes) {
+      score += 5;
+      passed.push('Uses blockquotes for emphasis');
+    }
+
+    // 8. Reading level (5 points max) - Simple check for sentence length
+    const sentences = textContent.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const avgWordsPerSentence = sentences.length > 0 ? wordCount / sentences.length : 0;
+    if (avgWordsPerSentence <= 20) {
+      score += 5;
+      passed.push('Good readability (concise sentences)');
+    } else {
+      issues.push({ type: 'warning', message: 'Some sentences may be too long. Aim for 15-20 words per sentence.' });
+    }
+
+    return { score: Math.min(score, 100), issues, passed };
+  }, [content, title, metaDescription]);
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getScoreBg = (score: number) => {
+    if (score >= 80) return 'bg-green-500';
+    if (score >= 60) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
+  return (
+    <div className="p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+          <Target className="w-4 h-4" />
+          SEO Score
+        </h3>
+        <span className={`text-3xl font-bold ${getScoreColor(analysis.score)}`}>
+          {analysis.score}
+        </span>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          className={`h-full transition-all duration-500 ${getScoreBg(analysis.score)}`}
+          style={{ width: `${analysis.score}%` }}
+        />
+      </div>
+
+      <p className="text-xs text-gray-500">
+        {analysis.score >= 80 ? 'Excellent! Your content is well-optimized.' :
+         analysis.score >= 60 ? 'Good progress. Address the issues below to improve.' :
+         'Needs improvement. Follow the suggestions below.'}
+      </p>
+
+      {/* Issues */}
+      {analysis.issues.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="font-medium text-sm text-gray-700 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-yellow-500" />
+            Improvements ({analysis.issues.length})
+          </h4>
+          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+            {analysis.issues.map((issue, idx) => (
+              <div
+                key={idx}
+                className={`p-2.5 rounded-lg text-xs ${
+                  issue.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' :
+                  issue.type === 'warning' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
+                  'bg-blue-50 text-blue-700 border border-blue-200'
+                }`}
+              >
+                {issue.message}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Passed */}
+      {analysis.passed.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="font-medium text-sm text-gray-700 flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-500" />
+            Passed ({analysis.passed.length})
+          </h4>
+          <div className="space-y-1.5 max-h-32 overflow-y-auto">
+            {analysis.passed.map((item, idx) => (
+              <div
+                key={idx}
+                className="p-2.5 bg-green-50 text-green-700 rounded-lg text-xs border border-green-200"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
+// SETTINGS PANEL
+// ============================================================================
+
+interface EditorSettings {
+  fontSize: 'small' | 'medium' | 'large';
+  lineHeight: 'compact' | 'normal' | 'relaxed';
+  showWordCount: boolean;
+  autoSave: boolean;
+  spellCheck: boolean;
+}
+
+const SettingsPanel: React.FC<{
+  settings: EditorSettings;
+  onSettingsChange: (settings: EditorSettings) => void;
+}> = ({ settings, onSettingsChange }) => {
+  const updateSetting = <K extends keyof EditorSettings>(key: K, value: EditorSettings[K]) => {
+    onSettingsChange({ ...settings, [key]: value });
+  };
+
+  return (
+    <div className="p-4 space-y-5">
+      <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+        <Settings className="w-4 h-4" />
+        Editor Settings
+      </h3>
+
+      {/* Font Size */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Font Size</label>
+        <div className="flex gap-2">
+          {(['small', 'medium', 'large'] as const).map((size) => (
+            <button
+              key={size}
+              onClick={() => updateSetting('fontSize', size)}
+              className={`flex-1 py-2 px-3 text-xs font-medium rounded-lg transition-all ${
+                settings.fontSize === size
+                  ? 'bg-[#1A403D] text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {size.charAt(0).toUpperCase() + size.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Line Height */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Line Spacing</label>
+        <div className="flex gap-2">
+          {(['compact', 'normal', 'relaxed'] as const).map((height) => (
+            <button
+              key={height}
+              onClick={() => updateSetting('lineHeight', height)}
+              className={`flex-1 py-2 px-3 text-xs font-medium rounded-lg transition-all ${
+                settings.lineHeight === height
+                  ? 'bg-[#1A403D] text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {height.charAt(0).toUpperCase() + height.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Toggle Options */}
+      <div className="space-y-3 pt-2">
+        <label className="flex items-center justify-between cursor-pointer">
+          <span className="text-sm text-gray-700">Show word count</span>
+          <button
+            onClick={() => updateSetting('showWordCount', !settings.showWordCount)}
+            className={`relative w-11 h-6 rounded-full transition-colors ${
+              settings.showWordCount ? 'bg-[#1A403D]' : 'bg-gray-300'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                settings.showWordCount ? 'translate-x-5' : ''
+              }`}
+            />
+          </button>
+        </label>
+
+        <label className="flex items-center justify-between cursor-pointer">
+          <span className="text-sm text-gray-700">Auto-save</span>
+          <button
+            onClick={() => updateSetting('autoSave', !settings.autoSave)}
+            className={`relative w-11 h-6 rounded-full transition-colors ${
+              settings.autoSave ? 'bg-[#1A403D]' : 'bg-gray-300'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                settings.autoSave ? 'translate-x-5' : ''
+              }`}
+            />
+          </button>
+        </label>
+
+        <label className="flex items-center justify-between cursor-pointer">
+          <span className="text-sm text-gray-700">Spell check</span>
+          <button
+            onClick={() => updateSetting('spellCheck', !settings.spellCheck)}
+            className={`relative w-11 h-6 rounded-full transition-colors ${
+              settings.spellCheck ? 'bg-[#1A403D]' : 'bg-gray-300'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                settings.spellCheck ? 'translate-x-5' : ''
+              }`}
+            />
+          </button>
+        </label>
+      </div>
+
+      {/* Keyboard Shortcuts Info */}
+      <div className="pt-4 border-t border-gray-200">
+        <h4 className="font-medium text-sm text-gray-700 mb-3">Keyboard Shortcuts</h4>
+        <div className="space-y-2 text-xs">
+          <div className="flex justify-between">
+            <span className="text-gray-500">Bold</span>
+            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Ctrl+B</kbd>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Italic</span>
+            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Ctrl+I</kbd>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Undo</span>
+            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Ctrl+Z</kbd>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Redo</span>
+            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Ctrl+Shift+Z</kbd>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Find</span>
+            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Ctrl+F</kbd>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Fullscreen</span>
+            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Esc to exit</kbd>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
@@ -447,7 +822,17 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
   const [linkUrl, setLinkUrl] = useState('');
   const [showFindReplace, setShowFindReplace] = useState(false);
   const [showHeadingMenu, setShowHeadingMenu] = useState(false);
-  const [showOutlinePanel, setShowOutlinePanel] = useState(false);
+  const [showSidePanel, setShowSidePanel] = useState(false);
+  const [activePanel, setActivePanel] = useState<PanelTab>('outline');
+
+  // Editor settings
+  const [editorSettings, setEditorSettings] = useState<EditorSettings>({
+    fontSize: 'medium',
+    lineHeight: 'normal',
+    showWordCount: true,
+    autoSave: true,
+    spellCheck: true
+  });
 
   // Auto-save state
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -741,11 +1126,11 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
             </div>
 
             <button
-              onClick={() => setShowOutlinePanel(!showOutlinePanel)}
-              className={`p-2 rounded-lg transition-colors ${showOutlinePanel ? 'bg-[#1A403D] text-white' : 'hover:bg-gray-200'}`}
-              title="Toggle outline panel"
+              onClick={() => setShowSidePanel(!showSidePanel)}
+              className={`p-2 rounded-lg transition-colors ${showSidePanel ? 'bg-[#1A403D] text-white' : 'hover:bg-gray-200'}`}
+              title="Toggle side panel"
             >
-              {showOutlinePanel ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
+              {showSidePanel ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
             </button>
 
             <button
@@ -905,8 +1290,12 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
               ref={editorRef}
               contentEditable
               onInput={handleContentChange}
+              spellCheck={editorSettings.spellCheck}
               className="p-8 focus:outline-none prose prose-lg max-w-none h-full"
-              style={{ lineHeight: 1.8, fontSize: '16px' }}
+              style={{
+                lineHeight: editorSettings.lineHeight === 'compact' ? 1.5 : editorSettings.lineHeight === 'relaxed' ? 2.0 : 1.8,
+                fontSize: editorSettings.fontSize === 'small' ? '14px' : editorSettings.fontSize === 'large' ? '18px' : '16px'
+              }}
               data-placeholder={placeholder}
             />
           </div>
@@ -924,10 +1313,46 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
           </div>
         )}
 
-        {/* Outline Panel */}
-        {showOutlinePanel && (
-          <div className="w-72 border-l border-gray-200 bg-gray-50 overflow-y-auto">
-            <DocumentOutline content={content} onNavigate={handleOutlineNavigate} />
+        {/* Side Panel with Tabs */}
+        {showSidePanel && (
+          <div className="w-80 border-l border-gray-200 bg-white flex flex-col">
+            {/* Panel Tabs */}
+            <div className="flex border-b border-gray-200 bg-gray-50">
+              {[
+                { id: 'outline' as PanelTab, label: 'Outline', icon: FileText },
+                { id: 'seo' as PanelTab, label: 'SEO', icon: Target },
+                { id: 'settings' as PanelTab, label: 'Settings', icon: Settings }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActivePanel(tab.id)}
+                  className={`flex-1 px-3 py-3 text-xs font-medium flex items-center justify-center gap-1.5 border-b-2 transition-colors ${
+                    activePanel === tab.id
+                      ? 'border-[#1A403D] text-[#1A403D] bg-white'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <tab.icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Panel Content */}
+            <div className="flex-1 overflow-y-auto">
+              {activePanel === 'outline' && (
+                <DocumentOutline content={content} onNavigate={handleOutlineNavigate} />
+              )}
+              {activePanel === 'seo' && (
+                <SEOScorePanel content={content} />
+              )}
+              {activePanel === 'settings' && (
+                <SettingsPanel
+                  settings={editorSettings}
+                  onSettingsChange={setEditorSettings}
+                />
+              )}
+            </div>
           </div>
         )}
       </div>
