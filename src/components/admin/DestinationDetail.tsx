@@ -545,7 +545,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
  className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
  activeTab === 'overview'
  ? 'bg-[#224240] text-white'
- : 'text-gray-600 hover:bg-gray-100 
+ : 'text-gray-600 hover:bg-gray-100'
  }`}
  >
  Overview
@@ -555,7 +555,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
  className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
  activeTab === 'homestays'
  ? 'bg-[#224240] text-white'
- : 'text-gray-600 hover:bg-gray-100 
+ : 'text-gray-600 hover:bg-gray-100'
  }`}
  >
  Homestays ({destination._count?.homestays || destination.homestays?.length || 0})
@@ -565,7 +565,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
  className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
  activeTab === 'analytics'
  ? 'bg-[#224240] text-white'
- : 'text-gray-600 hover:bg-gray-100 
+ : 'text-gray-600 hover:bg-gray-100'
  }`}
  >
  Analytics
@@ -702,7 +702,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
  className={`px-3 py-2 text-sm ${
  viewMode === 'grid'
  ? 'bg-[#224240] text-white'
- : 'bg-white text-gray-600 
+ : 'bg-white text-gray-600'
  }`}
  >
  <Grid className="h-4 w-4" />
@@ -712,7 +712,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
  className={`px-3 py-2 text-sm ${
  viewMode === 'list'
  ? 'bg-[#224240] text-white'
- : 'bg-white text-gray-600 
+ : 'bg-white text-gray-600'
  }`}
  >
  <List className="h-4 w-4" />
@@ -814,9 +814,9 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
  {homestay.name}
  </h4>
  <span className={`text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap ${
- homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 :
- homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 :
- 'bg-red-100 text-red-700 
+ homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+ homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+ 'bg-red-100 text-red-700'
  }`}>
  {homestay.status}
  </span>
@@ -904,9 +904,9 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
  </td>
  <td className="px-3 py-2">
  <span className={`text-xs px-2 py-0.5 rounded-full ${
- homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700 :
- homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 :
- 'bg-red-100 text-red-700 
+ homestay.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+ homestay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+ 'bg-red-100 text-red-700'
  }`}>
  {homestay.status}
  </span>
@@ -996,8 +996,8 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
  }}
  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
  showRemoveSelection
- ? 'bg-red-100 text-red-700 
- : 'bg-gray-100 text-gray-700 hover:bg-gray-200 
+ ? 'bg-red-100 text-red-700'
+ : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
  }`}
  >
  {showRemoveSelection ? (
@@ -1063,7 +1063,7 @@ export default function DestinationDetail({ destinationId }: DestinationDetailPr
  className={`relative border-2 rounded-lg overflow-hidden transition-all ${
  showRemoveSelection
  ? isSelected
- ? 'border-red-500 bg-red-50 
+ ? 'border-red-500 bg-red-50'
  : 'border-gray-200 hover:border-gray-300 cursor-pointer'
  : 'border-gray-200 hover:shadow-lg'
  }`}

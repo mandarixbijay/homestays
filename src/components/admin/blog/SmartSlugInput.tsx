@@ -152,65 +152,67 @@ export const SmartSlugInput: React.FC<SmartSlugInputProps> = ({
  placeholder-gray-500 
  focus:outline-none focus:ring-2
  `}
-                    placeholder="auto-generated-from-title"
-                />
+ placeholder="auto-generated-from-title"
+ />
 
-                {/* Status Icon */}
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                    {getStatusIcon()}
-                </div>
-            </div>
+ {/* Status Icon */}
+ <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+ {getStatusIcon()}
+ </div>
+ </div>
 
-            {/* Character Count */}
-            <div className="flex items-center justify-between text-xs">
-                <span className={`${value.length > 60 ? 'text-orange-600' :
-                        value.length > 50 ? 'text-yellow-600' :
-                            'text-gray-500'
-                    }`}>
-                    {value.length}/60 characters
-                </span>
-                {getStatusText() && (
-                    <span className={`flex items-center gap-1 ${isAvailable === false || !validationResult.valid
-                            ? 'text-red-600'
-                            : isAvailable === true
-                                ? 'text-green-600'
-                                : 'text-gray-500'
-                        }`}>
-                        {getStatusText()}
-                    </span>
-                )}
-            </div>
+ {/* Character Count */}
+ <div className="flex items-center justify-between text-xs">
+ <span className={`${
+ value.length > 60 ? 'text-orange-600' :
+ value.length > 50 ? 'text-yellow-600' :
+ 'text-gray-500'
+ }`}>
+ {value.length}/60 characters
+ </span>
+ {getStatusText() && (
+ <span className={`flex items-center gap-1 ${
+ isAvailable === false || !validationResult.valid
+ ? 'text-red-600'
+ : isAvailable === true
+ ? 'text-green-600'
+ : 'text-gray-500'
+ }`}>
+ {getStatusText()}
+ </span>
+ )}
+ </div>
 
-            {/* Validation Messages */}
-            {validationResult.issues.length > 0 && (
-                <div className="space-y-1">
-                    {validationResult.issues.map((issue, idx) => (
-                        <div key={idx} className="flex items-start gap-2 text-xs text-orange-600 ">
-                            <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                            <span>{issue}</span>
-                        </div>
-                    ))}
-                </div>
-            )}
+ {/* Validation Messages */}
+ {validationResult.issues.length > 0 && (
+ <div className="space-y-1">
+ {validationResult.issues.map((issue, idx) => (
+ <div key={idx} className="flex items-start gap-2 text-xs text-orange-600 ">
+ <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
+ <span>{issue}</span>
+ </div>
+ ))}
+ </div>
+ )}
 
-            {/* Helper Text */}
-            {!validationResult.issues.length && (
-                <p className="text-xs text-gray-500 ">
-                    URL-friendly version of the title. Keep it short (under 60 chars) and descriptive.
-                </p>
-            )}
+ {/* Helper Text */}
+ {!validationResult.issues.length && (
+ <p className="text-xs text-gray-500 ">
+ URL-friendly version of the title. Keep it short (under 60 chars) and descriptive.
+ </p>
+ )}
 
-            {/* Preview URL */}
-            {value && validationResult.valid && (
-                <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200 ">
-                    <div className="text-xs text-gray-600 mb-1">Preview URL:</div>
-                    <div className="text-sm text-[#1A403D] font-mono break-all">
-                        https://nepalhomestays.com/blogs/{value}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+ {/* Preview URL */}
+ {value && validationResult.valid && (
+ <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200 ">
+ <div className="text-xs text-gray-600 mb-1">Preview URL:</div>
+ <div className="text-sm text-[#1A403D] font-mono break-all">
+ https://nepalhomestays.com/blogs/{value}
+ </div>
+ </div>
+ )}
+ </div>
+ );
 };
 
 export default SmartSlugInput;

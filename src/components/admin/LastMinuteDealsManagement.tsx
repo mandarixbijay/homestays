@@ -546,7 +546,7 @@ export default function LastMinuteDealsManagement() {
                     <div key={deal.id} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${rankBadgeClass}`}>
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${idx === 0 ? 'bg-yellow-100 text-yellow-700' : idx === 1 ? 'bg-gray-100 text-gray-700' : idx === 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-50 text-gray-600'}`}>
                             <span className="text-sm font-bold">#{idx + 1}</span>
                           </div>
                           <div>
@@ -557,7 +557,7 @@ export default function LastMinuteDealsManagement() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className={`inline-flex items-center px-3 py-1.5 rounded-lg ${discountPillClass}`}>
+                          <div className={`inline-flex items-center px-3 py-1.5 rounded-lg ${deal.discountType === 'PERCENTAGE' ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700'}`}>
                             {deal.discountType === 'PERCENTAGE' ? <Percent className="h-4 w-4 mr-1" /> : <DollarSign className="h-4 w-4 mr-1" />}
                             <span className="text-lg font-bold">{deal.discount}{deal.discountType === 'PERCENTAGE' ? '%' : ''}</span>
                           </div>
@@ -733,7 +733,13 @@ export default function LastMinuteDealsManagement() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${statusClass}`}>
+                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
+                            isActive
+                              ? 'bg-green-100 text-green-800'
+                              : isExpired
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
                             {isActive ? 'Active' : isExpired ? 'Expired' : 'Inactive'}
                           </span>
                         </td>

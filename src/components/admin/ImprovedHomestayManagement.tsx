@@ -73,7 +73,7 @@ const StatCard: React.FC<{
     green: 'border-green-200 hover:border-green-300',
     yellow: 'border-yellow-200 hover:border-yellow-300',
     red: 'border-red-200 hover:border-red-300',
-    purple: 'border-purple-200 hover:border-purple-300',
+    purple: 'border-purple-200 hover:border-purple-300'
   };
 
   const textColorClasses = {
@@ -81,7 +81,7 @@ const StatCard: React.FC<{
     green: 'text-green-600',
     yellow: 'text-yellow-600',
     red: 'text-red-600',
-    purple: 'text-purple-600',
+    purple: 'text-purple-600'
   };
 
   const iconBgClasses = {
@@ -715,7 +715,11 @@ export default function ImprovedHomestayManagement() {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${
+                  showFilters
+                    ? 'bg-[#224240] text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 <span>Filters</span>
@@ -740,13 +744,21 @@ export default function ImprovedHomestayManagement() {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={`p-2 rounded-lg transition-colors ${
+                  viewMode === 'grid'
+                    ? 'bg-[#224240] text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
               >
                 <Grid className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={`p-2 rounded-lg transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-[#224240] text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
               >
                 <List className="h-5 w-5" />
               </button>
@@ -920,7 +932,11 @@ export default function ImprovedHomestayManagement() {
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${currentPage === pageNum ? 'bg-[#224240] text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        currentPage === pageNum
+                          ? 'bg-[#224240] text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                     >
                       {pageNum}
                     </button>
