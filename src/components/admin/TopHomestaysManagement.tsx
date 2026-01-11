@@ -691,6 +691,7 @@ export default function TopHomestaysManagement() {
                 <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
             </div>
           </div>
+        </div>
 
           <AnimatePresence>
             {showFilters && (
@@ -716,7 +717,6 @@ export default function TopHomestaysManagement() {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
 
         {loading && topHomestays.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12">

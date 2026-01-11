@@ -2,21 +2,21 @@
 
 import React, { useMemo } from 'react';
 import {
- Target, AlertCircle, CheckCircle, Info, TrendingUp,
- FileText, Hash, Image as ImageIcon, Link as LinkIcon
+    Target, AlertCircle, CheckCircle, Info, TrendingUp,
+    FileText, Hash, Image as ImageIcon, Link as LinkIcon
 } from 'lucide-react';
 import { analyzeSEO, SEOAnalysis } from '@/lib/utils/seoUtils';
 
 interface SEOScoreCardProps {
- title: string;
- slug: string;
- excerpt: string;
- content: string;
- seoTitle?: string;
- seoDescription?: string;
- tags: Array<{ id: number; name: string }>;
- categories: Array<{ id: number; name: string }>;
- images: Array<{ url?: string; alt?: string }>;
+    title: string;
+    slug: string;
+    excerpt: string;
+    content: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    tags: Array<{ id: number; name: string }>;
+    categories: Array<{ id: number; name: string }>;
+    images: Array<{ url?: string; alt?: string }>;
 }
 
 export const SEOScoreCard: React.FC<SEOScoreCardProps> = (props) => {

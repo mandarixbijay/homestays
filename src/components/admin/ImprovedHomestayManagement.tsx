@@ -5,10 +5,9 @@ import React, { useState, useEffect, useCallback, useMemo, Component, ReactNode 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
-  Home, Plus, Eye, Edit, Trash2, Check, X, MapPin, User, Star, Calendar,
-  Filter, Download, Upload, RefreshCw, TrendingUp, TrendingDown, Minus,
-  Search, Grid, List, MoreVertical, ChevronRight, CheckSquare, Square,
-  Settings, SlidersHorizontal, FileDown, Loader2
+  Home, Plus, Eye, Edit, Trash2, Check, X, MapPin, User, Calendar,
+  RefreshCw, TrendingUp, TrendingDown, Search, Grid, List, CheckSquare,
+  Square, SlidersHorizontal, FileDown, Loader2
 } from 'lucide-react';
 import { debounce } from 'lodash';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +15,7 @@ import {
   useHomestays, useAsyncOperation
 } from '@/hooks/useAdminApi';
 import {
-  LoadingSpinner, Alert, ActionButton, Card, StatusBadge,
+  LoadingSpinner, Alert, ActionButton, StatusBadge,
   Modal, EmptyState, Input, useToast
 } from '@/components/admin/AdminComponents';
 
@@ -413,13 +412,12 @@ export default function ImprovedHomestayManagement() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [syncingMap, setSyncingMap] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
   // Debounced API call for loading data
   const debouncedLoadData = useMemo(
     () => debounce((params: any) => {
       console.log('[HomestayManagement] Debounced load with params:', params);
-      loadHomestays(params).catch(error => {
+      loadHomestays(params).catch(() => {
         addToast({ type: 'error', title: 'Error', message: 'Failed to load homestays' });
       });
     }, 500),
@@ -589,8 +587,6 @@ export default function ImprovedHomestayManagement() {
         const error = await response.json();
         throw new Error(error.error || 'Failed to revalidate sitemap');
       }
-
-      setLastSyncTime(new Date());
 
       addToast({
         type: 'success',
@@ -800,6 +796,7 @@ export default function ImprovedHomestayManagement() {
                       />
                     </div>
                   </ErrorBoundary>
+
                   <select
                     value={statusFilter}
                     onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
@@ -810,18 +807,21 @@ export default function ImprovedHomestayManagement() {
                     <option value="APPROVED">Approved</option>
                     <option value="REJECTED">Rejected</option>
                   </select>
+
                   <Input
                     type="number"
                     value={ownerIdFilter}
                     onChange={(e) => { setOwnerIdFilter(e.target.value); setCurrentPage(1); }}
                     placeholder="Filter by Owner ID"
                   />
+
                   <Input
                     value={addressFilter}
                     onChange={(e) => { setAddressFilter(e.target.value); setCurrentPage(1); }}
                     placeholder="Filter by Address"
                   />
                 </div>
+
                 {hasFilters && (
                   <div className="mt-4">
                     <ActionButton

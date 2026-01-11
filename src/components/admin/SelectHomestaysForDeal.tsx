@@ -4,14 +4,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
- ArrowLeft, Search, Home, Zap, Percent, DollarSign, Calendar, CheckCircle,
- Grid, List, ChevronLeft, ChevronRight, Wifi, Star, Users, MapPin, User, Eye
+    ArrowLeft, Search, Home, Zap, Percent, DollarSign, Calendar, CheckCircle,
+    Grid, List, ChevronLeft, ChevronRight, Wifi, Star, Users, MapPin, User, Eye
 } from 'lucide-react';
 import {
- useHomestays, useLastMinuteDeals
+    useHomestays, useLastMinuteDeals
 } from '@/hooks/useAdminApi';
 import {
- LoadingSpinner, ActionButton, useToast, Alert
+    LoadingSpinner, ActionButton, useToast, Alert
 } from '@/components/admin/AdminComponents';
 
 type ViewMode = 'grid' | 'table';
