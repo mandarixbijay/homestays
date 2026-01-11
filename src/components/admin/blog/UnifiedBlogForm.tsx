@@ -9,7 +9,8 @@ import {
     Image as ImageIcon, X, Star, Bold, Italic, List, Hash, Quote, Type, Plus, Search,
     Folder, Tag as TagIcon, Sparkles, Link2, Code, AlignLeft, AlignCenter, AlignRight,
     Maximize2, Minimize2, Info, TrendingUp, BarChart3, Zap, FileText, Settings,
-    ExternalLink, Copy, CheckCircle2, XCircle, Layers, Palette, Loader2
+    ExternalLink, Copy, CheckCircle2, XCircle, Layers, Palette, Loader2,
+    PanelRightClose, PanelRight, ChevronRight
 } from 'lucide-react';
 
 import {
@@ -671,221 +672,213 @@ const PremiumCategoryTagManager: React.FC<{
 
     // Return the combined Categories and Tags UI here so the component returns JSX
     return (
-        <div className="space-y-6">
-            {/* Categories */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-200">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 bg-blue-500 rounded-lg">
-                            <Folder className="h-5 w-5 text-white" />
-                        </div>
-                        <label className="text-lg font-bold text-gray-900">Categories</label>
+        <div className="space-y-3">
+            {/* Categories - Compact */}
+            <div className="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                        <Folder className="h-3.5 w-3.5 text-blue-500" />
+                        <label className="text-xs font-semibold text-gray-900">Categories</label>
+                        {selectedCategories.length > 0 && (
+                            <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">
+                                {selectedCategories.length}
+                            </span>
+                        )}
                     </div>
                     <button
                         type="button"
                         onClick={() => setShowAddCategory(!showAddCategory)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 hover:bg-[#1A403D] text-white rounded-lg transition-all hover:scale-105 text-sm font-medium shadow-sm"
+                        className="text-[10px] text-blue-600 hover:text-blue-800 font-medium"
                     >
-                        <Plus className="h-3 w-3" />
-                        Add New
+                        + Add
                     </button>
                 </div>
 
                 {showAddCategory && (
-                    <div className="mb-4 p-4 bg-white rounded-lg shadow-lg border-2 border-blue-300 animate-in slide-in-from-top duration-300">
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                placeholder="New category name..."
-                                value={newCategoryName}
-                                onChange={(e) => setNewCategoryName(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
-                                className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1A403D]/20"
-                                autoFocus
-                            />
-                            <button
-                                type="button"
-                                onClick={handleAddCategory}
-                                disabled={adding}
-                                className="px-4 py-2 bg-[#1A403D] hover:bg-[#152f2d] text-white rounded-lg font-medium transition-all hover:scale-105 disabled:opacity-50 shadow-sm"
-                            >
-                                {adding ? <Clock className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => { setShowAddCategory(false); setNewCategoryName(''); }}
-                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-all"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        </div>
+                    <div className="mb-2 flex gap-1">
+                        <input
+                            type="text"
+                            placeholder="New category..."
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+                            className="flex-1 px-2 py-1 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-blue-500"
+                            autoFocus
+                        />
+                        <button
+                            type="button"
+                            onClick={handleAddCategory}
+                            disabled={adding}
+                            className="px-2 py-1 bg-blue-500 text-white rounded text-xs disabled:opacity-50"
+                        >
+                            {adding ? '...' : <Check className="h-3 w-3" />}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setShowAddCategory(false); setNewCategoryName(''); }}
+                            className="px-2 py-1 bg-gray-100 rounded text-xs"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
                     </div>
                 )}
 
-                <div className="relative mb-3">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <div className="relative mb-2">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Search categories..."
+                        placeholder="Search..."
                         value={categorySearch}
                         onChange={(e) => setCategorySearch(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1A403D]/20 transition-all"
+                        className="w-full pl-7 pr-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-blue-500"
                     />
                 </div>
 
-                <div className="max-h-64 overflow-y-auto bg-white rounded-lg border-2 border-gray-200 shadow-inner">
+                <div className="max-h-32 overflow-y-auto bg-white rounded border border-gray-100">
                     {filteredCategories.length > 0 ? (
                         filteredCategories.map(cat => (
                             <label
                                 key={cat.id}
-                                className="flex items-center p-4 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all group"
+                                className="flex items-center gap-2 px-2 py-1.5 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-b-0 text-xs"
                             >
                                 <input
                                     type="checkbox"
                                     checked={selectedCategories.includes(cat.id)}
                                     onChange={() => toggleCategory(cat.id)}
-                                    className="h-5 w-5 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-[#1A403D]/20 transition-all"
+                                    className="h-3 w-3 rounded border-gray-300 text-blue-600"
                                 />
-                                <Folder className="h-5 w-5 text-blue-500 mx-3 group-hover:scale-110 transition-transform" />
-                                <span className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                                    {cat.name}
-                                </span>
+                                <span className="text-gray-700">{cat.name}</span>
                             </label>
                         ))
                     ) : (
-                        <div className="p-8 text-center text-gray-500">
-                            <Folder className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">No categories found</p>
-                        </div>
+                        <div className="p-3 text-center text-gray-400 text-xs">No categories</div>
                     )}
                 </div>
 
                 {selectedCategories.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                        {selectedCategories.map(id => {
+                    <div className="mt-2 flex flex-wrap gap-1">
+                        {selectedCategories.slice(0, 3).map(id => {
                             const cat = availableCategories.find(c => c.id === id);
                             return cat ? (
                                 <span
                                     key={id}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-full font-medium border-2 border-blue-300 shadow-sm hover:shadow-md transition-all hover:scale-105"
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-medium"
                                 >
-                                    <Folder className="h-4 w-4" />
                                     {cat.name}
-                                    <button type="button" onClick={() => toggleCategory(id)} className="hover:bg-blue-100 rounded-full p-1 transition-all">
-                                        <X className="h-3 w-3" />
+                                    <button type="button" onClick={() => toggleCategory(id)} className="hover:text-blue-900">
+                                        <X className="h-2.5 w-2.5" />
                                     </button>
                                 </span>
                             ) : null;
                         })}
+                        {selectedCategories.length > 3 && (
+                            <span className="text-[10px] text-gray-500">+{selectedCategories.length - 3} more</span>
+                        )}
                     </div>
                 )}
             </div>
 
-            {/* Tags */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border-2 border-green-200">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 bg-green-500 rounded-lg">
-                            <TagIcon className="h-5 w-5 text-white" />
-                        </div>
-                        <label className="text-lg font-bold text-gray-900">Tags</label>
+            {/* Tags - Compact */}
+            <div className="bg-green-50/50 rounded-lg p-3 border border-green-100">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                        <TagIcon className="h-3.5 w-3.5 text-green-500" />
+                        <label className="text-xs font-semibold text-gray-900">Tags</label>
+                        {selectedTags.length > 0 && (
+                            <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">
+                                {selectedTags.length}
+                            </span>
+                        )}
                     </div>
                     <button
                         type="button"
                         onClick={() => setShowAddTag(!showAddTag)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all hover:scale-105 text-sm font-medium shadow-sm"
+                        className="text-[10px] text-green-600 hover:text-green-800 font-medium"
                     >
-                        <Plus className="h-3 w-3" />
-                        Add New
+                        + Add
                     </button>
                 </div>
 
                 {showAddTag && (
-                    <div className="mb-4 p-4 bg-white rounded-lg shadow-lg border-2 border-green-300 animate-in slide-in-from-top duration-300">
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                placeholder="New tag name..."
-                                value={newTagName}
-                                onChange={(e) => setNewTagName(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
-                                className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                                autoFocus
-                            />
-                            <button
-                                type="button"
-                                onClick={handleAddTag}
-                                disabled={adding}
-                                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all hover:scale-105 disabled:opacity-50 shadow-sm"
-                            >
-                                {adding ? <Clock className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => { setShowAddTag(false); setNewTagName(''); }}
-                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-all"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        </div>
+                    <div className="mb-2 flex gap-1">
+                        <input
+                            type="text"
+                            placeholder="New tag..."
+                            value={newTagName}
+                            onChange={(e) => setNewTagName(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
+                            className="flex-1 px-2 py-1 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-green-500"
+                            autoFocus
+                        />
+                        <button
+                            type="button"
+                            onClick={handleAddTag}
+                            disabled={adding}
+                            className="px-2 py-1 bg-green-500 text-white rounded text-xs disabled:opacity-50"
+                        >
+                            {adding ? '...' : <Check className="h-3 w-3" />}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setShowAddTag(false); setNewTagName(''); }}
+                            className="px-2 py-1 bg-gray-100 rounded text-xs"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
                     </div>
                 )}
 
-                <div className="relative mb-3">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <div className="relative mb-2">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Search tags..."
+                        placeholder="Search..."
                         value={tagSearch}
                         onChange={(e) => setTagSearch(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 transition-all"
+                        className="w-full pl-7 pr-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-green-500"
                     />
                 </div>
 
-                <div className="max-h-64 overflow-y-auto bg-white rounded-lg border-2 border-gray-200 shadow-inner">
+                <div className="max-h-32 overflow-y-auto bg-white rounded border border-gray-100">
                     {filteredTags.length > 0 ? (
                         filteredTags.map(tag => (
                             <label
                                 key={tag.id}
-                                className="flex items-center p-4 hover:bg-green-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all group"
+                                className="flex items-center gap-2 px-2 py-1.5 hover:bg-green-50 cursor-pointer border-b border-gray-50 last:border-b-0 text-xs"
                             >
                                 <input
                                     type="checkbox"
                                     checked={selectedTags.includes(tag.id)}
                                     onChange={() => toggleTag(tag.id)}
-                                    className="h-5 w-5 rounded border-2 border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500 transition-all"
+                                    className="h-3 w-3 rounded border-gray-300 text-green-600"
                                 />
-                                <TagIcon className="h-5 w-5 text-green-500 mx-3 group-hover:scale-110 transition-transform" />
-                                <span className="font-medium text-gray-900 group-hover:text-green-600 transition-colors">
-                                    {tag.name}
-                                </span>
+                                <span className="text-gray-700">{tag.name}</span>
                             </label>
                         ))
                     ) : (
-                        <div className="p-8 text-center text-gray-500">
-                            <TagIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">No tags found</p>
-                        </div>
+                        <div className="p-3 text-center text-gray-400 text-xs">No tags</div>
                     )}
                 </div>
 
                 {selectedTags.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                        {selectedTags.map(id => {
+                    <div className="mt-2 flex flex-wrap gap-1">
+                        {selectedTags.slice(0, 4).map(id => {
                             const tag = availableTags.find(t => t.id === id);
                             return tag ? (
                                 <span
                                     key={id}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white text-green-700 rounded-full font-medium border-2 border-green-300 shadow-sm hover:shadow-md transition-all hover:scale-105"
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-medium"
                                 >
-                                    <TagIcon className="h-4 w-4" />
                                     {tag.name}
-                                    <button type="button" onClick={() => toggleTag(id)} className="hover:bg-green-100 rounded-full p-1 transition-all">
-                                        <X className="h-3 w-3" />
+                                    <button type="button" onClick={() => toggleTag(id)} className="hover:text-green-900">
+                                        <X className="h-2.5 w-2.5" />
                                     </button>
                                 </span>
                             ) : null;
                         })}
+                        {selectedTags.length > 4 && (
+                            <span className="text-[10px] text-gray-500">+{selectedTags.length - 4} more</span>
+                        )}
                     </div>
                 )}
             </div>
@@ -1061,6 +1054,8 @@ export default function UnifiedBlogForm({ blogId, initialData }: UnifiedBlogForm
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [autoSaveStatus, setAutoSaveStatus] = useState<'saving' | 'saved' | 'error' | null>(null);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
     const imageFilesRef = useRef<File[]>([]);
     const autoSaveTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -1446,6 +1441,26 @@ const loadData = async () => {
                                 )}
                                 <span>{formData.status === 'PUBLISHED' ? 'Update' : 'Publish'}</span>
                             </button>
+                            {/* Sidebar Toggle - Desktop */}
+                            {!showPreview && (
+                                <button
+                                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                                    className="hidden lg:flex px-2 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors items-center gap-1"
+                                    title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+                                >
+                                    {sidebarOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRight className="h-4 w-4" />}
+                                </button>
+                            )}
+                            {/* Sidebar Toggle - Mobile */}
+                            {!showPreview && (
+                                <button
+                                    onClick={() => setSidebarMobileOpen(true)}
+                                    className="lg:hidden px-2 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1"
+                                    title="Open sidebar"
+                                >
+                                    <Settings className="h-4 w-4" />
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1533,13 +1548,13 @@ const loadData = async () => {
                         </div>
                     </Card>
                 ) : (
-                    /* Edit Mode - Clean Two Column Layout */
-                    <div className="flex gap-6">
+                    /* Edit Mode - Responsive Two Column Layout */
+                    <div className="flex gap-4 lg:gap-6 relative">
                         {/* Main Content Column */}
-                        <div className="flex-1 min-w-0 space-y-5">
+                        <div className={`flex-1 min-w-0 space-y-4 transition-all duration-300 ${sidebarOpen ? '' : 'lg:max-w-none'}`}>
                             {/* Title & Excerpt - Compact Card */}
                             <Card className="shadow-sm border border-gray-200">
-                                <div className="p-6 space-y-5">
+                                <div className="p-4 space-y-4">
                                     <Input
                                         label="Title"
                                         value={formData.title}
@@ -1619,61 +1634,55 @@ const loadData = async () => {
                             )}
                         </div>
 
-                        {/* Sidebar - Narrower and Cleaner */}
-                        <div className="hidden lg:block w-80 flex-shrink-0">
-                            <div className="sticky top-24 space-y-4">
-                                {/* Quick Settings Card */}
+                        {/* Desktop Sidebar - Collapsible */}
+                        <div className={`hidden lg:block flex-shrink-0 transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-0 overflow-hidden'}`}>
+                            <div className="sticky top-20 space-y-3 w-72">
+                                {/* Quick Settings Card - Compact */}
                                 <Card className="shadow-sm border border-gray-200">
-                                    <div className="p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <Settings className="h-4 w-4 text-gray-500" />
-                                            <h3 className="text-sm font-semibold text-gray-900">Settings</h3>
+                                    <div className="p-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-1.5">
+                                                <Settings className="h-3.5 w-3.5 text-gray-500" />
+                                                <h3 className="text-xs font-semibold text-gray-900">Settings</h3>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                                                <span className="font-medium">{wordCount} words</span>
+                                                <span>•</span>
+                                                <span>{readTime} min</span>
+                                            </div>
                                         </div>
-                                        <div className="space-y-3">
+                                        <div className="flex gap-2">
                                             <Select
-                                                label="Status"
                                                 value={formData.status}
                                                 onChange={(e) => handleChange('status', e.target.value)}
-                                                className="text-sm"
+                                                className="text-xs flex-1"
                                             >
                                                 <option value="DRAFT">Draft</option>
                                                 <option value="PUBLISHED">Published</option>
                                                 <option value="ARCHIVED">Archived</option>
                                             </Select>
-                                            <label className="flex items-center gap-2 p-2.5 bg-yellow-50 rounded-lg border border-yellow-200 cursor-pointer hover:bg-yellow-100 transition-colors">
+                                            <label className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border cursor-pointer transition-colors ${formData.featured ? 'bg-yellow-50 border-yellow-300' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.featured}
                                                     onChange={(e) => handleChange('featured', e.target.checked)}
-                                                    className="h-4 w-4 rounded"
+                                                    className="h-3 w-3 rounded"
                                                 />
-                                                <Star className={`h-4 w-4 ${formData.featured ? 'fill-yellow-500 text-yellow-500' : 'text-gray-400'}`} />
-                                                <span className="text-sm font-medium">Featured</span>
+                                                <Star className={`h-3.5 w-3.5 ${formData.featured ? 'fill-yellow-500 text-yellow-500' : 'text-gray-400'}`} />
                                             </label>
-                                            <div className="flex gap-2 p-2.5 bg-gray-50 rounded-lg">
-                                                <div className="flex-1 text-center">
-                                                    <p className="text-lg font-bold text-gray-900">{wordCount}</p>
-                                                    <p className="text-[10px] text-gray-500 uppercase">Words</p>
-                                                </div>
-                                                <div className="w-px bg-gray-200" />
-                                                <div className="flex-1 text-center">
-                                                    <p className="text-lg font-bold text-gray-900">{readTime}</p>
-                                                    <p className="text-[10px] text-gray-500 uppercase">Min</p>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </Card>
 
-                                {/* Featured Image */}
+                                {/* Featured Image - Compact */}
                                 <Card className="shadow-sm border border-gray-200">
-                                    <div className="p-4">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <div className="flex items-center gap-2">
-                                                <ImageIcon className="h-4 w-4 text-gray-500" />
-                                                <h3 className="text-sm font-semibold text-gray-900">Images</h3>
+                                    <div className="p-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-1.5">
+                                                <ImageIcon className="h-3.5 w-3.5 text-gray-500" />
+                                                <h3 className="text-xs font-semibold text-gray-900">Images</h3>
                                             </div>
-                                            <span className="text-[10px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded font-medium">
+                                            <span className="text-[9px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded font-medium">
                                                 Auto-optimized
                                             </span>
                                         </div>
@@ -1689,7 +1698,7 @@ const loadData = async () => {
 
                                 {/* Categories & Tags - Compact */}
                                 <Card className="shadow-sm border border-gray-200">
-                                    <div className="p-4">
+                                    <div className="p-3">
                                         <PremiumCategoryTagManager
                                             selectedCategories={formData.categoryIds}
                                             selectedTags={formData.tagIds}
@@ -1705,7 +1714,7 @@ const loadData = async () => {
 
                                 {/* SEO Score - Compact */}
                                 <Card className="shadow-sm border border-gray-200">
-                                    <div className="p-4">
+                                    <div className="p-3">
                                         <SEOScoreCard
                                             title={formData.title}
                                             slug={formData.slug}
@@ -1722,34 +1731,34 @@ const loadData = async () => {
 
                                 {/* SEO Meta - Compact */}
                                 <Card className="shadow-sm border border-gray-200">
-                                    <div className="p-4">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <Sparkles className="h-4 w-4 text-purple-500" />
-                                            <h3 className="text-sm font-semibold text-gray-900">SEO Meta</h3>
+                                    <div className="p-3">
+                                        <div className="flex items-center gap-1.5 mb-2">
+                                            <Sparkles className="h-3.5 w-3.5 text-purple-500" />
+                                            <h3 className="text-xs font-semibold text-gray-900">SEO Meta</h3>
                                         </div>
-                                        <div className="space-y-3">
+                                        <div className="space-y-2">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                    SEO Title <span className="text-gray-400">({formData.seoTitle.length}/60)</span>
+                                                <label className="block text-[10px] font-medium text-gray-500 mb-0.5">
+                                                    Title <span className="text-gray-400">({formData.seoTitle.length}/60)</span>
                                                 </label>
                                                 <input
                                                     type="text"
                                                     value={formData.seoTitle}
                                                     onChange={(e) => handleChange('seoTitle', e.target.value)}
-                                                    placeholder="SEO optimized title..."
-                                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D]"
+                                                    placeholder="SEO title..."
+                                                    className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D]"
                                                     maxLength={60}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">
-                                                    Meta Description <span className="text-gray-400">({formData.seoDescription.length}/160)</span>
+                                                <label className="block text-[10px] font-medium text-gray-500 mb-0.5">
+                                                    Description <span className="text-gray-400">({formData.seoDescription.length}/160)</span>
                                                 </label>
                                                 <textarea
                                                     value={formData.seoDescription}
                                                     onChange={(e) => handleChange('seoDescription', e.target.value)}
-                                                    placeholder="Brief description for search engines..."
-                                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D] resize-none"
+                                                    placeholder="Meta description..."
+                                                    className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D] resize-none"
                                                     rows={2}
                                                     maxLength={160}
                                                 />
@@ -1759,6 +1768,157 @@ const loadData = async () => {
                                 </Card>
                             </div>
                         </div>
+
+                        {/* Mobile Sidebar Overlay */}
+                        {sidebarMobileOpen && (
+                            <>
+                                {/* Backdrop */}
+                                <div
+                                    className="lg:hidden fixed inset-0 bg-black/50 z-40"
+                                    onClick={() => setSidebarMobileOpen(false)}
+                                />
+                                {/* Sidebar Panel */}
+                                <div className="lg:hidden fixed right-0 top-0 bottom-0 w-80 max-w-[90vw] bg-white z-50 shadow-2xl overflow-y-auto">
+                                    <div className="sticky top-0 bg-white border-b border-gray-200 p-3 flex items-center justify-between z-10">
+                                        <h2 className="font-semibold text-gray-900">Post Settings</h2>
+                                        <button
+                                            onClick={() => setSidebarMobileOpen(false)}
+                                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                        >
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                    <div className="p-3 space-y-3">
+                                        {/* Mobile Quick Settings */}
+                                        <Card className="shadow-sm border border-gray-200">
+                                            <div className="p-3">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Settings className="h-3.5 w-3.5 text-gray-500" />
+                                                        <h3 className="text-xs font-semibold text-gray-900">Settings</h3>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                                                        <span className="font-medium">{wordCount} words</span>
+                                                        <span>•</span>
+                                                        <span>{readTime} min</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <Select
+                                                        value={formData.status}
+                                                        onChange={(e) => handleChange('status', e.target.value)}
+                                                        className="text-xs flex-1"
+                                                    >
+                                                        <option value="DRAFT">Draft</option>
+                                                        <option value="PUBLISHED">Published</option>
+                                                        <option value="ARCHIVED">Archived</option>
+                                                    </Select>
+                                                    <label className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border cursor-pointer transition-colors ${formData.featured ? 'bg-yellow-50 border-yellow-300' : 'bg-gray-50 border-gray-200'}`}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.featured}
+                                                            onChange={(e) => handleChange('featured', e.target.checked)}
+                                                            className="h-3 w-3 rounded"
+                                                        />
+                                                        <Star className={`h-3.5 w-3.5 ${formData.featured ? 'fill-yellow-500 text-yellow-500' : 'text-gray-400'}`} />
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </Card>
+
+                                        {/* Mobile Images */}
+                                        <Card className="shadow-sm border border-gray-200">
+                                            <div className="p-3">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <ImageIcon className="h-3.5 w-3.5 text-gray-500" />
+                                                        <h3 className="text-xs font-semibold text-gray-900">Images</h3>
+                                                    </div>
+                                                </div>
+                                                <OptimizedImageUpload
+                                                    images={formData.images}
+                                                    onImagesChange={(images) => handleChange('images', images)}
+                                                    onFileUpload={handleImageUpload}
+                                                    maxImages={10}
+                                                    isFeaturedImage={false}
+                                                />
+                                            </div>
+                                        </Card>
+
+                                        {/* Mobile Categories & Tags */}
+                                        <Card className="shadow-sm border border-gray-200">
+                                            <div className="p-3">
+                                                <PremiumCategoryTagManager
+                                                    selectedCategories={formData.categoryIds}
+                                                    selectedTags={formData.tagIds}
+                                                    availableCategories={categories}
+                                                    availableTags={tags}
+                                                    onCategoriesChange={(ids) => handleChange('categoryIds', ids)}
+                                                    onTagsChange={(ids) => handleChange('tagIds', ids)}
+                                                    onAddCategory={handleAddCategory}
+                                                    onAddTag={handleAddTag}
+                                                />
+                                            </div>
+                                        </Card>
+
+                                        {/* Mobile SEO */}
+                                        <Card className="shadow-sm border border-gray-200">
+                                            <div className="p-3">
+                                                <SEOScoreCard
+                                                    title={formData.title}
+                                                    slug={formData.slug}
+                                                    excerpt={formData.excerpt}
+                                                    content={formData.content}
+                                                    seoTitle={formData.seoTitle}
+                                                    seoDescription={formData.seoDescription}
+                                                    tags={tags.filter(t => formData.tagIds.includes(t.id))}
+                                                    categories={categories.filter(c => formData.categoryIds.includes(c.id))}
+                                                    images={formData.images}
+                                                />
+                                            </div>
+                                        </Card>
+
+                                        {/* Mobile SEO Meta */}
+                                        <Card className="shadow-sm border border-gray-200">
+                                            <div className="p-3">
+                                                <div className="flex items-center gap-1.5 mb-2">
+                                                    <Sparkles className="h-3.5 w-3.5 text-purple-500" />
+                                                    <h3 className="text-xs font-semibold text-gray-900">SEO Meta</h3>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div>
+                                                        <label className="block text-[10px] font-medium text-gray-500 mb-0.5">
+                                                            Title <span className="text-gray-400">({formData.seoTitle.length}/60)</span>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            value={formData.seoTitle}
+                                                            onChange={(e) => handleChange('seoTitle', e.target.value)}
+                                                            placeholder="SEO title..."
+                                                            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D]"
+                                                            maxLength={60}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-medium text-gray-500 mb-0.5">
+                                                            Description <span className="text-gray-400">({formData.seoDescription.length}/160)</span>
+                                                        </label>
+                                                        <textarea
+                                                            value={formData.seoDescription}
+                                                            onChange={(e) => handleChange('seoDescription', e.target.value)}
+                                                            placeholder="Meta description..."
+                                                            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D] resize-none"
+                                                            rows={2}
+                                                            maxLength={160}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 )}
             </main>
