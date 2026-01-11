@@ -2,13 +2,11 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
-  Bold, Italic, List, Hash, Quote, Type, AlignLeft, AlignCenter, AlignRight,
+  Bold, Italic, List, Quote, Type, AlignLeft, AlignCenter, AlignRight,
   Image as ImageIcon, Link2, Maximize2, Minimize2, X, Upload, Loader2,
   AlertCircle, CheckCircle, Underline as UnderlineIcon, Eye, Edit3,
-  SplitSquareHorizontal, Save, Clock, Undo, Redo, Search, Replace,
-  Heading1, Heading2, Heading3, Heading4, ListOrdered, Minus, ChevronDown,
-  FileText, PanelLeftClose, PanelLeftOpen, Target, Settings, TrendingUp,
-  Zap, BookOpen, BarChart3, Info
+  Columns, Save, Undo, Redo, Search, Replace,
+  Heading1, Heading2, Heading3, ListOrdered, Minus, ChevronDown, MoreHorizontal
 } from 'lucide-react';
 import { optimizeImage } from '@/lib/utils/imageOptimization';
 
@@ -17,7 +15,6 @@ import { optimizeImage } from '@/lib/utils/imageOptimization';
 // ============================================================================
 
 type ViewMode = 'edit' | 'preview' | 'split';
-type PanelTab = 'outline' | 'seo' | 'settings';
 
 interface HistoryState {
   content: string;
@@ -38,7 +35,7 @@ interface EnhancedBlogEditorProps {
   onImageUpload?: (file: File) => Promise<string>;
   onAutoSave?: () => Promise<void>;
   placeholder?: string;
-  autoSaveInterval?: number; // milliseconds, default 30000 (30 seconds)
+  autoSaveInterval?: number;
 }
 
 // ============================================================================
@@ -118,28 +115,27 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="bg-gradient-to-r from-[#1A403D] to-[#224240] text-white p-6 rounded-t-2xl flex items-center justify-between">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="bg-gradient-to-r from-[#1A403D] to-[#2d5a56] text-white p-5 rounded-t-2xl flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-bold">Add Image</h3>
-            <p className="text-sm text-white/80 mt-1">Upload image with alt text</p>
+            <h3 className="text-xl font-bold">Insert Image</h3>
+            <p className="text-sm text-white/70 mt-0.5">Add image with alt text for SEO</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg">
-            <X className="h-6 w-6" />
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-5 space-y-4">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600" />
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
 
           {onUpload && (
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">Upload Image</label>
               <label className="block cursor-pointer">
                 <input
                   ref={fileInputRef}
@@ -149,23 +145,19 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
                   disabled={uploading || optimizing}
                   className="hidden"
                 />
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#1A403D] transition-colors">
+                <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-[#1A403D] hover:bg-gray-50 transition-all">
                   {uploading || optimizing ? (
-                    <div className="flex flex-col items-center gap-3">
-                      <Loader2 className="h-12 w-12 animate-spin text-[#1A403D]" />
-                      <p className="text-sm font-medium text-gray-600">
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="h-8 w-8 animate-spin text-[#1A403D]" />
+                      <p className="text-sm text-gray-600">
                         {optimizing ? 'Optimizing...' : 'Uploading...'}
                       </p>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="p-4 bg-blue-100 rounded-full">
-                        <Upload className="h-8 w-8 text-[#1A403D]" />
-                      </div>
-                      <div>
-                        <p className="text-base font-semibold text-gray-900">Click to upload</p>
-                        <p className="text-sm text-gray-500 mt-1">Auto-optimized</p>
-                      </div>
+                    <div className="flex flex-col items-center gap-2">
+                      <Upload className="h-8 w-8 text-gray-400" />
+                      <p className="text-sm font-medium text-gray-700">Click to upload</p>
+                      <p className="text-xs text-gray-500">Auto-optimized for web</p>
                     </div>
                   )}
                 </div>
@@ -174,71 +166,60 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Image URL</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Image URL</label>
             <input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
               placeholder="https://example.com/image.jpg"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Alt Text <span className="text-red-500">*</span>
-              {alt && (
-                <span className="ml-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                  <CheckCircle className="h-3 w-3 inline mr-1" />Valid
-                </span>
-              )}
             </label>
             <input
               type="text"
               value={alt}
               onChange={(e) => setAlt(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
-              placeholder="Describe the image"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
+              placeholder="Describe the image for accessibility"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Caption <span className="text-xs text-gray-500">(Optional)</span>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Caption <span className="text-xs text-gray-400">(optional)</span>
             </label>
             <input
               type="text"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
-              placeholder="Optional caption"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
+              placeholder="Optional caption below image"
             />
           </div>
 
           {url && (
-            <div className="border rounded-lg overflow-hidden">
-              <div className="px-4 py-2 bg-gray-50 border-b">
-                <span className="text-sm font-medium">Preview</span>
-              </div>
-              <div className="p-4 bg-gray-50">
-                <img src={url} alt={alt || 'Preview'} className="max-w-full h-auto rounded-lg shadow-lg mx-auto" style={{ maxHeight: '300px' }} />
-                {caption && <p className="text-sm text-gray-600 text-center mt-3 italic">{caption}</p>}
-              </div>
+            <div className="border rounded-lg overflow-hidden bg-gray-50">
+              <img src={url} alt={alt || 'Preview'} className="w-full h-40 object-contain" />
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 rounded-b-2xl">
-          <button onClick={onClose} className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-200 rounded-lg">
+        <div className="flex items-center justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-2xl">
+          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors">
             Cancel
           </button>
           <button
             onClick={handleInsert}
             disabled={!url || !alt}
-            className="px-6 py-2.5 text-sm font-semibold text-white bg-[#1A403D] hover:bg-[#152f2d] rounded-lg disabled:opacity-50 shadow-lg flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium text-white bg-[#1A403D] hover:bg-[#152f2d] rounded-lg disabled:opacity-50 transition-colors"
           >
-            <CheckCircle className="h-4 w-4" />Insert
+            Insert Image
           </button>
         </div>
       </div>
@@ -286,141 +267,52 @@ const FindReplaceBar: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="bg-gray-50 border-b border-gray-200 p-3 animate-in slide-in-from-top duration-200">
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-          <Search className="w-4 h-4 text-gray-400" />
+    <div className="bg-white border-b border-gray-200 p-3">
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-1 min-w-[180px]">
+          <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
           <input
             type="text"
             value={findText}
             onChange={(e) => setFindText(e.target.value)}
             placeholder="Find..."
-            className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
+            className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#1A403D]"
+            autoFocus
           />
           {matchCount > 0 && (
-            <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
-              {matchCount} found
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded whitespace-nowrap">
+              {matchCount}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-          <Replace className="w-4 h-4 text-gray-400" />
+        <div className="flex items-center gap-2 flex-1 min-w-[180px]">
+          <Replace className="w-4 h-4 text-gray-400 flex-shrink-0" />
           <input
             type="text"
             value={replaceText}
             onChange={(e) => setReplaceText(e.target.value)}
-            placeholder="Replace with..."
-            className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A403D]/20"
+            placeholder="Replace..."
+            className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#1A403D]"
           />
+        </div>
+        <div className="flex items-center gap-1">
           <button
             onClick={handleReplace}
             disabled={!findText}
-            className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm disabled:opacity-50"
+            className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 rounded disabled:opacity-50 transition-colors"
           >
             Replace
           </button>
           <button
             onClick={handleReplaceAll}
             disabled={!findText}
-            className="px-3 py-1.5 bg-[#1A403D] text-white hover:bg-[#152f2d] rounded-lg text-sm disabled:opacity-50"
+            className="px-3 py-1.5 text-xs font-medium bg-[#1A403D] text-white hover:bg-[#152f2d] rounded disabled:opacity-50 transition-colors"
           >
-            Replace All
+            All
           </button>
-        </div>
-        <button onClick={onClose} className="p-1.5 hover:bg-gray-200 rounded-lg">
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// ============================================================================
-// DOCUMENT OUTLINE PANEL
-// ============================================================================
-
-const DocumentOutline: React.FC<{
-  content: string;
-  onNavigate: (line: number) => void;
-}> = ({ content, onNavigate }) => {
-  const outline = useMemo(() => {
-    const lines = content.split('\n');
-    const headings: { level: number; text: string; line: number }[] = [];
-
-    lines.forEach((line, idx) => {
-      if (line.startsWith('#### ')) {
-        headings.push({ level: 4, text: line.replace('#### ', ''), line: idx });
-      } else if (line.startsWith('### ')) {
-        headings.push({ level: 3, text: line.replace('### ', ''), line: idx });
-      } else if (line.startsWith('## ')) {
-        headings.push({ level: 2, text: line.replace('## ', ''), line: idx });
-      } else if (line.startsWith('# ')) {
-        headings.push({ level: 1, text: line.replace('# ', ''), line: idx });
-      }
-    });
-
-    return headings;
-  }, [content]);
-
-  const stats = useMemo(() => {
-    const text = content.replace(/<[^>]*>/g, '');
-    const words = text.split(/\s+/).filter(w => w.length > 0).length;
-    const chars = text.length;
-    const paragraphs = content.split(/\n\n+/).filter(Boolean).length;
-    const readingTime = Math.ceil(words / 200);
-
-    return { words, chars, paragraphs, readingTime, headings: outline.length };
-  }, [content, outline]);
-
-  return (
-    <div className="p-4 space-y-4">
-      <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-        <FileText className="w-4 h-4" />
-        Document Outline
-      </h3>
-
-      {outline.length === 0 ? (
-        <p className="text-sm text-gray-500 italic">
-          No headings found. Add headings to create an outline.
-        </p>
-      ) : (
-        <nav className="space-y-1 max-h-64 overflow-y-auto">
-          {outline.map((heading, idx) => (
-            <button
-              key={idx}
-              onClick={() => onNavigate(heading.line)}
-              className={`w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors truncate ${
-                heading.level === 1 ? 'font-bold text-gray-900' :
-                heading.level === 2 ? 'font-semibold text-gray-800 pl-4' :
-                heading.level === 3 ? 'text-gray-700 pl-6' :
-                'text-gray-500 pl-8'
-              }`}
-            >
-              {heading.text || '(empty heading)'}
-            </button>
-          ))}
-        </nav>
-      )}
-
-      <div className="pt-4 border-t border-gray-200">
-        <h4 className="font-medium text-sm text-gray-700 mb-3">Document Stats</h4>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="p-3 bg-gray-50 rounded-lg text-center">
-            <p className="text-xl font-bold text-[#1A403D]">{stats.words.toLocaleString()}</p>
-            <p className="text-xs text-gray-500">Words</p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg text-center">
-            <p className="text-xl font-bold text-[#1A403D]">{stats.readingTime}</p>
-            <p className="text-xs text-gray-500">Min Read</p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg text-center">
-            <p className="text-xl font-bold text-[#1A403D]">{stats.paragraphs}</p>
-            <p className="text-xs text-gray-500">Paragraphs</p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg text-center">
-            <p className="text-xl font-bold text-[#1A403D]">{stats.headings}</p>
-            <p className="text-xs text-gray-500">Headings</p>
-          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded transition-colors">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>
@@ -428,377 +320,40 @@ const DocumentOutline: React.FC<{
 };
 
 // ============================================================================
-// SEO SCORE PANEL
+// TOOLBAR BUTTON
 // ============================================================================
 
-interface SEOAnalysis {
-  score: number;
-  issues: { type: 'error' | 'warning' | 'info'; message: string }[];
-  passed: string[];
-}
-
-const SEOScorePanel: React.FC<{
-  content: string;
-  title?: string;
-  metaDescription?: string;
-}> = ({ content, title = '', metaDescription = '' }) => {
-  const analysis = useMemo((): SEOAnalysis => {
-    let score = 0;
-    const issues: { type: 'error' | 'warning' | 'info'; message: string }[] = [];
-    const passed: string[] = [];
-
-    // Extract text content
-    const textContent = content.replace(/<[^>]*>/g, '');
-    const words = textContent.split(/\s+/).filter(w => w.length > 0);
-    const wordCount = words.length;
-
-    // Count headings
-    const h1Count = (content.match(/<h1|^# [^#]/gm) || []).length;
-    const h2Count = (content.match(/<h2|^## [^#]/gm) || []).length;
-    const h3Count = (content.match(/<h3|^### [^#]/gm) || []).length;
-
-    // Count images and check alt text
-    const imgMatches = content.match(/<img[^>]*>/g) || [];
-    const imagesWithoutAlt = imgMatches.filter(img => !img.includes('alt=') || img.includes('alt=""')).length;
-    const totalImages = imgMatches.length;
-
-    // Count links
-    const linkMatches = content.match(/<a[^>]*href[^>]*>/g) || [];
-    const totalLinks = linkMatches.length;
-
-    // 1. Word count analysis (20 points max)
-    if (wordCount >= 1500) {
-      score += 20;
-      passed.push(`Excellent content length (${wordCount.toLocaleString()} words)`);
-    } else if (wordCount >= 1000) {
-      score += 15;
-      passed.push(`Good content length (${wordCount.toLocaleString()} words)`);
-    } else if (wordCount >= 500) {
-      score += 10;
-      issues.push({ type: 'warning', message: `Content is ${wordCount} words. Aim for 1000+ words for better SEO.` });
-    } else {
-      score += 5;
-      issues.push({ type: 'error', message: `Content is too short (${wordCount} words). Write at least 500 words.` });
-    }
-
-    // 2. Heading structure (20 points max)
-    if (h2Count >= 3) {
-      score += 10;
-      passed.push(`Good H2 heading structure (${h2Count} headings)`);
-    } else if (h2Count >= 1) {
-      score += 5;
-      issues.push({ type: 'warning', message: `Add more H2 headings for better structure (currently ${h2Count})` });
-    } else {
-      issues.push({ type: 'error', message: 'No H2 headings found. Add section headings for better SEO.' });
-    }
-
-    if (h3Count >= 2) {
-      score += 10;
-      passed.push(`Good H3 subheading structure (${h3Count} headings)`);
-    } else if (h3Count >= 1) {
-      score += 5;
-      issues.push({ type: 'info', message: 'Consider adding more H3 subheadings for detailed structure' });
-    }
-
-    // 3. Images (15 points max)
-    if (totalImages > 0) {
-      if (imagesWithoutAlt === 0) {
-        score += 15;
-        passed.push(`All ${totalImages} images have alt text`);
-      } else {
-        score += 5;
-        issues.push({ type: 'warning', message: `${imagesWithoutAlt} of ${totalImages} images missing alt text` });
-      }
-    } else {
-      issues.push({ type: 'info', message: 'Consider adding images to improve engagement' });
-    }
-
-    // 4. Links (10 points max)
-    if (totalLinks >= 3) {
-      score += 10;
-      passed.push(`Good link diversity (${totalLinks} links)`);
-    } else if (totalLinks >= 1) {
-      score += 5;
-      issues.push({ type: 'info', message: 'Consider adding more internal/external links' });
-    } else {
-      issues.push({ type: 'info', message: 'Add links to improve SEO and user navigation' });
-    }
-
-    // 5. Paragraph structure (10 points max)
-    const paragraphs = content.split(/\n\n+|<\/p>/g).filter(p => p.trim().length > 0);
-    if (paragraphs.length >= 5) {
-      score += 10;
-      passed.push('Good paragraph structure');
-    } else {
-      score += 5;
-      issues.push({ type: 'info', message: 'Break content into more paragraphs for readability' });
-    }
-
-    // 6. Lists (5 points max)
-    const hasList = content.includes('<ul') || content.includes('<ol') || content.includes('- ') || content.match(/^\d+\./m);
-    if (hasList) {
-      score += 5;
-      passed.push('Contains lists for better readability');
-    } else {
-      issues.push({ type: 'info', message: 'Consider adding bullet or numbered lists' });
-    }
-
-    // 7. Blockquotes/highlights (5 points max)
-    const hasQuotes = content.includes('<blockquote') || content.includes('> ');
-    if (hasQuotes) {
-      score += 5;
-      passed.push('Uses blockquotes for emphasis');
-    }
-
-    // 8. Reading level (5 points max) - Simple check for sentence length
-    const sentences = textContent.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    const avgWordsPerSentence = sentences.length > 0 ? wordCount / sentences.length : 0;
-    if (avgWordsPerSentence <= 20) {
-      score += 5;
-      passed.push('Good readability (concise sentences)');
-    } else {
-      issues.push({ type: 'warning', message: 'Some sentences may be too long. Aim for 15-20 words per sentence.' });
-    }
-
-    return { score: Math.min(score, 100), issues, passed };
-  }, [content, title, metaDescription]);
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const getScoreBg = (score: number) => {
-    if (score >= 80) return 'bg-green-500';
-    if (score >= 60) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
-
-  return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Target className="w-4 h-4" />
-          SEO Score
-        </h3>
-        <span className={`text-3xl font-bold ${getScoreColor(analysis.score)}`}>
-          {analysis.score}
-        </span>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-        <div
-          className={`h-full transition-all duration-500 ${getScoreBg(analysis.score)}`}
-          style={{ width: `${analysis.score}%` }}
-        />
-      </div>
-
-      <p className="text-xs text-gray-500">
-        {analysis.score >= 80 ? 'Excellent! Your content is well-optimized.' :
-         analysis.score >= 60 ? 'Good progress. Address the issues below to improve.' :
-         'Needs improvement. Follow the suggestions below.'}
-      </p>
-
-      {/* Issues */}
-      {analysis.issues.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm text-gray-700 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-yellow-500" />
-            Improvements ({analysis.issues.length})
-          </h4>
-          <div className="space-y-1.5 max-h-48 overflow-y-auto">
-            {analysis.issues.map((issue, idx) => (
-              <div
-                key={idx}
-                className={`p-2.5 rounded-lg text-xs ${
-                  issue.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' :
-                  issue.type === 'warning' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
-                  'bg-blue-50 text-blue-700 border border-blue-200'
-                }`}
-              >
-                {issue.message}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Passed */}
-      {analysis.passed.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm text-gray-700 flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            Passed ({analysis.passed.length})
-          </h4>
-          <div className="space-y-1.5 max-h-32 overflow-y-auto">
-            {analysis.passed.map((item, idx) => (
-              <div
-                key={idx}
-                className="p-2.5 bg-green-50 text-green-700 rounded-lg text-xs border border-green-200"
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+const ToolbarButton: React.FC<{
+  icon: React.ReactNode;
+  onClick: () => void;
+  title: string;
+  active?: boolean;
+  disabled?: boolean;
+}> = ({ icon, onClick, title, active, disabled }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    title={title}
+    className={`p-2 rounded-md transition-all ${
+      active
+        ? 'bg-[#1A403D] text-white'
+        : disabled
+          ? 'text-gray-300 cursor-not-allowed'
+          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+    }`}
+  >
+    {icon}
+  </button>
+);
 
 // ============================================================================
-// SETTINGS PANEL
+// TOOLBAR DIVIDER
 // ============================================================================
 
-interface EditorSettings {
-  fontSize: 'small' | 'medium' | 'large';
-  lineHeight: 'compact' | 'normal' | 'relaxed';
-  showWordCount: boolean;
-  autoSave: boolean;
-  spellCheck: boolean;
-}
-
-const SettingsPanel: React.FC<{
-  settings: EditorSettings;
-  onSettingsChange: (settings: EditorSettings) => void;
-}> = ({ settings, onSettingsChange }) => {
-  const updateSetting = <K extends keyof EditorSettings>(key: K, value: EditorSettings[K]) => {
-    onSettingsChange({ ...settings, [key]: value });
-  };
-
-  return (
-    <div className="p-4 space-y-5">
-      <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-        <Settings className="w-4 h-4" />
-        Editor Settings
-      </h3>
-
-      {/* Font Size */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Font Size</label>
-        <div className="flex gap-2">
-          {(['small', 'medium', 'large'] as const).map((size) => (
-            <button
-              key={size}
-              onClick={() => updateSetting('fontSize', size)}
-              className={`flex-1 py-2 px-3 text-xs font-medium rounded-lg transition-all ${
-                settings.fontSize === size
-                  ? 'bg-[#1A403D] text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {size.charAt(0).toUpperCase() + size.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Line Height */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Line Spacing</label>
-        <div className="flex gap-2">
-          {(['compact', 'normal', 'relaxed'] as const).map((height) => (
-            <button
-              key={height}
-              onClick={() => updateSetting('lineHeight', height)}
-              className={`flex-1 py-2 px-3 text-xs font-medium rounded-lg transition-all ${
-                settings.lineHeight === height
-                  ? 'bg-[#1A403D] text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {height.charAt(0).toUpperCase() + height.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Toggle Options */}
-      <div className="space-y-3 pt-2">
-        <label className="flex items-center justify-between cursor-pointer">
-          <span className="text-sm text-gray-700">Show word count</span>
-          <button
-            onClick={() => updateSetting('showWordCount', !settings.showWordCount)}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              settings.showWordCount ? 'bg-[#1A403D]' : 'bg-gray-300'
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                settings.showWordCount ? 'translate-x-5' : ''
-              }`}
-            />
-          </button>
-        </label>
-
-        <label className="flex items-center justify-between cursor-pointer">
-          <span className="text-sm text-gray-700">Auto-save</span>
-          <button
-            onClick={() => updateSetting('autoSave', !settings.autoSave)}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              settings.autoSave ? 'bg-[#1A403D]' : 'bg-gray-300'
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                settings.autoSave ? 'translate-x-5' : ''
-              }`}
-            />
-          </button>
-        </label>
-
-        <label className="flex items-center justify-between cursor-pointer">
-          <span className="text-sm text-gray-700">Spell check</span>
-          <button
-            onClick={() => updateSetting('spellCheck', !settings.spellCheck)}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              settings.spellCheck ? 'bg-[#1A403D]' : 'bg-gray-300'
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                settings.spellCheck ? 'translate-x-5' : ''
-              }`}
-            />
-          </button>
-        </label>
-      </div>
-
-      {/* Keyboard Shortcuts Info */}
-      <div className="pt-4 border-t border-gray-200">
-        <h4 className="font-medium text-sm text-gray-700 mb-3">Keyboard Shortcuts</h4>
-        <div className="space-y-2 text-xs">
-          <div className="flex justify-between">
-            <span className="text-gray-500">Bold</span>
-            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Ctrl+B</kbd>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Italic</span>
-            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Ctrl+I</kbd>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Undo</span>
-            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Ctrl+Z</kbd>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Redo</span>
-            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Ctrl+Shift+Z</kbd>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Find</span>
-            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Ctrl+F</kbd>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Fullscreen</span>
-            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-gray-600">Esc to exit</kbd>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+const ToolbarDivider = () => (
+  <div className="w-px h-6 bg-gray-200 mx-1" />
+);
 
 // ============================================================================
 // MAIN COMPONENT
@@ -809,7 +364,7 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
   onChange,
   onImageUpload,
   onAutoSave,
-  placeholder = 'Start writing... Paste from Google Docs works perfectly!',
+  placeholder = 'Start writing your content...',
   autoSaveInterval = 30000
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
@@ -822,17 +377,7 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
   const [linkUrl, setLinkUrl] = useState('');
   const [showFindReplace, setShowFindReplace] = useState(false);
   const [showHeadingMenu, setShowHeadingMenu] = useState(false);
-  const [showSidePanel, setShowSidePanel] = useState(false);
-  const [activePanel, setActivePanel] = useState<PanelTab>('outline');
-
-  // Editor settings
-  const [editorSettings, setEditorSettings] = useState<EditorSettings>({
-    fontSize: 'medium',
-    lineHeight: 'normal',
-    showWordCount: true,
-    autoSave: true,
-    spellCheck: true
-  });
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   // Auto-save state
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -861,7 +406,6 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
   // Sync content when switching to edit mode
   useEffect(() => {
     if ((viewMode === 'edit' || viewMode === 'split') && editorRef.current) {
-      // Small delay to ensure DOM is ready
       setTimeout(() => {
         if (editorRef.current && content) {
           editorRef.current.innerHTML = content;
@@ -881,6 +425,16 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
       document.body.style.overflow = '';
     };
   }, [isFullscreen]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowHeadingMenu(false);
+      setShowMoreMenu(false);
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   // Auto-save effect
   useEffect(() => {
@@ -930,6 +484,7 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
       if (e.key === 'Escape') {
         setShowFindReplace(false);
         setShowHeadingMenu(false);
+        setShowMoreMenu(false);
         if (isFullscreen) setIsFullscreen(false);
       }
     };
@@ -982,7 +537,6 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
       onChange(newContent);
       setHasChanges(true);
 
-      // Debounce history
       const timer = setTimeout(() => {
         addToHistory(newContent);
       }, 500);
@@ -992,8 +546,8 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
 
   const handleImageInsert = (data: { url: string; alt: string; caption?: string }) => {
     const imgHtml = data.caption
-      ? `<figure style="margin: 24px 0;"><img src="${data.url}" alt="${data.alt}" style="max-width: 100%; height: auto; border-radius: 12px;" /><figcaption style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 8px; font-style: italic;">${data.caption}</figcaption></figure>`
-      : `<img src="${data.url}" alt="${data.alt}" style="max-width: 100%; height: auto; border-radius: 12px; margin: 24px 0;" />`;
+      ? `<figure class="my-6"><img src="${data.url}" alt="${data.alt}" class="w-full rounded-lg" /><figcaption class="text-center text-gray-500 text-sm mt-2 italic">${data.caption}</figcaption></figure>`
+      : `<img src="${data.url}" alt="${data.alt}" class="w-full rounded-lg my-6" />`;
 
     execCommand('insertHTML', imgHtml);
   };
@@ -1006,21 +560,13 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
     }
   };
 
-  const handleOutlineNavigate = (lineNumber: number) => {
-    // This is a simplified navigation - in a real implementation you'd
-    // need to map line numbers to DOM positions
-    editorRef.current?.focus();
-  };
-
   // Markdown to HTML for preview
   const markdownToHtml = useCallback((md: string): string => {
     if (!md) return '<p class="text-gray-400 italic">No content yet...</p>';
-
-    // If content already has HTML tags, return as-is
     if (md.includes('<')) return md;
 
     let html = md
-      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="max-w-full h-auto rounded-lg my-4" />')
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="w-full rounded-lg my-4" />')
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-[#1A403D] underline">$1</a>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
@@ -1036,368 +582,359 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
       } else if (line.startsWith('### ')) {
         processedLines.push(`<h3 class="text-xl font-semibold mt-8 mb-3">${line.slice(4)}</h3>`);
       } else if (line.startsWith('## ')) {
-        processedLines.push(`<h2 class="text-2xl font-bold mt-10 mb-4 pb-2 border-b border-gray-200">${line.slice(3)}</h2>`);
+        processedLines.push(`<h2 class="text-2xl font-bold mt-8 mb-4">${line.slice(3)}</h2>`);
       } else if (line.startsWith('# ')) {
-        processedLines.push(`<h1 class="text-3xl font-bold mt-10 mb-5">${line.slice(2)}</h1>`);
+        processedLines.push(`<h1 class="text-3xl font-bold mt-8 mb-5">${line.slice(2)}</h1>`);
       } else if (line.startsWith('> ')) {
-        processedLines.push(`<blockquote class="border-l-4 border-[#D1AA5A] bg-gray-50 py-4 px-6 my-4 italic text-gray-700 rounded-r-lg">${line.slice(2)}</blockquote>`);
+        processedLines.push(`<blockquote class="border-l-4 border-[#D1AA5A] bg-gray-50 py-3 px-5 my-4 italic text-gray-600 rounded-r">${line.slice(2)}</blockquote>`);
       } else if (line.startsWith('- ') || line.startsWith('* ')) {
-        processedLines.push(`<li class="ml-6 mb-2">${line.slice(2)}</li>`);
+        processedLines.push(`<li class="ml-6 mb-1">${line.slice(2)}</li>`);
       } else if (line.match(/^\d+\.\s/)) {
-        processedLines.push(`<li class="ml-6 mb-2 list-decimal">${line.replace(/^\d+\.\s/, '')}</li>`);
+        processedLines.push(`<li class="ml-6 mb-1 list-decimal">${line.replace(/^\d+\.\s/, '')}</li>`);
       } else if (line.startsWith('---')) {
         processedLines.push('<hr class="my-8 border-gray-200" />');
       } else if (line.trim()) {
-        processedLines.push(`<p class="mb-4 leading-relaxed text-gray-700">${line}</p>`);
+        processedLines.push(`<p class="mb-4 leading-relaxed">${line}</p>`);
       }
     });
 
     return processedLines.join('') || '<p class="text-gray-400 italic">No content yet...</p>';
   }, []);
 
+  const editorHeight = isFullscreen ? 'calc(100vh - 140px)' : '600px';
+
   return (
     <>
       {/* Fullscreen backdrop */}
       {isFullscreen && (
-        <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsFullscreen(false)} />
+        <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setIsFullscreen(false)} />
       )}
-      <div className={`bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-gray-200 flex flex-col ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
-      {/* Primary Toolbar */}
-      <div className="bg-gray-50 border-b border-gray-200">
-        <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100">
-          {/* Left: View Mode Toggle */}
-          <div className="flex items-center gap-1 p-1 bg-white rounded-lg shadow-sm border">
-            <button
-              onClick={() => setViewMode('edit')}
-              className={`px-3 py-1.5 text-sm rounded-md transition-all flex items-center gap-1.5 ${
-                viewMode === 'edit' ? 'bg-[#1A403D] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <Edit3 className="w-4 h-4" />
-              Edit
-            </button>
-            <button
-              onClick={() => setViewMode('split')}
-              className={`px-3 py-1.5 text-sm rounded-md transition-all flex items-center gap-1.5 ${
-                viewMode === 'split' ? 'bg-[#1A403D] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <SplitSquareHorizontal className="w-4 h-4" />
-              Split
-            </button>
-            <button
-              onClick={() => setViewMode('preview')}
-              className={`px-3 py-1.5 text-sm rounded-md transition-all flex items-center gap-1.5 ${
-                viewMode === 'preview' ? 'bg-[#1A403D] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <Eye className="w-4 h-4" />
-              Preview
-            </button>
-          </div>
 
-          {/* Center: Stats */}
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span className="font-medium">{wordCount.toLocaleString()} words</span>
-            <span>•</span>
-            <span>{readTime} min read</span>
-          </div>
+      <div className={`bg-white rounded-xl overflow-hidden border border-gray-200 flex flex-col ${
+        isFullscreen ? 'fixed inset-4 z-50 shadow-2xl' : 'shadow-sm'
+      }`}>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2">
-            {/* Auto-save Status */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm">
-              {isSaving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                  <span className="text-blue-600">Saving...</span>
-                </>
-              ) : hasChanges ? (
-                <>
-                  <span className="w-2 h-2 bg-yellow-500 rounded-full" />
-                  <span className="text-yellow-600">Unsaved</span>
-                </>
-              ) : lastSaved ? (
-                <>
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span className="text-green-600">Saved</span>
-                </>
-              ) : null}
-            </div>
-
-            <button
-              onClick={() => setShowSidePanel(!showSidePanel)}
-              className={`p-2 rounded-lg transition-colors ${showSidePanel ? 'bg-[#1A403D] text-white' : 'hover:bg-gray-200'}`}
-              title="Toggle side panel"
-            >
-              {showSidePanel ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
-            </button>
-
-            <button
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-              title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen'}
-            >
-              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Formatting Toolbar - Only show in edit or split mode */}
-        {viewMode !== 'preview' && (
-          <div className="flex items-center gap-1 px-4 py-2 overflow-x-auto">
-            {/* Undo/Redo */}
-            <div className="flex items-center gap-1 pr-2 border-r border-gray-200">
-              <button
-                onClick={handleUndo}
-                disabled={historyIndex <= 0}
-                className="p-2 hover:bg-gray-200 rounded-lg disabled:opacity-30 transition-colors"
-                title="Undo (Ctrl+Z)"
-              >
-                <Undo className="w-4 h-4" />
-              </button>
-              <button
-                onClick={handleRedo}
-                disabled={historyIndex >= history.length - 1}
-                className="p-2 hover:bg-gray-200 rounded-lg disabled:opacity-30 transition-colors"
-                title="Redo (Ctrl+Shift+Z)"
-              >
-                <Redo className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Text Formatting */}
-            <div className="flex items-center gap-1 px-2 border-r border-gray-200">
-              <button onClick={() => execCommand('bold')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Bold (Ctrl+B)">
-                <Bold className="w-4 h-4" />
-              </button>
-              <button onClick={() => execCommand('italic')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Italic (Ctrl+I)">
-                <Italic className="w-4 h-4" />
-              </button>
-              <button onClick={() => execCommand('underline')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Underline">
-                <UnderlineIcon className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Headings Dropdown */}
-            <div className="relative px-2 border-r border-gray-200">
-              <button
-                onClick={() => setShowHeadingMenu(!showHeadingMenu)}
-                className="flex items-center gap-1 px-3 py-2 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                <Type className="w-4 h-4" />
-                <span className="text-sm">Heading</span>
-                <ChevronDown className="w-3 h-3" />
-              </button>
-              {showHeadingMenu && (
-                <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50">
-                  <button onClick={() => { execCommand('formatBlock', 'h1'); setShowHeadingMenu(false); }} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
-                    <Heading1 className="w-4 h-4" />
-                    <span className="text-xl font-bold">Heading 1</span>
-                  </button>
-                  <button onClick={() => { execCommand('formatBlock', 'h2'); setShowHeadingMenu(false); }} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
-                    <Heading2 className="w-4 h-4" />
-                    <span className="text-lg font-bold">Heading 2</span>
-                  </button>
-                  <button onClick={() => { execCommand('formatBlock', 'h3'); setShowHeadingMenu(false); }} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
-                    <Heading3 className="w-4 h-4" />
-                    <span className="text-base font-bold">Heading 3</span>
-                  </button>
-                  <button onClick={() => { execCommand('formatBlock', 'h4'); setShowHeadingMenu(false); }} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
-                    <Heading4 className="w-4 h-4" />
-                    <span className="text-sm font-bold">Heading 4</span>
-                  </button>
-                  <div className="border-t border-gray-100" />
-                  <button onClick={() => { execCommand('formatBlock', 'p'); setShowHeadingMenu(false); }} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2">
-                    <Type className="w-4 h-4" />
-                    <span>Paragraph</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Lists */}
-            <div className="flex items-center gap-1 px-2 border-r border-gray-200">
-              <button onClick={() => execCommand('insertUnorderedList')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Bullet List">
-                <List className="w-4 h-4" />
-              </button>
-              <button onClick={() => execCommand('insertOrderedList')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Numbered List">
-                <ListOrdered className="w-4 h-4" />
-              </button>
-              <button onClick={() => execCommand('formatBlock', 'blockquote')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Quote">
-                <Quote className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Alignment */}
-            <div className="flex items-center gap-1 px-2 border-r border-gray-200">
-              <button onClick={() => execCommand('justifyLeft')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Align Left">
-                <AlignLeft className="w-4 h-4" />
-              </button>
-              <button onClick={() => execCommand('justifyCenter')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Center">
-                <AlignCenter className="w-4 h-4" />
-              </button>
-              <button onClick={() => execCommand('justifyRight')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Align Right">
-                <AlignRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Insert */}
-            <div className="flex items-center gap-1 px-2 border-r border-gray-200">
-              <button onClick={() => setShowLinkDialog(true)} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Insert Link">
-                <Link2 className="w-4 h-4" />
-              </button>
-              <button onClick={() => setShowImageDialog(true)} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Insert Image">
-                <ImageIcon className="w-4 h-4" />
-              </button>
-              <button onClick={() => execCommand('insertHorizontalRule')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors" title="Horizontal Line">
-                <Minus className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Find/Replace */}
-            <button
-              onClick={() => setShowFindReplace(!showFindReplace)}
-              className={`p-2 hover:bg-gray-200 rounded-lg transition-colors ${showFindReplace ? 'bg-gray-200' : ''}`}
-              title="Find & Replace (Ctrl+F)"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {/* Find/Replace Bar */}
-        <FindReplaceBar
-          isOpen={showFindReplace}
-          onClose={() => setShowFindReplace(false)}
-          content={content}
-          onReplace={(newContent) => {
-            if (editorRef.current) {
-              editorRef.current.innerHTML = newContent;
-            }
-            onChange(newContent);
-            addToHistory(newContent);
-          }}
-        />
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex" style={{ height: isFullscreen ? 'calc(100vh - 180px)' : '500px' }}>
-        {/* Editor Panel */}
-        {(viewMode === 'edit' || viewMode === 'split') && (
-          <div className={`flex-1 overflow-auto ${viewMode === 'split' ? 'border-r border-gray-200' : ''}`}>
-            <div
-              ref={editorRef}
-              contentEditable
-              onInput={handleContentChange}
-              spellCheck={editorSettings.spellCheck}
-              className="p-8 focus:outline-none prose prose-lg max-w-none h-full"
-              style={{
-                lineHeight: editorSettings.lineHeight === 'compact' ? 1.5 : editorSettings.lineHeight === 'relaxed' ? 2.0 : 1.8,
-                fontSize: editorSettings.fontSize === 'small' ? '14px' : editorSettings.fontSize === 'large' ? '18px' : '16px'
-              }}
-              data-placeholder={placeholder}
-            />
-          </div>
-        )}
-
-        {/* Preview Panel */}
-        {(viewMode === 'preview' || viewMode === 'split') && (
-          <div className={`flex-1 overflow-auto bg-white ${viewMode === 'split' ? '' : ''}`}>
-            <div className="max-w-3xl mx-auto p-8">
-              <div
-                className="prose prose-lg max-w-none"
-                dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Side Panel with Tabs */}
-        {showSidePanel && (
-          <div className="w-80 border-l border-gray-200 bg-white flex flex-col">
-            {/* Panel Tabs */}
-            <div className="flex border-b border-gray-200 bg-gray-50">
+        {/* Compact Toolbar */}
+        <div className="border-b border-gray-200 bg-gray-50/80">
+          <div className="flex items-center justify-between px-3 py-2">
+            {/* Left: View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-white rounded-lg p-0.5 border border-gray-200 shadow-sm">
               {[
-                { id: 'outline' as PanelTab, label: 'Outline', icon: FileText },
-                { id: 'seo' as PanelTab, label: 'SEO', icon: Target },
-                { id: 'settings' as PanelTab, label: 'Settings', icon: Settings }
-              ].map((tab) => (
+                { mode: 'edit' as ViewMode, icon: Edit3, label: 'Edit' },
+                { mode: 'split' as ViewMode, icon: Columns, label: 'Split' },
+                { mode: 'preview' as ViewMode, icon: Eye, label: 'Preview' },
+              ].map(({ mode, icon: Icon, label }) => (
                 <button
-                  key={tab.id}
-                  onClick={() => setActivePanel(tab.id)}
-                  className={`flex-1 px-3 py-3 text-xs font-medium flex items-center justify-center gap-1.5 border-b-2 transition-colors ${
-                    activePanel === tab.id
-                      ? 'border-[#1A403D] text-[#1A403D] bg-white'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  key={mode}
+                  onClick={() => setViewMode(mode)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
+                    viewMode === mode
+                      ? 'bg-[#1A403D] text-white shadow-sm'
+                      : 'text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  <tab.icon className="w-4 h-4" />
-                  {tab.label}
+                  <Icon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{label}</span>
                 </button>
               ))}
             </div>
 
-            {/* Panel Content */}
-            <div className="flex-1 overflow-y-auto">
-              {activePanel === 'outline' && (
-                <DocumentOutline content={content} onNavigate={handleOutlineNavigate} />
-              )}
-              {activePanel === 'seo' && (
-                <SEOScorePanel content={content} />
-              )}
-              {activePanel === 'settings' && (
-                <SettingsPanel
-                  settings={editorSettings}
-                  onSettingsChange={setEditorSettings}
+            {/* Center: Stats & Save Status */}
+            <div className="hidden md:flex items-center gap-3 text-xs text-gray-500">
+              <span className="font-medium">{wordCount.toLocaleString()} words</span>
+              <span className="text-gray-300">•</span>
+              <span>{readTime} min read</span>
+              {isSaving ? (
+                <span className="flex items-center gap-1 text-blue-600">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Saving...
+                </span>
+              ) : hasChanges ? (
+                <span className="text-yellow-600">• Unsaved</span>
+              ) : lastSaved ? (
+                <span className="flex items-center gap-1 text-green-600">
+                  <CheckCircle className="w-3 h-3" />
+                  Saved
+                </span>
+              ) : null}
+            </div>
+
+            {/* Right: Fullscreen */}
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+              title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen'}
+            >
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {/* Formatting Toolbar - Only show in edit or split mode */}
+          {viewMode !== 'preview' && (
+            <div className="flex items-center gap-0.5 px-3 py-1.5 border-t border-gray-100 overflow-x-auto">
+              {/* Undo/Redo */}
+              <ToolbarButton
+                icon={<Undo className="w-4 h-4" />}
+                onClick={handleUndo}
+                title="Undo (Ctrl+Z)"
+                disabled={historyIndex <= 0}
+              />
+              <ToolbarButton
+                icon={<Redo className="w-4 h-4" />}
+                onClick={handleRedo}
+                title="Redo (Ctrl+Shift+Z)"
+                disabled={historyIndex >= history.length - 1}
+              />
+
+              <ToolbarDivider />
+
+              {/* Headings Dropdown */}
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => setShowHeadingMenu(!showHeadingMenu)}
+                  className="flex items-center gap-1 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                >
+                  <Type className="w-4 h-4" />
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+                {showHeadingMenu && (
+                  <div className="absolute top-full left-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1">
+                    {[
+                      { tag: 'h1', label: 'Heading 1', icon: Heading1, size: 'text-xl font-bold' },
+                      { tag: 'h2', label: 'Heading 2', icon: Heading2, size: 'text-lg font-bold' },
+                      { tag: 'h3', label: 'Heading 3', icon: Heading3, size: 'text-base font-semibold' },
+                      { tag: 'p', label: 'Paragraph', icon: Type, size: 'text-sm' },
+                    ].map(({ tag, label, icon: Icon, size }) => (
+                      <button
+                        key={tag}
+                        onClick={() => { execCommand('formatBlock', tag); setShowHeadingMenu(false); }}
+                        className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                      >
+                        <Icon className="w-4 h-4 text-gray-400" />
+                        <span className={size}>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <ToolbarDivider />
+
+              {/* Text Formatting */}
+              <ToolbarButton
+                icon={<Bold className="w-4 h-4" />}
+                onClick={() => execCommand('bold')}
+                title="Bold (Ctrl+B)"
+              />
+              <ToolbarButton
+                icon={<Italic className="w-4 h-4" />}
+                onClick={() => execCommand('italic')}
+                title="Italic (Ctrl+I)"
+              />
+              <ToolbarButton
+                icon={<UnderlineIcon className="w-4 h-4" />}
+                onClick={() => execCommand('underline')}
+                title="Underline"
+              />
+
+              <ToolbarDivider />
+
+              {/* Lists */}
+              <ToolbarButton
+                icon={<List className="w-4 h-4" />}
+                onClick={() => execCommand('insertUnorderedList')}
+                title="Bullet List"
+              />
+              <ToolbarButton
+                icon={<ListOrdered className="w-4 h-4" />}
+                onClick={() => execCommand('insertOrderedList')}
+                title="Numbered List"
+              />
+              <ToolbarButton
+                icon={<Quote className="w-4 h-4" />}
+                onClick={() => execCommand('formatBlock', 'blockquote')}
+                title="Quote"
+              />
+
+              <ToolbarDivider />
+
+              {/* Alignment */}
+              <ToolbarButton
+                icon={<AlignLeft className="w-4 h-4" />}
+                onClick={() => execCommand('justifyLeft')}
+                title="Align Left"
+              />
+              <ToolbarButton
+                icon={<AlignCenter className="w-4 h-4" />}
+                onClick={() => execCommand('justifyCenter')}
+                title="Center"
+              />
+              <ToolbarButton
+                icon={<AlignRight className="w-4 h-4" />}
+                onClick={() => execCommand('justifyRight')}
+                title="Align Right"
+              />
+
+              <ToolbarDivider />
+
+              {/* Insert */}
+              <ToolbarButton
+                icon={<Link2 className="w-4 h-4" />}
+                onClick={() => setShowLinkDialog(true)}
+                title="Insert Link"
+              />
+              <ToolbarButton
+                icon={<ImageIcon className="w-4 h-4" />}
+                onClick={() => setShowImageDialog(true)}
+                title="Insert Image"
+              />
+
+              {/* More Options */}
+              <div className="relative ml-auto" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => setShowMoreMenu(!showMoreMenu)}
+                  className="p-2 text-gray-500 hover:bg-gray-100 rounded-md transition-colors"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+                {showMoreMenu && (
+                  <div className="absolute top-full right-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1">
+                    <button
+                      onClick={() => { setShowFindReplace(!showFindReplace); setShowMoreMenu(false); }}
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <Search className="w-4 h-4 text-gray-400" />
+                      Find & Replace
+                    </button>
+                    <button
+                      onClick={() => { execCommand('insertHorizontalRule'); setShowMoreMenu(false); }}
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <Minus className="w-4 h-4 text-gray-400" />
+                      Horizontal Line
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Find/Replace Bar */}
+          <FindReplaceBar
+            isOpen={showFindReplace}
+            onClose={() => setShowFindReplace(false)}
+            content={content}
+            onReplace={(newContent) => {
+              if (editorRef.current) {
+                editorRef.current.innerHTML = newContent;
+              }
+              onChange(newContent);
+              addToHistory(newContent);
+            }}
+          />
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex flex-1 overflow-hidden" style={{ height: editorHeight }}>
+          {/* Editor Panel */}
+          {(viewMode === 'edit' || viewMode === 'split') && (
+            <div className={`flex-1 overflow-auto ${viewMode === 'split' ? 'border-r border-gray-200' : ''}`}>
+              <div
+                ref={editorRef}
+                contentEditable
+                onInput={handleContentChange}
+                spellCheck={true}
+                className="p-6 md:p-8 focus:outline-none prose prose-lg max-w-none min-h-full"
+                style={{ lineHeight: 1.8 }}
+                data-placeholder={placeholder}
+              />
+            </div>
+          )}
+
+          {/* Preview Panel */}
+          {(viewMode === 'preview' || viewMode === 'split') && (
+            <div className={`flex-1 overflow-auto bg-gray-50/50 ${viewMode === 'split' ? '' : ''}`}>
+              <div className="max-w-3xl mx-auto p-6 md:p-8">
+                <div
+                  className="prose prose-lg max-w-none"
+                  dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
                 />
-              )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Stats Bar */}
+        <div className="md:hidden flex items-center justify-between px-3 py-2 border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
+          <span>{wordCount} words • {readTime} min</span>
+          {isSaving ? (
+            <span className="text-blue-600">Saving...</span>
+          ) : hasChanges ? (
+            <span className="text-yellow-600">Unsaved</span>
+          ) : lastSaved ? (
+            <span className="text-green-600">Saved</span>
+          ) : null}
+        </div>
+
+        {/* Link Dialog */}
+        {showLinkDialog && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50">
+            <div className="bg-white rounded-xl p-5 max-w-md w-full shadow-2xl">
+              <h3 className="text-lg font-bold mb-4">Insert Link</h3>
+              <input
+                type="url"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
+                placeholder="https://example.com"
+                onKeyPress={(e) => e.key === 'Enter' && insertLink()}
+                autoFocus
+              />
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => setShowLinkDialog(false)}
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={insertLink}
+                  className="px-4 py-2 bg-[#1A403D] text-white rounded-lg hover:bg-[#152f2d] transition-colors"
+                >
+                  Insert
+                </button>
+              </div>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Link Dialog */}
-      {showLinkDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
-            <h3 className="text-lg font-bold mb-4">Insert Link</h3>
-            <input
-              type="url"
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              className="w-full px-4 py-3 border-2 rounded-xl mb-4 focus:border-[#1A403D] focus:ring-2 focus:ring-[#1A403D]/20"
-              placeholder="https://example.com"
-              onKeyPress={(e) => e.key === 'Enter' && insertLink()}
-              autoFocus
-            />
-            <div className="flex gap-3 justify-end">
-              <button onClick={() => setShowLinkDialog(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl">
-                Cancel
-              </button>
-              <button onClick={insertLink} className="px-4 py-2 bg-[#1A403D] text-white rounded-xl hover:bg-[#152f2d]">
-                Insert
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        {/* Image Dialog */}
+        <ImageDialog
+          isOpen={showImageDialog}
+          onClose={() => setShowImageDialog(false)}
+          onInsert={handleImageInsert}
+          onUpload={onImageUpload}
+        />
 
-      {/* Image Dialog */}
-      <ImageDialog
-        isOpen={showImageDialog}
-        onClose={() => setShowImageDialog(false)}
-        onInsert={handleImageInsert}
-        onUpload={onImageUpload}
-      />
-
-      <style jsx>{`
-        [contenteditable][data-placeholder]:empty:before {
-          content: attr(data-placeholder);
-          color: #9ca3af;
-          pointer-events: none;
-        }
-      `}</style>
+        <style jsx>{`
+          [contenteditable][data-placeholder]:empty:before {
+            content: attr(data-placeholder);
+            color: #9ca3af;
+            pointer-events: none;
+          }
+          [contenteditable] img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+          }
+          [contenteditable] blockquote {
+            border-left: 4px solid #D1AA5A;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+            color: #6b7280;
+          }
+        `}</style>
       </div>
     </>
   );
