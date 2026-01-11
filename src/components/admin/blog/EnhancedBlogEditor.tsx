@@ -601,7 +601,9 @@ export const EnhancedBlogEditor: React.FC<EnhancedBlogEditorProps> = ({
     return processedLines.join('') || '<p class="text-gray-400 italic">No content yet...</p>';
   }, []);
 
-  const editorHeight = isFullscreen ? 'calc(100vh - 140px)' : '600px';
+  // Dynamic height: full viewport minus header, title card, images card, and bottom bar
+  // Min height of 400px to ensure usability on small screens
+  const editorHeight = isFullscreen ? 'calc(100vh - 140px)' : 'max(400px, calc(100vh - 480px))';
 
   return (
     <>
