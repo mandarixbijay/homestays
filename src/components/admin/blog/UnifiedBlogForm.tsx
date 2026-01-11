@@ -28,7 +28,7 @@ import { optimizeImage } from '@/lib/utils/imageOptimization';
 import SEOScoreCard from './SEOScoreCard';
 import SmartSlugInput from './SmartSlugInput';
 import OptimizedImageUpload from './OptimizedImageUpload';
-import SimpleRichTextEditor from './SimpleRichTextEditor';
+import EnhancedBlogEditor from './EnhancedBlogEditor';
 import ContentImageManager from './ContentImageManager';
 
 // ============================================================================
@@ -1613,11 +1613,12 @@ const loadData = async () => {
                                             </span>
                                         </div>
                                     </div>
-                                    <SimpleRichTextEditor
+                                    <EnhancedBlogEditor
                                         content={formData.content}
                                         onChange={(content) => handleChange('content', content)}
                                         onImageUpload={handleImageUpload}
                                         placeholder="Start writing your blog content here... Paste from Google Docs works perfectly!"
+                                        autoSaveInterval={30000}
                                     />
                                     {errors.content && (
                                         <p className="mt-3 text-sm text-red-600 flex items-center gap-2 bg-red-50 p-3 rounded-lg">
