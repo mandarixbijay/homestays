@@ -10,7 +10,7 @@ import {
     Folder, Tag as TagIcon, Sparkles, Link2, Code, AlignLeft, AlignCenter, AlignRight,
     Maximize2, Minimize2, Info, TrendingUp, BarChart3, Zap, FileText, Settings,
     ExternalLink, Copy, CheckCircle2, XCircle, Layers, Palette, Loader2,
-    PanelRightClose, PanelRight, ChevronRight
+    PanelRightClose, PanelRight, ChevronRight, ChevronUp, ChevronDown, AlertTriangle, Target
 } from 'lucide-react';
 
 import {
@@ -1058,6 +1058,7 @@ export default function UnifiedBlogForm({ blogId, initialData }: UnifiedBlogForm
     const [autoSaveStatus, setAutoSaveStatus] = useState<'saving' | 'saved' | 'error' | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
+    const [seoExpanded, setSeoExpanded] = useState(false);
     const imageFilesRef = useRef<File[]>([]);
     const autoSaveTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -1896,59 +1897,145 @@ const loadData = async () => {
                         )}
 
                         {/* Floating Bottom Bar - SEO Score & Stats */}
-                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-30">
+                        <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-30 transition-all duration-300 ${seoExpanded ? 'pb-0' : ''}`}>
+                            {/* Expanded SEO Issues Panel */}
+                            {seoExpanded && seoAnalysis.issues.length > 0 && (
+                                <div className="border-b border-gray-100 bg-gray-50/80">
+                                    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            {/* Errors */}
+                                            {seoAnalysis.issues.filter(i => i.type === 'error').length > 0 && (
+                                                <div className="space-y-2">
+                                                    <h4 className="text-xs font-semibold text-red-700 flex items-center gap-1.5">
+                                                        <XCircle className="h-3.5 w-3.5" />
+                                                        Issues to Fix
+                                                    </h4>
+                                                    <div className="space-y-1.5">
+                                                        {seoAnalysis.issues.filter(i => i.type === 'error').map((issue, idx) => (
+                                                            <div key={idx} className="flex items-start gap-2 text-xs bg-red-50 text-red-700 px-2.5 py-1.5 rounded-lg border border-red-100">
+                                                                <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+                                                                <span>{issue.message}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {/* Warnings */}
+                                            {seoAnalysis.issues.filter(i => i.type === 'warning').length > 0 && (
+                                                <div className="space-y-2">
+                                                    <h4 className="text-xs font-semibold text-yellow-700 flex items-center gap-1.5">
+                                                        <AlertTriangle className="h-3.5 w-3.5" />
+                                                        Suggestions
+                                                    </h4>
+                                                    <div className="space-y-1.5">
+                                                        {seoAnalysis.issues.filter(i => i.type === 'warning').map((issue, idx) => (
+                                                            <div key={idx} className="flex items-start gap-2 text-xs bg-yellow-50 text-yellow-700 px-2.5 py-1.5 rounded-lg border border-yellow-100">
+                                                                <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+                                                                <span>{issue.message}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {/* All good message */}
+                                        {seoAnalysis.issues.length === 0 && (
+                                            <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 px-3 py-2 rounded-lg">
+                                                <CheckCircle2 className="h-4 w-4" />
+                                                <span className="font-medium">Great job! Your content is well-optimized for SEO.</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Main Bottom Bar */}
                             <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2">
                                 <div className="flex items-center justify-between">
                                     {/* Left: Stats */}
-                                    <div className="flex items-center gap-4 text-xs text-gray-600">
-                                        <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center gap-3 sm:gap-4 text-xs text-gray-600">
+                                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-md">
                                             <FileText className="h-3.5 w-3.5 text-gray-400" />
-                                            <span className="font-medium">{wordCount.toLocaleString()}</span>
-                                            <span className="text-gray-400">words</span>
+                                            <span className="font-semibold text-gray-700">{wordCount.toLocaleString()}</span>
+                                            <span className="text-gray-400 hidden sm:inline">words</span>
                                         </div>
-                                        <div className="hidden sm:flex items-center gap-1.5">
+                                        <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-md">
                                             <Clock className="h-3.5 w-3.5 text-gray-400" />
-                                            <span className="font-medium">{readTime}</span>
-                                            <span className="text-gray-400">min read</span>
+                                            <span className="font-semibold text-gray-700">{readTime}</span>
+                                            <span className="text-gray-400">min</span>
                                         </div>
-                                        <div className="hidden md:flex items-center gap-1.5">
+                                        <div className="hidden md:flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-md">
                                             <ImageIcon className="h-3.5 w-3.5 text-gray-400" />
-                                            <span className="font-medium">{formData.images.length}</span>
+                                            <span className="font-semibold text-gray-700">{formData.images.length}</span>
                                             <span className="text-gray-400">images</span>
                                         </div>
                                     </div>
 
-                                    {/* Center: SEO Score */}
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${getScoreColor(seoAnalysis.score).light}`}>
-                                                <span className={`text-sm font-bold ${getScoreColor(seoAnalysis.score).text}`}>
-                                                    {seoAnalysis.score}
-                                                </span>
-                                            </div>
-                                            <div className="hidden sm:block">
-                                                <p className="text-xs font-semibold text-gray-900">SEO Score</p>
-                                                <p className={`text-[10px] ${getScoreColor(seoAnalysis.score).text}`}>
-                                                    {seoAnalysis.score >= 80 ? 'Good' : seoAnalysis.score >= 60 ? 'Needs Work' : 'Poor'}
-                                                </p>
-                                            </div>
+                                    {/* Center: SEO Score - Clickable */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setSeoExpanded(!seoExpanded)}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all hover:bg-gray-50 ${seoExpanded ? 'bg-gray-100' : ''}`}
+                                    >
+                                        {/* Score Circle */}
+                                        <div className={`relative flex items-center justify-center w-9 h-9 rounded-full ${getScoreColor(seoAnalysis.score).light}`}>
+                                            <span className={`text-sm font-bold ${getScoreColor(seoAnalysis.score).text}`}>
+                                                {seoAnalysis.score}
+                                            </span>
+                                            {/* Progress ring */}
+                                            <svg className="absolute inset-0 w-9 h-9 -rotate-90" viewBox="0 0 36 36">
+                                                <circle
+                                                    cx="18" cy="18" r="16"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    className="text-gray-200"
+                                                />
+                                                <circle
+                                                    cx="18" cy="18" r="16"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeDasharray={`${seoAnalysis.score} 100`}
+                                                    strokeLinecap="round"
+                                                    className={getScoreColor(seoAnalysis.score).text}
+                                                />
+                                            </svg>
                                         </div>
-                                        {/* SEO Issues Quick View */}
-                                        {seoAnalysis.issues.length > 0 && (
-                                            <div className="hidden lg:flex items-center gap-2 text-xs">
+
+                                        {/* Score Label & Issues */}
+                                        <div className="hidden sm:flex flex-col items-start">
+                                            <span className="text-xs font-semibold text-gray-900">SEO Score</span>
+                                            <div className="flex items-center gap-1.5">
                                                 {seoAnalysis.issues.filter(i => i.type === 'error').length > 0 && (
-                                                    <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-medium">
+                                                    <span className="text-[10px] px-1.5 py-0.5 bg-red-100 text-red-700 rounded font-medium">
                                                         {seoAnalysis.issues.filter(i => i.type === 'error').length} errors
                                                     </span>
                                                 )}
                                                 {seoAnalysis.issues.filter(i => i.type === 'warning').length > 0 && (
-                                                    <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full font-medium">
+                                                    <span className="text-[10px] px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded font-medium">
                                                         {seoAnalysis.issues.filter(i => i.type === 'warning').length} warnings
                                                     </span>
                                                 )}
+                                                {seoAnalysis.issues.length === 0 && (
+                                                    <span className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-700 rounded font-medium flex items-center gap-0.5">
+                                                        <CheckCircle2 className="h-2.5 w-2.5" /> Optimized
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Expand/Collapse Icon */}
+                                        {seoAnalysis.issues.length > 0 && (
+                                            <div className="ml-1">
+                                                {seoExpanded ? (
+                                                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                                                ) : (
+                                                    <ChevronUp className="h-4 w-4 text-gray-400" />
+                                                )}
                                             </div>
                                         )}
-                                    </div>
+                                    </button>
 
                                     {/* Right: Auto-save Status */}
                                     <div className="flex items-center gap-2">
