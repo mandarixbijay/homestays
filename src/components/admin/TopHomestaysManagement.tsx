@@ -72,10 +72,10 @@ const StatCard: React.FC<{
   };
 
   const textColorClasses = {
-    teal: 'text-[#224240]
-    green: 'text-green-600
-    yellow: 'text-yellow-600
-    purple: 'text-purple-600
+    teal: 'text-[#224240]',
+    green: 'text-green-600',
+    yellow: 'text-yellow-600',
+    purple: 'text-purple-600'
   };
 
   const iconBgClasses = {
@@ -561,13 +561,13 @@ export default function TopHomestaysManagement() {
         <div className="mb-6">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-2">
             <div className="flex space-x-2">
-              <button onClick={() => setActiveTab('overview')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'overview' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100
+              <button onClick={() => setActiveTab('overview')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'overview' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center justify-center space-x-2">
                   <Star className="h-4 w-4" />
                   <span>Overview</span>
                 </div>
               </button>
-              <button onClick={() => setActiveTab('analytics')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'analytics' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100
+              <button onClick={() => setActiveTab('analytics')} className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'analytics' ? 'bg-gradient-to-r from-[#224240] to-[#2a5350] text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center justify-center space-x-2">
                   <BarChart3 className="h-4 w-4" />
                   <span>Analytics</span>
@@ -640,13 +640,13 @@ export default function TopHomestaysManagement() {
                   <div key={item.id} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${idx === 0 ? 'bg-yellow-100 text-yellow-700 : idx === 1 ? 'bg-gray-100 text-gray-700 : idx === 2 ? 'bg-orange-100 text-orange-700 : 'bg-gray-50 text-gray-600
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${idx === 0 ? 'bg-yellow-100 text-yellow-700' : idx === 1 ? 'bg-gray-100 text-gray-700' : idx === 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-50 text-gray-600'}`}>
                           <span className="text-sm font-bold">#{item.priority}</span>
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">{item.homestay?.name || 'Unknown'}</p>
                           <div className="flex items-center space-x-2 text-xs text-gray-500">
-                            <span className={`px-2 py-0.5 rounded-full ${item.strategy === 'MANUAL' ? 'bg-purple-100 text-purple-700 : 'bg-blue-100 text-blue-700
+                            <span className={`px-2 py-0.5 rounded-full ${item.strategy === 'MANUAL' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
                               {item.strategy === 'MANUAL' ? 'Manual' : 'Insight Based'}
                             </span>
                             {item.category && (
@@ -672,25 +672,25 @@ export default function TopHomestaysManagement() {
         {activeTab === 'overview' && (
           <>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-4">
-              <button onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-700
-                <SlidersHorizontal className="h-4 w-4" /><span>Filters</span>
-                {hasFilters && <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">Active</span>}
-              </button>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
-                <Grid className="h-5 w-5" /></button>
-              <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
-                <List className="h-5 w-5" /></button>
-              <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
-                <Table className="h-5 w-5" /></button>
-              <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
-                <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
-            </div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4">
+            <button onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-700'}`}>
+              <SlidersHorizontal className="h-4 w-4" /><span>Filters</span>
+              {hasFilters && <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">Active</span>}
+            </button>
           </div>
+          <div className="flex items-center space-x-2">
+            <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
+              <Grid className="h-5 w-5" /></button>
+            <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
+              <List className="h-5 w-5" /></button>
+            <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600'}`}>
+              <Table className="h-5 w-5" /></button>
+            <button onClick={() => loadData()} disabled={loading} className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+              <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} /></button>
+          </div>
+        </div>
 
           <AnimatePresence>
             {showFilters && (
@@ -827,11 +827,7 @@ export default function TopHomestaysManagement() {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
-                            topHomestay.isActive
-                              ? 'bg-green-100 text-green-800
-                              : 'bg-gray-100 text-gray-800
-                          }`}>
+                          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${topHomestay.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                             {topHomestay.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </td>

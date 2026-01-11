@@ -5,10 +5,9 @@ import React, { useState, useEffect, useCallback, useMemo, Component, ReactNode 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
-  Home, Plus, Eye, Edit, Trash2, Check, X, MapPin, User, Star, Calendar,
-  Filter, Download, Upload, RefreshCw, TrendingUp, TrendingDown, Minus,
-  Search, Grid, List, MoreVertical, ChevronRight, CheckSquare, Square,
-  Settings, SlidersHorizontal, FileDown, Loader2
+  Home, Plus, Eye, Edit, Trash2, Check, X, MapPin, User, Calendar,
+  RefreshCw, TrendingUp, TrendingDown, Search, Grid, List, CheckSquare,
+  Square, SlidersHorizontal, FileDown, Loader2
 } from 'lucide-react';
 import { debounce } from 'lodash';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +15,7 @@ import {
   useHomestays, useAsyncOperation
 } from '@/hooks/useAdminApi';
 import {
-  LoadingSpinner, Alert, ActionButton, Card, StatusBadge,
+  LoadingSpinner, Alert, ActionButton, StatusBadge,
   Modal, EmptyState, Input, useToast
 } from '@/components/admin/AdminComponents';
 
@@ -71,18 +70,18 @@ const StatCard: React.FC<{
 
   const borderColorClasses = {
     teal: 'border-[#224240]/20 hover:border-[#224240]/40',
-    green: 'border-green-200 hover:border-green-300
-    yellow: 'border-yellow-200 hover:border-yellow-300
-    red: 'border-red-200 hover:border-red-300
-    purple: 'border-purple-200 hover:border-purple-300
+    green: 'border-green-200 hover:border-green-300',
+    yellow: 'border-yellow-200 hover:border-yellow-300',
+    red: 'border-red-200 hover:border-red-300',
+    purple: 'border-purple-200 hover:border-purple-300',
   };
 
   const textColorClasses = {
-    teal: 'text-[#224240]
-    green: 'text-green-600
-    yellow: 'text-yellow-600
-    red: 'text-red-600
-    purple: 'text-purple-600
+    teal: 'text-[#224240]',
+    green: 'text-green-600',
+    yellow: 'text-yellow-600',
+    red: 'text-red-600',
+    purple: 'text-purple-600',
   };
 
   const iconBgClasses = {
@@ -119,7 +118,7 @@ const StatCard: React.FC<{
               <div className="flex items-baseline space-x-2">
                 <p className={`text-4xl font-bold ${textColorClasses[color]}`}>{value}</p>
                 {trend && (
-                  <div className={`flex items-center text-sm font-semibold ${trend.isPositive ? 'text-green-600 : 'text-red-600
+                  <div className={`flex items-center text-sm font-semibold ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
                     {trend.isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                     <span className="ml-1">{Math.abs(trend.value)}%</span>
                   </div>
@@ -413,13 +412,12 @@ export default function ImprovedHomestayManagement() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [syncingMap, setSyncingMap] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
   // Debounced API call for loading data
   const debouncedLoadData = useMemo(
     () => debounce((params: any) => {
       console.log('[HomestayManagement] Debounced load with params:', params);
-      loadHomestays(params).catch(error => {
+      loadHomestays(params).catch(() => {
         addToast({ type: 'error', title: 'Error', message: 'Failed to load homestays' });
       });
     }, 500),
@@ -590,8 +588,6 @@ export default function ImprovedHomestayManagement() {
         throw new Error(error.error || 'Failed to revalidate sitemap');
       }
 
-      setLastSyncTime(new Date());
-
       addToast({
         type: 'success',
         title: 'Sitemap Revalidated',
@@ -719,11 +715,7 @@ export default function ImprovedHomestayManagement() {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${
-                  showFilters
-                    ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200
-                }`}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all ${showFilters ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 <span>Filters</span>
@@ -748,21 +740,13 @@ export default function ImprovedHomestayManagement() {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200
-                }`}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
                 <Grid className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-[#224240] text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200
-                }`}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#224240] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
                 <List className="h-5 w-5" />
               </button>
@@ -800,6 +784,7 @@ export default function ImprovedHomestayManagement() {
                       />
                     </div>
                   </ErrorBoundary>
+
                   <select
                     value={statusFilter}
                     onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
@@ -810,18 +795,21 @@ export default function ImprovedHomestayManagement() {
                     <option value="APPROVED">Approved</option>
                     <option value="REJECTED">Rejected</option>
                   </select>
+
                   <Input
                     type="number"
                     value={ownerIdFilter}
                     onChange={(e) => { setOwnerIdFilter(e.target.value); setCurrentPage(1); }}
                     placeholder="Filter by Owner ID"
                   />
+
                   <Input
                     value={addressFilter}
                     onChange={(e) => { setAddressFilter(e.target.value); setCurrentPage(1); }}
                     placeholder="Filter by Address"
                   />
                 </div>
+
                 {hasFilters && (
                   <div className="mt-4">
                     <ActionButton
@@ -932,11 +920,7 @@ export default function ImprovedHomestayManagement() {
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                        currentPage === pageNum
-                          ? 'bg-[#224240] text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200
-                      }`}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${currentPage === pageNum ? 'bg-[#224240] text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     >
                       {pageNum}
                     </button>
