@@ -9,7 +9,7 @@ import {
     Image as ImageIcon, X, Star, Bold, Italic, List, Hash, Quote, Type, Plus, Search,
     Folder, Tag as TagIcon, Sparkles, Link2, Code, AlignLeft, AlignCenter, AlignRight,
     Maximize2, Minimize2, Info, TrendingUp, BarChart3, Zap, FileText, Settings,
-    ExternalLink, Copy, CheckCircle2, XCircle, Layers, Palette
+    ExternalLink, Copy, CheckCircle2, XCircle, Layers, Palette, Loader2
 } from 'lucide-react';
 
 import {
@@ -1380,86 +1380,79 @@ const loadData = async () => {
     const readTime = calculateReadTime(formData.content);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-            {/* Premium Header */}
-            <header className="bg-white/80/80 backdrop-blur-xl border-b-2 border-gray-200 sticky top-0 z-50 shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="min-h-screen bg-gray-50">
+            {/* Clean Header */}
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-3">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             <button
                                 onClick={() => router.push('/admin/blog')}
-                                className="p-3 hover:bg-gray-100 rounded-xl transition-all hover:scale-110 group"
+                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                                <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+                                <ArrowLeft className="h-5 w-5 text-gray-600" />
                             </button>
-                            <div>
-                                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                    {isEditMode ? '✏️ Edit Blog Post' : '✨ Create New Blog'}
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-lg font-semibold text-gray-900">
+                                    {isEditMode ? 'Edit Post' : 'New Post'}
                                 </h1>
-                                <div className="flex items-center gap-3 mt-1">
-                                    <span className="text-sm text-gray-600 font-medium">
-                                        {wordCount} words • {readTime} min read
-                                    </span>
-                                    <div className={`px-3 py-1 rounded-full text-xs font-bold ${formData.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' :
-                                            formData.status === 'DRAFT' ? 'bg-yellow-100 text-yellow-700' :
-                                                'bg-gray-100 text-gray-700'
-                                        }`}>
-                                        {formData.status}
-                                    </div>
-                                    {formData.featured && (
-                                        <div className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-xs font-bold flex items-center gap-1">
-                                            <Star className="h-3 w-3 fill-current" />
-                                            FEATURED
-                                        </div>
-                                    )}
-                                    <AutoSaveIndicator status={autoSaveStatus} />
+                                <div className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                    formData.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' :
+                                    formData.status === 'DRAFT' ? 'bg-yellow-100 text-yellow-700' :
+                                    'bg-gray-100 text-gray-700'
+                                }`}>
+                                    {formData.status.toLowerCase()}
                                 </div>
+                                {formData.featured && (
+                                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                )}
+                                <AutoSaveIndicator status={autoSaveStatus} />
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <ActionButton
+                        <div className="flex items-center gap-2">
+                            <button
                                 onClick={() => setShowPreview(!showPreview)}
-                                variant="secondary"
-                                icon={<Eye className="h-4 w-4" />}
-                                className="shadow-sm hover:shadow-md"
+                                className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1.5"
                             >
-                                {showPreview ? 'Edit' : 'Preview'}
-                            </ActionButton>
+                                <Eye className="h-4 w-4" />
+                                <span className="hidden sm:inline">{showPreview ? 'Edit' : 'Preview'}</span>
+                            </button>
                             {isEditMode && (
-                                <ActionButton
+                                <button
                                     onClick={() => setShowDeleteModal(true)}
-                                    variant="danger"
-                                    icon={<Trash2 className="h-4 w-4" />}
-                                    className="shadow-sm hover:shadow-md"
+                                    className="px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5"
                                 >
-                                    Delete
-                                </ActionButton>
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Delete</span>
+                                </button>
                             )}
-                            <ActionButton
+                            <button
                                 onClick={() => handleSave(false)}
-                                variant="secondary"
-                                icon={<Save className="h-4 w-4" />}
-                                loading={saving && formData.status === 'DRAFT'}
-                                className="shadow-sm hover:shadow-md"
+                                disabled={saving}
+                                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
                             >
-                                Save Draft
-                            </ActionButton>
-                            <ActionButton
+                                <Save className="h-4 w-4" />
+                                <span className="hidden sm:inline">Save</span>
+                            </button>
+                            <button
                                 onClick={() => handleSave(true)}
-                                variant="primary"
-                                icon={<Globe className="h-4 w-4" />}
-                                loading={saving && formData.status === 'PUBLISHED'}
-                                className="shadow-lg hover:shadow-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                                disabled={saving}
+                                className="px-4 py-1.5 text-sm font-medium text-white bg-[#1A403D] hover:bg-[#152f2d] rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
                             >
-                                {formData.status === 'PUBLISHED' ? 'Update' : 'Publish'}
-                            </ActionButton>
+                                {saving ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Globe className="h-4 w-4" />
+                                )}
+                                <span>{formData.status === 'PUBLISHED' ? 'Update' : 'Publish'}</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
                 {showPreview ? (
                     /* Preview Mode */
                     <Card className="shadow-2xl border-2 border-gray-200 animate-in fade-in duration-500">
@@ -1540,76 +1533,60 @@ const loadData = async () => {
                         </div>
                     </Card>
                 ) : (
-                    /* Edit Mode - Two Column Layout with Sticky Sidebar */
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        {/* Main Content Column (Left) */}
-                        <div className="lg:col-span-8 space-y-6">
-                            {/* Title & Slug Card */}
-                            <Card className="shadow-xl border border-gray-200 hover:shadow-2xl transition-all">
-                                <div className="p-10 space-y-8">
-                                    <div>
-                                        <Input
-                                            label="📝 Blog Title"
-                                            value={formData.title}
-                                            onChange={(e) => handleChange('title', e.target.value)}
-                                            error={errors.title}
-                                            required
-                                            className="text-xl font-bold"
-                                            placeholder="Give your blog an amazing title..."
-                                        />
-                                    </div>
-                                    <div>
-                                        {/* NEW: Smart Slug Input with auto-generation and validation */}
-                                        <SmartSlugInput
-                                            title={formData.title}
-                                            value={formData.slug}
-                                            onChange={(slug) => handleChange('slug', slug)}
-                                            checkAvailability={async (slug) => {
-                                                try {
-                                                    const result = await blogApi.checkSlugAvailability(slug);
-                                                    return result;
-                                                } catch (error) {
-                                                    console.error('Failed to check slug availability:', error);
-                                                    return true; // Assume available if check fails
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                    <div>
-                                        <TextArea
-                                            label="📄 Excerpt"
-                                            value={formData.excerpt}
-                                            onChange={(e) => handleChange('excerpt', e.target.value)}
-                                            rows={3}
-                                            placeholder="Write a compelling excerpt that hooks your readers..."
-                                            hint={`${formData.excerpt.length}/300 characters`}
-                                            maxLength={300}
-                                        />
-                                    </div>
+                    /* Edit Mode - Clean Two Column Layout */
+                    <div className="flex gap-6">
+                        {/* Main Content Column */}
+                        <div className="flex-1 min-w-0 space-y-5">
+                            {/* Title & Excerpt - Compact Card */}
+                            <Card className="shadow-sm border border-gray-200">
+                                <div className="p-6 space-y-5">
+                                    <Input
+                                        label="Title"
+                                        value={formData.title}
+                                        onChange={(e) => handleChange('title', e.target.value)}
+                                        error={errors.title}
+                                        required
+                                        className="text-lg font-semibold"
+                                        placeholder="Enter blog title..."
+                                    />
+                                    <SmartSlugInput
+                                        title={formData.title}
+                                        value={formData.slug}
+                                        onChange={(slug) => handleChange('slug', slug)}
+                                        checkAvailability={async (slug) => {
+                                            try {
+                                                const result = await blogApi.checkSlugAvailability(slug);
+                                                return result;
+                                            } catch (error) {
+                                                console.error('Failed to check slug availability:', error);
+                                                return true;
+                                            }
+                                        }}
+                                    />
+                                    <TextArea
+                                        label="Excerpt"
+                                        value={formData.excerpt}
+                                        onChange={(e) => handleChange('excerpt', e.target.value)}
+                                        rows={2}
+                                        placeholder="Brief summary of the post..."
+                                        hint={`${formData.excerpt.length}/300`}
+                                        maxLength={300}
+                                    />
                                 </div>
                             </Card>
 
-                            {/* Content Editor Card */}
-                            <Card className="shadow-xl border border-gray-200 hover:shadow-2xl transition-all">
-                                <div className="p-10">
-                                    <div className="mb-6">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <FileText className="h-6 w-6 text-blue-500" />
-                                            <h2 className="text-2xl font-bold text-gray-900">Content</h2>
-                                            <span className="text-red-500 text-xl">*</span>
+                            {/* Content Editor - Full Width */}
+                            <Card className="shadow-sm border border-gray-200">
+                                <div className="p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <FileText className="h-5 w-5 text-[#1A403D]" />
+                                            <h2 className="text-lg font-semibold text-gray-900">Content</h2>
+                                            <span className="text-red-500">*</span>
                                         </div>
-                                        <div className="flex flex-wrap items-center gap-3 text-sm">
-                                            <span className="px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full font-medium flex items-center gap-2">
-                                                <Sparkles className="h-4 w-4" />
-                                                Paste from Google Docs
-                                            </span>
-                                            <span className="px-3 py-1.5 bg-green-100 text-green-800 rounded-full font-medium flex items-center gap-2">
-                                                <CheckCircle2 className="h-4 w-4" />
-                                                Auto image optimization
-                                            </span>
-                                            <span className="px-3 py-1.5 bg-purple-100 text-purple-800 rounded-full font-medium flex items-center gap-2">
-                                                <ImageIcon className="h-4 w-4" />
-                                                Alt text for all images
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded font-medium">
+                                                Paste from Docs
                                             </span>
                                         </div>
                                     </div>
@@ -1617,11 +1594,11 @@ const loadData = async () => {
                                         content={formData.content}
                                         onChange={(content) => handleChange('content', content)}
                                         onImageUpload={handleImageUpload}
-                                        placeholder="Start writing your blog content here... Paste from Google Docs works perfectly!"
+                                        placeholder="Start writing your content here..."
                                         autoSaveInterval={30000}
                                     />
                                     {errors.content && (
-                                        <p className="mt-3 text-sm text-red-600 flex items-center gap-2 bg-red-50 p-3 rounded-lg">
+                                        <p className="mt-2 text-sm text-red-600 flex items-center gap-2 bg-red-50 p-2 rounded">
                                             <AlertCircle className="h-4 w-4" />
                                             {errors.content}
                                         </p>
@@ -1629,10 +1606,10 @@ const loadData = async () => {
                                 </div>
                             </Card>
 
-                            {/* Content Image Manager - Detects and manages images in content */}
+                            {/* Content Image Manager - Collapsible */}
                             {formData.content && (
-                                <Card className="shadow-xl border border-gray-200 hover:shadow-2xl transition-all">
-                                    <div className="p-6">
+                                <Card className="shadow-sm border border-gray-200">
+                                    <div className="p-4">
                                         <ContentImageManager
                                             content={formData.content}
                                             onContentUpdate={(newContent) => handleChange('content', newContent)}
@@ -1642,62 +1619,61 @@ const loadData = async () => {
                             )}
                         </div>
 
-                        {/* Sticky Sidebar (Right) */}
-                        <div className="lg:col-span-4 space-y-6">
-                            <div className="lg:sticky lg:top-24 space-y-6">
-                                {/* Publishing Card */}
-                                <Card className="shadow-lg border border-gray-200">
-                                    <div className="p-6">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <Settings className="h-5 w-5 text-blue-500" />
-                                            <h3 className="text-lg font-bold text-gray-900">Publishing</h3>
+                        {/* Sidebar - Narrower and Cleaner */}
+                        <div className="hidden lg:block w-80 flex-shrink-0">
+                            <div className="sticky top-24 space-y-4">
+                                {/* Quick Settings Card */}
+                                <Card className="shadow-sm border border-gray-200">
+                                    <div className="p-4">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <Settings className="h-4 w-4 text-gray-500" />
+                                            <h3 className="text-sm font-semibold text-gray-900">Settings</h3>
                                         </div>
-                                        <div className="space-y-4">
+                                        <div className="space-y-3">
                                             <Select
                                                 label="Status"
                                                 value={formData.status}
                                                 onChange={(e) => handleChange('status', e.target.value)}
-                                                className="font-medium"
+                                                className="text-sm"
                                             >
-                                                <option value="DRAFT">📝 Draft</option>
-                                                <option value="PUBLISHED">🌍 Published</option>
-                                                <option value="ARCHIVED">📦 Archived</option>
+                                                <option value="DRAFT">Draft</option>
+                                                <option value="PUBLISHED">Published</option>
+                                                <option value="ARCHIVED">Archived</option>
                                             </Select>
-                                            <label className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200 cursor-pointer hover:border-yellow-300 transition-colors">
+                                            <label className="flex items-center gap-2 p-2.5 bg-yellow-50 rounded-lg border border-yellow-200 cursor-pointer hover:bg-yellow-100 transition-colors">
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.featured}
                                                     onChange={(e) => handleChange('featured', e.target.checked)}
-                                                    className="h-5 w-5 rounded"
+                                                    className="h-4 w-4 rounded"
                                                 />
-                                                <div className="flex items-center gap-2 font-medium text-yellow-900">
-                                                    <Star className={`h-5 w-5 ${formData.featured ? 'fill-current text-yellow-500' : ''}`} />
-                                                    Featured
-                                                </div>
+                                                <Star className={`h-4 w-4 ${formData.featured ? 'fill-yellow-500 text-yellow-500' : 'text-gray-400'}`} />
+                                                <span className="text-sm font-medium">Featured</span>
                                             </label>
-                                            <div className="grid grid-cols-2 gap-3 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                                                <div className="text-center">
-                                                    <p className="text-2xl font-bold text-blue-600">{wordCount}</p>
-                                                    <p className="text-xs text-gray-600 font-medium mt-0.5">Words</p>
+                                            <div className="flex gap-2 p-2.5 bg-gray-50 rounded-lg">
+                                                <div className="flex-1 text-center">
+                                                    <p className="text-lg font-bold text-gray-900">{wordCount}</p>
+                                                    <p className="text-[10px] text-gray-500 uppercase">Words</p>
                                                 </div>
-                                                <div className="text-center">
-                                                    <p className="text-2xl font-bold text-indigo-600">{readTime}</p>
-                                                    <p className="text-xs text-gray-600 font-medium mt-0.5">Min Read</p>
+                                                <div className="w-px bg-gray-200" />
+                                                <div className="flex-1 text-center">
+                                                    <p className="text-lg font-bold text-gray-900">{readTime}</p>
+                                                    <p className="text-[10px] text-gray-500 uppercase">Min</p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </Card>
 
-                                {/* Image Gallery Card */}
-                                <Card className="shadow-lg border border-gray-200">
-                                    <div className="p-6">
-                                        <div className="flex items-center justify-between mb-4">
+                                {/* Featured Image */}
+                                <Card className="shadow-sm border border-gray-200">
+                                    <div className="p-4">
+                                        <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-2">
-                                                <ImageIcon className="h-5 w-5 text-purple-500" />
-                                                <h3 className="text-lg font-bold text-gray-900">Images</h3>
+                                                <ImageIcon className="h-4 w-4 text-gray-500" />
+                                                <h3 className="text-sm font-semibold text-gray-900">Images</h3>
                                             </div>
-                                            <span className="text-[10px] text-green-600 bg-green-50 px-2 py-1 rounded-full font-semibold">
+                                            <span className="text-[10px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded font-medium">
                                                 Auto-optimized
                                             </span>
                                         </div>
@@ -1711,9 +1687,9 @@ const loadData = async () => {
                                     </div>
                                 </Card>
 
-                                {/* Categories & Tags */}
-                                <Card className="shadow-lg border border-gray-200">
-                                    <div className="p-6">
+                                {/* Categories & Tags - Compact */}
+                                <Card className="shadow-sm border border-gray-200">
+                                    <div className="p-4">
                                         <PremiumCategoryTagManager
                                             selectedCategories={formData.categoryIds}
                                             selectedTags={formData.tagIds}
@@ -1727,9 +1703,9 @@ const loadData = async () => {
                                     </div>
                                 </Card>
 
-                                {/* SEO Score Dashboard */}
-                                <Card className="shadow-lg border border-green-200 bg-gradient-to-br from-green-50/50 to-emerald-50/50">
-                                    <div className="p-6">
+                                {/* SEO Score - Compact */}
+                                <Card className="shadow-sm border border-gray-200">
+                                    <div className="p-4">
                                         <SEOScoreCard
                                             title={formData.title}
                                             slug={formData.slug}
@@ -1744,13 +1720,43 @@ const loadData = async () => {
                                     </div>
                                 </Card>
 
-                                {/* SEO Optimizer */}
-                                <SEOOptimizer
-                                    seoTitle={formData.seoTitle}
-                                    seoDescription={formData.seoDescription}
-                                    onSeoTitleChange={(value) => handleChange('seoTitle', value)}
-                                    onSeoDescriptionChange={(value) => handleChange('seoDescription', value)}
-                                />
+                                {/* SEO Meta - Compact */}
+                                <Card className="shadow-sm border border-gray-200">
+                                    <div className="p-4">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <Sparkles className="h-4 w-4 text-purple-500" />
+                                            <h3 className="text-sm font-semibold text-gray-900">SEO Meta</h3>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                    SEO Title <span className="text-gray-400">({formData.seoTitle.length}/60)</span>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={formData.seoTitle}
+                                                    onChange={(e) => handleChange('seoTitle', e.target.value)}
+                                                    placeholder="SEO optimized title..."
+                                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D]"
+                                                    maxLength={60}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                    Meta Description <span className="text-gray-400">({formData.seoDescription.length}/160)</span>
+                                                </label>
+                                                <textarea
+                                                    value={formData.seoDescription}
+                                                    onChange={(e) => handleChange('seoDescription', e.target.value)}
+                                                    placeholder="Brief description for search engines..."
+                                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D] resize-none"
+                                                    rows={2}
+                                                    maxLength={160}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
                             </div>
                         </div>
                     </div>
