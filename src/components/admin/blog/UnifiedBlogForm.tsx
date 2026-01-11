@@ -1,7 +1,7 @@
 // src/components/admin/blog/UnifiedBlogForm.tsx
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import {
@@ -24,6 +24,8 @@ import { revalidateBlogPages } from '@/app/actions/revalidate';
 // NEW: Import optimization utilities
 import { generateSEOSlug, calculateReadingTime as calculateReadTime } from '@/lib/utils/seoUtils';
 import { optimizeImage } from '@/lib/utils/imageOptimization';
+
+import { analyzeSEO } from '@/lib/utils/seoUtils';
 
 // NEW: Import new components
 import SEOScoreCard from './SEOScoreCard';
@@ -1374,6 +1376,27 @@ const loadData = async () => {
     const wordCount = formData.content.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(w => w).length;
     const readTime = calculateReadTime(formData.content);
 
+    // Memoized SEO Score calculation
+    const seoAnalysis = useMemo(() => {
+        return analyzeSEO({
+            title: formData.title,
+            slug: formData.slug,
+            excerpt: formData.excerpt,
+            content: formData.content,
+            seoTitle: formData.seoTitle,
+            seoDescription: formData.seoDescription,
+            tags: tags.filter(t => formData.tagIds.includes(t.id)).map(t => t.name),
+            categories: categories.filter(c => formData.categoryIds.includes(c.id)).map(c => c.name),
+            images: formData.images
+        });
+    }, [formData, tags, categories]);
+
+    const getScoreColor = (score: number) => {
+        if (score >= 80) return { bg: 'bg-green-500', text: 'text-green-600', light: 'bg-green-100' };
+        if (score >= 60) return { bg: 'bg-yellow-500', text: 'text-yellow-600', light: 'bg-yellow-100' };
+        return { bg: 'bg-red-500', text: 'text-red-600', light: 'bg-red-100' };
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Clean Header */}
@@ -1548,63 +1571,106 @@ const loadData = async () => {
                         </div>
                     </Card>
                 ) : (
-                    /* Edit Mode - Responsive Two Column Layout */
-                    <div className="flex gap-4 lg:gap-6 relative">
+                    /* Edit Mode - Reorganized Layout */
+                    <div className="flex gap-4 lg:gap-5 relative pb-20">
                         {/* Main Content Column */}
                         <div className={`flex-1 min-w-0 space-y-4 transition-all duration-300 ${sidebarOpen ? '' : 'lg:max-w-none'}`}>
-                            {/* Title & Excerpt - Compact Card */}
+                            {/* Title, Slug, Excerpt & SEO Meta - Combined Card */}
                             <Card className="shadow-sm border border-gray-200">
                                 <div className="p-4 space-y-4">
-                                    <Input
-                                        label="Title"
-                                        value={formData.title}
-                                        onChange={(e) => handleChange('title', e.target.value)}
-                                        error={errors.title}
-                                        required
-                                        className="text-lg font-semibold"
-                                        placeholder="Enter blog title..."
-                                    />
-                                    <SmartSlugInput
-                                        title={formData.title}
-                                        value={formData.slug}
-                                        onChange={(slug) => handleChange('slug', slug)}
-                                        checkAvailability={async (slug) => {
-                                            try {
-                                                const result = await blogApi.checkSlugAvailability(slug);
-                                                return result;
-                                            } catch (error) {
-                                                console.error('Failed to check slug availability:', error);
-                                                return true;
-                                            }
-                                        }}
-                                    />
-                                    <TextArea
-                                        label="Excerpt"
-                                        value={formData.excerpt}
-                                        onChange={(e) => handleChange('excerpt', e.target.value)}
-                                        rows={2}
-                                        placeholder="Brief summary of the post..."
-                                        hint={`${formData.excerpt.length}/300`}
-                                        maxLength={300}
-                                    />
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                        <div className="lg:col-span-2">
+                                            <Input
+                                                label="Title"
+                                                value={formData.title}
+                                                onChange={(e) => handleChange('title', e.target.value)}
+                                                error={errors.title}
+                                                required
+                                                className="text-lg font-semibold"
+                                                placeholder="Enter blog title..."
+                                            />
+                                        </div>
+                                        <SmartSlugInput
+                                            title={formData.title}
+                                            value={formData.slug}
+                                            onChange={(slug) => handleChange('slug', slug)}
+                                            checkAvailability={async (slug) => {
+                                                try {
+                                                    const result = await blogApi.checkSlugAvailability(slug);
+                                                    return result;
+                                                } catch (error) {
+                                                    console.error('Failed to check slug availability:', error);
+                                                    return true;
+                                                }
+                                            }}
+                                        />
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                SEO Title <span className="text-xs text-gray-400">({formData.seoTitle.length}/60)</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={formData.seoTitle}
+                                                onChange={(e) => handleChange('seoTitle', e.target.value)}
+                                                placeholder="SEO optimized title..."
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D]"
+                                                maxLength={60}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                        <TextArea
+                                            label="Excerpt"
+                                            value={formData.excerpt}
+                                            onChange={(e) => handleChange('excerpt', e.target.value)}
+                                            rows={2}
+                                            placeholder="Brief summary of the post..."
+                                            hint={`${formData.excerpt.length}/300`}
+                                            maxLength={300}
+                                        />
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Meta Description <span className="text-xs text-gray-400">({formData.seoDescription.length}/160)</span>
+                                            </label>
+                                            <textarea
+                                                value={formData.seoDescription}
+                                                onChange={(e) => handleChange('seoDescription', e.target.value)}
+                                                placeholder="Brief description for search engines..."
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1A403D]/20 focus:border-[#1A403D] resize-none"
+                                                rows={2}
+                                                maxLength={160}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </Card>
 
-                            {/* Content Editor - Full Width */}
+                            {/* Featured Images - Horizontal Card */}
                             <Card className="shadow-sm border border-gray-200">
                                 <div className="p-4">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
-                                            <FileText className="h-5 w-5 text-[#1A403D]" />
-                                            <h2 className="text-lg font-semibold text-gray-900">Content</h2>
-                                            <span className="text-red-500">*</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                                            <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded font-medium">
-                                                Paste from Docs
+                                            <ImageIcon className="h-4 w-4 text-[#1A403D]" />
+                                            <h3 className="text-sm font-semibold text-gray-900">Featured Images</h3>
+                                            <span className="text-[10px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded font-medium">
+                                                Auto-optimized
                                             </span>
                                         </div>
+                                        <span className="text-xs text-gray-500">{formData.images.length} image{formData.images.length !== 1 ? 's' : ''}</span>
                                     </div>
+                                    <OptimizedImageUpload
+                                        images={formData.images}
+                                        onImagesChange={(images) => handleChange('images', images)}
+                                        onFileUpload={handleImageUpload}
+                                        maxImages={10}
+                                        isFeaturedImage={false}
+                                    />
+                                </div>
+                            </Card>
+
+                            {/* Content Editor - Taller */}
+                            <Card className="shadow-sm border border-gray-200">
+                                <div className="p-3">
                                     <EnhancedBlogEditor
                                         content={formData.content}
                                         onChange={(content) => handleChange('content', content)}
@@ -1621,7 +1687,7 @@ const loadData = async () => {
                                 </div>
                             </Card>
 
-                            {/* Content Image Manager - Collapsible */}
+                            {/* Content Image Manager */}
                             {formData.content && (
                                 <Card className="shadow-sm border border-gray-200">
                                     <div className="p-4">
@@ -1634,21 +1700,16 @@ const loadData = async () => {
                             )}
                         </div>
 
-                        {/* Desktop Sidebar - Collapsible */}
+                        {/* Desktop Sidebar - Simplified (Categories & Tags only) */}
                         <div className={`hidden lg:block flex-shrink-0 transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-0 overflow-hidden'}`}>
                             <div className="sticky top-20 space-y-3 w-72">
-                                {/* Quick Settings Card - Compact */}
+                                {/* Quick Settings Card */}
                                 <Card className="shadow-sm border border-gray-200">
                                     <div className="p-3">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-1.5">
                                                 <Settings className="h-3.5 w-3.5 text-gray-500" />
-                                                <h3 className="text-xs font-semibold text-gray-900">Settings</h3>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-[10px] text-gray-500">
-                                                <span className="font-medium">{wordCount} words</span>
-                                                <span>•</span>
-                                                <span>{readTime} min</span>
+                                                <h3 className="text-xs font-semibold text-gray-900">Post Settings</h3>
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
@@ -1674,29 +1735,7 @@ const loadData = async () => {
                                     </div>
                                 </Card>
 
-                                {/* Featured Image - Compact */}
-                                <Card className="shadow-sm border border-gray-200">
-                                    <div className="p-3">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-1.5">
-                                                <ImageIcon className="h-3.5 w-3.5 text-gray-500" />
-                                                <h3 className="text-xs font-semibold text-gray-900">Images</h3>
-                                            </div>
-                                            <span className="text-[9px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded font-medium">
-                                                Auto-optimized
-                                            </span>
-                                        </div>
-                                        <OptimizedImageUpload
-                                            images={formData.images}
-                                            onImagesChange={(images) => handleChange('images', images)}
-                                            onFileUpload={handleImageUpload}
-                                            maxImages={10}
-                                            isFeaturedImage={false}
-                                        />
-                                    </div>
-                                </Card>
-
-                                {/* Categories & Tags - Compact */}
+                                {/* Categories & Tags */}
                                 <Card className="shadow-sm border border-gray-200">
                                     <div className="p-3">
                                         <PremiumCategoryTagManager
@@ -1711,65 +1750,10 @@ const loadData = async () => {
                                         />
                                     </div>
                                 </Card>
-
-                                {/* SEO Score - Compact */}
-                                <Card className="shadow-sm border border-gray-200">
-                                    <div className="p-3">
-                                        <SEOScoreCard
-                                            title={formData.title}
-                                            slug={formData.slug}
-                                            excerpt={formData.excerpt}
-                                            content={formData.content}
-                                            seoTitle={formData.seoTitle}
-                                            seoDescription={formData.seoDescription}
-                                            tags={tags.filter(t => formData.tagIds.includes(t.id))}
-                                            categories={categories.filter(c => formData.categoryIds.includes(c.id))}
-                                            images={formData.images}
-                                        />
-                                    </div>
-                                </Card>
-
-                                {/* SEO Meta - Compact */}
-                                <Card className="shadow-sm border border-gray-200">
-                                    <div className="p-3">
-                                        <div className="flex items-center gap-1.5 mb-2">
-                                            <Sparkles className="h-3.5 w-3.5 text-purple-500" />
-                                            <h3 className="text-xs font-semibold text-gray-900">SEO Meta</h3>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <div>
-                                                <label className="block text-[10px] font-medium text-gray-500 mb-0.5">
-                                                    Title <span className="text-gray-400">({formData.seoTitle.length}/60)</span>
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={formData.seoTitle}
-                                                    onChange={(e) => handleChange('seoTitle', e.target.value)}
-                                                    placeholder="SEO title..."
-                                                    className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D]"
-                                                    maxLength={60}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-medium text-gray-500 mb-0.5">
-                                                    Description <span className="text-gray-400">({formData.seoDescription.length}/160)</span>
-                                                </label>
-                                                <textarea
-                                                    value={formData.seoDescription}
-                                                    onChange={(e) => handleChange('seoDescription', e.target.value)}
-                                                    placeholder="Meta description..."
-                                                    className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D] resize-none"
-                                                    rows={2}
-                                                    maxLength={160}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Card>
                             </div>
                         </div>
 
-                        {/* Mobile Sidebar Overlay */}
+                        {/* Mobile Sidebar Overlay - Simplified */}
                         {sidebarMobileOpen && (
                             <>
                                 {/* Backdrop */}
@@ -1797,11 +1781,6 @@ const loadData = async () => {
                                                         <Settings className="h-3.5 w-3.5 text-gray-500" />
                                                         <h3 className="text-xs font-semibold text-gray-900">Settings</h3>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-[10px] text-gray-500">
-                                                        <span className="font-medium">{wordCount} words</span>
-                                                        <span>•</span>
-                                                        <span>{readTime} min</span>
-                                                    </div>
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <Select
@@ -1826,25 +1805,6 @@ const loadData = async () => {
                                             </div>
                                         </Card>
 
-                                        {/* Mobile Images */}
-                                        <Card className="shadow-sm border border-gray-200">
-                                            <div className="p-3">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <ImageIcon className="h-3.5 w-3.5 text-gray-500" />
-                                                        <h3 className="text-xs font-semibold text-gray-900">Images</h3>
-                                                    </div>
-                                                </div>
-                                                <OptimizedImageUpload
-                                                    images={formData.images}
-                                                    onImagesChange={(images) => handleChange('images', images)}
-                                                    onFileUpload={handleImageUpload}
-                                                    maxImages={10}
-                                                    isFeaturedImage={false}
-                                                />
-                                            </div>
-                                        </Card>
-
                                         {/* Mobile Categories & Tags */}
                                         <Card className="shadow-sm border border-gray-200">
                                             <div className="p-3">
@@ -1860,65 +1820,73 @@ const loadData = async () => {
                                                 />
                                             </div>
                                         </Card>
-
-                                        {/* Mobile SEO */}
-                                        <Card className="shadow-sm border border-gray-200">
-                                            <div className="p-3">
-                                                <SEOScoreCard
-                                                    title={formData.title}
-                                                    slug={formData.slug}
-                                                    excerpt={formData.excerpt}
-                                                    content={formData.content}
-                                                    seoTitle={formData.seoTitle}
-                                                    seoDescription={formData.seoDescription}
-                                                    tags={tags.filter(t => formData.tagIds.includes(t.id))}
-                                                    categories={categories.filter(c => formData.categoryIds.includes(c.id))}
-                                                    images={formData.images}
-                                                />
-                                            </div>
-                                        </Card>
-
-                                        {/* Mobile SEO Meta */}
-                                        <Card className="shadow-sm border border-gray-200">
-                                            <div className="p-3">
-                                                <div className="flex items-center gap-1.5 mb-2">
-                                                    <Sparkles className="h-3.5 w-3.5 text-purple-500" />
-                                                    <h3 className="text-xs font-semibold text-gray-900">SEO Meta</h3>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <div>
-                                                        <label className="block text-[10px] font-medium text-gray-500 mb-0.5">
-                                                            Title <span className="text-gray-400">({formData.seoTitle.length}/60)</span>
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            value={formData.seoTitle}
-                                                            onChange={(e) => handleChange('seoTitle', e.target.value)}
-                                                            placeholder="SEO title..."
-                                                            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D]"
-                                                            maxLength={60}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[10px] font-medium text-gray-500 mb-0.5">
-                                                            Description <span className="text-gray-400">({formData.seoDescription.length}/160)</span>
-                                                        </label>
-                                                        <textarea
-                                                            value={formData.seoDescription}
-                                                            onChange={(e) => handleChange('seoDescription', e.target.value)}
-                                                            placeholder="Meta description..."
-                                                            className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-[#1A403D] focus:border-[#1A403D] resize-none"
-                                                            rows={2}
-                                                            maxLength={160}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </Card>
                                     </div>
                                 </div>
                             </>
                         )}
+
+                        {/* Floating Bottom Bar - SEO Score & Stats */}
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-30">
+                            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2">
+                                <div className="flex items-center justify-between">
+                                    {/* Left: Stats */}
+                                    <div className="flex items-center gap-4 text-xs text-gray-600">
+                                        <div className="flex items-center gap-1.5">
+                                            <FileText className="h-3.5 w-3.5 text-gray-400" />
+                                            <span className="font-medium">{wordCount.toLocaleString()}</span>
+                                            <span className="text-gray-400">words</span>
+                                        </div>
+                                        <div className="hidden sm:flex items-center gap-1.5">
+                                            <Clock className="h-3.5 w-3.5 text-gray-400" />
+                                            <span className="font-medium">{readTime}</span>
+                                            <span className="text-gray-400">min read</span>
+                                        </div>
+                                        <div className="hidden md:flex items-center gap-1.5">
+                                            <ImageIcon className="h-3.5 w-3.5 text-gray-400" />
+                                            <span className="font-medium">{formData.images.length}</span>
+                                            <span className="text-gray-400">images</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Center: SEO Score */}
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${getScoreColor(seoAnalysis.score).light}`}>
+                                                <span className={`text-sm font-bold ${getScoreColor(seoAnalysis.score).text}`}>
+                                                    {seoAnalysis.score}
+                                                </span>
+                                            </div>
+                                            <div className="hidden sm:block">
+                                                <p className="text-xs font-semibold text-gray-900">SEO Score</p>
+                                                <p className={`text-[10px] ${getScoreColor(seoAnalysis.score).text}`}>
+                                                    {seoAnalysis.score >= 80 ? 'Good' : seoAnalysis.score >= 60 ? 'Needs Work' : 'Poor'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {/* SEO Issues Quick View */}
+                                        {seoAnalysis.issues.length > 0 && (
+                                            <div className="hidden lg:flex items-center gap-2 text-xs">
+                                                {seoAnalysis.issues.filter(i => i.type === 'error').length > 0 && (
+                                                    <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-medium">
+                                                        {seoAnalysis.issues.filter(i => i.type === 'error').length} errors
+                                                    </span>
+                                                )}
+                                                {seoAnalysis.issues.filter(i => i.type === 'warning').length > 0 && (
+                                                    <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full font-medium">
+                                                        {seoAnalysis.issues.filter(i => i.type === 'warning').length} warnings
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Right: Auto-save Status */}
+                                    <div className="flex items-center gap-2">
+                                        <AutoSaveIndicator status={autoSaveStatus} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </main>
